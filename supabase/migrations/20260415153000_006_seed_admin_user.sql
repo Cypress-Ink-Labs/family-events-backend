@@ -1,0 +1,2 @@
+-- Admin user seeding moved to supabase/seed.sql (local-only).
+-- This migration is intentionally empty so it applies cleanly on remote.
