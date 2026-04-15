@@ -1,0 +1,54 @@
+project_id = "family-events-ui"
+
+[api]
+enabled           = true
+port              = 55321
+schemas           = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows          = 1000
+
+[db]
+port          = 55322
+major_version = 15
+
+[db.migrations]
+enabled      = true
+schema_paths = ["./migrations/*.sql"]
+
+[db.seed]
+enabled = true
+sql_paths = [
+  "./migrations/20260407154210_003_seed_initial_data.sql",
+  "./migrations/20260415114500_005_seed_event_sources.sql",
+]
+
+[realtime]
+enabled = true
+
+[auth]
+enabled                  = true
+site_url                 = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173"]
+jwt_expiry               = 3600
+enable_signup            = true
+
+[storage]
+enabled         = true
+file_size_limit = "50MiB"
+
+[studio]
+enabled = true
+port    = 55323
+
+[inbucket]
+enabled = true
+port    = 55324
+
+[analytics]
+enabled = true
+port    = 55327
+
+[edge_runtime]
+enabled        = true
+policy         = "oneshot"
+inspector_port = 55326
