@@ -1,5 +1,6 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "npm:@supabase/supabase-js@2"
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from "@supabase/supabase-js"
+import { DOMParser } from "@b-fuze/deno-dom"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,6 +33,9 @@ interface ParsedEvent {
   address: string | null
   sourceUrl: string | null
   imageUrl: string | null
+  images: string[]
+  price: number | null
+  isFree: boolean
 }
 
 interface SourceResult {
@@ -106,6 +110,56 @@ function stripHtml(value: string): string {
     .trim()
 }
 
+function extractPrice(text: string): { price: number | null; isFree: boolean } {
+  const lower = text.toLowerCase()
+
+  const freePatterns = [
+    /\bfree\b/,
+    /\bno cost\b/,
+    /\bno charge\b/,
+    /\bcomplimentary\b/,
+    /\bfree admission\b/,
+    /\bfree event\b/,
+  ]
+  for (const pattern of freePatterns) {
+    if (pattern.test(lower)) {
+      return { price: null, isFree: true }
+    }
+  }
+
+  const priceMatch = text.match(/\$\s*(\d+(?:\.\d{1,2})?)/)
+  if (priceMatch) {
+    return { price: Number(priceMatch[1]), isFree: false }
+  }
+
+  return { price: null, isFree: false }
+}
+
+function extractImages(rawContent: string, baseUrl: string): string[] {
+  const urls = new Set<string>()
+
+  const patterns = [
+    /<media:content[^>]+url=["']([^"']+)["'][^>]*\/?>/gi,
+    /<media:thumbnail[^>]+url=["']([^"']+)["'][^>]*\/?>/gi,
+    /<enclosure[^>]+url=["']([^"']+)["'][^>]+type=["']image\/[^"']+["'][^>]*\/?>/gi,
+    /<enclosure[^>]+type=["']image\/[^"']+["'][^>]+url=["']([^"']+)["'][^>]*\/?>/gi,
+    /<img[^>]+src=["']([^"']+)["'][^>]*\/?>/gi,
+  ]
+
+  for (const pattern of patterns) {
+    for (const match of rawContent.matchAll(pattern)) {
+      try {
+        const resolved = new URL(match[1], baseUrl).toString()
+        urls.add(resolved)
+      } catch {
+        // skip invalid URLs
+      }
+    }
+  }
+
+  return [...urls].slice(0, 5)
+}
+
 function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
   const itemMatches = [
     ...xml.matchAll(/<item[\s\S]*?<\/item>/gi),
@@ -140,6 +194,10 @@ function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
       rawItem.match(/<dc:date>([\s\S]*?)<\/dc:date>/i)
     const startDatetime = parseIsoDate(dateMatch?.[1]?.trim()) ?? new Date().toISOString()
 
+    const images = extractImages(rawItem, sourceUrl)
+    const rawDescription = descriptionMatch?.[1] ?? ""
+    const priceInfo = extractPrice(rawDescription)
+
     results.push({
       title,
       description,
@@ -148,7 +206,10 @@ function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
       venueName: null,
       address: null,
       sourceUrl: normalizedSourceLink,
-      imageUrl: null,
+      imageUrl: images[0] ?? null,
+      images,
+      price: priceInfo.price,
+      isFree: priceInfo.isFree,
     })
   }
 
@@ -185,6 +246,17 @@ function parseIcalFeed(icalContent: string): ParsedEvent[] {
       continue
     }
 
+    const attachMatches = [...eventBlock.matchAll(/ATTACH[^:]*:(.+)/g)]
+    const icalImages: string[] = []
+    for (const m of attachMatches) {
+      const val = m[1].trim()
+      if (/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)/i.test(val)) {
+        icalImages.push(val)
+      }
+    }
+
+    const priceInfo = extractPrice(description)
+
     events.push({
       title: summary,
       description,
@@ -193,7 +265,10 @@ function parseIcalFeed(icalContent: string): ParsedEvent[] {
       venueName: location,
       address: location,
       sourceUrl: url,
-      imageUrl: null,
+      imageUrl: icalImages[0] ?? null,
+      images: icalImages.slice(0, 5),
+      price: priceInfo.price,
+      isFree: priceInfo.isFree,
     })
   }
 
@@ -238,6 +313,23 @@ function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
     const surroundingText = link.parentElement?.textContent?.replaceAll(/\s+/g, " ").trim() ?? title
     const startDatetime = parseDateFromText(surroundingText) ?? new Date().toISOString()
 
+    // Find nearest image in parent/ancestor elements
+    const webImages: string[] = []
+    const container = link.parentElement?.parentElement ?? link.parentElement
+    const imgEl = container?.querySelector("img")
+    if (imgEl) {
+      const src = imgEl.getAttribute("src")
+      if (src) {
+        try {
+          webImages.push(new URL(src, sourceUrl).toString())
+        } catch {
+          // skip invalid URLs
+        }
+      }
+    }
+
+    const priceInfo = extractPrice(surroundingText)
+
     seenTitles.add(title.toLowerCase())
     events.push({
       title,
@@ -247,7 +339,10 @@ function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
       venueName: null,
       address: null,
       sourceUrl: normalizedUrl,
-      imageUrl: null,
+      imageUrl: webImages[0] ?? null,
+      images: webImages,
+      price: priceInfo.price,
+      isFree: priceInfo.isFree,
     })
   }
 
@@ -369,7 +464,9 @@ async function processSource(
         source_url: parsed.sourceUrl,
         source_name: source.name,
         source_id: source.id,
-        images: parsed.imageUrl ? [parsed.imageUrl] : [],
+        images: parsed.images.length > 0 ? parsed.images : parsed.imageUrl ? [parsed.imageUrl] : [],
+        price: parsed.price,
+        is_free: parsed.isFree,
         status: "draft" as const,
       }
 

@@ -1,5 +1,5 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "npm:@supabase/supabase-js@2"
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from "@supabase/supabase-js"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -167,6 +167,9 @@ interface ClassificationResult {
   tags: Array<{ slug: string; confidence: number }>
   ageMin: number | null
   ageMax: number | null
+  price: number | null
+  isFree: boolean
+  venueName: string | null
   provider: "openai" | "keyword-fallback"
 }
 
@@ -238,6 +241,43 @@ function extractAgeRangeFromText(
   return { ageMin: null, ageMax: null }
 }
 
+function extractPriceFromText(
+  title: string,
+  description: string
+): { price: number | null; isFree: boolean } {
+  const text = `${title} ${description}`.toLowerCase()
+
+  const freePatterns = [/\bfree\b/, /\bno cost\b/, /\bno charge\b/, /\bcomplimentary\b/]
+  for (const pattern of freePatterns) {
+    if (pattern.test(text)) {
+      return { price: null, isFree: true }
+    }
+  }
+
+  const priceMatch = `${title} ${description}`.match(/\$\s*(\d+(?:\.\d{1,2})?)/)
+  if (priceMatch) {
+    return { price: Number(priceMatch[1]), isFree: false }
+  }
+
+  return { price: null, isFree: false }
+}
+
+function extractVenueFromText(title: string, description: string): { venueName: string | null } {
+  const text = `${title} ${description}`
+
+  const atMatch = text.match(/\bat\s+(?:the\s+)?([A-Z][A-Za-z\s'&-]{3,40})(?:[,.\n]|$)/)
+  if (atMatch) {
+    return { venueName: atMatch[1].trim() }
+  }
+
+  const locationMatch = text.match(/(?:Location|Venue|Where):\s*([^\n,]{3,60})/i)
+  if (locationMatch) {
+    return { venueName: locationMatch[1].trim() }
+  }
+
+  return { venueName: null }
+}
+
 async function classifyWithOpenAI(
   apiKey: string,
   model: string,
@@ -248,6 +288,9 @@ async function classifyWithOpenAI(
   tags: Array<{ slug: string; confidence: number }>
   ageMin: number | null
   ageMax: number | null
+  price: number | null
+  isFree: boolean
+  venueName: string | null
 }> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -263,7 +306,7 @@ async function classifyWithOpenAI(
         {
           role: "system",
           content:
-            "You classify family events. Respond with JSON only: { tags: [{ slug: string, confidence: number }], age_min: number|null, age_max: number|null }",
+            'You classify and enrich family event data. Respond with JSON only: { "tags": [{ "slug": string, "confidence": number }], "age_min": number|null, "age_max": number|null, "price": number|null, "is_free": boolean, "venue_name": string|null }',
         },
         {
           role: "user",
@@ -275,6 +318,8 @@ async function classifyWithOpenAI(
               "Choose up to 6 relevant tags from available_tags only.",
               "confidence must be between 0 and 1.",
               "Extract age_min and age_max if present in text. Use null when unknown.",
+              'Extract price if mentioned (e.g. "$15"). If "free"/"no cost"/"complimentary", set is_free=true and price=null. If a dollar amount is found, set is_free=false and price to the number. If unknown, set is_free=false and price=null.',
+              'Extract venue_name if mentioned (e.g. "at Central Library", "Location: City Park"). Use null when unknown.',
             ],
           }),
         },
@@ -304,8 +349,11 @@ async function classifyWithOpenAI(
 
   const ageMin = typeof parsed?.age_min === "number" ? parsed.age_min : null
   const ageMax = typeof parsed?.age_max === "number" ? parsed.age_max : null
+  const price = typeof parsed?.price === "number" ? parsed.price : null
+  const isFree = parsed?.is_free === true
+  const venueName = typeof parsed?.venue_name === "string" ? parsed.venue_name : null
 
-  return { tags, ageMin, ageMax }
+  return { tags, ageMin, ageMax, price, isFree, venueName }
 }
 
 Deno.serve(async (req: Request) => {
@@ -324,14 +372,23 @@ Deno.serve(async (req: Request) => {
     let title = typeof body?.title === "string" ? body.title.trim() : ""
     let description = typeof body?.description === "string" ? body.description : ""
 
-    if (event_id && (!title || !description)) {
+    let currentEvent: {
+      title: string
+      description: string | null
+      price: number | null
+      is_free: boolean
+      venue_name: string | null
+    } | null = null
+
+    if (event_id) {
       const { data: eventRow } = await supabase
         .from("events")
-        .select("title, description")
+        .select("title, description, price, is_free, venue_name")
         .eq("id", event_id)
         .maybeSingle()
 
       if (eventRow) {
+        currentEvent = eventRow
         title = title || eventRow.title
         description = description || eventRow.description || ""
       }
@@ -370,23 +427,36 @@ Deno.serve(async (req: Request) => {
           tags: aiResult.tags,
           ageMin: aiResult.ageMin,
           ageMax: aiResult.ageMax,
+          price: aiResult.price,
+          isFree: aiResult.isFree,
+          venueName: aiResult.venueName,
           provider: "openai",
         }
       } catch (_) {
         const fallbackAge = extractAgeRangeFromText(title, description)
+        const fallbackPrice = extractPriceFromText(title, description)
+        const fallbackVenue = extractVenueFromText(title, description)
         classification = {
           tags: computeTags(title, description ?? ""),
           ageMin: fallbackAge.ageMin,
           ageMax: fallbackAge.ageMax,
+          price: fallbackPrice.price,
+          isFree: fallbackPrice.isFree,
+          venueName: fallbackVenue.venueName,
           provider: "keyword-fallback",
         }
       }
     } else {
       const fallbackAge = extractAgeRangeFromText(title, description)
+      const fallbackPrice = extractPriceFromText(title, description)
+      const fallbackVenue = extractVenueFromText(title, description)
       classification = {
         tags: computeTags(title, description ?? ""),
         ageMin: fallbackAge.ageMin,
         ageMax: fallbackAge.ageMax,
+        price: fallbackPrice.price,
+        isFree: fallbackPrice.isFree,
+        venueName: fallbackVenue.venueName,
         provider: "keyword-fallback",
       }
     }
@@ -435,14 +505,23 @@ Deno.serve(async (req: Request) => {
         await supabase.from("event_tags").upsert(rows, { onConflict: "event_id,tag_id" })
       }
 
-      await supabase
-        .from("events")
-        .update({
-          ai_confidence: topConfidence,
-          age_min: classification.ageMin,
-          age_max: classification.ageMax,
-        })
-        .eq("id", event_id)
+      const updatePayload: Record<string, unknown> = {
+        ai_confidence: topConfidence,
+        age_min: classification.ageMin,
+        age_max: classification.ageMax,
+      }
+      // Only fill gaps — don't overwrite scraper-extracted values
+      if (classification.price !== null && currentEvent?.price == null) {
+        updatePayload.price = classification.price
+      }
+      if (classification.isFree && !currentEvent?.is_free) {
+        updatePayload.is_free = classification.isFree
+      }
+      if (classification.venueName && !currentEvent?.venue_name) {
+        updatePayload.venue_name = classification.venueName
+      }
+
+      await supabase.from("events").update(updatePayload).eq("id", event_id)
     }
 
     return new Response(
@@ -451,6 +530,9 @@ Deno.serve(async (req: Request) => {
         provider: classification.provider,
         age_min: classification.ageMin,
         age_max: classification.ageMax,
+        price: classification.price,
+        is_free: classification.isFree,
+        venue_name: classification.venueName,
         overall_confidence: topConfidence,
         processed: true,
       }),
