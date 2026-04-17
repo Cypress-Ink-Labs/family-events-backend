@@ -23,7 +23,9 @@ INSERT INTO cities (name, state, country, slug, latitude, longitude, timezone) V
   ('Seattle',       'WA', 'US', 'seattle',        47.6062, -122.3321, 'America/Los_Angeles'),
   ('Denver',        'CO', 'US', 'denver',         39.7392, -104.9903, 'America/Denver'),
   ('Miami',         'FL', 'US', 'miami',          25.7617,  -80.1918, 'America/New_York'),
-  ('Portland',      'OR', 'US', 'portland',       45.5051, -122.6750, 'America/Los_Angeles')
+  ('Portland',      'OR', 'US', 'portland',       45.5051, -122.6750, 'America/Los_Angeles'),
+  ('Baton Rouge',   'LA', 'US', 'baton-rouge',    30.4515,  -91.1871, 'America/Chicago'),
+  ('Louisville',    'KY', 'US', 'louisville',     38.2527,  -85.7585, 'America/New_York')
 ON CONFLICT (slug) DO NOTHING;
 
 -- =============================================
