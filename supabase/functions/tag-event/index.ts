@@ -8,6 +8,7 @@ import {
   extractPriceFromText,
   extractVenueFromText,
 } from "../_shared/classification.ts"
+import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -136,12 +137,16 @@ Deno.serve(async (req: Request) => {
       price: number | null
       is_free: boolean
       venue_name: string | null
+      address: string | null
+      latitude: number | null
+      longitude: number | null
+      city_id: string | null
     } | null = null
 
     if (event_id) {
       const { data: eventRow } = await supabase
         .from("events")
-        .select("title, description, price, is_free, venue_name")
+        .select("title, description, price, is_free, venue_name, address, latitude, longitude, city_id")
         .eq("id", event_id)
         .maybeSingle()
 
@@ -284,6 +289,48 @@ Deno.serve(async (req: Request) => {
       }
       if (classification.venueName && !currentEvent?.venue_name) {
         updatePayload.venue_name = classification.venueName
+      }
+
+      // Geocode if event has no coords yet. Prefer address → venue → city fallback.
+      const needsGeocode =
+        currentEvent?.latitude == null || currentEvent?.longitude == null
+      if (needsGeocode) {
+        const resolvedVenue =
+          currentEvent?.venue_name ?? (classification.venueName as string | null)
+        const resolvedAddress = currentEvent?.address ?? null
+
+        let city: { name: string; state: string | null; latitude: number | null; longitude: number | null } | null = null
+        if (currentEvent?.city_id) {
+          const { data: cityRow } = await supabase
+            .from("cities")
+            .select("name, state, latitude, longitude")
+            .eq("id", currentEvent.city_id)
+            .maybeSingle()
+          city = cityRow as typeof city
+        }
+
+        const query = buildGeocodeQuery({
+          address: resolvedAddress,
+          venueName: resolvedVenue,
+          cityName: city?.name ?? null,
+          cityState: city?.state ?? null,
+        })
+
+        let geocoded: { latitude: number; longitude: number } | null = null
+        if (query) {
+          const hit = await geocodeViaNominatim(query)
+          if (hit) geocoded = { latitude: hit.latitude, longitude: hit.longitude }
+        }
+
+        // Fallback: use city center so the pin still appears on the map.
+        if (!geocoded && city?.latitude != null && city?.longitude != null) {
+          geocoded = { latitude: city.latitude, longitude: city.longitude }
+        }
+
+        if (geocoded) {
+          updatePayload.latitude = geocoded.latitude
+          updatePayload.longitude = geocoded.longitude
+        }
       }
 
       await supabase.from("events").update(updatePayload).eq("id", event_id)

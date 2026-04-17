@@ -9,6 +9,7 @@ import {
   parseIcalDate,
   parseIsoDate,
   stripHtml,
+  unescapeIcalText,
 } from "../_shared/parsing.ts"
 
 const corsHeaders = {
@@ -147,19 +148,18 @@ function parseIcalFeed(icalContent: string): ParsedEvent[] {
       continue
     }
 
-    const summary = eventBlock.match(/SUMMARY:(.+)/)?.[1]?.trim() ?? ""
+    const rawSummary = eventBlock.match(/SUMMARY:(.+)/)?.[1]?.trim() ?? ""
+    const summary = unescapeIcalText(rawSummary)
     if (!summary) {
       continue
     }
 
-    const description =
-      eventBlock
-        .match(/DESCRIPTION:(.+)/)?.[1]
-        ?.replaceAll("\\n", " ")
-        .trim() ?? ""
+    const rawDescription = eventBlock.match(/DESCRIPTION:(.+)/)?.[1]?.trim() ?? ""
+    const description = unescapeIcalText(rawDescription)
     const dtStartRaw = eventBlock.match(/DTSTART[^:]*:(.+)/)?.[1]?.trim() ?? null
     const dtEndRaw = eventBlock.match(/DTEND[^:]*:(.+)/)?.[1]?.trim() ?? null
-    const location = eventBlock.match(/LOCATION:(.+)/)?.[1]?.trim() ?? null
+    const rawLocation = eventBlock.match(/LOCATION:(.+)/)?.[1]?.trim() ?? null
+    const location = rawLocation ? unescapeIcalText(rawLocation) : null
     const url = eventBlock.match(/URL:(.+)/)?.[1]?.trim() ?? null
 
     const startDatetime = parseIcalDate(dtStartRaw)
@@ -444,9 +444,25 @@ async function processSource(
   let eventsSkipped = 0
   let errorMessage: string | null = null
 
+  // Flush live progress to source_runs so the UI can show incremental counts.
+  const PROGRESS_BATCH = 5
+  async function flushProgress() {
+    await supabase
+      .from("source_runs")
+      .update({
+        events_found: eventsFound,
+        events_imported: eventsImported,
+        events_skipped: eventsSkipped,
+      })
+      .eq("id", runRow.id)
+  }
+
   try {
     const parsedEvents = await fetchSourceEvents(source)
     eventsFound = parsedEvents.length
+
+    // Write total found immediately so the UI shows "X found" while import runs.
+    await flushProgress()
 
     const timezone = await resolveCityTimezone(supabase, source.city_id)
     const index = await buildExistingEventIndex(supabase, source, parsedEvents)
@@ -510,6 +526,11 @@ async function processSource(
         parsed.title,
         parsed.description
       )
+
+      // Flush progress every N events so the UI shows live counts.
+      if (eventsImported % PROGRESS_BATCH === 0) {
+        await flushProgress()
+      }
     }
 
     if (eventsImported === 0 && eventsFound > 0) {

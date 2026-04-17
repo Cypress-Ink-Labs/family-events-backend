@@ -59,6 +59,18 @@ export function decodeHtml(value: string): string {
     .replaceAll("&#39;", "'")
 }
 
+/**
+ * Unescape iCal (RFC 5545 §3.3.11) text values: \n, \N → newline, \, → comma,
+ * \; → semicolon, \\ → backslash. Leaves other sequences as-is.
+ */
+export function unescapeIcalText(value: string): string {
+  return value
+    .replace(/\\n/gi, " ")
+    .replace(/\\,/g, ",")
+    .replace(/\\;/g, ";")
+    .replace(/\\\\/g, "\\")
+}
+
 export function stripHtml(value: string): string {
   return decodeHtml(value.replaceAll(/<[^>]*>/g, " "))
     .replaceAll(/\s+/g, " ")

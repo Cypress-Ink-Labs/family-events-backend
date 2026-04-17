@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest"
-import { decodeHtml, dedupKey, extractPrice, parseIcalDate, parseIsoDate, stripHtml } from "./parsing"
+import {
+  decodeHtml,
+  dedupKey,
+  extractPrice,
+  parseIcalDate,
+  parseIsoDate,
+  stripHtml,
+  unescapeIcalText,
+} from "./parsing"
 
 describe("parseIsoDate", () => {
   it("normalizes a valid ISO string to ISO UTC", () => {
@@ -57,6 +65,31 @@ describe("decodeHtml", () => {
 
   it("leaves non-entity text untouched", () => {
     expect(decodeHtml("plain text")).toBe("plain text")
+  })
+})
+
+describe("unescapeIcalText", () => {
+  it("unescapes iCal comma sequences", () => {
+    expect(unescapeIcalText("Louisville Zoo\\, 1100 Trevilian Way\\, KY")).toBe(
+      "Louisville Zoo, 1100 Trevilian Way, KY"
+    )
+  })
+
+  it("unescapes iCal semicolon sequences", () => {
+    expect(unescapeIcalText("Event 1\\; Event 2")).toBe("Event 1; Event 2")
+  })
+
+  it("converts \\n to a space", () => {
+    expect(unescapeIcalText("Line 1\\nLine 2")).toBe("Line 1 Line 2")
+    expect(unescapeIcalText("Line 1\\NLine 2")).toBe("Line 1 Line 2")
+  })
+
+  it("unescapes double-backslash to single backslash", () => {
+    expect(unescapeIcalText("path\\\\to\\\\file")).toBe("path\\to\\file")
+  })
+
+  it("leaves plain text alone", () => {
+    expect(unescapeIcalText("just plain text")).toBe("just plain text")
   })
 })
 
