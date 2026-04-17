@@ -1,5 +1,13 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
+import { requireServiceRole } from "../_shared/auth.ts"
+import {
+  clampConfidence,
+  computeTags,
+  extractAgeRangeFromText,
+  extractPriceFromText,
+  extractVenueFromText,
+} from "../_shared/classification.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,161 +15,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 }
 
-interface TagRule {
-  slug: string
-  keywords: string[]
-}
-
-const TAG_RULES: TagRule[] = [
-  {
-    slug: "music",
-    keywords: [
-      "music",
-      "sing",
-      "song",
-      "instrument",
-      "drum",
-      "guitar",
-      "violin",
-      "band",
-      "musical",
-      "karaoke",
-      "choir",
-      "concert",
-    ],
-  },
-  {
-    slug: "outdoor",
-    keywords: [
-      "outdoor",
-      "park",
-      "garden",
-      "hike",
-      "nature",
-      "trail",
-      "playground",
-      "outside",
-      "picnic",
-      "beach",
-      "forest",
-      "camp",
-    ],
-  },
-  {
-    slug: "storytime",
-    keywords: [
-      "storytime",
-      "story time",
-      "book",
-      "reading",
-      "read aloud",
-      "library",
-      "tales",
-      "narrative",
-      "bedtime",
-    ],
-  },
-  {
-    slug: "art",
-    keywords: [
-      "art",
-      "craft",
-      "paint",
-      "draw",
-      "sculpture",
-      "pottery",
-      "clay",
-      "creative",
-      "collage",
-      "watercolor",
-      "sketch",
-    ],
-  },
-  {
-    slug: "science",
-    keywords: [
-      "science",
-      "stem",
-      "experiment",
-      "lab",
-      "chemistry",
-      "biology",
-      "physics",
-      "robot",
-      "coding",
-      "tech",
-      "engineering",
-    ],
-  },
-  {
-    slug: "sports",
-    keywords: [
-      "sport",
-      "soccer",
-      "basketball",
-      "swim",
-      "gymnastics",
-      "yoga",
-      "dance",
-      "fitness",
-      "run",
-      "martial arts",
-      "tennis",
-    ],
-  },
-  {
-    slug: "theater",
-    keywords: [
-      "theater",
-      "theatre",
-      "drama",
-      "puppet",
-      "performance",
-      "show",
-      "stage",
-      "act",
-      "improv",
-      "comedy",
-    ],
-  },
-  {
-    slug: "cooking",
-    keywords: ["cook", "bake", "food", "kitchen", "recipe", "chef", "culinary", "meal", "snack"],
-  },
-  {
-    slug: "sensory",
-    keywords: [
-      "sensory",
-      "tactile",
-      "texture",
-      "exploration",
-      "touch",
-      "feel",
-      "messy",
-      "kinetic",
-      "sand",
-      "water play",
-    ],
-  },
-  {
-    slug: "playgroup",
-    keywords: [
-      "playgroup",
-      "play group",
-      "toddler",
-      "baby",
-      "infant",
-      "mommy and me",
-      "parent and me",
-      "social",
-    ],
-  },
-  { slug: "free", keywords: ["free", "no cost", "no charge", "complimentary", "at no cost"] },
-  {
-    slug: "drop-in",
-    keywords: ["drop-in", "drop in", "walk-in", "no registration", "no booking required"],
-  },
-]
+type TagProvider = "openai" | "keyword-fallback"
 
 interface ClassificationResult {
   tags: Array<{ slug: string; confidence: number }>
@@ -170,112 +24,7 @@ interface ClassificationResult {
   price: number | null
   isFree: boolean
   venueName: string | null
-  provider: "openai" | "keyword-fallback"
-}
-
-function clampConfidence(value: number): number {
-  if (Number.isNaN(value)) return 0.5
-  return Math.min(1, Math.max(0, value))
-}
-
-function computeTags(
-  title: string,
-  description: string
-): Array<{ slug: string; confidence: number }> {
-  const text = `${title} ${description}`.toLowerCase()
-  const results: Array<{ slug: string; confidence: number }> = []
-
-  for (const rule of TAG_RULES) {
-    let hits = 0
-    for (const kw of rule.keywords) {
-      if (text.includes(kw)) {
-        hits++
-      }
-    }
-    if (hits > 0) {
-      const confidence = Math.min(0.5 + (hits / rule.keywords.length) * 0.5, 0.98)
-      results.push({ slug: rule.slug, confidence: Math.round(confidence * 100) / 100 })
-    }
-  }
-
-  return results.sort((a, b) => b.confidence - a.confidence)
-}
-
-function extractAgeRangeFromText(
-  title: string,
-  description: string
-): { ageMin: number | null; ageMax: number | null } {
-  const text = `${title} ${description}`.toLowerCase()
-
-  const rangeMatch = text.match(/(\d{1,2})\s*(?:-|to)\s*(\d{1,2})\s*(?:years?|yrs?|yo|y\/o)/)
-  if (rangeMatch) {
-    return {
-      ageMin: Number(rangeMatch[1]),
-      ageMax: Number(rangeMatch[2]),
-    }
-  }
-
-  const plusMatch = text.match(/(?:ages?\s*)?(\d{1,2})\s*\+/)
-  if (plusMatch) {
-    return {
-      ageMin: Number(plusMatch[1]),
-      ageMax: null,
-    }
-  }
-
-  const underMatch = text.match(/under\s*(\d{1,2})/)
-  if (underMatch) {
-    return {
-      ageMin: null,
-      ageMax: Number(underMatch[1]),
-    }
-  }
-
-  if (text.includes("toddler")) {
-    return { ageMin: 1, ageMax: 4 }
-  }
-  if (text.includes("baby") || text.includes("infant")) {
-    return { ageMin: 0, ageMax: 2 }
-  }
-
-  return { ageMin: null, ageMax: null }
-}
-
-function extractPriceFromText(
-  title: string,
-  description: string
-): { price: number | null; isFree: boolean } {
-  const text = `${title} ${description}`.toLowerCase()
-
-  const freePatterns = [/\bfree\b/, /\bno cost\b/, /\bno charge\b/, /\bcomplimentary\b/]
-  for (const pattern of freePatterns) {
-    if (pattern.test(text)) {
-      return { price: null, isFree: true }
-    }
-  }
-
-  const priceMatch = `${title} ${description}`.match(/\$\s*(\d+(?:\.\d{1,2})?)/)
-  if (priceMatch) {
-    return { price: Number(priceMatch[1]), isFree: false }
-  }
-
-  return { price: null, isFree: false }
-}
-
-function extractVenueFromText(title: string, description: string): { venueName: string | null } {
-  const text = `${title} ${description}`
-
-  const atMatch = text.match(/\bat\s+(?:the\s+)?([A-Z][A-Za-z\s'&-]{3,40})(?:[,.\n]|$)/)
-  if (atMatch) {
-    return { venueName: atMatch[1].trim() }
-  }
-
-  const locationMatch = text.match(/(?:Location|Venue|Where):\s*([^\n,]{3,60})/i)
-  if (locationMatch) {
-    return { venueName: locationMatch[1].trim() }
-  }
-
-  return { venueName: null }
+  provider: TagProvider
 }
 
 async function classifyWithOpenAI(
@@ -328,7 +77,8 @@ async function classifyWithOpenAI(
   })
 
   if (!response.ok) {
-    throw new Error(`OpenAI classification failed (${response.status})`)
+    const errorBody = await response.text().catch(() => "")
+    throw new Error(`OpenAI classification failed (${response.status}): ${errorBody.slice(0, 200)}`)
   }
 
   const completion = await response.json()
@@ -361,11 +111,19 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 200, headers: corsHeaders })
   }
 
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+
+  // Auth: service role only. This function is internal (called from scrape-source).
+  const auth = requireServiceRole(req, serviceRoleKey)
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
+  }
+
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    )
+    const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", serviceRoleKey)
 
     const body = await req.json()
     const { event_id } = body
@@ -432,7 +190,13 @@ Deno.serve(async (req: Request) => {
           venueName: aiResult.venueName,
           provider: "openai",
         }
-      } catch (_) {
+      } catch (openAiError) {
+        // Surface the failure — admin needs to know if OpenAI is down/unauthorized,
+        // otherwise every event silently drops to lower-quality keyword tagging.
+        console.error("OpenAI classification failed, falling back to keyword matching", {
+          event_id: event_id ?? null,
+          error: openAiError instanceof Error ? openAiError.message : String(openAiError),
+        })
         const fallbackAge = extractAgeRangeFromText(title, description)
         const fallbackPrice = extractPriceFromText(title, description)
         const fallbackVenue = extractVenueFromText(title, description)
@@ -507,6 +271,7 @@ Deno.serve(async (req: Request) => {
 
       const updatePayload: Record<string, unknown> = {
         ai_confidence: topConfidence,
+        ai_tag_provider: classification.provider,
         age_min: classification.ageMin,
         age_max: classification.ageMax,
       }
@@ -539,6 +304,9 @@ Deno.serve(async (req: Request) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   } catch (err) {
+    console.error("tag-event handler failed", {
+      error: err instanceof Error ? err.message : String(err),
+    })
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

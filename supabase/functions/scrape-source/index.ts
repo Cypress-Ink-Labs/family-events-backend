@@ -1,6 +1,15 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
 import { DOMParser } from "@b-fuze/deno-dom"
+import { requireAdminOrService } from "../_shared/auth.ts"
+import {
+  decodeHtml,
+  dedupKey,
+  extractPrice,
+  parseIcalDate,
+  parseIsoDate,
+  stripHtml,
+} from "../_shared/parsing.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,94 +54,6 @@ interface SourceResult {
   eventsImported: number
   eventsSkipped: number
   error: string | null
-}
-
-function parseIsoDate(value: string | null | undefined): string | null {
-  if (!value) {
-    return null
-  }
-
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) {
-    return null
-  }
-  return parsed.toISOString()
-}
-
-function parseIcalDate(value: string | null): string | null {
-  if (!value) {
-    return null
-  }
-
-  const compact = value.trim()
-  if (/^\d{8}$/.test(compact)) {
-    const year = compact.slice(0, 4)
-    const month = compact.slice(4, 6)
-    const day = compact.slice(6, 8)
-    return new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString()
-  }
-
-  if (/^\d{8}T\d{6}Z$/.test(compact)) {
-    const year = compact.slice(0, 4)
-    const month = compact.slice(4, 6)
-    const day = compact.slice(6, 8)
-    const hour = compact.slice(9, 11)
-    const minute = compact.slice(11, 13)
-    const second = compact.slice(13, 15)
-    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString()
-  }
-
-  if (/^\d{8}T\d{6}$/.test(compact)) {
-    const year = compact.slice(0, 4)
-    const month = compact.slice(4, 6)
-    const day = compact.slice(6, 8)
-    const hour = compact.slice(9, 11)
-    const minute = compact.slice(11, 13)
-    const second = compact.slice(13, 15)
-    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}`).toISOString()
-  }
-
-  return parseIsoDate(compact)
-}
-
-function decodeHtml(value: string): string {
-  return value
-    .replaceAll("&amp;", "&")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">")
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-}
-
-function stripHtml(value: string): string {
-  return decodeHtml(value.replaceAll(/<[^>]*>/g, " "))
-    .replaceAll(/\s+/g, " ")
-    .trim()
-}
-
-function extractPrice(text: string): { price: number | null; isFree: boolean } {
-  const lower = text.toLowerCase()
-
-  const freePatterns = [
-    /\bfree\b/,
-    /\bno cost\b/,
-    /\bno charge\b/,
-    /\bcomplimentary\b/,
-    /\bfree admission\b/,
-    /\bfree event\b/,
-  ]
-  for (const pattern of freePatterns) {
-    if (pattern.test(lower)) {
-      return { price: null, isFree: true }
-    }
-  }
-
-  const priceMatch = text.match(/\$\s*(\d+(?:\.\d{1,2})?)/)
-  if (priceMatch) {
-    return { price: Number(priceMatch[1]), isFree: false }
-  }
-
-  return { price: null, isFree: false }
 }
 
 function extractImages(rawContent: string, baseUrl: string): string[] {
@@ -366,18 +287,22 @@ async function tagImportedEvent(
   title: string,
   description: string
 ) {
-  await fetch(`${supabaseUrl}/functions/v1/tag-event`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${serviceRoleKey}`,
-    },
-    body: JSON.stringify({
-      event_id: eventId,
-      title,
-      description,
-    }),
-  })
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/tag-event`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+      body: JSON.stringify({
+        event_id: eventId,
+        title,
+        description,
+      }),
+    })
+  } catch (err) {
+    console.error("tag-event invocation failed", { eventId, err: String(err) })
+  }
 }
 
 async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]> {
@@ -404,6 +329,94 @@ async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]>
     return parseIcalFeed(content)
   }
   return parseWebsite(content, source.url)
+}
+
+/**
+ * Resolve the timezone for scraped events. Prefers the source's city timezone,
+ * falls back to UTC so clocks stay correct even if cities table is incomplete.
+ */
+async function resolveCityTimezone(
+  supabase: ReturnType<typeof createClient>,
+  cityId: string | null
+): Promise<string> {
+  if (!cityId) return "UTC"
+  const { data } = await supabase.from("cities").select("timezone").eq("id", cityId).maybeSingle()
+  return (data?.timezone as string | undefined) ?? "UTC"
+}
+
+interface ExistingEventIndex {
+  bySourceUrl: Map<string, string> // source_url -> event_id (within this source)
+  byDedupKey: Map<string, string> // dedup_key -> event_id (cross-source, same city)
+}
+
+/**
+ * Fetch existing events relevant to this scrape run in ONE query instead of
+ * N queries. Covers both within-source (source_url match) and cross-source
+ * (title + start + city match) deduplication.
+ */
+async function buildExistingEventIndex(
+  supabase: ReturnType<typeof createClient>,
+  source: EventSourceRow,
+  parsedEvents: ParsedEvent[]
+): Promise<ExistingEventIndex> {
+  const bySourceUrl = new Map<string, string>()
+  const byDedupKey = new Map<string, string>()
+
+  if (parsedEvents.length === 0) {
+    return { bySourceUrl, byDedupKey }
+  }
+
+  // Within-source index: any prior event from THIS source
+  const { data: sameSourceRows } = await supabase
+    .from("events")
+    .select("id, source_url, title, start_datetime, city_id")
+    .eq("source_id", source.id)
+
+  for (const row of (sameSourceRows ?? []) as Array<{
+    id: string
+    source_url: string | null
+    title: string
+    start_datetime: string
+    city_id: string | null
+  }>) {
+    if (row.source_url) {
+      bySourceUrl.set(row.source_url, row.id)
+    }
+    byDedupKey.set(dedupKey(row.title, row.start_datetime, row.city_id), row.id)
+  }
+
+  // Cross-source index: events in same city from OTHER sources that might match
+  // our parsed events by title + start datetime.
+  if (source.city_id) {
+    // Collect candidate start datetimes to narrow the cross-source query
+    const starts = parsedEvents.map((e) => e.startDatetime)
+    if (starts.length > 0) {
+      const minStart = starts.reduce((a, b) => (a < b ? a : b))
+      const maxStart = starts.reduce((a, b) => (a > b ? a : b))
+
+      const { data: crossSourceRows } = await supabase
+        .from("events")
+        .select("id, title, start_datetime, city_id")
+        .eq("city_id", source.city_id)
+        .neq("source_id", source.id)
+        .gte("start_datetime", minStart)
+        .lte("start_datetime", maxStart)
+
+      for (const row of (crossSourceRows ?? []) as Array<{
+        id: string
+        title: string
+        start_datetime: string
+        city_id: string | null
+      }>) {
+        const key = dedupKey(row.title, row.start_datetime, row.city_id)
+        if (!byDedupKey.has(key)) {
+          byDedupKey.set(key, row.id)
+        }
+      }
+    }
+  }
+
+  return { bySourceUrl, byDedupKey }
 }
 
 async function processSource(
@@ -435,21 +448,29 @@ async function processSource(
     const parsedEvents = await fetchSourceEvents(source)
     eventsFound = parsedEvents.length
 
-    for (const parsed of parsedEvents) {
-      if (!parsed.title || !parsed.startDatetime) {
+    const timezone = await resolveCityTimezone(supabase, source.city_id)
+    const index = await buildExistingEventIndex(supabase, source, parsedEvents)
+
+    const validEvents = parsedEvents.filter((p) => {
+      if (!p.title || !p.startDatetime) {
+        eventsSkipped += 1
+        return false
+      }
+      return true
+    })
+
+    for (const parsed of validEvents) {
+      // Prefer within-source match (source_url), fall back to cross-source dedup
+      const sourceUrlMatch = parsed.sourceUrl ? index.bySourceUrl.get(parsed.sourceUrl) : null
+      const crossSourceMatch = index.byDedupKey.get(
+        dedupKey(parsed.title, parsed.startDatetime, source.city_id)
+      )
+      const existingEventId = sourceUrlMatch ?? crossSourceMatch ?? null
+
+      // Skip if this is a cross-source dupe from ANOTHER source (don't overwrite)
+      if (!sourceUrlMatch && crossSourceMatch) {
         eventsSkipped += 1
         continue
-      }
-
-      let existingEventId: string | null = null
-      if (parsed.sourceUrl) {
-        const { data: existing } = await supabase
-          .from("events")
-          .select("id")
-          .eq("source_id", source.id)
-          .eq("source_url", parsed.sourceUrl)
-          .maybeSingle()
-        existingEventId = existing?.id ?? null
       }
 
       const payload = {
@@ -457,7 +478,7 @@ async function processSource(
         description: parsed.description || null,
         start_datetime: parsed.startDatetime,
         end_datetime: parsed.endDatetime,
-        timezone: "America/New_York",
+        timezone,
         venue_name: parsed.venueName,
         address: parsed.address,
         city_id: source.city_id,
@@ -535,11 +556,21 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 200, headers: corsHeaders })
   }
 
-  try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    const supabase = createClient(supabaseUrl, serviceRoleKey)
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  const supabase = createClient(supabaseUrl, serviceRoleKey)
 
+  // Auth: accept service role (cron) or admin user JWT. Reject everything else.
+  const auth = await requireAdminOrService(req, supabase, supabaseUrl, serviceRoleKey, anonKey)
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
+  }
+
+  try {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {}
     const requestedSourceId = typeof body?.source_id === "string" ? body.source_id : null
 
