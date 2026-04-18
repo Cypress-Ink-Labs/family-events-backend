@@ -133,5 +133,31 @@ BEGIN
     display_name = excluded.display_name,
     role = excluded.role,
     updated_at = now();
+
+  INSERT INTO public.user_access (
+    user_id,
+    is_enabled,
+    enabled_at,
+    disabled_at,
+    disabled_reason,
+    created_at,
+    updated_at
+  )
+  VALUES (
+    admin_user_id,
+    true,
+    now(),
+    NULL,
+    NULL,
+    now(),
+    now()
+  )
+  ON CONFLICT (user_id) DO UPDATE
+  SET
+    is_enabled = true,
+    enabled_at = COALESCE(public.user_access.enabled_at, now()),
+    disabled_at = NULL,
+    disabled_reason = NULL,
+    updated_at = now();
 END
 $$;

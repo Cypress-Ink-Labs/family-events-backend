@@ -11,6 +11,8 @@
 
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 # ── colours ──────────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -26,15 +28,18 @@ echo "family-events-ui — local dev setup"
 echo "──────────────────────────────────"
 
 # ── 1. Pull config from supabase status ──────────────────────────────────────
-SUPABASE_CLI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/supabase.sh"
-STATUS=$("$SUPABASE_CLI" status --output env 2>/dev/null) || fail "supabase is not running. Start it with: npm run supabase:start"
+SUPABASE_CLI="$ROOT_DIR/scripts/supabase.sh"
+STATUS=$(bash "$SUPABASE_CLI" status --output env 2>/dev/null) || fail "supabase is not running. Start it with: npm run supabase:start"
 
 SERVICE_ROLE_KEY=$(echo "$STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d'"' -f2)
 DB_URL=$(echo "$STATUS"           | grep '^DB_URL='          | cut -d'"' -f2)
 API_URL=$(echo "$STATUS"          | grep '^API_URL='         | cut -d'"' -f2)
+PUBLISHABLE_KEY=$(echo "$STATUS"  | grep '^PUBLISHABLE_KEY=' | cut -d'"' -f2)
 
 [ -z "$SERVICE_ROLE_KEY" ] && fail "Could not read SERVICE_ROLE_KEY from supabase status"
 [ -z "$DB_URL"           ] && fail "Could not read DB_URL from supabase status"
+[ -z "$API_URL"          ] && fail "Could not read API_URL from supabase status"
+[ -z "$PUBLISHABLE_KEY"  ] && fail "Could not read PUBLISHABLE_KEY from supabase status"
 
 # pg_net calls come from inside Docker, so swap 127.0.0.1 → host.docker.internal
 INTERNAL_URL="${API_URL/127.0.0.1/host.docker.internal}"
@@ -52,6 +57,13 @@ psql "$ADMIN_PG_URL" -q \
 
 ok "app.settings.supabase_url  = $INTERNAL_URL"
 ok "app.settings.service_role_key set"
+
+cat > "$ROOT_DIR/.env.development.local" <<EOF
+VITE_SUPABASE_URL=$API_URL
+VITE_SUPABASE_KEY=$PUBLISHABLE_KEY
+VITE_SUPABASE_ANON_KEY=$PUBLISHABLE_KEY
+EOF
+ok ".env.development.local updated for local Supabase"
 
 # Invite gate: default off locally. Flip with REQUIRE_INVITE=true npm run setup:local
 REQUIRE_INVITE="${REQUIRE_INVITE:-false}"
@@ -76,8 +88,13 @@ RESULT=$(psql "$DB_URL" -t -q \
 ROLE=$(psql "$DB_URL" -t -q \
   -c "SELECT role FROM user_profiles WHERE email = '${ADMIN_EMAIL}';" 2>/dev/null | xargs)
 
-if [ "$ROLE" = "admin" ]; then
-  ok "Admin user: $ADMIN_EMAIL (role=admin)"
+ACCESS_ENABLED=$(psql "$DB_URL" -t -q \
+  -c "SELECT COALESCE((SELECT is_enabled::text FROM user_access ua JOIN user_profiles up ON up.id = ua.user_id WHERE up.email = '${ADMIN_EMAIL}' LIMIT 1), 'false');" 2>/dev/null | xargs)
+
+if [ "$ROLE" = "admin" ] && [ "$ACCESS_ENABLED" = "true" ]; then
+  ok "Admin user: $ADMIN_EMAIL (role=admin, access=enabled)"
+elif [ "$ROLE" = "admin" ]; then
+  warn "Admin role exists but access is still disabled — re-run this script after migrations finish"
 else
   warn "Admin profile not found yet — sign up at /sign-up with $ADMIN_EMAIL, then re-run this script"
 fi
@@ -98,4 +115,6 @@ echo ""
 echo "  Admin login:  $ADMIN_EMAIL / Admin123!"
 echo "  Studio:       http://127.0.0.1:55323"
 echo "  App:          http://localhost:5173"
+echo "  Functions:    npm run supabase:functions:serve"
+echo "  All-in-one:   npm run supabase:dev"
 echo ""
