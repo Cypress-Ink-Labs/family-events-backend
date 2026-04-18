@@ -26,7 +26,8 @@ echo "family-events-ui — local dev setup"
 echo "──────────────────────────────────"
 
 # ── 1. Pull config from supabase status ──────────────────────────────────────
-STATUS=$(supabase status --output env 2>/dev/null) || fail "supabase is not running. Start it with: supabase start"
+SUPABASE_CLI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/supabase.sh"
+STATUS=$("$SUPABASE_CLI" status --output env 2>/dev/null) || fail "supabase is not running. Start it with: npm run supabase:start"
 
 SERVICE_ROLE_KEY=$(echo "$STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d'"' -f2)
 DB_URL=$(echo "$STATUS"           | grep '^DB_URL='          | cut -d'"' -f2)
@@ -51,6 +52,13 @@ psql "$ADMIN_PG_URL" -q \
 
 ok "app.settings.supabase_url  = $INTERNAL_URL"
 ok "app.settings.service_role_key set"
+
+# Invite gate: default off locally. Flip with REQUIRE_INVITE=true npm run setup:local
+REQUIRE_INVITE="${REQUIRE_INVITE:-false}"
+psql "$ADMIN_PG_URL" -q \
+  -c "ALTER DATABASE postgres SET \"app.settings.require_invite\" = '${REQUIRE_INVITE}';" \
+  2>/dev/null
+ok "app.settings.require_invite = $REQUIRE_INVITE"
 
 # ── 3. Set admin email and bootstrap ─────────────────────────────────────────
 echo ""
