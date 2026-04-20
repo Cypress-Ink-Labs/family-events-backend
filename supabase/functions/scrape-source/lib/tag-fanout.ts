@@ -3,7 +3,8 @@ export async function tagImportedEvent(
   serviceRoleKey: string,
   eventId: string,
   title: string,
-  description: string
+  description: string,
+  sourceRunId?: string | null
 ) {
   try {
     await fetch(`${supabaseUrl}/functions/v1/tag-event`, {
@@ -14,6 +15,8 @@ export async function tagImportedEvent(
       },
       body: JSON.stringify({
         event_id: eventId,
+        source_run_id: sourceRunId ?? null,
+        trigger_type: "import",
         title,
         description,
       }),

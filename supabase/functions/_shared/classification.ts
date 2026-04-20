@@ -6,6 +6,13 @@ export interface TagRule {
   keywords: string[]
 }
 
+export interface ComputedTag {
+  slug: string
+  confidence: number
+  reason: string | null
+  matchedKeywords: string[]
+}
+
 export const TAG_RULES: TagRule[] = [
   {
     slug: "music",
@@ -165,20 +172,20 @@ export function clampConfidence(value: number): number {
 export function computeTags(
   title: string,
   description: string
-): Array<{ slug: string; confidence: number }> {
+): ComputedTag[] {
   const text = `${title} ${description}`.toLowerCase()
-  const results: Array<{ slug: string; confidence: number }> = []
+  const results: ComputedTag[] = []
 
   for (const rule of TAG_RULES) {
-    let hits = 0
-    for (const kw of rule.keywords) {
-      if (text.includes(kw)) {
-        hits++
-      }
-    }
-    if (hits > 0) {
-      const confidence = Math.min(0.5 + (hits / rule.keywords.length) * 0.5, 0.98)
-      results.push({ slug: rule.slug, confidence: Math.round(confidence * 100) / 100 })
+    const matchedKeywords = rule.keywords.filter((kw) => text.includes(kw))
+    if (matchedKeywords.length > 0) {
+      const confidence = Math.min(0.5 + (matchedKeywords.length / rule.keywords.length) * 0.5, 0.98)
+      results.push({
+        slug: rule.slug,
+        confidence: Math.round(confidence * 100) / 100,
+        reason: `Matched keyword rule hits: ${matchedKeywords.join(", ")}.`,
+        matchedKeywords,
+      })
     }
   }
 

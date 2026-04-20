@@ -1,70 +1,210 @@
+import { XMLParser } from "npm:fast-xml-parser@4.5.0"
 import { decodeHtml, extractPrice, parseIsoDate, stripHtml } from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import type { ParsedEvent } from "../lib/types.ts"
 
-function extractImages(rawContent: string, baseUrl: string): string[] {
-  const urls = new Set<string>()
+type XmlObject = Record<string, unknown>
 
-  const patterns = [
-    /<media:content[^>]+url=["']([^"']+)["'][^>]*\/?>/gi,
-    /<media:thumbnail[^>]+url=["']([^"']+)["'][^>]*\/?>/gi,
-    /<enclosure[^>]+url=["']([^"']+)["'][^>]+type=["']image\/[^"']+["'][^>]*\/?>/gi,
-    /<enclosure[^>]+type=["']image\/[^"']+["'][^>]+url=["']([^"']+)["'][^>]*\/?>/gi,
-    /<img[^>]+src=["']([^"']+)["'][^>]*\/?>/gi,
-  ]
+const xmlParser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: "",
+  trimValues: true,
+})
 
-  for (const pattern of patterns) {
-    for (const match of rawContent.matchAll(pattern)) {
-      try {
-        const resolved = new URL(match[1], baseUrl).toString()
-        if (validateExternalUrl(resolved).ok) {
-          urls.add(resolved)
-        }
-      } catch {
-        // skip invalid URLs
+function localName(tagName: string): string {
+  const lower = tagName.toLowerCase()
+  return lower.includes(":") ? lower.split(":").at(-1) ?? lower : lower
+}
+
+function asArray<T>(value: T | T[] | null | undefined): T[] {
+  if (value === null || value === undefined) {
+    return []
+  }
+  return Array.isArray(value) ? value : [value]
+}
+
+function textFromValue(value: unknown): string | null {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    const text = String(value).trim()
+    return text.length > 0 ? text : null
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const text = textFromValue(item)
+      if (text) {
+        return text
       }
     }
+    return null
+  }
+
+  if (value && typeof value === "object") {
+    const objectValue = value as XmlObject
+    return textFromValue(objectValue["#text"] ?? objectValue["$text"])
+  }
+
+  return null
+}
+
+function pickValue(node: XmlObject, keys: string[]): unknown {
+  const normalized = keys.map((key) => key.toLowerCase())
+  for (const key of normalized) {
+    if (key in node) {
+      return node[key]
+    }
+
+    for (const [entryKey, entryValue] of Object.entries(node)) {
+      if (localName(entryKey) === localName(key)) {
+        return entryValue
+      }
+    }
+  }
+  return null
+}
+
+function normalizeUrl(value: string | null | undefined, baseUrl: string): string | null {
+  if (!value) {
+    return null
+  }
+  try {
+    return new URL(value, baseUrl).toString()
+  } catch {
+    return null
+  }
+}
+
+function addValidatedImage(urls: Set<string>, value: string | null | undefined, baseUrl: string): void {
+  const resolved = normalizeUrl(value, baseUrl)
+  if (!resolved) {
+    return
+  }
+  if (validateExternalUrl(resolved).ok) {
+    urls.add(resolved)
+  }
+}
+
+function extractImages(item: XmlObject, baseUrl: string, descriptionHtml: string): string[] {
+  const urls = new Set<string>()
+
+  for (const [key, value] of Object.entries(item)) {
+    const lower = key.toLowerCase()
+    if (lower.startsWith("media:") && (localName(lower) === "content" || localName(lower) === "thumbnail")) {
+      for (const media of asArray(value)) {
+        if (media && typeof media === "object") {
+          addValidatedImage(urls, textFromValue((media as XmlObject).url), baseUrl)
+        }
+      }
+      continue
+    }
+
+    if (localName(lower) === "enclosure") {
+      for (const enclosure of asArray(value)) {
+        if (!enclosure || typeof enclosure !== "object") {
+          continue
+        }
+        const enclosureNode = enclosure as XmlObject
+        const type = textFromValue(enclosureNode.type)?.toLowerCase() ?? ""
+        if (type.startsWith("image/")) {
+          addValidatedImage(urls, textFromValue(enclosureNode.url), baseUrl)
+        }
+      }
+    }
+  }
+
+  for (const match of descriptionHtml.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)) {
+    addValidatedImage(urls, match[1], baseUrl)
   }
 
   return [...urls].slice(0, 5)
 }
 
+function collectEntries(parsedXml: XmlObject): XmlObject[] {
+  const entries: XmlObject[] = []
+
+  const rssItems = (parsedXml.rss as XmlObject | undefined)?.channel as XmlObject | undefined
+  entries.push(...asArray(rssItems?.item).filter((item): item is XmlObject => !!item && typeof item === "object"))
+
+  const atomFeed = parsedXml.feed as XmlObject | undefined
+  entries.push(...asArray(atomFeed?.entry).filter((item): item is XmlObject => !!item && typeof item === "object"))
+
+  if (entries.length > 0) {
+    return entries
+  }
+
+  function visit(node: unknown): void {
+    if (!node || typeof node !== "object") {
+      return
+    }
+    const objectNode = node as XmlObject
+    for (const [key, value] of Object.entries(objectNode)) {
+      const local = localName(key)
+      if (local === "item" || local === "entry") {
+        for (const candidate of asArray(value)) {
+          if (candidate && typeof candidate === "object") {
+            entries.push(candidate as XmlObject)
+          }
+        }
+      }
+      visit(value)
+    }
+  }
+
+  visit(parsedXml)
+  return entries
+}
+
+function extractSourceLink(item: XmlObject, sourceUrl: string): string | null {
+  const linkValue = pickValue(item, ["link"])
+  for (const link of asArray(linkValue)) {
+    if (typeof link === "string") {
+      return normalizeUrl(decodeHtml(link.trim()), sourceUrl)
+    }
+
+    if (link && typeof link === "object") {
+      const node = link as XmlObject
+      const href = textFromValue(node.href)
+      if (href) {
+        return normalizeUrl(decodeHtml(href), sourceUrl)
+      }
+      const text = textFromValue(node)
+      if (text) {
+        return normalizeUrl(decodeHtml(text), sourceUrl)
+      }
+    }
+  }
+
+  return sourceUrl
+}
+
 export function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
-  const itemMatches = [
-    ...xml.matchAll(/<item[\s\S]*?<\/item>/gi),
-    ...xml.matchAll(/<entry[\s\S]*?<\/entry>/gi),
-  ]
+  let parsed: XmlObject
+  try {
+    parsed = xmlParser.parse(xml) as XmlObject
+  } catch {
+    return []
+  }
+
+  const items = collectEntries(parsed)
   const results: ParsedEvent[] = []
 
-  for (const [rawItem] of itemMatches) {
-    const titleMatch =
-      rawItem.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/i) ??
-      rawItem.match(/<title>([\s\S]*?)<\/title>/i)
-    const title = titleMatch ? stripHtml(titleMatch[1]) : ""
+  for (const item of items) {
+    const title = stripHtml(textFromValue(pickValue(item, ["title"])) ?? "")
     if (!title) {
       continue
     }
 
-    const descriptionMatch =
-      rawItem.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/i) ??
-      rawItem.match(/<description>([\s\S]*?)<\/description>/i) ??
-      rawItem.match(/<summary>([\s\S]*?)<\/summary>/i)
-    const description = descriptionMatch ? stripHtml(descriptionMatch[1]) : ""
+    const rawDescription =
+      textFromValue(pickValue(item, ["description", "summary", "content:encoded", "content"])) ?? ""
+    const description = stripHtml(rawDescription)
 
-    const linkMatch =
-      rawItem.match(/<link>([\s\S]*?)<\/link>/i) ??
-      rawItem.match(/<link[^>]*href=["']([^"']+)["'][^>]*\/?>/i)
-    const sourceLink = linkMatch ? decodeHtml(linkMatch[1].trim()) : sourceUrl
-    const normalizedSourceLink = sourceLink ? new URL(sourceLink, sourceUrl).toString() : null
+    const dateValue = textFromValue(pickValue(item, ["pubDate", "updated", "published", "dc:date"]))
+    const startDatetime = parseIsoDate(dateValue)
+    if (!startDatetime) {
+      continue
+    }
 
-    const dateMatch =
-      rawItem.match(/<pubDate>([\s\S]*?)<\/pubDate>/i) ??
-      rawItem.match(/<updated>([\s\S]*?)<\/updated>/i) ??
-      rawItem.match(/<dc:date>([\s\S]*?)<\/dc:date>/i)
-    const startDatetime = parseIsoDate(dateMatch?.[1]?.trim()) ?? new Date().toISOString()
-
-    const images = extractImages(rawItem, sourceUrl)
-    const rawDescription = descriptionMatch?.[1] ?? ""
+    const images = extractImages(item, sourceUrl, rawDescription)
     const priceInfo = extractPrice(rawDescription)
 
     results.push({
@@ -74,7 +214,7 @@ export function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
       endDatetime: null,
       venueName: null,
       address: null,
-      sourceUrl: normalizedSourceLink,
+      sourceUrl: extractSourceLink(item, sourceUrl),
       imageUrl: images[0] ?? null,
       images,
       price: priceInfo.price,

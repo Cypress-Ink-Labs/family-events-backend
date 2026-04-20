@@ -17,15 +17,34 @@ const corsHeaders = {
 }
 
 type TagProvider = "openai" | "keyword-fallback"
+type ClassificationStatus = "success" | "fallback" | "error"
+type TriggerType = "import" | "reclassify" | "manual-review"
+
+interface ClassificationTag {
+  slug: string
+  confidence: number
+  reason: string | null
+  matchedKeywords?: string[]
+}
 
 interface ClassificationResult {
-  tags: Array<{ slug: string; confidence: number }>
+  tags: ClassificationTag[]
   ageMin: number | null
   ageMax: number | null
   price: number | null
   isFree: boolean
   venueName: string | null
   provider: TagProvider
+  reasoningSummary: string | null
+  status: ClassificationStatus
+  fallbackReason: string | null
+  model: string | null
+}
+
+function buildKeywordFallbackSummary(openAiConfigured: boolean): string {
+  return openAiConfigured
+    ? "Keyword fallback classified this event because OpenAI was unavailable. Matching keywords were used to assign tags."
+    : "Keyword fallback classified this event because no OpenAI API key was configured. Matching keywords were used to assign tags."
 }
 
 async function classifyWithOpenAI(
@@ -35,12 +54,13 @@ async function classifyWithOpenAI(
   description: string,
   availableTags: Array<{ slug: string; name: string }>
 ): Promise<{
-  tags: Array<{ slug: string; confidence: number }>
+  tags: ClassificationTag[]
   ageMin: number | null
   ageMax: number | null
   price: number | null
   isFree: boolean
   venueName: string | null
+  reasoningSummary: string | null
 }> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -56,7 +76,7 @@ async function classifyWithOpenAI(
         {
           role: "system",
           content:
-            'You classify and enrich family event data. Respond with JSON only: { "tags": [{ "slug": string, "confidence": number }], "age_min": number|null, "age_max": number|null, "price": number|null, "is_free": boolean, "venue_name": string|null }',
+            'You classify and enrich family event data. Respond with JSON only: { "tags": [{ "slug": string, "confidence": number, "reason": string|null }], "age_min": number|null, "age_max": number|null, "price": number|null, "is_free": boolean, "venue_name": string|null, "reasoning_summary": string|null }',
         },
         {
           role: "user",
@@ -70,6 +90,8 @@ async function classifyWithOpenAI(
               "Extract age_min and age_max if present in text. Use null when unknown.",
               'Extract price if mentioned (e.g. "$15"). If "free"/"no cost"/"complimentary", set is_free=true and price=null. If a dollar amount is found, set is_free=false and price to the number. If unknown, set is_free=false and price=null.',
               'Extract venue_name if mentioned (e.g. "at Central Library", "Location: City Park"). Use null when unknown.',
+              "Provide a brief reasoning_summary explaining how the event was classified for admin review.",
+              "Each tag may include a short reason string quoting or paraphrasing the evidence.",
             ],
           }),
         },
@@ -91,11 +113,12 @@ async function classifyWithOpenAI(
   const parsed = JSON.parse(rawContent)
   const tags = Array.isArray(parsed?.tags)
     ? parsed.tags
-        .map((tag: { slug?: string; confidence?: number }) => ({
+        .map((tag: { slug?: string; confidence?: number; reason?: string | null }) => ({
           slug: String(tag?.slug ?? ""),
           confidence: clampConfidence(Number(tag?.confidence ?? 0.5)),
+          reason: typeof tag?.reason === "string" ? tag.reason : null,
         }))
-        .filter((tag: { slug: string; confidence: number }) => tag.slug)
+        .filter((tag: { slug: string; confidence: number; reason: string | null }) => tag.slug)
     : []
 
   const ageMin = typeof parsed?.age_min === "number" ? parsed.age_min : null
@@ -103,8 +126,10 @@ async function classifyWithOpenAI(
   const price = typeof parsed?.price === "number" ? parsed.price : null
   const isFree = parsed?.is_free === true
   const venueName = typeof parsed?.venue_name === "string" ? parsed.venue_name : null
+  const reasoningSummary =
+    typeof parsed?.reasoning_summary === "string" ? parsed.reasoning_summary : null
 
-  return { tags, ageMin, ageMax, price, isFree, venueName }
+  return { tags, ageMin, ageMax, price, isFree, venueName, reasoningSummary }
 }
 
 Deno.serve(async (req: Request) => {
@@ -114,7 +139,6 @@ Deno.serve(async (req: Request) => {
 
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 
-  // Auth: service role only. This function is internal (called from scrape-source).
   const auth = requireServiceRole(req, serviceRoleKey)
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.message }), {
@@ -127,7 +151,13 @@ Deno.serve(async (req: Request) => {
     const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", serviceRoleKey)
 
     const body = await req.json()
-    const { event_id } = body
+    const eventId = typeof body?.event_id === "string" ? body.event_id : null
+    const sourceRunId = typeof body?.source_run_id === "string" ? body.source_run_id : null
+    const triggerType: TriggerType =
+      body?.trigger_type === "reclassify" || body?.trigger_type === "manual-review"
+        ? body.trigger_type
+        : "import"
+    const traceStartedAt = Date.now()
     let title = typeof body?.title === "string" ? body.title.trim() : ""
     let description = typeof body?.description === "string" ? body.description : ""
 
@@ -143,12 +173,16 @@ Deno.serve(async (req: Request) => {
       city_id: string | null
     } | null = null
 
-    if (event_id) {
-      const { data: eventRow } = await supabase
+    if (eventId) {
+      const { data: eventRow, error: eventError } = await supabase
         .from("events")
         .select("title, description, price, is_free, venue_name, address, latitude, longitude, city_id")
-        .eq("id", event_id)
+        .eq("id", eventId)
         .maybeSingle()
+
+      if (eventError) {
+        throw eventError
+      }
 
       if (eventRow) {
         currentEvent = eventRow
@@ -186,6 +220,7 @@ Deno.serve(async (req: Request) => {
           description,
           availableTags ?? []
         )
+
         classification = {
           tags: aiResult.tags,
           ageMin: aiResult.ageMin,
@@ -194,39 +229,54 @@ Deno.serve(async (req: Request) => {
           isFree: aiResult.isFree,
           venueName: aiResult.venueName,
           provider: "openai",
+          reasoningSummary: aiResult.reasoningSummary,
+          status: "success",
+          fallbackReason: null,
+          model: openAiModel,
         }
       } catch (openAiError) {
-        // Surface the failure — admin needs to know if OpenAI is down/unauthorized,
-        // otherwise every event silently drops to lower-quality keyword tagging.
         console.error("OpenAI classification failed, falling back to keyword matching", {
-          event_id: event_id ?? null,
+          event_id: eventId,
           error: openAiError instanceof Error ? openAiError.message : String(openAiError),
         })
+
         const fallbackAge = extractAgeRangeFromText(title, description)
         const fallbackPrice = extractPriceFromText(title, description)
         const fallbackVenue = extractVenueFromText(title, description)
+        const fallbackTags = computeTags(title, description)
+
         classification = {
-          tags: computeTags(title, description ?? ""),
+          tags: fallbackTags,
           ageMin: fallbackAge.ageMin,
           ageMax: fallbackAge.ageMax,
           price: fallbackPrice.price,
           isFree: fallbackPrice.isFree,
           venueName: fallbackVenue.venueName,
           provider: "keyword-fallback",
+          reasoningSummary: buildKeywordFallbackSummary(true),
+          status: "fallback",
+          fallbackReason: openAiError instanceof Error ? openAiError.message : String(openAiError),
+          model: openAiModel,
         }
       }
     } else {
       const fallbackAge = extractAgeRangeFromText(title, description)
       const fallbackPrice = extractPriceFromText(title, description)
       const fallbackVenue = extractVenueFromText(title, description)
+      const fallbackTags = computeTags(title, description)
+
       classification = {
-        tags: computeTags(title, description ?? ""),
+        tags: fallbackTags,
         ageMin: fallbackAge.ageMin,
         ageMax: fallbackAge.ageMax,
         price: fallbackPrice.price,
         isFree: fallbackPrice.isFree,
         venueName: fallbackVenue.venueName,
         provider: "keyword-fallback",
+        reasoningSummary: buildKeywordFallbackSummary(false),
+        status: "fallback",
+        fallbackReason: "OPENAI_API_KEY is not configured",
+        model: openAiModel,
       }
     }
 
@@ -234,29 +284,71 @@ Deno.serve(async (req: Request) => {
       .filter((tag) => (availableTags ?? []).some((candidate) => candidate.slug === tag.slug))
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, 6)
+
     const topConfidence =
       normalizedTags.length > 0
         ? normalizedTags.reduce((total, tag) => total + tag.confidence, 0) / normalizedTags.length
         : 0
 
-    if (event_id) {
-      const tagMap = new Map(
-        (availableTags ?? []).map((tag: { id: string; slug: string }) => [tag.slug, tag.id])
-      )
+    if (eventId) {
+      const { error: traceInsertError } = await supabase.from("event_ai_traces").insert({
+        event_id: eventId,
+        source_run_id: sourceRunId,
+        trigger_type: triggerType,
+        provider: classification.provider,
+        model: classification.model,
+        status: classification.status,
+        input_title: title,
+        input_description: description || null,
+        available_tag_slugs: (availableTags ?? []).map((tag) => tag.slug),
+        predicted_tags: normalizedTags.map((tag) => ({
+          slug: tag.slug,
+          confidence: tag.confidence,
+          reason: tag.reason,
+          matched_keywords: tag.matchedKeywords ?? [],
+        })),
+        predicted_fields: {
+          age_min: classification.ageMin,
+          age_max: classification.ageMax,
+          price: classification.price,
+          is_free: classification.isFree,
+          venue_name: classification.venueName,
+        },
+        reasoning_summary: classification.reasoningSummary,
+        fallback_reason: classification.fallbackReason,
+        processing_ms: Date.now() - traceStartedAt,
+      })
 
-      const { data: manualOverrides } = await supabase
+      if (traceInsertError) {
+        console.error("Failed to persist AI trace", {
+          event_id: eventId,
+          error: traceInsertError.message,
+        })
+      }
+
+      const tagMap = new Map((availableTags ?? []).map((tag) => [tag.slug, tag.id]))
+
+      const { data: manualOverrides, error: manualOverridesError } = await supabase
         .from("event_tags")
         .select("tag_id")
-        .eq("event_id", event_id)
+        .eq("event_id", eventId)
         .eq("is_manual_override", true)
+
+      if (manualOverridesError) {
+        throw manualOverridesError
+      }
 
       const manualOverrideTagIds = new Set((manualOverrides ?? []).map((row) => row.tag_id))
 
-      await supabase
+      const { error: deleteError } = await supabase
         .from("event_tags")
         .delete()
-        .eq("event_id", event_id)
+        .eq("event_id", eventId)
         .eq("is_manual_override", false)
+
+      if (deleteError) {
+        throw deleteError
+      }
 
       const rows = normalizedTags
         .filter((tag) => {
@@ -264,14 +356,20 @@ Deno.serve(async (req: Request) => {
           return tagId && !manualOverrideTagIds.has(tagId)
         })
         .map((tag) => ({
-          event_id,
+          event_id: eventId,
           tag_id: tagMap.get(tag.slug)!,
           confidence: tag.confidence,
           is_manual_override: false,
         }))
 
       if (rows.length > 0) {
-        await supabase.from("event_tags").upsert(rows, { onConflict: "event_id,tag_id" })
+        const { error: upsertError } = await supabase
+          .from("event_tags")
+          .upsert(rows, { onConflict: "event_id,tag_id" })
+
+        if (upsertError) {
+          throw upsertError
+        }
       }
 
       const updatePayload: Record<string, unknown> = {
@@ -280,7 +378,7 @@ Deno.serve(async (req: Request) => {
         age_min: classification.ageMin,
         age_max: classification.ageMax,
       }
-      // Only fill gaps — don't overwrite scraper-extracted values
+
       if (classification.price !== null && currentEvent?.price == null) {
         updatePayload.price = classification.price
       }
@@ -291,21 +389,23 @@ Deno.serve(async (req: Request) => {
         updatePayload.venue_name = classification.venueName
       }
 
-      // Geocode if event has no coords yet. Prefer address → venue → city fallback.
-      const needsGeocode =
-        currentEvent?.latitude == null || currentEvent?.longitude == null
+      const needsGeocode = currentEvent?.latitude == null || currentEvent?.longitude == null
       if (needsGeocode) {
-        const resolvedVenue =
-          currentEvent?.venue_name ?? (classification.venueName as string | null)
+        const resolvedVenue = currentEvent?.venue_name ?? classification.venueName
         const resolvedAddress = currentEvent?.address ?? null
 
         let city: { name: string; state: string | null; latitude: number | null; longitude: number | null } | null = null
         if (currentEvent?.city_id) {
-          const { data: cityRow } = await supabase
+          const { data: cityRow, error: cityError } = await supabase
             .from("cities")
             .select("name, state, latitude, longitude")
             .eq("id", currentEvent.city_id)
             .maybeSingle()
+
+          if (cityError) {
+            throw cityError
+          }
+
           city = cityRow as typeof city
         }
 
@@ -319,10 +419,11 @@ Deno.serve(async (req: Request) => {
         let geocoded: { latitude: number; longitude: number } | null = null
         if (query) {
           const hit = await geocodeViaNominatim(query)
-          if (hit) geocoded = { latitude: hit.latitude, longitude: hit.longitude }
+          if (hit) {
+            geocoded = { latitude: hit.latitude, longitude: hit.longitude }
+          }
         }
 
-        // Fallback: use city center so the pin still appears on the map.
         if (!geocoded && city?.latitude != null && city?.longitude != null) {
           geocoded = { latitude: city.latitude, longitude: city.longitude }
         }
@@ -333,7 +434,14 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      await supabase.from("events").update(updatePayload).eq("id", event_id)
+      const { error: eventUpdateError } = await supabase
+        .from("events")
+        .update(updatePayload)
+        .eq("id", eventId)
+
+      if (eventUpdateError) {
+        throw eventUpdateError
+      }
     }
 
     return new Response(
@@ -345,6 +453,10 @@ Deno.serve(async (req: Request) => {
         price: classification.price,
         is_free: classification.isFree,
         venue_name: classification.venueName,
+        reasoning_summary: classification.reasoningSummary,
+        fallback_reason: classification.fallbackReason,
+        status: classification.status,
+        model: classification.model,
         overall_confidence: topConfidence,
         processed: true,
       }),
@@ -354,6 +466,7 @@ Deno.serve(async (req: Request) => {
     console.error("tag-event handler failed", {
       error: err instanceof Error ? err.message : String(err),
     })
+
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

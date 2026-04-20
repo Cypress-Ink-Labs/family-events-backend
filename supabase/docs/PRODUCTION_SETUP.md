@@ -51,6 +51,10 @@ There is no admin user in production until you create one.
    yet (in which case repeat step 3 after they do). Idempotent — running it
    after the user is already admin returns `0` and is safe.
 
+For automated verification users, use the idempotent SQL helper in
+`supabase/snippets/provision_remote_admin_test_user.sql` after the user signs
+up.
+
 ## 4. Deploy edge functions
 
 ```bash

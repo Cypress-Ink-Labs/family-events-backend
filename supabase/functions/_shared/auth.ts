@@ -4,6 +4,20 @@ export type AuthResult =
   | { ok: true; source: "service_role" | "admin"; userId: string | null }
   | { ok: false; status: 401 | 403; message: string }
 
+type UserClient = {
+  auth: {
+    getUser: () => Promise<{
+      data: { user: { id: string } | null }
+      error: unknown
+    }>
+  }
+}
+type UserClientFactory = (
+  supabaseUrl: string,
+  anonKey: string,
+  options: Parameters<typeof createClient>[2]
+) => UserClient
+
 function extractBearer(req: Request): string | null {
   const header = req.headers.get("Authorization") ?? req.headers.get("authorization")
   if (!header) return null
@@ -23,6 +37,41 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0
 }
 
+function looksLikeLegacyJwt(value: string): boolean {
+  return value.split(".").length === 3
+}
+
+function looksLikeSecretKey(value: string): boolean {
+  return value.startsWith("sb_secret_")
+}
+
+function isServiceRoleToken(token: string, serviceRoleKey: string): boolean {
+  const normalizedToken = token.trim()
+  const normalizedServiceRoleKey = serviceRoleKey.trim()
+
+  if (!normalizedServiceRoleKey || !normalizedToken) {
+    return false
+  }
+
+  // Keep format checks explicit so both legacy JWT and new sb_secret keys are
+  // intentionally accepted through the same timing-safe compare branch.
+  if (looksLikeSecretKey(normalizedServiceRoleKey)) {
+    return (
+      looksLikeSecretKey(normalizedToken) &&
+      timingSafeEqual(normalizedToken, normalizedServiceRoleKey)
+    )
+  }
+
+  if (looksLikeLegacyJwt(normalizedServiceRoleKey)) {
+    return (
+      looksLikeLegacyJwt(normalizedToken) &&
+      timingSafeEqual(normalizedToken, normalizedServiceRoleKey)
+    )
+  }
+
+  return timingSafeEqual(normalizedToken, normalizedServiceRoleKey)
+}
+
 /**
  * Verify that the caller is either:
  *   1. Using the service role key (internal / cron calls), OR
@@ -37,19 +86,20 @@ export async function requireAdminOrService(
   serviceClient: SupabaseClient,
   supabaseUrl: string,
   serviceRoleKey: string,
-  anonKey: string
+  anonKey: string,
+  userClientFactory: UserClientFactory = createClient
 ): Promise<AuthResult> {
   const token = extractBearer(req)
   if (!token) {
     return { ok: false, status: 401, message: "missing authorization header" }
   }
 
-  if (timingSafeEqual(token, serviceRoleKey)) {
+  if (isServiceRoleToken(token, serviceRoleKey)) {
     return { ok: true, source: "service_role", userId: null }
   }
 
   // User-facing call: verify JWT and check role
-  const userClient = createClient(supabaseUrl, anonKey, {
+  const userClient = userClientFactory(supabaseUrl, anonKey, {
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
   })
@@ -89,7 +139,7 @@ export function requireServiceRole(req: Request, serviceRoleKey: string): AuthRe
   if (!token) {
     return { ok: false, status: 401, message: "missing authorization header" }
   }
-  if (!timingSafeEqual(token, serviceRoleKey)) {
+  if (!isServiceRoleToken(token, serviceRoleKey)) {
     return { ok: false, status: 403, message: "service role required" }
   }
   return { ok: true, source: "service_role", userId: null }

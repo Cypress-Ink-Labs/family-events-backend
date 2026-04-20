@@ -61,6 +61,7 @@ export async function processSource(
   if (runInsertError || !runRow) {
     throw runInsertError ?? new Error("Failed to create source run record.")
   }
+  const runId = runRow.id
 
   let status: RunStatus = "success"
   let eventsFound = 0
@@ -78,7 +79,7 @@ export async function processSource(
         events_imported: eventsImported,
         events_skipped: eventsSkipped,
       })
-      .eq("id", runRow.id)
+      .eq("id", runId)
   }
 
   try {
@@ -148,7 +149,8 @@ export async function processSource(
         serviceRoleKey,
         upsertedEvent.id,
         parsed.title,
-        parsed.description
+        parsed.description,
+        runRow.id
       )
 
       // Flush progress every N events so the UI shows live counts.
@@ -181,13 +183,13 @@ export async function processSource(
       events_skipped: eventsSkipped,
       error_log: errorMessage,
     })
-    .eq("id", runRow.id)
+    .eq("id", runId)
 
   await supabase
     .from("event_sources")
     .update({
       last_scraped_at: new Date().toISOString(),
-      last_status: status === "running" ? "pending" : status,
+      last_status: status,
       error_count: status === "error" ? source.error_count + 1 : 0,
     })
     .eq("id", source.id)

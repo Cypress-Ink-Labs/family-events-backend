@@ -53,3 +53,9 @@ port    = 55327
 enabled        = true
 policy         = "oneshot"
 inspector_port = 55326
+
+[functions.scrape-source]
+verify_jwt = false
+
+[functions.tag-event]
+verify_jwt = false
