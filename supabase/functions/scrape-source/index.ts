@@ -11,6 +11,9 @@ import {
   stripHtml,
   unescapeIcalText,
 } from "../_shared/parsing.ts"
+import { validateExternalUrl } from "../_shared/url-validation.ts"
+
+const SOURCE_FETCH_TIMEOUT_MS = 10_000
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,7 +75,9 @@ function extractImages(rawContent: string, baseUrl: string): string[] {
     for (const match of rawContent.matchAll(pattern)) {
       try {
         const resolved = new URL(match[1], baseUrl).toString()
-        urls.add(resolved)
+        if (validateExternalUrl(resolved).ok) {
+          urls.add(resolved)
+        }
       } catch {
         // skip invalid URLs
       }
@@ -171,7 +176,10 @@ function parseIcalFeed(icalContent: string): ParsedEvent[] {
     const icalImages: string[] = []
     for (const m of attachMatches) {
       const val = m[1].trim()
-      if (/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)/i.test(val)) {
+      if (
+        /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)/i.test(val) &&
+        validateExternalUrl(val).ok
+      ) {
         icalImages.push(val)
       }
     }
@@ -242,7 +250,10 @@ function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
       const src = imgEl.getAttribute("src")
       if (src) {
         try {
-          webImages.push(new URL(src, sourceUrl).toString())
+          const resolved = new URL(src, sourceUrl).toString()
+          if (validateExternalUrl(resolved).ok) {
+            webImages.push(resolved)
+          }
         } catch {
           // skip invalid URLs
         }
@@ -310,11 +321,17 @@ async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]>
     return []
   }
 
+  const validation = validateExternalUrl(source.url)
+  if (!validation.ok) {
+    throw new Error(`Source URL rejected by validator: ${validation.reason}`)
+  }
+
   const response = await fetch(source.url, {
     headers: {
       "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
       Accept: "text/html,application/xml,text/xml,*/*",
     },
+    signal: AbortSignal.timeout(SOURCE_FETCH_TIMEOUT_MS),
   })
 
   if (!response.ok) {
@@ -539,6 +556,12 @@ async function processSource(
   } catch (error) {
     status = "error"
     errorMessage = error instanceof Error ? error.message : "Unknown scrape failure."
+    console.error("scrape-source fetch failed", {
+      source_id: source.id,
+      source_name: source.name,
+      source_type: source.source_type,
+      error: errorMessage,
+    })
   }
 
   await supabase
