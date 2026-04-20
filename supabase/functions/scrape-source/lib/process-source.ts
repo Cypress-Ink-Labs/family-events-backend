@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
+import { captureEdgeException } from "../../_shared/sentry.ts"
+import { errorContext, logEdgeEvent } from "../../_shared/logger.ts"
 import { dedupKey } from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import { parseIcalFeed } from "../parsers/ical.ts"
@@ -138,6 +140,28 @@ export async function processSource(
 
       const { data: upsertedEvent, error: upsertError } = await operation
       if (upsertError || !upsertedEvent) {
+        const error = upsertError ?? new Error("Event upsert returned no row.")
+        await captureEdgeException(
+          error,
+          errorContext(error, {
+            function: "scrape-source",
+            source_id: source.id,
+            source_name: source.name,
+            run_id: runId,
+            event_title: parsed.title,
+          })
+        )
+        logEdgeEvent(
+          "error",
+          "scrape-source event import failed",
+          errorContext(error, {
+            function: "scrape-source",
+            source_id: source.id,
+            source_name: source.name,
+            run_id: runId,
+            event_title: parsed.title,
+          })
+        )
         eventsSkipped += 1
         continue
       }
@@ -165,12 +189,27 @@ export async function processSource(
   } catch (error) {
     status = "error"
     errorMessage = error instanceof Error ? error.message : "Unknown scrape failure."
-    console.error("scrape-source fetch failed", {
-      source_id: source.id,
-      source_name: source.name,
-      source_type: source.source_type,
-      error: errorMessage,
-    })
+    await captureEdgeException(
+      error,
+      errorContext(error, {
+        function: "scrape-source",
+        source_id: source.id,
+        source_name: source.name,
+        source_type: source.source_type,
+        run_id: runId,
+      })
+    )
+    logEdgeEvent(
+      "error",
+      "scrape-source fetch failed",
+      errorContext(error, {
+        function: "scrape-source",
+        source_id: source.id,
+        source_name: source.name,
+        source_type: source.source_type,
+        run_id: runId,
+      })
+    )
   }
 
   await supabase

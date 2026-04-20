@@ -1,6 +1,8 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
 import { requireAdminOrService } from "../_shared/auth.ts"
+import { captureEdgeException } from "../_shared/sentry.ts"
+import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
 import { processSource } from "./lib/process-source.ts"
 import { isSourceDue } from "./lib/schedule.ts"
 import type { EventSourceRow, SourceResult } from "./lib/types.ts"
@@ -20,6 +22,7 @@ Deno.serve(async (req: Request) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   const supabase = createClient(supabaseUrl, serviceRoleKey)
+  let requestedSourceId: string | null = null
 
   // Auth: accept service role (cron) or admin user JWT. Reject everything else.
   const auth = await requireAdminOrService(req, supabase, supabaseUrl, serviceRoleKey, anonKey)
@@ -32,7 +35,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {}
-    const requestedSourceId = typeof body?.source_id === "string" ? body.source_id : null
+    requestedSourceId = typeof body?.source_id === "string" ? body.source_id : null
 
     let sourceQuery = supabase.from("event_sources").select("*").eq("is_active", true)
     if (requestedSourceId) {
@@ -67,6 +70,22 @@ Deno.serve(async (req: Request) => {
       }
     )
   } catch (error) {
+    await captureEdgeException(
+      error,
+      errorContext(error, {
+        function: "scrape-source",
+        source_id: requestedSourceId,
+      })
+    )
+    logEdgeEvent(
+      "error",
+      "scrape-source handler failed",
+      errorContext(error, {
+        function: "scrape-source",
+        source_id: requestedSourceId,
+      })
+    )
+
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : "Unexpected scrape failure.",
