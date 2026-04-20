@@ -227,6 +227,85 @@ BEGIN
     RAISE EXCEPTION 'CITY_FILTER_FAIL: p_city_id=city_b returned %, want 1', n;
   END IF;
   RAISE NOTICE 'CITY_FILTER_OK: p_city_id scoping works.';
+
+  -- p_event_ids: passing two explicit IDs returns exactly those two rows,
+  -- independent of city/status/limit/offset. ev_draft is deliberately
+  -- included in the id array to verify the by-ids path bypasses the default
+  -- status='published' filter (matches event-detail / my-events expectations).
+  SELECT count(*) INTO n FROM public.events_enriched(
+    p_city_id := NULL,
+    p_status  := NULL,
+    p_limit   := NULL,
+    p_offset  := NULL,
+    p_user_id := NULL,
+    p_event_ids := ARRAY[ev_rated, ev_zero]
+  );
+  IF n <> 2 THEN
+    RAISE EXCEPTION 'EVENT_IDS_COUNT_FAIL: p_event_ids=[rated,zero] returned %, want 2', n;
+  END IF;
+
+  -- Verify the two IDs returned are exactly the ones we asked for.
+  IF NOT EXISTS (
+    SELECT 1 FROM public.events_enriched(p_event_ids := ARRAY[ev_rated]) WHERE id = ev_rated
+  ) THEN
+    RAISE EXCEPTION 'EVENT_IDS_IDENTITY_FAIL: ev_rated not returned when requested by id';
+  END IF;
+
+  -- ev_draft via p_event_ids: must come back even though default p_status filter
+  -- would hide it. Confirms p_event_ids overrides p_status.
+  SELECT count(*) INTO n FROM public.events_enriched(
+    p_event_ids := ARRAY[(SELECT (v)::uuid FROM _fx WHERE k='ev_draft')],
+    p_user_id := NULL
+  );
+  IF n <> 1 THEN
+    RAISE EXCEPTION 'EVENT_IDS_OVERRIDE_FAIL: ev_draft via p_event_ids returned %, want 1', n;
+  END IF;
+  RAISE NOTICE 'EVENT_IDS_OK: p_event_ids returns exact rows and overrides status/city/limit.';
+
+  -- p_date_from: ev_rated starts at +1d, ev_zero at +2d, ev_other at +3d.
+  -- A lower bound of now() + 2.5d should exclude ev_rated AND ev_zero,
+  -- leaving only ev_other.
+  SELECT count(*) INTO n FROM public.events_enriched(
+    p_user_id := NULL,
+    p_date_from := now() + interval '2 days 12 hours'
+  )
+  WHERE id IN (ev_rated, ev_zero, ev_other);
+  IF n <> 1 THEN
+    RAISE EXCEPTION 'DATE_FROM_FAIL: p_date_from cutoff returned %, want 1 (ev_other)', n;
+  END IF;
+
+  -- Also verify ev_rated (earliest) is explicitly gone.
+  IF EXISTS (
+    SELECT 1 FROM public.events_enriched(
+      p_user_id := NULL,
+      p_date_from := now() + interval '2 days 12 hours'
+    ) WHERE id = ev_rated
+  ) THEN
+    RAISE EXCEPTION 'DATE_FROM_LOWER_BOUND_FAIL: ev_rated not excluded by lower bound';
+  END IF;
+  RAISE NOTICE 'DATE_FROM_OK: p_date_from excludes events with start_datetime < p_date_from.';
+
+  -- p_date_to: upper bound of now() + 1.5d should keep only ev_rated (+1d)
+  -- and exclude ev_zero (+2d), ev_other (+3d).
+  SELECT count(*) INTO n FROM public.events_enriched(
+    p_user_id := NULL,
+    p_date_to := now() + interval '1 day 12 hours'
+  )
+  WHERE id IN (ev_rated, ev_zero, ev_other);
+  IF n <> 1 THEN
+    RAISE EXCEPTION 'DATE_TO_FAIL: p_date_to cutoff returned %, want 1 (ev_rated)', n;
+  END IF;
+
+  -- Also verify ev_other (latest) is explicitly gone.
+  IF EXISTS (
+    SELECT 1 FROM public.events_enriched(
+      p_user_id := NULL,
+      p_date_to := now() + interval '1 day 12 hours'
+    ) WHERE id = ev_other
+  ) THEN
+    RAISE EXCEPTION 'DATE_TO_UPPER_BOUND_FAIL: ev_other not excluded by upper bound';
+  END IF;
+  RAISE NOTICE 'DATE_TO_OK: p_date_to excludes events with start_datetime > p_date_to.';
 END $$;
 
 -- Authenticated path: pass the real uid as p_user_id → is_favorited/is_in_calendar reflect user rows.
