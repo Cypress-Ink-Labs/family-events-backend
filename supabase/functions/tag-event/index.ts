@@ -1,6 +1,8 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
 import { requireServiceRole } from "../_shared/auth.ts"
+import { captureEdgeException } from "../_shared/sentry.ts"
+import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
 import {
   clampConfidence,
   computeTags,
@@ -235,10 +237,29 @@ Deno.serve(async (req: Request) => {
           model: openAiModel,
         }
       } catch (openAiError) {
-        console.error("OpenAI classification failed, falling back to keyword matching", {
-          event_id: eventId,
-          error: openAiError instanceof Error ? openAiError.message : String(openAiError),
-        })
+        await captureEdgeException(
+          openAiError,
+          errorContext(openAiError, {
+            function: "tag-event",
+            event_id: eventId,
+            source_run_id: sourceRunId,
+            trigger_type: triggerType,
+            provider: "openai",
+            status: "fallback",
+          })
+        )
+        logEdgeEvent(
+          "warn",
+          "OpenAI classification failed, falling back to keyword matching",
+          errorContext(openAiError, {
+            function: "tag-event",
+            event_id: eventId,
+            source_run_id: sourceRunId,
+            trigger_type: triggerType,
+            provider: "openai",
+            status: "fallback",
+          })
+        )
 
         const fallbackAge = extractAgeRangeFromText(title, description)
         const fallbackPrice = extractPriceFromText(title, description)
@@ -320,10 +341,25 @@ Deno.serve(async (req: Request) => {
       })
 
       if (traceInsertError) {
-        console.error("Failed to persist AI trace", {
-          event_id: eventId,
-          error: traceInsertError.message,
-        })
+        await captureEdgeException(
+          traceInsertError,
+          errorContext(traceInsertError, {
+            function: "tag-event",
+            event_id: eventId,
+            source_run_id: sourceRunId,
+            trigger_type: triggerType,
+          })
+        )
+        logEdgeEvent(
+          "error",
+          "Failed to persist AI trace",
+          errorContext(traceInsertError, {
+            function: "tag-event",
+            event_id: eventId,
+            source_run_id: sourceRunId,
+            trigger_type: triggerType,
+          })
+        )
       }
 
       const tagMap = new Map((availableTags ?? []).map((tag) => [tag.slug, tag.id]))
@@ -394,7 +430,14 @@ Deno.serve(async (req: Request) => {
         const resolvedVenue = currentEvent?.venue_name ?? classification.venueName
         const resolvedAddress = currentEvent?.address ?? null
 
-        let city: { name: string; state: string | null; latitude: number | null; longitude: number | null } | null = null
+        type CityLookup = {
+          name: string
+          state: string | null
+          latitude: number | null
+          longitude: number | null
+        }
+
+        let city: CityLookup | null = null
         if (currentEvent?.city_id) {
           const { data: cityRow, error: cityError } = await supabase
             .from("cities")
@@ -406,7 +449,7 @@ Deno.serve(async (req: Request) => {
             throw cityError
           }
 
-          city = cityRow as typeof city
+          city = cityRow as CityLookup | null
         }
 
         const query = buildGeocodeQuery({
@@ -463,9 +506,21 @@ Deno.serve(async (req: Request) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   } catch (err) {
-    console.error("tag-event handler failed", {
-      error: err instanceof Error ? err.message : String(err),
-    })
+    await captureEdgeException(
+      err,
+      errorContext(err, {
+        function: "tag-event",
+        event_id: null,
+      })
+    )
+    logEdgeEvent(
+      "error",
+      "tag-event handler failed",
+      errorContext(err, {
+        function: "tag-event",
+        event_id: null,
+      })
+    )
 
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,

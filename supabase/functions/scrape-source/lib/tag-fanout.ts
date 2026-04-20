@@ -1,3 +1,6 @@
+import { captureEdgeException } from "../../_shared/sentry.ts"
+import { errorContext, logEdgeEvent } from "../../_shared/logger.ts"
+
 export async function tagImportedEvent(
   supabaseUrl: string,
   serviceRoleKey: string,
@@ -7,7 +10,7 @@ export async function tagImportedEvent(
   sourceRunId?: string | null
 ) {
   try {
-    await fetch(`${supabaseUrl}/functions/v1/tag-event`, {
+    const response = await fetch(`${supabaseUrl}/functions/v1/tag-event`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,7 +24,29 @@ export async function tagImportedEvent(
         description,
       }),
     })
+
+    if (!response.ok) {
+      throw new Error(`tag-event invocation failed (${response.status})`)
+    }
   } catch (err) {
-    console.error("tag-event invocation failed", { eventId, err: String(err) })
+    await captureEdgeException(
+      err,
+      errorContext(err, {
+        function: "scrape-source",
+        downstream_function: "tag-event",
+        event_id: eventId,
+        source_run_id: sourceRunId ?? null,
+      })
+    )
+    logEdgeEvent(
+      "error",
+      "tag-event invocation failed",
+      errorContext(err, {
+        function: "scrape-source",
+        downstream_function: "tag-event",
+        event_id: eventId,
+        source_run_id: sourceRunId ?? null,
+      })
+    )
   }
 }
