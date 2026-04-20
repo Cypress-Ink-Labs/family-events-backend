@@ -88,6 +88,11 @@ SELECT (v)::uuid,
        END
 FROM _fx WHERE k IN ('ev_rated', 'ev_zero', 'ev_other', 'ev_draft');
 
+-- Tag provider: ev_rated was classified by OpenAI; ev_zero has no provider set
+-- (NULL) to verify NULL surfaces through the RPC unchanged.
+UPDATE public.events SET ai_tag_provider = 'openai'
+  WHERE id = (SELECT (v)::uuid FROM _fx WHERE k='ev_rated');
+
 -- Two tags on ev_rated (to verify ordering + array aggregation).
 INSERT INTO public.event_tags (event_id, tag_id)
 SELECT (SELECT (v)::uuid FROM _fx WHERE k='ev_rated'),
@@ -131,6 +136,7 @@ DECLARE
   r_fav boolean; r_cal boolean;
   r_avg numeric; r_count int;
   r_tags jsonb;
+  r_provider text;
   n int;
 BEGIN
   SELECT (v)::uuid INTO ev_rated FROM _fx WHERE k='ev_rated';
@@ -198,6 +204,20 @@ BEGIN
   END IF;
   RAISE NOTICE 'TAGS_OK: ordered jsonb array, [] for tagless events.';
 
+  -- ai_tag_provider: ev_rated was UPDATEd to 'openai'; ev_zero left unset (NULL).
+  -- Both must round-trip through the RPC's RETURNS TABLE unchanged.
+  SELECT ai_tag_provider INTO r_provider
+  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_rated;
+  IF r_provider IS DISTINCT FROM 'openai' THEN
+    RAISE EXCEPTION 'AI_TAG_PROVIDER_RATED_FAIL: got %, want ''openai''', r_provider;
+  END IF;
+  SELECT ai_tag_provider INTO r_provider
+  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_zero;
+  IF r_provider IS NOT NULL THEN
+    RAISE EXCEPTION 'AI_TAG_PROVIDER_NULL_FAIL: got %, want NULL', r_provider;
+  END IF;
+  RAISE NOTICE 'AI_TAG_PROVIDER_OK: surfaces ''openai'' for classified events and NULL when unset.';
+
   -- p_city_id filter: passing city_b should return ONLY ev_other.
   SELECT count(*) INTO n FROM public.events_enriched(
     p_city_id := (SELECT (v)::uuid FROM _fx WHERE k='city_b'),
@@ -231,6 +251,41 @@ BEGIN
     RAISE EXCEPTION 'AUTH_ZERO_FAIL: got fav=%, cal=%, want false/true', r_fav, r_cal;
   END IF;
   RAISE NOTICE 'AUTH_OK: is_favorited/is_in_calendar reflect user rows.';
+END $$;
+
+-- -----------------------------------------------------------------------------
+-- RLS gate: the RPC is SECURITY INVOKER, so SET LOCAL role anon must be subject
+-- to the anon SELECT policy on public.events — published rows visible, drafts
+-- hidden. This exercises the actual RLS path, not just the p_user_id parameter
+-- defaults covered above.
+-- -----------------------------------------------------------------------------
+DO $$
+DECLARE
+  ev_rated uuid; ev_draft uuid;
+  pub_visible boolean; draft_visible boolean;
+BEGIN
+  SELECT (v)::uuid INTO ev_rated FROM _fx WHERE k='ev_rated';
+  SELECT (v)::uuid INTO ev_draft FROM _fx WHERE k='ev_draft';
+
+  SET LOCAL role anon;
+  SELECT EXISTS (
+    SELECT 1 FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_rated
+  ) INTO pub_visible;
+  SELECT EXISTS (
+    SELECT 1 FROM public.events_enriched(p_status := 'draft', p_user_id := NULL)
+     WHERE id = ev_draft
+  ) INTO draft_visible;
+  RESET role;
+
+  IF NOT pub_visible THEN
+    RAISE EXCEPTION 'ANON_PUBLISHED_FAIL: anon cannot see published event via RPC';
+  END IF;
+  RAISE NOTICE 'ANON_PUBLISHED_OK: anon sees published event via SECURITY INVOKER RPC.';
+
+  IF draft_visible THEN
+    RAISE EXCEPTION 'ANON_DRAFT_FAIL: anon can see draft event via RPC (RLS bypassed)';
+  END IF;
+  RAISE NOTICE 'ANON_DRAFT_OK: anon blocked from draft rows via RPC (RLS enforced).';
 END $$;
 
 ROLLBACK;
