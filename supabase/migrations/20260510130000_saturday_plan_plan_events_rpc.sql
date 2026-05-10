@@ -117,6 +117,16 @@ as $$
       and (p_city_id is null or e.city_id = p_city_id)
       and e.start_datetime::date = p_date
   ),
+  event_history as (
+    select
+      et.event_id,
+      count(et.tag_id)::numeric as tag_count,
+      count(et.tag_id) filter (where uft.tag_id is not null)::numeric as matching_tag_count
+    from public.event_tags et
+    join candidate_events ce on ce.id = et.event_id
+    left join user_favorite_tags uft on uft.tag_id = et.tag_id
+    group by et.event_id
+  ),
   scored_events as (
     select
       e.id as event_id,
@@ -156,19 +166,15 @@ as $$
         when p_kid_age between coalesce(e.age_min, p_kid_age) and coalesce(e.age_max, p_kid_age) then 1.0
         else 0.0
       end as age_score,
-      coalesce(history.history_affinity, 0.0) as history_affinity
-    from candidate_events e
-    left join lateral (
-      select
+      coalesce(
         case
-          when count(et.tag_id) = 0 then 0.0
-          else count(et.tag_id) filter (where uft.tag_id is not null)::numeric
-            / count(et.tag_id)::numeric
-        end as history_affinity
-      from public.event_tags et
-      left join user_favorite_tags uft on uft.tag_id = et.tag_id
-      where et.event_id = e.id
-    ) as history on true
+          when history.tag_count = 0 then 0.0
+          else history.matching_tag_count / history.tag_count
+        end,
+        0.0
+      ) as history_affinity
+    from candidate_events e
+    left join event_history history on history.event_id = e.id
   )
   select
     se.event_id,
