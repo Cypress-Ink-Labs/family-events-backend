@@ -57,10 +57,6 @@ if (typeof Deno !== "undefined") {
     const originalFetch = globalThis.fetch
     try {
       globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) => {
-        if (init?.method !== "HEAD") {
-          throw new Error("Expected HEAD request")
-        }
-
         const url = new URL(
           typeof input === "string" ? input : input instanceof URL ? input : input.url
         )
@@ -91,6 +87,22 @@ if (typeof Deno !== "undefined") {
             })
           )
         }
+        if (url.pathname === "/ok-no-length.jpg") {
+          if (init?.method === "HEAD") {
+            return Promise.resolve(
+              new Response(null, {
+                status: 200,
+                headers: { "content-type": "image/jpeg" },
+              })
+            )
+          }
+          return Promise.resolve(
+            new Response(new Uint8Array(1024), {
+              status: 200,
+              headers: { "content-type": "image/jpeg" },
+            })
+          )
+        }
         return Promise.resolve(new Response(null, { status: 404 }))
       }) as typeof fetch
 
@@ -99,11 +111,15 @@ if (typeof Deno !== "undefined") {
           "https://events.example.com/too-big.jpg",
           "https://events.example.com/wrong-type.jpg",
           "https://events.example.com/ok.jpg",
+          "https://events.example.com/ok-no-length.jpg",
         ],
       })
 
       const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
-      assertDeepEquals(images, ["https://events.example.com/ok.jpg"])
+      assertDeepEquals(images, [
+        "https://events.example.com/ok.jpg",
+        "https://events.example.com/ok-no-length.jpg",
+      ])
     } finally {
       globalThis.fetch = originalFetch
     }

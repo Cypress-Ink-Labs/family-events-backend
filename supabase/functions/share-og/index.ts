@@ -8,7 +8,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 }
 
-const CACHE_CONTROL = "public, max-age=300, s-maxage=86400"
+const CACHE_CONTROL_SUCCESS = "public, max-age=300, s-maxage=86400"
+const CACHE_CONTROL_FALLBACK = "public, max-age=60, s-maxage=300"
 const OG_IMAGE_WIDTH = "1200"
 const OG_IMAGE_HEIGHT = "630"
 const MAX_OG_DESCRIPTION_LENGTH = 200
@@ -27,6 +28,7 @@ type PublicEventRow = {
 }
 
 function escapeHtml(value: string): string {
+  // Only used for HTML context. Inline JS values are serialized separately.
   return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -114,7 +116,7 @@ function renderHtml(params: {
   const escapedUrl = escapeHtml(params.ogUrl)
   const escapedVenue = escapeHtml(params.venueName ?? "Family Events")
   const escapedStart = escapeHtml(params.startDatetime ?? "")
-  const escapedEventId = params.eventId ? escapeHtml(params.eventId) : ""
+  const serializedEventId = JSON.stringify(params.eventId ?? "").replaceAll("</", "<\\/")
 
   // ASCII flow (required by EXECUTE.md decision notes):
   //
@@ -205,17 +207,17 @@ function renderHtml(params: {
       </main>
     </div>
     <script>
-      window.__PUBLIC_SHARE_EVENT_ID__ = "${escapedEventId}";
+      window.__PUBLIC_SHARE_EVENT_ID__ = ${serializedEventId};
     </script>
   </body>
 </html>`
 }
 
-function responseHeaders(): HeadersInit {
+function responseHeaders(cacheControl: string): HeadersInit {
   return {
     ...corsHeaders,
     "Content-Type": "text/html; charset=utf-8",
-    "Cache-Control": CACHE_CONTROL,
+    "Cache-Control": cacheControl,
   }
 }
 
@@ -245,7 +247,23 @@ export async function handleShareOg(req: Request): Promise<Response> {
         venueName: null,
         startDatetime: null,
       }),
-      { status: 200, headers: responseHeaders() }
+      { status: 200, headers: responseHeaders(CACHE_CONTROL_FALLBACK) }
+    )
+  }
+
+  if (!supabaseUrl || !anonKey) {
+    return new Response(
+      renderHtml({
+        title: FALLBACK_TITLE,
+        description: FALLBACK_DESCRIPTION,
+        ogImageUrl: `${requestUrl.origin}/og-fallback.png`,
+        ogUrl,
+        noIndex: true,
+        eventId,
+        venueName: null,
+        startDatetime: null,
+      }),
+      { status: 200, headers: responseHeaders(CACHE_CONTROL_FALLBACK) }
     )
   }
 
@@ -271,7 +289,7 @@ export async function handleShareOg(req: Request): Promise<Response> {
         venueName: null,
         startDatetime: null,
       }),
-      { status: 200, headers: responseHeaders() }
+      { status: 200, headers: responseHeaders(CACHE_CONTROL_FALLBACK) }
     )
   }
 
@@ -290,7 +308,7 @@ export async function handleShareOg(req: Request): Promise<Response> {
       venueName: event.venue_name,
       startDatetime: event.start_datetime,
     }),
-    { status: 200, headers: responseHeaders() }
+    { status: 200, headers: responseHeaders(CACHE_CONTROL_SUCCESS) }
   )
 }
 

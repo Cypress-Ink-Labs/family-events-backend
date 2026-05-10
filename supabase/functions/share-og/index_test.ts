@@ -1,14 +1,9 @@
+import { assertEquals } from "jsr:@std/assert"
 import {
   extractEventIdFromRequest,
   pickOgImage,
   truncateOgDescription,
 } from "./index.ts"
-
-function assertEquals<T>(actual: T, expected: T): void {
-  if (!Object.is(actual, expected)) {
-    throw new Error(`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`)
-  }
-}
 
 if (typeof Deno !== "undefined") {
   Deno.test("extractEventIdFromRequest resolves query parameter first", () => {

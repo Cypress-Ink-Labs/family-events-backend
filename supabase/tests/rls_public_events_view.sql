@@ -141,8 +141,10 @@ DECLARE
   raw_visible boolean := false;
 BEGIN
   SET LOCAL role anon;
-  SELECT EXISTS (SELECT 1 FROM public.public_events WHERE id = pub_uuid) INTO view_visible;
-  SELECT EXISTS (SELECT 1 FROM public.events        WHERE id = pub_uuid) INTO raw_visible;
+  SELECT EXISTS (SELECT 1 FROM public.public_events WHERE id = pub_uuid)
+    INTO view_visible;
+  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = pub_uuid)
+    INTO raw_visible;
   RESET role;
 
   IF NOT view_visible THEN
@@ -167,8 +169,10 @@ DECLARE
   draft_tag_visible boolean;
 BEGIN
   SET LOCAL role anon;
-  SELECT EXISTS (SELECT 1 FROM public.event_tags WHERE event_id = pub_uuid)   INTO pub_tag_visible;
-  SELECT EXISTS (SELECT 1 FROM public.event_tags WHERE event_id = draft_uuid) INTO draft_tag_visible;
+  SELECT EXISTS (SELECT 1 FROM public.event_tags WHERE event_id = pub_uuid)
+    INTO pub_tag_visible;
+  SELECT EXISTS (SELECT 1 FROM public.event_tags WHERE event_id = draft_uuid)
+    INTO draft_tag_visible;
   RESET role;
 
   IF NOT pub_tag_visible THEN
@@ -193,9 +197,14 @@ DECLARE
   pub_stats_count int;
 BEGIN
   SET LOCAL role anon;
-  SELECT EXISTS (SELECT 1 FROM public.ratings WHERE event_id = pub_uuid)   INTO pub_rating_visible;
-  SELECT EXISTS (SELECT 1 FROM public.ratings WHERE event_id = draft_uuid) INTO draft_rating_visible;
-  SELECT COALESCE(rating_count, 0) FROM public.event_rating_stats WHERE event_id = pub_uuid INTO pub_stats_count;
+  SELECT EXISTS (SELECT 1 FROM public.ratings WHERE event_id = pub_uuid)
+    INTO pub_rating_visible;
+  SELECT EXISTS (SELECT 1 FROM public.ratings WHERE event_id = draft_uuid)
+    INTO draft_rating_visible;
+  SELECT COALESCE(rating_count, 0)
+  FROM public.event_rating_stats
+  WHERE event_id = pub_uuid
+  INTO pub_stats_count;
   RESET role;
 
   IF NOT pub_rating_visible THEN
@@ -221,8 +230,10 @@ DECLARE
   draft_comment_visible boolean;
 BEGIN
   SET LOCAL role anon;
-  SELECT EXISTS (SELECT 1 FROM public.comments WHERE event_id = pub_uuid)   INTO pub_comment_visible;
-  SELECT EXISTS (SELECT 1 FROM public.comments WHERE event_id = draft_uuid) INTO draft_comment_visible;
+  SELECT EXISTS (SELECT 1 FROM public.comments WHERE event_id = pub_uuid)
+    INTO pub_comment_visible;
+  SELECT EXISTS (SELECT 1 FROM public.comments WHERE event_id = draft_uuid)
+    INTO draft_comment_visible;
   RESET role;
 
   IF NOT pub_comment_visible THEN

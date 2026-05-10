@@ -26,7 +26,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function waitForNominatimSlot(): Promise<void> {
-  let releaseQueue: (() => void) | null = null
+  let releaseQueue: (() => void) | undefined
   const queueTail = new Promise<void>((resolve) => {
     releaseQueue = resolve
   })
@@ -34,7 +34,6 @@ async function waitForNominatimSlot(): Promise<void> {
   nominatimQueue = queueTail
 
   await previousQueue
-  const release = releaseQueue
   try {
     const elapsed = Date.now() - lastNominatimRequestAt
     if (elapsed < NOMINATIM_RATE_LIMIT_MS) {
@@ -42,9 +41,7 @@ async function waitForNominatimSlot(): Promise<void> {
     }
     lastNominatimRequestAt = Date.now()
   } finally {
-    if (release) {
-      release()
-    }
+    releaseQueue?.()
   }
 }
 

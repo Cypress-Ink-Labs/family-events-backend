@@ -99,6 +99,52 @@ export function deriveIsOutdoorFromParsedEvent(parsed: ParsedEvent): boolean | n
   return null
 }
 
+async function measureImageByteLength(imageUrl: string): Promise<number | null> {
+  let response: Response
+  try {
+    response = await fetch(imageUrl, {
+      method: "GET",
+      headers: {
+        "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
+        Accept: "image/*",
+      },
+      signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
+    })
+  } catch {
+    return null
+  }
+
+  if (!response.ok || !response.body) {
+    return null
+  }
+
+  const contentType = response.headers.get("content-type")?.toLowerCase() ?? ""
+  if (!contentType.startsWith("image/")) {
+    return null
+  }
+
+  const reader = response.body.getReader()
+  let total = 0
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) {
+        break
+      }
+      total += value.byteLength
+      if (total > IMAGE_MAX_BYTES) {
+        return total
+      }
+    }
+  } catch {
+    return null
+  } finally {
+    reader.releaseLock()
+  }
+
+  return total
+}
+
 async function validateImageAtIngest(
   imageUrl: string,
   allowedHosts: string[]
@@ -162,12 +208,14 @@ async function validateImageAtIngest(
   }
 
   const contentLengthHeader = response.headers.get("content-length")
-  if (!contentLengthHeader) {
+  const contentLength = contentLengthHeader ? Number(contentLengthHeader) : null
+  const measuredLength = contentLengthHeader ? null : await measureImageByteLength(finalUrl.toString())
+  const effectiveLength = contentLength ?? measuredLength
+  if (effectiveLength === null) {
     return null
   }
 
-  const contentLength = Number(contentLengthHeader)
-  if (!Number.isFinite(contentLength) || contentLength <= 0 || contentLength > IMAGE_MAX_BYTES) {
+  if (!Number.isFinite(effectiveLength) || effectiveLength <= 0 || effectiveLength > IMAGE_MAX_BYTES) {
     return null
   }
 
