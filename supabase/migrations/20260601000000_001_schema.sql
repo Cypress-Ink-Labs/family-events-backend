@@ -260,9 +260,17 @@ ALTER TABLE public.admin_audit_log ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS admin_audit_log_admin_user_id_idx ON public.admin_audit_log(admin_user_id);
 
 -- Deferred FK: user_profiles.city_preference_id → cities
-ALTER TABLE public.user_profiles
-  ADD CONSTRAINT user_profiles_city_preference_id_fkey
-  FOREIGN KEY (city_preference_id) REFERENCES public.cities(id) ON DELETE SET NULL;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'user_profiles_city_preference_id_fkey'
+  ) THEN
+    ALTER TABLE public.user_profiles
+      ADD CONSTRAINT user_profiles_city_preference_id_fkey
+      FOREIGN KEY (city_preference_id) REFERENCES public.cities(id) ON DELETE SET NULL;
+  END IF;
+END
+$$;
 CREATE INDEX IF NOT EXISTS user_profiles_city_preference_id_idx
   ON public.user_profiles(city_preference_id);
 
