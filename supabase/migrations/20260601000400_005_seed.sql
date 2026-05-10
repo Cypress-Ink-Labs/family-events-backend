@@ -112,5 +112,6 @@ SELECT
 FROM source_data s
 JOIN public.cities c ON c.slug = s.city_slug
 WHERE NOT EXISTS (
-  SELECT 1 FROM public.event_sources existing WHERE existing.url = s.url
+  SELECT 1 FROM public.event_sources existing
+  WHERE existing.url = s.url
 );

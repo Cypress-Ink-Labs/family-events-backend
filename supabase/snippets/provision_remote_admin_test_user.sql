@@ -11,13 +11,13 @@
 -- Idempotent promotion:
 UPDATE public.user_profiles
 SET role = 'admin'
-WHERE lower(email) = lower('lecoqjacob@gmail.com')
+WHERE lower(email) = lower('<TEST_ADMIN_EMAIL>')
   AND role <> 'admin';
 
 -- Verify effective role:
 SELECT id, email, role
 FROM public.user_profiles
-WHERE lower(email) = lower('lecoqjacob@gmail.com');
+WHERE lower(email) = lower('<TEST_ADMIN_EMAIL>');
 
 -- Optional rollback:
 -- UPDATE public.user_profiles

@@ -190,8 +190,11 @@ AS $$
   OFFSET CASE WHEN p_event_ids IS NULL THEN p_offset ELSE 0    END;
 $$;
 
+-- Restricted to authenticated. events_enriched returns the full events row
+-- including status/search_vector/view_count, so the anon path goes through
+-- the column-whitelisted public_events view instead.
 GRANT EXECUTE ON FUNCTION public.events_enriched(uuid, text, int, int, uuid, uuid[], timestamptz, timestamptz)
-  TO anon, authenticated;
+  TO authenticated;
 
 -- =============================================
 -- plan_events_for_user RPC
@@ -243,11 +246,14 @@ BEGIN
     GROUP BY et.tag_id
   ),
   candidate_events AS (
+    -- Compare in the event's own timezone, not the DB session TZ. An event
+    -- at 21:00 Friday Chicago lives as 02:00 Saturday UTC; casting the raw
+    -- timestamptz to ::date in UTC would mis-bucket it as Saturday.
     SELECT e.id, e.age_min, e.age_max, e.latitude, e.longitude, e.is_outdoor
     FROM public.events e
     WHERE e.status = 'published'
       AND (p_city_id IS NULL OR e.city_id = p_city_id)
-      AND e.start_datetime::date = p_date
+      AND (e.start_datetime AT TIME ZONE e.timezone)::date = p_date
   ),
   event_history AS (
     SELECT

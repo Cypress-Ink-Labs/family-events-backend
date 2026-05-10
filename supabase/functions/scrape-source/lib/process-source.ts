@@ -108,6 +108,11 @@ async function measureImageByteLength(imageUrl: string): Promise<number | null> 
         "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
         Accept: "image/*",
       },
+      // redirect: "error" — by this point the URL has already cleared the
+      // HEAD allowlist re-check. Following a fresh GET-time redirect would
+      // bypass that guard and re-open the SSRF surface (a server can serve a
+      // benign HEAD and a redirect-to-internal-IP GET).
+      redirect: "error",
       signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
     })
   } catch {
@@ -238,15 +243,20 @@ export async function sanitizeImagesForIngest(
     return []
   }
 
+  // Cap the accepted images, not the raw candidates. If the first three
+  // candidates fail validation but candidates 4-5 succeed, we want them.
   const imageCandidates = [
     ...new Set([
       ...parsed.images,
       ...(parsed.imageUrl ? [parsed.imageUrl] : []),
     ]),
-  ].slice(0, MAX_IMAGES_PER_EVENT)
+  ]
 
   const validImages: string[] = []
   for (const imageCandidate of imageCandidates) {
+    if (validImages.length >= MAX_IMAGES_PER_EVENT) {
+      break
+    }
     const validatedImage = await validateImageAtIngest(imageCandidate, allowedHosts)
     if (validatedImage && !validImages.includes(validatedImage)) {
       validImages.push(validatedImage)

@@ -1,4 +1,7 @@
--- Rollback: drop all tables in reverse dependency order
+-- Rollback: drop all tables in reverse dependency order.
+-- Drop dependent view first so the CASCADE on events doesn't trip view drops.
+DROP VIEW IF EXISTS public.public_events;
+
 DROP TABLE IF EXISTS public.event_ai_traces CASCADE;
 DROP TABLE IF EXISTS public.pending_invite_claims CASCADE;
 DROP TABLE IF EXISTS public.user_access CASCADE;

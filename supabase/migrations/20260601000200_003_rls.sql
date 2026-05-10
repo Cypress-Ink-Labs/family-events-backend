@@ -75,9 +75,15 @@ CREATE POLICY "Users can view own profile or admins can view all profiles"
     OR (SELECT private.is_admin())
   );
 
+-- WITH CHECK additionally pins role='user' on INSERT. Defense-in-depth:
+-- REVOKE and the trigger protect UPDATE; this protects INSERT against a
+-- user creating their own row with role='admin' on first sign-in.
 CREATE POLICY "Users can insert own profile"
   ON public.user_profiles FOR INSERT TO authenticated
-  WITH CHECK ((SELECT auth.uid()) = id);
+  WITH CHECK (
+    (SELECT auth.uid()) = id
+    AND role = 'user'
+  );
 
 -- WITH CHECK prevents role self-escalation at the policy layer.
 -- Defense-in-depth: REVOKE + prevent_role_change trigger also guard this.
@@ -168,9 +174,21 @@ CREATE POLICY "Anon can read event tags for published events"
     )
   );
 
+-- Mirror the anon gate for authenticated non-admins: enabled users see tags
+-- only for published events. Admins still see all tags (drafts included)
+-- through the bypass branch.
 CREATE POLICY "Enabled users can read event tags"
   ON public.event_tags FOR SELECT TO authenticated
-  USING ((SELECT private.has_enabled_access()));
+  USING (
+    (SELECT private.is_admin())
+    OR (
+      (SELECT private.has_enabled_access())
+      AND EXISTS (
+        SELECT 1 FROM public.events e
+        WHERE e.id = event_tags.event_id AND e.status = 'published'
+      )
+    )
+  );
 
 CREATE POLICY "Admins can insert event tags"
   ON public.event_tags FOR INSERT TO authenticated
@@ -247,9 +265,20 @@ CREATE POLICY "Anon can read ratings for published events"
     )
   );
 
+-- Mirror anon gate for authenticated non-admins: see ratings only for
+-- published events. Admins bypass via is_admin() branch.
 CREATE POLICY "Enabled users can read ratings"
   ON public.ratings FOR SELECT TO authenticated
-  USING ((SELECT private.has_enabled_access()));
+  USING (
+    (SELECT private.is_admin())
+    OR (
+      (SELECT private.has_enabled_access())
+      AND EXISTS (
+        SELECT 1 FROM public.events e
+        WHERE e.id = ratings.event_id AND e.status = 'published'
+      )
+    )
+  );
 
 CREATE POLICY "Enabled users can add ratings"
   ON public.ratings FOR INSERT TO authenticated
@@ -290,6 +319,10 @@ CREATE POLICY "Anon can read approved comments on published events"
     )
   );
 
+-- Non-admin authenticated readers see approved comments only on published
+-- events. Admins see everything (drafts + unapproved). This mirrors the
+-- anon gate so a draft event's comments are not leaked through the
+-- comments table when the event itself is hidden by the events policy.
 CREATE POLICY "Authenticated users can read approved comments or admins can read all comments"
   ON public.comments FOR SELECT TO authenticated
   USING (
@@ -297,6 +330,10 @@ CREATE POLICY "Authenticated users can read approved comments or admins can read
     OR (
       (SELECT private.has_enabled_access())
       AND is_approved = true
+      AND EXISTS (
+        SELECT 1 FROM public.events e
+        WHERE e.id = comments.event_id AND e.status = 'published'
+      )
     )
   );
 

@@ -338,8 +338,13 @@ BEGIN
 END;
 $$;
 
+-- redeem_invite(text) is intentionally not granted to anon/authenticated.
+-- The canonical signup flow uses redeem_invite_for_email + claim_pending_invite_access
+-- which is idempotent across retries. Leaving redeem_invite(text) callable from the
+-- client would let anyone burn invite capacity without ever creating a claim,
+-- because it bumps used_count without parking a pending claim.
 REVOKE ALL ON FUNCTION public.redeem_invite(text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.redeem_invite(text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.redeem_invite(text) TO postgres, service_role;
 
 -- =============================================
 -- public.redeem_invite_for_email(text, text)
@@ -353,28 +358,49 @@ SET search_path = ''
 AS $$
 DECLARE
   canonical_email text;
+  canonical_code  text;
+  existing_code   text;
   rows_updated    int;
 BEGIN
   canonical_email := lower(btrim(p_email));
+  canonical_code  := btrim(coalesce(p_code, ''));
 
-  IF p_code IS NULL OR btrim(p_code) = '' OR canonical_email = '' THEN
+  IF canonical_code = '' OR canonical_email = '' THEN
     RETURN false;
   END IF;
 
+  -- Idempotent re-submit of the same code → no work, no capacity burn.
   IF EXISTS (
     SELECT 1
     FROM public.pending_invite_claims
     WHERE email = canonical_email
-      AND invite_code = btrim(p_code)
+      AND invite_code = canonical_code
       AND claimed_by IS NULL
       AND expires_at > now()
   ) THEN
     RETURN true;
   END IF;
 
+  -- If an unclaimed pending claim exists for this email with a DIFFERENT
+  -- code, refund that prior code's used_count before consuming the new one.
+  -- Without this refund, a user who pastes the wrong code first burns one
+  -- use on every retry. (Already-claimed or expired claims are not refunded.)
+  SELECT invite_code INTO existing_code
+  FROM public.pending_invite_claims
+  WHERE email = canonical_email
+    AND claimed_by IS NULL
+    AND expires_at > now()
+  LIMIT 1;
+
+  IF existing_code IS NOT NULL AND existing_code <> canonical_code THEN
+    UPDATE public.invite_codes
+    SET used_count = GREATEST(used_count - 1, 0)
+    WHERE code = existing_code;
+  END IF;
+
   UPDATE public.invite_codes
   SET used_count = used_count + 1
-  WHERE code = btrim(p_code)
+  WHERE code = canonical_code
     AND used_count < max_uses
     AND (expires_at IS NULL OR expires_at > now());
 
@@ -384,7 +410,7 @@ BEGIN
   END IF;
 
   INSERT INTO public.pending_invite_claims (email, invite_code, expires_at, claimed_by, claimed_at, created_at)
-  VALUES (canonical_email, btrim(p_code), now() + interval '2 hours', NULL, NULL, now())
+  VALUES (canonical_email, canonical_code, now() + interval '2 hours', NULL, NULL, now())
   ON CONFLICT (email) DO UPDATE
     SET invite_code = excluded.invite_code,
         expires_at  = excluded.expires_at,
