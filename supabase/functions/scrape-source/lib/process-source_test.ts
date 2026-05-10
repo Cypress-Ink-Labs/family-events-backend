@@ -1,17 +1,6 @@
+import { assertEquals } from "jsr:@std/assert"
 import { deriveIsOutdoorFromParsedEvent, sanitizeImagesForIngest } from "./process-source.ts"
 import type { ParsedEvent } from "./types.ts"
-
-function assertEquals<T>(actual: T, expected: T): void {
-  if (!Object.is(actual, expected)) {
-    throw new Error(`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`)
-  }
-}
-
-function assertDeepEquals(actual: unknown, expected: unknown): void {
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error(`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`)
-  }
-}
 
 function buildParsedEvent(overrides: Partial<ParsedEvent> = {}): ParsedEvent {
   return {
@@ -116,7 +105,7 @@ if (typeof Deno !== "undefined") {
       })
 
       const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
-      assertDeepEquals(images, [
+      assertEquals(images, [
         "https://events.example.com/ok.jpg",
         "https://events.example.com/ok-no-length.jpg",
       ])
@@ -144,7 +133,7 @@ if (typeof Deno !== "undefined") {
       })
 
       const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
-      assertDeepEquals(images, [])
+      assertEquals(images, [])
       assertEquals(fetchCalls, 0)
     } finally {
       globalThis.fetch = originalFetch

@@ -133,10 +133,16 @@ async function measureImageByteLength(imageUrl: string): Promise<number | null> 
       }
       total += value.byteLength
       if (total > IMAGE_MAX_BYTES) {
+        await reader.cancel()
         return total
       }
     }
   } catch {
+    try {
+      await reader.cancel()
+    } catch {
+      // Ignore cancel errors
+    }
     return null
   } finally {
     reader.releaseLock()
