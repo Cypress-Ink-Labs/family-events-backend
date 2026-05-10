@@ -264,6 +264,9 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.invoke_scrape_source(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.invoke_scrape_source(uuid) TO postgres, service_role;
+
 -- =============================================
 -- public.run_due_source_scrapes()
 -- Invoked hourly by pg_cron.
@@ -290,6 +293,9 @@ BEGIN
   END LOOP;
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.run_due_source_scrapes() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.run_due_source_scrapes() TO postgres, service_role;
 
 DO $$
 BEGIN
@@ -353,6 +359,17 @@ BEGIN
 
   IF p_code IS NULL OR btrim(p_code) = '' OR canonical_email = '' THEN
     RETURN false;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.pending_invite_claims
+    WHERE email = canonical_email
+      AND invite_code = btrim(p_code)
+      AND claimed_by IS NULL
+      AND expires_at > now()
+  ) THEN
+    RETURN true;
   END IF;
 
   UPDATE public.invite_codes

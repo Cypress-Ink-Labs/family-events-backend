@@ -68,7 +68,7 @@ ALTER TABLE public.user_profiles FORCE ROW LEVEL SECURITY;
 CREATE TABLE IF NOT EXISTS public.event_sources (
   id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name                 text NOT NULL,
-  url                  text NOT NULL,
+  url                  text NOT NULL UNIQUE,
   source_type          text NOT NULL DEFAULT 'website'
                          CHECK (source_type IN ('website', 'ical', 'rss', 'manual')),
   city_id              uuid REFERENCES public.cities(id) ON DELETE SET NULL,
@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS public.event_sources (
 );
 ALTER TABLE public.event_sources ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS event_sources_city_id_idx ON public.event_sources(city_id);
+CREATE UNIQUE INDEX IF NOT EXISTS event_sources_url_idx ON public.event_sources(url);
 
 -- =============================================
 -- source_runs
@@ -248,7 +249,7 @@ CREATE INDEX IF NOT EXISTS recommendation_signals_event_id_idx ON public.recomme
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.admin_audit_log (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  admin_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE SET NULL,
+  admin_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   action        text NOT NULL,
   target_type   text,
   target_id     uuid,
