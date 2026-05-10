@@ -1,8 +1,10 @@
 /*
-  # H3 — anon read of published content (events, cities) is allowed
+  # H3 — anon read of published content (public view + cities)
 
-  Verifies the additive anon SELECT policies. Anon can see published events
-  and active cities; anon cannot see drafts or inactive cities.
+  Verifies the Saturday Plan public boundary:
+  - anon can see published events via public.public_events
+  - anon cannot read raw public.events
+  - anon can see active cities; anon cannot see inactive cities
 
   Run with:
 
@@ -41,30 +43,35 @@ SELECT (v)::uuid,
 FROM _fx WHERE k IN ('pub_event', 'draft_event');
 
 -- -----------------------------------------------------------------------------
--- Anon: sees only the published event.
+-- Anon: sees published data via public view, not raw table.
 -- -----------------------------------------------------------------------------
 DO $$
 DECLARE
   pub_id uuid;
   draft_id uuid;
-  pub_visible boolean;
-  draft_visible boolean;
+  pub_visible_in_view boolean;
+  draft_visible_in_view boolean;
+  raw_visible boolean;
 BEGIN
   SELECT (v)::uuid INTO pub_id FROM _fx WHERE k='pub_event';
   SELECT (v)::uuid INTO draft_id FROM _fx WHERE k='draft_event';
 
   SET LOCAL role anon;
-  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = pub_id) INTO pub_visible;
-  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = draft_id) INTO draft_visible;
+  SELECT EXISTS (SELECT 1 FROM public.public_events WHERE id = pub_id) INTO pub_visible_in_view;
+  SELECT EXISTS (SELECT 1 FROM public.public_events WHERE id = draft_id) INTO draft_visible_in_view;
+  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = pub_id) INTO raw_visible;
   RESET role;
 
-  IF NOT pub_visible THEN
-    RAISE EXCEPTION 'EVENTS_PUB_FAIL: anon cannot see published event';
+  IF NOT pub_visible_in_view THEN
+    RAISE EXCEPTION 'PUBLIC_VIEW_PUB_FAIL: anon cannot see published event in public view';
   END IF;
-  IF draft_visible THEN
-    RAISE EXCEPTION 'EVENTS_DRAFT_FAIL: anon can see draft event';
+  IF draft_visible_in_view THEN
+    RAISE EXCEPTION 'PUBLIC_VIEW_DRAFT_FAIL: anon can see draft event in public view';
   END IF;
-  RAISE NOTICE 'EVENTS_OK: anon sees published, not draft.';
+  IF raw_visible THEN
+    RAISE EXCEPTION 'RAW_EVENTS_FAIL: anon can read raw events table';
+  END IF;
+  RAISE NOTICE 'PUBLIC_VIEW_OK: anon sees published via view, not draft, raw table blocked.';
 END $$;
 
 -- -----------------------------------------------------------------------------
