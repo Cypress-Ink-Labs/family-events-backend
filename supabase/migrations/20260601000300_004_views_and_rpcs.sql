@@ -226,7 +226,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 STABLE
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = ''
 AS $$
 BEGIN
@@ -320,5 +320,6 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.plan_events_for_user(uuid, date, uuid, double precision, double precision, integer, text, integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.plan_events_for_user(uuid, date, uuid, double precision, double precision, integer, text, integer)
   TO authenticated;

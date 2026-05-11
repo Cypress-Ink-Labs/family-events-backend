@@ -225,6 +225,7 @@ CREATE TABLE IF NOT EXISTS public.comments (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comments REPLICA IDENTITY FULL;
 CREATE INDEX IF NOT EXISTS comments_event_id_idx ON public.comments(event_id);
 CREATE INDEX IF NOT EXISTS comments_user_id_idx  ON public.comments(user_id);
 

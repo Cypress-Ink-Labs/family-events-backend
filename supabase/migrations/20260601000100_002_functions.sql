@@ -551,3 +551,191 @@ BEGIN
   PERFORM private.bootstrap_admin();
 END;
 $$;
+
+-- =============================================
+-- Supabase Realtime — comments table
+-- REPLICA IDENTITY FULL is set on the table in schema.sql so that DELETE
+-- payloads include event_id, making the client-side filter work correctly.
+-- =============================================
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'comments'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE comments;
+  END IF;
+END $$;
+
+-- =============================================
+-- Admin cron management functions
+-- The cron schema is not exposed via PostgREST; SECURITY DEFINER allows
+-- the function owner (who has USAGE on cron) to proxy access for admins.
+-- =============================================
+
+CREATE OR REPLACE FUNCTION public.admin_list_cron_jobs()
+RETURNS TABLE (
+  jobid        bigint,
+  jobname      text,
+  schedule     text,
+  command      text,
+  active       boolean,
+  last_run_start   timestamptz,
+  last_run_end     timestamptz,
+  last_run_status  text,
+  last_run_message text
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    j.jobid,
+    j.jobname,
+    j.schedule,
+    j.command,
+    j.active,
+    d.start_time,
+    d.end_time,
+    d.status,
+    d.return_message
+  FROM cron.job j
+  LEFT JOIN LATERAL (
+    SELECT jrd.start_time, jrd.end_time, jrd.status, jrd.return_message
+    FROM cron.job_run_details jrd
+    WHERE jrd.jobid = j.jobid
+    ORDER BY jrd.start_time DESC
+    LIMIT 1
+  ) d ON true
+  ORDER BY j.jobname;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_list_cron_jobs() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_list_cron_jobs() TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_cron_run_history(
+  p_job_name text DEFAULT NULL,
+  p_limit    int  DEFAULT 50
+)
+RETURNS TABLE (
+  runid           bigint,
+  jobname         text,
+  status          text,
+  return_message  text,
+  start_time      timestamptz,
+  end_time        timestamptz,
+  duration_ms     numeric
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    d.runid,
+    j.jobname,
+    d.status,
+    d.return_message,
+    d.start_time,
+    d.end_time,
+    CASE
+      WHEN d.end_time IS NOT NULL
+      THEN ROUND(EXTRACT(EPOCH FROM (d.end_time - d.start_time)) * 1000)
+      ELSE NULL
+    END AS duration_ms
+  FROM cron.job_run_details d
+  JOIN cron.job j ON j.jobid = d.jobid
+  WHERE (p_job_name IS NULL OR j.jobname = p_job_name)
+  ORDER BY d.start_time DESC
+  LIMIT GREATEST(COALESCE(p_limit, 50), 1);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_cron_run_history(text, int) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_cron_run_history(text, int) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_toggle_cron_job(
+  p_job_name text,
+  p_active   boolean
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  UPDATE cron.job SET active = p_active WHERE jobname = p_job_name;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'cron job not found: %', p_job_name USING ERRCODE = 'P0002';
+  END IF;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_toggle_cron_job(text, boolean) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_toggle_cron_job(text, boolean) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_set_cron_schedule(
+  p_job_name text,
+  p_schedule text
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_command text;
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT command INTO v_command FROM cron.job WHERE jobname = p_job_name;
+
+  IF v_command IS NULL THEN
+    RAISE EXCEPTION 'cron job not found: %', p_job_name USING ERRCODE = 'P0002';
+  END IF;
+
+  PERFORM cron.schedule(p_job_name, p_schedule, v_command);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_set_cron_schedule(text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_set_cron_schedule(text, text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_run_due_scrapes()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  PERFORM public.run_due_source_scrapes();
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_run_due_scrapes() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_run_due_scrapes() TO authenticated;
