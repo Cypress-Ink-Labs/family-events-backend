@@ -442,7 +442,7 @@ export async function processSource(
         price: parsed.price,
         is_free: parsed.isFree,
         is_outdoor: isOutdoor,
-        status: (!existingEventId && source.auto_approve) ? "published" : "draft",
+        status: (!existingEventId && source.auto_approve) ? "published" as const : "draft" as const,
         ...(existingEventId
           ? {}
           : {
