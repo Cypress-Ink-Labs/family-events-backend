@@ -63,6 +63,17 @@ describe("decodeHtml", () => {
     expect(decodeHtml("it&#39;s")).toBe("it's")
   })
 
+  it("decodes hex numeric character references", () => {
+    expect(decodeHtml("&#x1f331;")).toBe("🌱")
+    expect(decodeHtml("&#x1f41c;")).toBe("🐜")
+    expect(decodeHtml("Garden Talks &#x1f331; Dig in")).toBe("Garden Talks 🌱 Dig in")
+  })
+
+  it("decodes decimal numeric character references", () => {
+    expect(decodeHtml("&#128049;")).toBe("🐱")
+    expect(decodeHtml("Hello&#33;")).toBe("Hello!")
+  })
+
   it("leaves non-entity text untouched", () => {
     expect(decodeHtml("plain text")).toBe("plain text")
   })

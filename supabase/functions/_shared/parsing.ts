@@ -57,6 +57,8 @@ export function decodeHtml(value: string): string {
     .replaceAll("&gt;", ">")
     .replaceAll("&quot;", '"')
     .replaceAll("&#39;", "'")
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
 }
 
 /**
@@ -106,11 +108,7 @@ export function extractPrice(text: string): { price: number | null; isFree: bool
  * Build a dedup key for cross-source event detection.
  * Same title + same start minute + same city = same event regardless of source.
  */
-export function dedupKey(
-  title: string,
-  startDatetime: string,
-  cityId: string | null
-): string {
+export function dedupKey(title: string, startDatetime: string, cityId: string | null): string {
   const normalizedTitle = title.trim().toLowerCase()
   // Truncate to minute precision to handle minor ISO format variations
   const minute = startDatetime.slice(0, 16)
