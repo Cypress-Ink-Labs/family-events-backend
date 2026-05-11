@@ -9,9 +9,12 @@ CREATE OR REPLACE FUNCTION public.admin_bulk_set_auto_approve(enable boolean)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
   UPDATE public.event_sources SET auto_approve = enable;
 END;
 $$;
