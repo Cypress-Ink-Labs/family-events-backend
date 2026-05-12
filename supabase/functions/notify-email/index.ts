@@ -183,8 +183,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
-  const resendFrom =
-    Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
+  const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
   const adminEmail = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? ""
   const appUrl = Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app"
 
@@ -243,13 +242,10 @@ Deno.serve(async (req: Request) => {
         new Error(`Resend ${result.status}: ${result.body.slice(0, 200)}`),
         { function: "notify-email", kind: payload.kind }
       )
-      return new Response(
-        JSON.stringify({ sent: false, error: `resend_${result.status}` }),
-        {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      )
+      return new Response(JSON.stringify({ sent: false, error: `resend_${result.status}` }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
     }
 
     logEdgeEvent("log", "notify-email: sent", {
@@ -263,7 +259,11 @@ Deno.serve(async (req: Request) => {
     })
   } catch (err) {
     await captureEdgeException(err, errorContext(err, { function: "notify-email" }))
-    logEdgeEvent("error", "notify-email outer failure", errorContext(err, { function: "notify-email" }))
+    logEdgeEvent(
+      "error",
+      "notify-email outer failure",
+      errorContext(err, { function: "notify-email" })
+    )
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

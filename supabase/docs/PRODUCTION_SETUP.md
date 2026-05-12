@@ -60,13 +60,30 @@ up.
 ```bash
 supabase functions deploy scrape-source
 supabase functions deploy tag-event
+supabase functions deploy process-tag-queue
+supabase functions deploy share-og
+supabase functions deploy notify-email
 ```
 
 Verify OPENAI_API_KEY and OPENAI_MODEL are set in Supabase project secrets if
 you want AI tagging. Without them, tag-event falls back to keyword matching
 (check `events.ai_tag_provider` to audit which path is running).
 
-## 5. Verify
+## 5. Configure email (Resend)
+
+Application emails (admin notification on new invite request, code delivery
+on approval) and Supabase Auth emails (signup confirmation, password reset)
+both route through Resend. One Resend account + API key serves both paths.
+
+See [`supabase/docs/EMAIL.md`](./EMAIL.md) for the full setup walkthrough:
+domain verification, Supabase × Resend integration for Auth, secrets for
+`notify-email`, and verification queries.
+
+Without configured email, the invite-request feature still works
+end-to-end at the data layer — admins just have to copy codes manually
+from `/admin/invites` and share them out of band.
+
+## 6. Verify
 
 - `/sign-in` with the admin credentials
 - Navigate to `/admin` — should load without redirecting
