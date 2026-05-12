@@ -301,7 +301,10 @@ DO $$
 BEGIN
   BEGIN
     PERFORM cron.unschedule('scrape-due-sources-hourly');
-  EXCEPTION WHEN OTHERS THEN NULL;
+  EXCEPTION
+    WHEN undefined_object THEN NULL;
+    WHEN OTHERS THEN
+      RAISE WARNING 'Unexpected error unscheduling scrape-due-sources-hourly: %', SQLERRM;
   END;
   PERFORM cron.schedule(
     'scrape-due-sources-hourly',

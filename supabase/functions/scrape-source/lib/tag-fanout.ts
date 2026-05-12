@@ -10,7 +10,7 @@ async function invokeTagEvent(
 ): Promise<void> {
   for (let attempt = 1; attempt <= TAG_EVENT_MAX_ATTEMPTS; attempt++) {
     if (attempt > 1) {
-      // Exponential backoff: 500ms, 1000ms
+      // Linear backoff: 500ms, 1000ms
       await new Promise((r) => setTimeout(r, 500 * (attempt - 1)))
     }
 
@@ -25,8 +25,12 @@ async function invokeTagEvent(
 
     if (response.ok) return
 
-    // 503 / worker-not-ready errors are retriable; others are not
-    const isRetriable = response.status === 503 || response.status === 504 || response.status === 502
+    // 5xx server errors and 429 rate limits are retriable; others are not
+    const isRetriable =
+      response.status === 429 ||
+      response.status === 502 ||
+      response.status === 503 ||
+      response.status === 504
     if (!isRetriable || attempt === TAG_EVENT_MAX_ATTEMPTS) {
       throw new Error(`tag-event invocation failed (${response.status})`)
     }
