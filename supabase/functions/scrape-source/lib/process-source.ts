@@ -4,6 +4,7 @@ import { errorContext, logEdgeEvent } from "../../_shared/logger.ts"
 import { buildGeocodeQuery, geocodeViaNominatim } from "../../_shared/geocode.ts"
 import { dedupKey } from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
+import { resolveAndCheckPublicIp } from "../../_shared/url-resolve.ts"
 import { parseIcalFeed } from "../parsers/ical.ts"
 import { parseRssFeed } from "../parsers/rss.ts"
 import { parseWebsite } from "../parsers/website.ts"
@@ -13,6 +14,7 @@ import { tagImportedEvent } from "./tag-fanout.ts"
 import type { EventSourceRow, ParsedEvent, RunStatus, SourceResult } from "./types.ts"
 
 const SOURCE_FETCH_TIMEOUT_MS = 10_000
+const SOURCE_MAX_BYTES = 5 * 1024 * 1024 // 5 MB cap on feed body to prevent OOM
 const IMAGE_HEAD_TIMEOUT_MS = 5_000
 const IMAGE_MAX_BYTES = 2 * 1024 * 1024
 const MAX_IMAGES_PER_EVENT = 5
@@ -100,6 +102,13 @@ export function deriveIsOutdoorFromParsedEvent(parsed: ParsedEvent): boolean | n
 }
 
 async function measureImageByteLength(imageUrl: string): Promise<number | null> {
+  // DNS re-check before GET. A server can serve a benign HEAD pointing to a
+  // public IP and then resolve to an internal IP for the GET (DNS rebinding).
+  const dnsCheck = await resolveAndCheckPublicIp(imageUrl)
+  if (!dnsCheck.ok) {
+    return null
+  }
+
   let response: Response
   try {
     response = await fetch(imageUrl, {
@@ -176,6 +185,13 @@ async function validateImageAtIngest(
     return null
   }
   if (!hostAllowed(parsedUrl.hostname, allowedHosts)) {
+    return null
+  }
+
+  // DNS pre-check before HEAD. allowlist + protocol alone don't protect against
+  // an allowlisted hostname resolving to an internal IP.
+  const dnsCheck = await resolveAndCheckPublicIp(parsedUrl.toString())
+  if (!dnsCheck.ok) {
     return null
   }
 
@@ -316,12 +332,43 @@ async function resolveCoordinatesForParsedEvent(
   return { latitude: null, longitude: null }
 }
 
+async function readResponseBodyCapped(response: Response, maxBytes: number): Promise<string> {
+  if (!response.body) return ""
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      total += value.byteLength
+      if (total > maxBytes) {
+        await reader.cancel()
+        throw new Error(`Response body exceeded cap of ${maxBytes} bytes`)
+      }
+      chunks.push(value)
+    }
+  } finally {
+    reader.releaseLock()
+  }
+  const buf = new Uint8Array(total)
+  let offset = 0
+  for (const c of chunks) {
+    buf.set(c, offset)
+    offset += c.byteLength
+  }
+  return new TextDecoder("utf-8").decode(buf)
+}
+
 async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]> {
   if (source.source_type === "manual") {
     return []
   }
 
-  const validation = validateExternalUrl(source.url)
+  // DNS-resolution-time SSRF check. validateExternalUrl alone only catches IP
+  // literals; resolveAndCheckPublicIp also rejects hostnames that resolve into
+  // private/loopback/link-local ranges (e.g. 169.254.169.254 metadata, RFC1918).
+  const validation = await resolveAndCheckPublicIp(source.url)
   if (!validation.ok) {
     throw new Error(`Source URL rejected by validator: ${validation.reason}`)
   }
@@ -338,7 +385,9 @@ async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]>
     throw new Error(`Failed to fetch source (${response.status})`)
   }
 
-  const content = await response.text()
+  // Streamed read with 5 MB cap. response.text() is unbounded; a malicious or
+  // accidentally-huge feed could OOM the edge function.
+  const content = await readResponseBodyCapped(response, SOURCE_MAX_BYTES)
   if (source.source_type === "rss") {
     return parseRssFeed(content, source.url)
   }
