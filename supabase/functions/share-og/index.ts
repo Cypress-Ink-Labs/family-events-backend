@@ -8,8 +8,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 }
 
-const CACHE_CONTROL_SUCCESS = "public, max-age=300, s-maxage=86400"
-const CACHE_CONTROL_FALLBACK = "public, max-age=60, s-maxage=300"
+// CDN cache TTL is short on purpose: event data mutates (status flips,
+// description edits, cancellation), and a long s-maxage keeps the stale
+// preview pinned at the edge. 5 min is enough to absorb crawler spikes
+// without holding a deleted/unpublished event visible for hours.
+const CACHE_CONTROL_SUCCESS = "public, max-age=300, s-maxage=300, stale-while-revalidate=60"
+const CACHE_CONTROL_FALLBACK = "public, max-age=60, s-maxage=60"
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const OG_IMAGE_WIDTH = "1200"
 const OG_IMAGE_HEIGHT = "630"
 const MAX_OG_DESCRIPTION_LENGTH = 200
@@ -35,6 +40,22 @@ function escapeHtml(value: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;")
+}
+
+// U+2028 (LINE SEPARATOR) and U+2029 (PARAGRAPH SEPARATOR) are valid in JSON but
+// illegal as raw characters inside JS string literals (engines treat them as
+// line terminators), breaking the inline <script>. Escape them defensively.
+// Constructed via String.fromCharCode so this source file itself stays free of
+// the raw separators (which would confuse the TS parser as line terminators).
+const JS_LINE_TERMINATOR_REGEX = new RegExp(
+  `[${String.fromCharCode(0x2028)}${String.fromCharCode(0x2029)}]`,
+  "g"
+)
+
+function serializeForInlineScript(value: unknown): string {
+  return JSON.stringify(value ?? "")
+    .replaceAll("</", "<\\/")
+    .replace(JS_LINE_TERMINATOR_REGEX, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`)
 }
 
 export function truncateOgDescription(input: string | null): string {
@@ -87,17 +108,21 @@ export function pickOgImage(images: unknown, origin: string): string {
 
 export function extractEventIdFromRequest(url: URL): string | null {
   const queryEventId = url.searchParams.get("eventId") ?? url.searchParams.get("event_id")
-  if (queryEventId) {
-    return queryEventId
-  }
+  const candidate =
+    queryEventId ??
+    (() => {
+      const pathParts = url.pathname.split("/").filter(Boolean)
+      const idx = pathParts.findIndex((part) => part === "share-og")
+      if (idx >= 0 && pathParts[idx + 1]) {
+        return decodeURIComponent(pathParts[idx + 1])
+      }
+      return null
+    })()
 
-  const pathParts = url.pathname.split("/").filter(Boolean)
-  const shareFunctionIndex = pathParts.findIndex((part) => part === "share-og")
-  if (shareFunctionIndex >= 0 && pathParts[shareFunctionIndex + 1]) {
-    return decodeURIComponent(pathParts[shareFunctionIndex + 1])
-  }
-
-  return null
+  if (!candidate) return null
+  // Reject non-UUIDs before hitting the DB. Postgres returns 22P02 for non-UUID
+  // input to a uuid column, which works correctly but pollutes Sentry breadcrumbs.
+  return UUID_PATTERN.test(candidate) ? candidate : null
 }
 
 function renderHtml(params: {
@@ -116,7 +141,7 @@ function renderHtml(params: {
   const escapedUrl = escapeHtml(params.ogUrl)
   const escapedVenue = escapeHtml(params.venueName ?? "Family Events")
   const escapedStart = escapeHtml(params.startDatetime ?? "")
-  const serializedEventId = JSON.stringify(params.eventId ?? "").replaceAll("</", "<\\/")
+  const serializedEventId = serializeForInlineScript(params.eventId)
 
   // ASCII flow (required by EXECUTE.md decision notes):
   //
