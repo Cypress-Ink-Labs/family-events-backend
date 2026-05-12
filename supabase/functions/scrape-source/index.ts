@@ -52,7 +52,7 @@ Deno.serve(async (req: Request) => {
     const results: SourceResult[] = []
 
     for (const source of dueSources) {
-      const result = await processSource(supabase, source, supabaseUrl, serviceRoleKey)
+      const result = await processSource(supabase, source)
       results.push(result)
     }
 

@@ -10,7 +10,8 @@ import { parseRssFeed } from "../parsers/rss.ts"
 import { parseWebsite } from "../parsers/website.ts"
 import { buildExistingEventIndex } from "./dedupe.ts"
 import { resolveCityTimezone } from "./schedule.ts"
-import { tagImportedEvent } from "./tag-fanout.ts"
+// tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
+// scrape-source now just enqueues, returning immediately.
 import type { EventSourceRow, ParsedEvent, RunStatus, SourceResult } from "./types.ts"
 
 const SOURCE_FETCH_TIMEOUT_MS = 10_000
@@ -394,9 +395,7 @@ async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]>
 
 export async function processSource(
   supabase: SupabaseClient,
-  source: EventSourceRow,
-  supabaseUrl: string,
-  serviceRoleKey: string
+  source: EventSourceRow
 ): Promise<SourceResult> {
   const { data: runRow, error: runInsertError } = await supabase
     .from("source_runs")
@@ -541,14 +540,37 @@ export async function processSource(
 
       eventsImported += 1
 
-      await tagImportedEvent(
-        supabaseUrl,
-        serviceRoleKey,
-        upsertedEvent.id,
-        parsed.title,
-        parsed.description,
-        runRow.id
-      )
+      // Enqueue tag-event work. The process-tag-queue worker drains the queue
+      // every minute. ON CONFLICT is implicit via the partial-unique index on
+      // (event_id) WHERE status IN ('pending','processing'); a duplicate row
+      // for the same active event raises 23505 which we swallow.
+      const { error: enqueueError } = await supabase
+        .from("event_tag_queue")
+        .insert({
+          event_id: upsertedEvent.id,
+          source_run_id: runRow.id,
+          trigger_type: "import",
+        })
+      if (enqueueError && enqueueError.code !== "23505") {
+        await captureEdgeException(
+          enqueueError,
+          errorContext(enqueueError, {
+            function: "scrape-source",
+            stage: "enqueue-tag",
+            event_id: upsertedEvent.id,
+            run_id: runId,
+          })
+        )
+        logEdgeEvent(
+          "error",
+          "failed to enqueue tag-event work",
+          errorContext(enqueueError, {
+            function: "scrape-source",
+            event_id: upsertedEvent.id,
+            run_id: runId,
+          })
+        )
+      }
 
       // Flush progress every N events so the UI shows live counts.
       if (eventsImported % PROGRESS_BATCH === 0) {
