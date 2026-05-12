@@ -416,6 +416,12 @@ export async function processSource(
   let eventsImported = 0
   let eventsSkipped = 0
   let errorMessage: string | null = null
+  // Counts non-fatal enqueue failures (e.g. transient RLS/network) so the run
+  // can be downgraded to 'partial' if any occurred. Fatal pipeline-deploy
+  // errors (queue table missing) are tracked separately and short-circuit
+  // the loop because no further work can succeed.
+  let enqueueFailures = 0
+  let pipelineSetupError: string | null = null
 
   // Flush live progress to source_runs so the UI can show incremental counts.
   const PROGRESS_BATCH = 5
@@ -541,9 +547,15 @@ export async function processSource(
       eventsImported += 1
 
       // Enqueue tag-event work. The process-tag-queue worker drains the queue
-      // every minute. ON CONFLICT is implicit via the partial-unique index on
-      // (event_id) WHERE status IN ('pending','processing'); a duplicate row
-      // for the same active event raises 23505 which we swallow.
+      // every minute. Three error classes are handled distinctly so the
+      // source_run row reflects pipeline health rather than just import counts:
+      //   - 23505 (already enqueued, partial-unique violation): benign, swallow
+      //   - 42P01 (table doesn't exist) → queue migration not deployed: fatal,
+      //     short-circuit and mark the whole run as 'error' so the admin
+      //     dashboard surfaces it instead of showing green while events are
+      //     silently un-tagged
+      //   - any other PostgrestError: count as a non-fatal failure; the run
+      //     downgrades to 'partial' if any occurred
       const { error: enqueueError } = await supabase
         .from("event_tag_queue")
         .insert({
@@ -570,6 +582,16 @@ export async function processSource(
             run_id: runId,
           })
         )
+
+        if (enqueueError.code === "42P01") {
+          // Queue table missing — phase-4 migration not applied to this DB.
+          // Continuing the loop is pointless because every subsequent enqueue
+          // will hit the same error. Surface it loudly.
+          pipelineSetupError =
+            "event_tag_queue table is missing. Run `supabase db push --linked` to apply phase-4 migrations, then `supabase functions deploy process-tag-queue --linked`."
+          break
+        }
+        enqueueFailures += 1
       }
 
       // Flush progress every N events so the UI shows live counts.
@@ -578,8 +600,20 @@ export async function processSource(
       }
     }
 
-    if (eventsImported === 0 && eventsFound > 0) {
+    // Status derivation precedence:
+    //   1. pipelineSetupError (queue table missing) → 'error' + actionable hint
+    //   2. found events but imported none → 'partial'
+    //   3. any non-fatal enqueue failures → 'partial' (events landed but
+    //      tag-event pipeline is unhealthy for some of them)
+    //   4. otherwise 'success' (default initial value)
+    if (pipelineSetupError) {
+      status = "error"
+      errorMessage = pipelineSetupError
+    } else if (eventsImported === 0 && eventsFound > 0) {
       status = "partial"
+    } else if (enqueueFailures > 0) {
+      status = "partial"
+      errorMessage = `Imported ${eventsImported} event${eventsImported === 1 ? "" : "s"} but ${enqueueFailures} failed to enqueue for tag-event classification (check Sentry for details).`
     }
   } catch (error) {
     status = "error"
