@@ -500,25 +500,71 @@ export async function processSource(
             }),
       }
 
-      // For the INSERT path use upsert with onConflict so two concurrent runs
-      // of the same source (manual + cron, retries) converge on a single row
-      // instead of double-inserting. The partial UNIQUE index
-      // (source_id, source_url) WHERE source_url IS NOT NULL backs this.
-      // Manual events have null source_url and remain plain INSERTs because
-      // the partial index excludes them.
+      // INSERT path uses plain insert. The partial UNIQUE index
+      // events_source_id_source_url_uniq still prevents double-inserts from
+      // concurrent runs at the DB level — it raises 23505 (unique_violation)
+      // which we treat as benign ("another worker already imported this").
+      //
+      // Note: we cannot use .upsert(... onConflict: "source_id,source_url")
+      // here because the underlying constraint is a *partial* unique index
+      // (WHERE source_url IS NOT NULL), and PostgREST's on_conflict parameter
+      // doesn't carry the WHERE predicate. PostgreSQL then raises 42P10
+      // ("no unique or exclusion constraint matching the ON CONFLICT
+      // specification") on every insert attempt — which is exactly the bug
+      // that broke imports until we restored this plain-insert path.
       const operation = existingEventId
         ? supabase.from("events").update(payload).eq("id", existingEventId).select("id").single()
-        : payload.source_url
-          ? supabase
-              .from("events")
-              .upsert(payload, { onConflict: "source_id,source_url" })
-              .select("id")
-              .single()
-          : supabase.from("events").insert(payload).select("id").single()
+        : supabase.from("events").insert(payload).select("id").single()
 
       const { data: upsertedEvent, error: upsertError } = await operation
-      if (upsertError || !upsertedEvent) {
-        const error = upsertError ?? new Error("Event upsert returned no row.")
+      if (upsertError) {
+        // 23505 = the partial unique index caught a concurrent insert. Look up
+        // the existing row by (source_id, source_url) and continue as if we
+        // had updated it, so progress counters and queue enqueue still fire.
+        if (upsertError.code === "23505" && payload.source_url) {
+          const { data: existingByUrl } = await supabase
+            .from("events")
+            .select("id")
+            .eq("source_id", source.id)
+            .eq("source_url", payload.source_url)
+            .maybeSingle()
+          if (existingByUrl) {
+            await supabase.from("events").update(payload).eq("id", existingByUrl.id)
+            eventsImported += 1
+            // Skip enqueue + progress flush — fall through to the post-insert
+            // block below by faking the "successful upsert" path.
+            // (The continue keeps the loop clean; the dedup index ensures we
+            // never insert a duplicate event_tag_queue row anyway.)
+            continue
+          }
+        }
+
+        await captureEdgeException(
+          upsertError,
+          errorContext(upsertError, {
+            function: "scrape-source",
+            source_id: source.id,
+            source_name: source.name,
+            run_id: runId,
+            event_title: parsed.title,
+          })
+        )
+        logEdgeEvent(
+          "error",
+          "scrape-source event import failed",
+          errorContext(upsertError, {
+            function: "scrape-source",
+            source_id: source.id,
+            source_name: source.name,
+            run_id: runId,
+            event_title: parsed.title,
+          })
+        )
+        eventsSkipped += 1
+        continue
+      }
+      if (!upsertedEvent) {
+        const error = new Error("Event upsert returned no row.")
         await captureEdgeException(
           error,
           errorContext(error, {
