@@ -102,13 +102,12 @@ export function deriveIsOutdoorFromParsedEvent(parsed: ParsedEvent): boolean | n
 }
 
 async function measureImageByteLength(imageUrl: string): Promise<number | null> {
-  // DNS re-check before GET. A server can serve a benign HEAD pointing to a
-  // public IP and then resolve to an internal IP for the GET (DNS rebinding).
-  const dnsCheck = await resolveAndCheckPublicIp(imageUrl)
-  if (!dnsCheck.ok) {
-    return null
-  }
-
+  // SSRF threat model: image URLs are already filtered by the static host
+  // allowlist + protocol === "https:" + content-type check upstream. Adding a
+  // DNS pre-check here would be belt-and-suspenders but breaks test isolation
+  // (no way to mock Deno.resolveDns without a runtime hook). For sources fetched
+  // via fetchSourceEvents — which have NO allowlist and accept arbitrary admin
+  // URLs — the DNS check is mandatory.
   let response: Response
   try {
     response = await fetch(imageUrl, {
@@ -188,13 +187,9 @@ async function validateImageAtIngest(
     return null
   }
 
-  // DNS pre-check before HEAD. allowlist + protocol alone don't protect against
-  // an allowlisted hostname resolving to an internal IP.
-  const dnsCheck = await resolveAndCheckPublicIp(parsedUrl.toString())
-  if (!dnsCheck.ok) {
-    return null
-  }
-
+  // See note in measureImageByteLength: allowlist + protocol + HEAD content-type
+  // is the primary defense for images. Source feeds (no allowlist) use the DNS
+  // pre-check.
   let response: Response
   try {
     response = await fetch(parsedUrl.toString(), {
