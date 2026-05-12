@@ -500,9 +500,21 @@ export async function processSource(
             }),
       }
 
+      // For the INSERT path use upsert with onConflict so two concurrent runs
+      // of the same source (manual + cron, retries) converge on a single row
+      // instead of double-inserting. The partial UNIQUE index
+      // (source_id, source_url) WHERE source_url IS NOT NULL backs this.
+      // Manual events have null source_url and remain plain INSERTs because
+      // the partial index excludes them.
       const operation = existingEventId
         ? supabase.from("events").update(payload).eq("id", existingEventId).select("id").single()
-        : supabase.from("events").insert(payload).select("id").single()
+        : payload.source_url
+          ? supabase
+              .from("events")
+              .upsert(payload, { onConflict: "source_id,source_url" })
+              .select("id")
+              .single()
+          : supabase.from("events").insert(payload).select("id").single()
 
       const { data: upsertedEvent, error: upsertError } = await operation
       if (upsertError || !upsertedEvent) {
@@ -576,28 +588,47 @@ export async function processSource(
         run_id: runId,
       })
     )
+  } finally {
+    // Finalization MUST run even when the catch handler itself throws (e.g.
+    // a logging call fails) or when an unexpected error escapes after the
+    // catch. Otherwise source_runs is left in 'running' state forever.
+    try {
+      await supabase
+        .from("source_runs")
+        .update({
+          completed_at: new Date().toISOString(),
+          status,
+          events_found: eventsFound,
+          events_imported: eventsImported,
+          events_skipped: eventsSkipped,
+          error_log: errorMessage,
+        })
+        .eq("id", runId)
+
+      await supabase
+        .from("event_sources")
+        .update({
+          last_scraped_at: new Date().toISOString(),
+          last_status: status,
+          // Only reset error_count on full success. A 'partial' run (events
+          // found, none imported) used to clear the counter and mask persistent
+          // failures; keep accumulating until a clean success.
+          error_count: status === "success" ? 0 : source.error_count + (status === "error" ? 1 : 0),
+        })
+        .eq("id", source.id)
+    } catch (finalizeError) {
+      await captureEdgeException(
+        finalizeError,
+        errorContext(finalizeError, {
+          function: "scrape-source",
+          source_id: source.id,
+          source_name: source.name,
+          run_id: runId,
+          stage: "finalize",
+        })
+      )
+    }
   }
-
-  await supabase
-    .from("source_runs")
-    .update({
-      completed_at: new Date().toISOString(),
-      status,
-      events_found: eventsFound,
-      events_imported: eventsImported,
-      events_skipped: eventsSkipped,
-      error_log: errorMessage,
-    })
-    .eq("id", runId)
-
-  await supabase
-    .from("event_sources")
-    .update({
-      last_scraped_at: new Date().toISOString(),
-      last_status: status,
-      error_count: status === "error" ? source.error_count + 1 : 0,
-    })
-    .eq("id", source.id)
 
   return {
     sourceId: source.id,
