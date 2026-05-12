@@ -16,6 +16,34 @@ interface NominatimHit {
 }
 
 const NOMINATIM_UA = "family-events-ui/1.0 (geocoder)"
+const NOMINATIM_RATE_LIMIT_MS = 1_000
+
+let lastNominatimRequestAt = 0
+let nominatimQueue: Promise<void> = Promise.resolve()
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function waitForNominatimSlot(): Promise<void> {
+  let releaseQueue: (() => void) | undefined
+  const queueTail = new Promise<void>((resolve) => {
+    releaseQueue = resolve
+  })
+  const previousQueue = nominatimQueue
+  nominatimQueue = queueTail
+
+  await previousQueue
+  try {
+    const elapsed = Date.now() - lastNominatimRequestAt
+    if (elapsed < NOMINATIM_RATE_LIMIT_MS) {
+      await sleep(NOMINATIM_RATE_LIMIT_MS - elapsed)
+    }
+    lastNominatimRequestAt = Date.now()
+  } finally {
+    releaseQueue?.()
+  }
+}
 
 /**
  * Query Nominatim for a place. Returns lat/lng or null if not found / error.
@@ -27,6 +55,7 @@ export async function geocodeViaNominatim(query: string): Promise<GeocodeResult 
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
 
   try {
+    await waitForNominatimSlot()
     const res = await fetch(url, {
       headers: {
         "User-Agent": NOMINATIM_UA,
