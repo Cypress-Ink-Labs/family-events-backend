@@ -11,9 +11,11 @@ isn't being delivered.
 | Signup confirmation                           | `supabase.auth.signUp()`           | **Supabase Auth** (via Resend SMTP) |
 | Password reset                                | `supabase.auth.resetPasswordFor…`  | **Supabase Auth** (via Resend SMTP) |
 | Magic link / OTP                              | `supabase.auth.signInWithOtp()`    | **Supabase Auth** (via Resend SMTP) |
+| Magic link (invite-gated, sign-in page)       | `useAuth().sendMagicLink(...)`     | **Supabase Auth** (via Resend SMTP) |
 | Email change confirmation                     | `supabase.auth.updateUser({email})`| **Supabase Auth** (via Resend SMTP) |
 | Admin notification: "new invite request"      | `public.request_invite(...)` RPC   | **`notify-email` edge function**    |
 | Requester notification: "your code is XYZ"    | `admin_approve_invite_request` RPC | **`notify-email` edge function**    |
+| Requester notification: "request not approved"| `admin_reject_invite_request` RPC  | **`notify-email` edge function**    |
 
 The first four are **Auth-flow emails** — built into Supabase Auth, with
 templates editable in the dashboard. The bottom two are **application
