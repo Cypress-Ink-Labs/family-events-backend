@@ -29,7 +29,17 @@ enabled = true
 [auth]
 enabled                  = true
 site_url                 = "http://localhost:5173"
-additional_redirect_urls = ["http://localhost:5173"]
+# Keep this list in sync with Supabase Dashboard → Authentication → URL
+# Configuration → Redirect URLs. The dashboard list governs the hosted
+# project; this list governs `supabase start` only. Both must include any
+# path the client passes as `redirectTo` (e.g. /reset-password) or auth
+# silently falls back to site_url.
+additional_redirect_urls = [
+  "http://localhost:5173",
+  "http://localhost:5173/**",
+  "https://family-events.up.railway.app",
+  "https://family-events.up.railway.app/**",
+]
 jwt_expiry               = 3600
 enable_signup            = true
 

@@ -34,6 +34,10 @@ type Payload =
       code: string
       app_url?: string
     }
+  | {
+      kind: "request_rejected"
+      email: string
+    }
 
 function escapeHtml(value: string): string {
   return value
@@ -129,6 +133,29 @@ function renderRequestApproved(
   }
 }
 
+function renderRequestRejected(
+  payload: Extract<Payload, { kind: "request_rejected" }>
+): RenderedEmail {
+  return {
+    to: payload.email,
+    subject: "Update on your Family Events invite request",
+    html: `
+      <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; color: #0f172a; max-width: 560px;">
+        <h2 style="margin-bottom: 8px;">About your invite request</h2>
+        <p style="margin: 0 0 16px;">
+          Thanks for asking to join Family Events. After review, we're not able to approve your request at this time.
+        </p>
+        <p style="color: #475569; font-size: 13px;">
+          No further action is needed on your end. If you think this was a mistake, you're welcome to reach out to the person who runs the site.
+        </p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
+          Didn't request this? You can ignore this email.
+        </p>
+      </div>
+    `.trim(),
+  }
+}
+
 async function sendViaResend(args: {
   apiKey: string
   from: string
@@ -203,6 +230,8 @@ Deno.serve(async (req: Request) => {
       rendered = renderAdminRequest(payload, adminEmail, appUrl)
     } else if (payload.kind === "request_approved") {
       rendered = renderRequestApproved(payload, appUrl)
+    } else if (payload.kind === "request_rejected") {
+      rendered = renderRequestRejected(payload)
     } else {
       return new Response(JSON.stringify({ error: "unknown kind" }), {
         status: 400,
