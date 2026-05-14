@@ -59,5 +59,4 @@ revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
 
 comment on function public.delete_my_account() is
-    'Deletes the calling user''s account and per-user app data. ' ||
-    'Anon-callable: NO. Used by web /profile and iOS Profile sheet.';
+    'Deletes the calling user''s account and per-user app data. Anon-callable: NO. Used by web /profile and iOS Profile sheet.';
