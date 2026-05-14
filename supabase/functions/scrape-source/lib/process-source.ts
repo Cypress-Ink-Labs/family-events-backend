@@ -356,7 +356,7 @@ async function readResponseBodyCapped(response: Response, maxBytes: number): Pro
   return new TextDecoder("utf-8").decode(buf)
 }
 
-async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]> {
+async function fetchSourceEvents(source: EventSourceRow, timezone: string): Promise<ParsedEvent[]> {
   if (source.source_type === "manual") {
     return []
   }
@@ -390,7 +390,7 @@ async function fetchSourceEvents(source: EventSourceRow): Promise<ParsedEvent[]>
   if (source.source_type === "ical") {
     return parseIcalFeed(content)
   }
-  return parseWebsite(content, source.url)
+  return parseWebsite(content, source.url, timezone)
 }
 
 export async function processSource(
@@ -437,13 +437,13 @@ export async function processSource(
   }
 
   try {
-    const parsedEvents = await fetchSourceEvents(source)
+    const timezone = await resolveCityTimezone(supabase, source.city_id)
+    const parsedEvents = await fetchSourceEvents(source, timezone)
     eventsFound = parsedEvents.length
 
     // Write total found immediately so the UI shows "X found" while import runs.
     await flushProgress()
 
-    const timezone = await resolveCityTimezone(supabase, source.city_id)
     const index = await buildExistingEventIndex(supabase, source, parsedEvents)
     const sourceCityContext = await fetchSourceCityContext(supabase, source.city_id)
 

@@ -1,7 +1,16 @@
 import { DOMParser } from "@b-fuze/deno-dom"
-import { extractPrice, parseIsoDate } from "../../_shared/parsing.ts"
+import {
+  extractPrice,
+  normalizeExtractedText,
+  parseIsoDate,
+  stripHtml,
+} from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import type { ParsedEvent } from "../lib/types.ts"
+
+type StructuredEvent = ParsedEvent & {
+  sourceUrl: string | null
+}
 
 function toArray(value: unknown): unknown[] {
   if (Array.isArray(value)) {
@@ -27,7 +36,7 @@ function eventNodes(value: unknown): Record<string, unknown>[] {
 
 function pickText(value: unknown): string | null {
   if (typeof value === "string") {
-    const trimmed = value.trim()
+    const trimmed = stripHtml(value)
     return trimmed.length > 0 ? trimmed : null
   }
   if (value && typeof value === "object") {
@@ -51,6 +60,120 @@ function extractImageUrls(value: unknown): string[] {
   return []
 }
 
+function getTimeZoneOffset(date: Date, timeZone: string): number {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })
+
+  const parts = formatter.formatToParts(date)
+  const parsed = {
+    year: Number(parts.find((part) => part.type === "year")?.value),
+    month: Number(parts.find((part) => part.type === "month")?.value),
+    day: Number(parts.find((part) => part.type === "day")?.value),
+    hour: Number(parts.find((part) => part.type === "hour")?.value),
+    minute: Number(parts.find((part) => part.type === "minute")?.value),
+    second: Number(parts.find((part) => part.type === "second")?.value),
+  }
+
+  const asUtc = Date.UTC(
+    parsed.year,
+    parsed.month - 1,
+    parsed.day,
+    parsed.hour,
+    parsed.minute,
+    parsed.second
+  )
+
+  return asUtc - date.getTime()
+}
+
+function localDateTimeToIso(
+  dateStamp: string,
+  hour: number,
+  minute: number,
+  timeZone: string
+): string | null {
+  const match = dateStamp.match(/^(\d{4})(\d{2})(\d{2})$/)
+  if (!match) {
+    return null
+  }
+
+  const [, year, month, day] = match
+  const utcGuess = Date.UTC(Number(year), Number(month) - 1, Number(day), hour, minute, 0)
+
+  try {
+    const initialOffset = getTimeZoneOffset(new Date(utcGuess), timeZone)
+    let adjusted = utcGuess - initialOffset
+    const followupOffset = getTimeZoneOffset(new Date(adjusted), timeZone)
+    if (followupOffset !== initialOffset) {
+      adjusted = utcGuess - followupOffset
+    }
+    return new Date(adjusted).toISOString()
+  } catch {
+    return new Date(utcGuess).toISOString()
+  }
+}
+
+function parseClock(value: string): { hour: number; minute: number } | null {
+  const match = value.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i)
+  if (!match) {
+    return null
+  }
+
+  let hour = Number(match[1])
+  const minute = match[2] ? Number(match[2]) : 0
+  if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+    return null
+  }
+
+  const period = match[3].toLowerCase()
+  if (period === "p" && hour !== 12) {
+    hour += 12
+  }
+  if (period === "a" && hour === 12) {
+    hour = 0
+  }
+
+  return { hour, minute }
+}
+
+function parseMecTimeRange(
+  dateStamp: string,
+  rawTime: string,
+  timeZone: string
+): { startDatetime: string; endDatetime: string | null } | null {
+  const normalized = normalizeExtractedText(rawTime)
+    .replace(/^[^\d]+/, "")
+    .replace(/\s+/g, " ")
+  const [rawStart, rawEnd] = normalized.split(/\s*(?:-|–|—|to)\s*/i)
+  const startClock = parseClock(rawStart ?? "")
+  if (!startClock) {
+    return null
+  }
+
+  const startDatetime = localDateTimeToIso(dateStamp, startClock.hour, startClock.minute, timeZone)
+  if (!startDatetime) {
+    return null
+  }
+
+  const endClock = parseClock(rawEnd ?? "")
+  let endDatetime = endClock
+    ? localDateTimeToIso(dateStamp, endClock.hour, endClock.minute, timeZone)
+    : null
+  if (endDatetime && new Date(endDatetime).getTime() <= new Date(startDatetime).getTime()) {
+    endDatetime = new Date(new Date(endDatetime).getTime() + 24 * 60 * 60 * 1000).toISOString()
+  }
+
+  return { startDatetime, endDatetime }
+}
+
 function normalizeUrl(value: string | null, baseUrl: string): string | null {
   if (!value) {
     return null
@@ -62,9 +185,21 @@ function normalizeUrl(value: string | null, baseUrl: string): string | null {
   }
 }
 
-export function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(html, "text/html")
+function offerPrice(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}
+
+function parseStructuredEvents(
+  doc: ReturnType<DOMParser["parseFromString"]>,
+  sourceUrl: string
+): StructuredEvent[] {
   if (!doc) {
     return []
   }
@@ -84,9 +219,7 @@ export function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
     }
   }
 
-  const seenKeys = new Set<string>()
-  const events: ParsedEvent[] = []
-
+  const events: StructuredEvent[] = []
   for (const candidate of eventCandidates) {
     const title = pickText(candidate.name)
     if (!title) {
@@ -109,11 +242,6 @@ export function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
       pickText((candidate.location as Record<string, unknown> | undefined)?.["streetAddress"]) ??
       venueName
 
-    const key = `${title.toLowerCase()}::${startDatetime}`
-    if (seenKeys.has(key)) {
-      continue
-    }
-
     const webImages: string[] = []
     for (const image of extractImageUrls(candidate.image)) {
       const normalized = normalizeUrl(image, sourceUrl)
@@ -126,11 +254,10 @@ export function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
     }
 
     const offers = candidate.offers as Record<string, unknown> | undefined
-    const priceFromOffers = typeof offers?.price === "number" ? offers.price : null
+    const priceFromOffers = offerPrice(offers?.price)
     const isFreeFromOffers = priceFromOffers === 0
     const priceInfo = extractPrice(description)
 
-    seenKeys.add(key)
     events.push({
       title,
       description: description.slice(0, 500),
@@ -144,6 +271,107 @@ export function parseWebsite(html: string, sourceUrl: string): ParsedEvent[] {
       price: priceFromOffers ?? priceInfo.price,
       isFree: isFreeFromOffers || priceInfo.isFree,
     })
+  }
+
+  return events
+}
+
+function parseMecCalendarEvents(
+  doc: ReturnType<DOMParser["parseFromString"]>,
+  sourceUrl: string,
+  timeZone: string,
+  structuredEvents: StructuredEvent[]
+): ParsedEvent[] {
+  if (!doc) {
+    return []
+  }
+
+  const structuredByUrl = new Map(
+    structuredEvents
+      .filter((event) => event.sourceUrl)
+      .map((event) => [event.sourceUrl as string, event])
+  )
+  const seenKeys = new Set<string>()
+  const events: ParsedEvent[] = []
+
+  for (const dayNode of doc.querySelectorAll(".mec-calendar-day[data-mec-cell]")) {
+    const dateStamp = dayNode.getAttribute("data-mec-cell") ?? ""
+    for (const link of dayNode.querySelectorAll(
+      "a.event-single-link-simple[data-tooltip-content]"
+    )) {
+      const title = pickText(link.querySelector(".mec-event-title")?.textContent)
+      if (!title) {
+        continue
+      }
+
+      const tooltipSelector = link.getAttribute("data-tooltip-content")
+      const tooltip = tooltipSelector ? doc.querySelector(tooltipSelector) : null
+      const parsedTime = parseMecTimeRange(
+        dateStamp,
+        tooltip?.querySelector(".mec-tooltip-event-time")?.textContent ?? "",
+        timeZone
+      )
+      if (!parsedTime) {
+        continue
+      }
+
+      const eventUrl = normalizeUrl(link.getAttribute("href"), sourceUrl) ?? sourceUrl
+      const structured = structuredByUrl.get(eventUrl)
+      const rawDescription = tooltip?.querySelector(".mec-tooltip-event-desc")?.textContent ?? ""
+      const description =
+        structured?.description ?? stripHtml(rawDescription.replace(/\s*,\s*\.\.\.$/, ""))
+      const tooltipImage = tooltip?.querySelector("img")?.getAttribute("src") ?? null
+      const imageUrl = structured?.imageUrl ?? normalizeUrl(tooltipImage, sourceUrl)
+      const images = structured?.images.length ? structured.images : imageUrl ? [imageUrl] : []
+      const priceInfo = extractPrice(description)
+
+      const key = `${eventUrl}::${parsedTime.startDatetime}`
+      if (seenKeys.has(key)) {
+        continue
+      }
+
+      seenKeys.add(key)
+      events.push({
+        title,
+        description: description.slice(0, 500),
+        startDatetime: parsedTime.startDatetime,
+        endDatetime: parsedTime.endDatetime,
+        venueName: structured?.venueName ?? null,
+        address: structured?.address ?? structured?.venueName ?? null,
+        sourceUrl: eventUrl,
+        imageUrl,
+        images,
+        price: structured?.price ?? priceInfo.price,
+        isFree: structured?.isFree ?? priceInfo.isFree,
+      })
+    }
+  }
+
+  return events
+}
+
+export function parseWebsite(html: string, sourceUrl: string, timeZone = "UTC"): ParsedEvent[] {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, "text/html")
+  if (!doc) {
+    return []
+  }
+
+  const structuredEvents = parseStructuredEvents(doc, sourceUrl)
+  const mecEvents = parseMecCalendarEvents(doc, sourceUrl, timeZone, structuredEvents)
+  if (mecEvents.length > 0) {
+    return mecEvents
+  }
+
+  const seenKeys = new Set<string>()
+  const events: ParsedEvent[] = []
+  for (const structured of structuredEvents) {
+    const key = `${structured.title.toLowerCase()}::${structured.startDatetime}`
+    if (seenKeys.has(key)) {
+      continue
+    }
+    seenKeys.add(key)
+    events.push(structured)
   }
 
   return events

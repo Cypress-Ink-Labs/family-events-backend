@@ -61,6 +61,9 @@ describe("decodeHtml", () => {
     expect(decodeHtml("&lt;tag&gt;")).toBe("<tag>")
     expect(decodeHtml("&quot;hi&quot;")).toBe('"hi"')
     expect(decodeHtml("it&#39;s")).toBe("it's")
+    expect(decodeHtml("Farmers &#038; Artisans &ndash; free&nbsp;event")).toBe(
+      "Farmers & Artisans - free event"
+    )
   })
 
   it("decodes hex numeric character references", () => {
@@ -120,6 +123,12 @@ describe("stripHtml", () => {
   it("handles self-closing tags", () => {
     expect(stripHtml("before<br/>after")).toBe("before after")
   })
+
+  it("adds spaces before labels that source HTML runs together", () => {
+    expect(stripHtml("May 26Time: 5:30–6:30 PMWhat to Bring: gloves")).toBe(
+      "May 26 Time: 5:30-6:30 PM What to Bring: gloves"
+    )
+  })
 })
 
 describe("extractPrice", () => {
@@ -150,7 +159,10 @@ describe("extractPrice", () => {
   })
 
   it("returns null price when no info present", () => {
-    expect(extractPrice("See website for details")).toEqual({ price: null, isFree: false })
+    expect(extractPrice("See website for details")).toEqual({
+      price: null,
+      isFree: false,
+    })
   })
 
   it("free patterns beat dollar-sign patterns", () => {

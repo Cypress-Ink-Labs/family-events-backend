@@ -51,12 +51,33 @@ export function parseIcalDate(value: string | null): string | null {
 }
 
 export function decodeHtml(value: string): string {
+  const namedEntities: Record<string, string> = {
+    amp: "&",
+    apos: "'",
+    gt: ">",
+    hellip: "...",
+    laquo: "<<",
+    ldquo: '"',
+    lsquo: "'",
+    mdash: "-",
+    nbsp: " ",
+    ndash: "-",
+    quot: '"',
+    raquo: ">>",
+    rdquo: '"',
+    rsquo: "'",
+    shy: "",
+    times: "x",
+    lt: "<",
+  }
+
   return value
     .replaceAll("&amp;", "&")
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">")
     .replaceAll("&quot;", '"')
     .replaceAll("&#39;", "'")
+    .replaceAll("&apos;", "'")
     .replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => {
       const codePoint = parseInt(hex, 16)
       return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
@@ -69,6 +90,25 @@ export function decodeHtml(value: string): string {
         ? String.fromCodePoint(codePoint)
         : match
     })
+    .replace(/&([a-zA-Z][a-zA-Z0-9]+);/g, (match, entityName) => {
+      return namedEntities[entityName.toLowerCase()] ?? match
+    })
+}
+
+export function normalizeExtractedText(value: string): string {
+  return decodeHtml(value)
+    .replaceAll("\u00a0", " ")
+    .replace(/[–—]/g, "-")
+    .replaceAll(/\s+/g, " ")
+    .replace(
+      /([a-z0-9).!?])\s*(Spring Dates|Dates|Date|Time|Location|Meeting Point|Where|When|Cost|About|Themes|What to Bring):/gi,
+      "$1 $2:"
+    )
+    .replace(
+      /\b([AP])\.?M\.?\s*(Spring Dates|Dates|Date|Time|Location|Meeting Point|Where|When|Cost|About|Themes|What to Bring):/gi,
+      "$1M $2:"
+    )
+    .trim()
 }
 
 /**
@@ -84,9 +124,7 @@ export function unescapeIcalText(value: string): string {
 }
 
 export function stripHtml(value: string): string {
-  return decodeHtml(value.replaceAll(/<[^>]*>/g, " "))
-    .replaceAll(/\s+/g, " ")
-    .trim()
+  return normalizeExtractedText(value.replaceAll(/<[^>]*>/g, " "))
 }
 
 export function extractPrice(text: string): { price: number | null; isFree: boolean } {
