@@ -66,11 +66,12 @@ function ipv6BlockedReason(ip: string): string | null {
 }
 
 async function resolveHost(hostname: string): Promise<string[]> {
+  const deno = Deno as unknown as {
+    resolveDns: (host: string, kind: "A" | "AAAA") => Promise<string[]>
+  }
   const results = await Promise.allSettled([
-    // deno-lint-ignore no-explicit-any
-    (Deno as any).resolveDns(hostname, "A"),
-    // deno-lint-ignore no-explicit-any
-    (Deno as any).resolveDns(hostname, "AAAA"),
+    deno.resolveDns(hostname, "A"),
+    deno.resolveDns(hostname, "AAAA"),
   ])
   const ips: string[] = []
   for (const r of results) {
