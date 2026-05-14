@@ -1,0 +1,19 @@
+{
+  "plugins": ["react", "typescript", "unicorn", "oxc"],
+  "ignorePatterns": ["dist", "node_modules"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "react/exhaustive-deps": "warn",
+    "react/rules-of-hooks": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "warn"
+  }
+}

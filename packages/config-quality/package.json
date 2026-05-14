@@ -1,0 +1,10 @@
+{
+  "name": "@family-events/config-quality",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./oxlint.base.json": "./oxlint.base.json",
+    "./oxfmt.base.json": "./oxfmt.base.json"
+  }
+}
