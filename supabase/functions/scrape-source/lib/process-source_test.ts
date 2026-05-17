@@ -139,4 +139,41 @@ if (typeof Deno !== "undefined") {
       globalThis.fetch = originalFetch
     }
   })
+
+  Deno.test("sanitizeImagesForIngest validates image candidates with bounded concurrency", async () => {
+    const originalFetch = globalThis.fetch
+    let active = 0
+    let maxActive = 0
+    try {
+      globalThis.fetch = (async (input: string | URL | Request) => {
+        const url = new URL(
+          typeof input === "string" ? input : input instanceof URL ? input : input.url
+        )
+        active += 1
+        maxActive = Math.max(maxActive, active)
+        await new Promise((resolve) => setTimeout(resolve, 20))
+        active -= 1
+        return new Response(null, {
+          status: 200,
+          headers: { "content-type": "image/jpeg", "content-length": "1024" },
+        })
+      }) as typeof fetch
+
+      const parsed = buildParsedEvent({
+        images: [
+          "https://events.example.com/1.jpg",
+          "https://events.example.com/2.jpg",
+          "https://events.example.com/3.jpg",
+          "https://events.example.com/4.jpg",
+        ],
+      })
+
+      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
+      assertEquals(images.length, 4)
+      assertEquals(maxActive, 2)
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
 }
