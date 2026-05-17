@@ -18,6 +18,8 @@ const SOURCE_MAX_BYTES = 5 * 1024 * 1024 // 5 MB cap on feed body to prevent OOM
 const IMAGE_HEAD_TIMEOUT_MS = 5_000
 const IMAGE_MAX_BYTES = 2 * 1024 * 1024
 const MAX_IMAGES_PER_EVENT = 5
+const IMAGE_VALIDATION_CONCURRENCY = 2
+const IMAGE_VALIDATION_TIMEOUT_MS = 6_000
 const IMAGE_HOST_ALLOWLIST_ENV = "SCRAPER_IMAGE_HOST_ALLOWLIST"
 const LEGACY_IMAGE_HOST_ALLOWLIST_ENV = "SCRAPE_IMAGE_HOST_ALLOWLIST"
 
@@ -244,6 +246,17 @@ async function validateImageAtIngest(
   return finalUrl.toString()
 }
 
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | null> {
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(() => resolve(null), timeoutMs)
+    promise
+      .then((value) => resolve(value))
+      .catch(() => resolve(null))
+      .finally(() => clearTimeout(timeoutId))
+  })
+}
+
 export async function sanitizeImagesForIngest(
   parsed: ParsedEvent,
   sourceUrl: string
@@ -264,13 +277,29 @@ export async function sanitizeImagesForIngest(
   ]
 
   const validImages: string[] = []
-  for (const imageCandidate of imageCandidates) {
-    if (validImages.length >= MAX_IMAGES_PER_EVENT) {
-      break
-    }
-    const validatedImage = await validateImageAtIngest(imageCandidate, allowedHosts)
-    if (validatedImage && !validImages.includes(validatedImage)) {
+  let cursor = 0
+
+  while (cursor < imageCandidates.length && validImages.length < MAX_IMAGES_PER_EVENT) {
+    const batch = imageCandidates.slice(cursor, cursor + IMAGE_VALIDATION_CONCURRENCY)
+    cursor += batch.length
+
+    const results = await Promise.all(
+      batch.map((imageCandidate) =>
+        withTimeout(
+          validateImageAtIngest(imageCandidate, allowedHosts),
+          IMAGE_VALIDATION_TIMEOUT_MS
+        )
+      )
+    )
+
+    for (const validatedImage of results) {
+      if (!validatedImage || validImages.includes(validatedImage)) {
+        continue
+      }
       validImages.push(validatedImage)
+      if (validImages.length >= MAX_IMAGES_PER_EVENT) {
+        break
+      }
     }
   }
 
@@ -332,20 +361,27 @@ async function readResponseBodyCapped(response: Response, maxBytes: number): Pro
   const reader = response.body.getReader()
   const chunks: Uint8Array[] = []
   let total = 0
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      total += value.byteLength
-      if (total > maxBytes) {
-        await reader.cancel()
-        throw new Error(`Response body exceeded cap of ${maxBytes} bytes`)
-      }
-      chunks.push(value)
+
+  const readNextChunk = async (): Promise<void> => {
+    const { done, value } = await reader.read()
+    if (done) return
+
+    total += value.byteLength
+    if (total > maxBytes) {
+      await reader.cancel()
+      throw new Error(`Response body exceeded cap of ${maxBytes} bytes`)
     }
+
+    chunks.push(value)
+    await readNextChunk()
+  }
+
+  try {
+    await readNextChunk()
   } finally {
     reader.releaseLock()
   }
+
   const buf = new Uint8Array(total)
   let offset = 0
   for (const c of chunks) {

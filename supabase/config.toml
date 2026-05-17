@@ -65,13 +65,13 @@ policy         = "oneshot"
 inspector_port = 55326
 
 [functions.scrape-source]
-verify_jwt = false
+verify_jwt = true
 
 [functions.tag-event]
-verify_jwt = false
+verify_jwt = true
 
 [functions.share-og]
-verify_jwt = false
+verify_jwt = true
 
 [functions.notify-email]
-verify_jwt = false
+verify_jwt = true
