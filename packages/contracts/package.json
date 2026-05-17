@@ -18,8 +18,6 @@
   },
   "devDependencies": {
     "@family-events/config-quality": "workspace:*",
-    "oxfmt": "^0.49.0",
-    "typescript": "~6.0.3",
-    "vitest": "^4.1.6"
+    "@family-events/config-typescript": "workspace:*"
   }
 }
