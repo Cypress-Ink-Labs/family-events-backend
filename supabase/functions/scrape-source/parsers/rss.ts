@@ -8,6 +8,7 @@ import {
 } from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import type { ParsedEvent } from "../lib/types.ts"
+import type { SourceParser } from "./_lib/types.ts"
 
 type XmlObject = Record<string, unknown>
 
@@ -229,4 +230,14 @@ export function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
   }
 
   return results
+}
+
+export const rssParser: SourceParser<"rss"> = {
+  type: "rss",
+  async fetchAndParse(source, ctx) {
+    const xml = await ctx.fetchText(source.url, {
+      accept: "application/rss+xml,application/atom+xml,application/xml,text/xml,*/*",
+    })
+    return parseRssFeed(xml, source.url)
+  },
 }

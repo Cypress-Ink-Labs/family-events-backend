@@ -7,6 +7,7 @@ import {
 } from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import type { ParsedEvent } from "../lib/types.ts"
+import type { SourceParser } from "./_lib/types.ts"
 
 interface ParsedIcalLine {
   key: string
@@ -210,4 +211,14 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
   }
 
   return events
+}
+
+export const icalParser: SourceParser<"ical"> = {
+  type: "ical",
+  async fetchAndParse(source, ctx) {
+    const content = await ctx.fetchText(source.url, {
+      accept: "text/calendar,application/calendar+json,*/*",
+    })
+    return parseIcalFeed(content)
+  },
 }

@@ -5,9 +5,8 @@ import { buildGeocodeQuery, geocodeViaNominatim } from "../../_shared/geocode.ts
 import { dedupKey } from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import { resolveAndCheckPublicIp } from "../../_shared/url-resolve.ts"
-import { parseIcalFeed } from "../parsers/ical.ts"
-import { parseRssFeed } from "../parsers/rss.ts"
-import { parseWebsite } from "../parsers/website.ts"
+import { parsers } from "../parsers/index.ts"
+import type { ParserContext } from "../parsers/_lib/context.ts"
 import { buildExistingEventIndex } from "./dedupe.ts"
 import { resolveCityTimezone } from "./schedule.ts"
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
@@ -356,23 +355,21 @@ async function readResponseBodyCapped(response: Response, maxBytes: number): Pro
   return new TextDecoder("utf-8").decode(buf)
 }
 
-async function fetchSourceEvents(source: EventSourceRow, timezone: string): Promise<ParsedEvent[]> {
-  if (source.source_type === "manual") {
-    return []
-  }
+const DEFAULT_FETCH_ACCEPT = "text/html,application/xml,text/xml,*/*"
 
+async function guardedFetchText(url: string, accept: string): Promise<string> {
   // DNS-resolution-time SSRF check. validateExternalUrl alone only catches IP
   // literals; resolveAndCheckPublicIp also rejects hostnames that resolve into
   // private/loopback/link-local ranges (e.g. 169.254.169.254 metadata, RFC1918).
-  const validation = await resolveAndCheckPublicIp(source.url)
+  const validation = await resolveAndCheckPublicIp(url)
   if (!validation.ok) {
     throw new Error(`Source URL rejected by validator: ${validation.reason}`)
   }
 
-  const response = await fetch(source.url, {
+  const response = await fetch(url, {
     headers: {
       "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
-      Accept: "text/html,application/xml,text/xml,*/*",
+      Accept: accept,
     },
     signal: AbortSignal.timeout(SOURCE_FETCH_TIMEOUT_MS),
   })
@@ -383,14 +380,30 @@ async function fetchSourceEvents(source: EventSourceRow, timezone: string): Prom
 
   // Streamed read with 5 MB cap. response.text() is unbounded; a malicious or
   // accidentally-huge feed could OOM the edge function.
-  const content = await readResponseBodyCapped(response, SOURCE_MAX_BYTES)
-  if (source.source_type === "rss") {
-    return parseRssFeed(content, source.url)
+  return await readResponseBodyCapped(response, SOURCE_MAX_BYTES)
+}
+
+export function buildParserContext(timezone: string): ParserContext {
+  return {
+    timezone,
+    fetchText: (url, opts) => guardedFetchText(url, opts?.accept ?? DEFAULT_FETCH_ACCEPT),
+    fetchJson: async <T = unknown>(
+      url: string,
+      opts?: { accept?: string }
+    ): Promise<T> => {
+      const body = await guardedFetchText(url, opts?.accept ?? "application/json,*/*")
+      return JSON.parse(body) as T
+    },
   }
-  if (source.source_type === "ical") {
-    return parseIcalFeed(content)
+}
+
+async function fetchSourceEvents(source: EventSourceRow, timezone: string): Promise<ParsedEvent[]> {
+  const parser = parsers[source.source_type]
+  if (!parser) {
+    throw new Error(`No parser registered for source_type=${source.source_type}`)
   }
-  return parseWebsite(content, source.url, timezone)
+  const ctx = buildParserContext(timezone)
+  return parser.fetchAndParse(source, ctx)
 }
 
 export async function processSource(

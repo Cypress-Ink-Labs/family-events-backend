@@ -8,6 +8,7 @@ import {
 } from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import type { ParsedEvent } from "../lib/types.ts"
+import type { SourceParser } from "./_lib/types.ts"
 
 type StructuredEvent = ParsedEvent & {
   sourceUrl: string | null
@@ -376,4 +377,14 @@ export function parseWebsite(html: string, sourceUrl: string, timeZone = "UTC"):
   }
 
   return events
+}
+
+export const websiteParser: SourceParser<"website"> = {
+  type: "website",
+  async fetchAndParse(source, ctx) {
+    const html = await ctx.fetchText(source.url, {
+      accept: "text/html,application/xml,text/xml,*/*",
+    })
+    return parseWebsite(html, source.url, ctx.timezone)
+  },
 }

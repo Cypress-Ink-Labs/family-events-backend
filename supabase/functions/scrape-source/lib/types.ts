@@ -1,4 +1,6 @@
-export type SourceType = "website" | "ical" | "rss" | "manual"
+import type { SourceType } from "../parsers/index.ts"
+
+export type { SourceType }
 export type RunStatus = "running" | "success" | "error" | "partial"
 
 export interface EventSourceRow {
@@ -13,6 +15,7 @@ export interface EventSourceRow {
   last_scraped_at: string | null
   last_status: "pending" | "success" | "error" | "partial" | null
   error_count: number
+  date_window_days: number | null
 }
 
 export interface ParsedEvent {
