@@ -138,6 +138,9 @@ CREATE TABLE IF NOT EXISTS public.events (
   is_outdoor       boolean,
   view_count       integer NOT NULL DEFAULT 0,
   search_vector    tsvector,
+  admin_locked_fields text[] NOT NULL DEFAULT '{}',
+  admin_last_edited_at timestamptz,
+  admin_last_edited_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   created_at       timestamptz NOT NULL DEFAULT now(),
   updated_at       timestamptz NOT NULL DEFAULT now()
 );
@@ -151,6 +154,8 @@ CREATE INDEX IF NOT EXISTS events_search_vector_idx          ON public.events US
 CREATE INDEX IF NOT EXISTS events_status_start_datetime_idx  ON public.events(status, start_datetime);
 CREATE INDEX IF NOT EXISTS events_city_id_start_datetime_idx ON public.events(city_id, start_datetime);
 CREATE INDEX IF NOT EXISTS events_source_id_idx              ON public.events(source_id);
+CREATE INDEX IF NOT EXISTS events_admin_last_edited_at_idx
+  ON public.events(admin_last_edited_at) WHERE admin_last_edited_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_events_ai_tag_provider
   ON public.events(ai_tag_provider) WHERE ai_tag_provider IS NOT NULL;
 

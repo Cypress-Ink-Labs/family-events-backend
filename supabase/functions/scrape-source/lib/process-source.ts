@@ -39,6 +39,32 @@ type SourceCityContext = {
   longitude: number | null
 }
 
+function applyAdminFieldLocks<T extends Record<string, unknown>>(
+  payload: T,
+  lockedFields: string[] | null | undefined
+): Partial<T> {
+  const locked = new Set(lockedFields ?? [])
+  return Object.fromEntries(
+    Object.entries(payload).filter(([key]) => !locked.has(key))
+  ) as Partial<T>
+}
+
+async function fetchAdminLockedFields(
+  supabase: SupabaseClient,
+  eventId: string
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("events")
+    .select("admin_locked_fields")
+    .eq("id", eventId)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+  return Array.isArray(data?.admin_locked_fields) ? data.admin_locked_fields : []
+}
+
 function normalizeHost(value: string | null | undefined): string | null {
   if (!value) {
     return null
@@ -561,11 +587,28 @@ export async function processSource(
       // ("no unique or exclusion constraint matching the ON CONFLICT
       // specification") on every insert attempt — which is exactly the bug
       // that broke imports until we restored this plain-insert path.
-      const operation = existingEventId
-        ? supabase.from("events").update(payload).eq("id", existingEventId).select("id").single()
-        : supabase.from("events").insert(payload).select("id").single()
-
-      const { data: upsertedEvent, error: upsertError } = await operation
+      let upsertedEvent: { id: string } | null = null
+      let upsertError: { code?: string; message?: string } | null = null
+      if (existingEventId) {
+        const lockedFields = await fetchAdminLockedFields(supabase, existingEventId)
+        const unlockedPayload = applyAdminFieldLocks(payload, lockedFields)
+        if (Object.keys(unlockedPayload).length === 0) {
+          upsertedEvent = { id: existingEventId }
+        } else {
+          const result = await supabase
+            .from("events")
+            .update(unlockedPayload)
+            .eq("id", existingEventId)
+            .select("id")
+            .single()
+          upsertedEvent = result.data
+          upsertError = result.error
+        }
+      } else {
+        const result = await supabase.from("events").insert(payload).select("id").single()
+        upsertedEvent = result.data
+        upsertError = result.error
+      }
       if (upsertError) {
         // 23505 = the partial unique index caught a concurrent insert. Look up
         // the existing row by (source_id, source_url) and continue as if we
@@ -578,7 +621,11 @@ export async function processSource(
             .eq("source_url", payload.source_url)
             .maybeSingle()
           if (existingByUrl) {
-            await supabase.from("events").update(payload).eq("id", existingByUrl.id)
+            const lockedFields = await fetchAdminLockedFields(supabase, existingByUrl.id)
+            const unlockedPayload = applyAdminFieldLocks(payload, lockedFields)
+            if (Object.keys(unlockedPayload).length > 0) {
+              await supabase.from("events").update(unlockedPayload).eq("id", existingByUrl.id)
+            }
             eventsImported += 1
             // Skip enqueue + progress flush — fall through to the post-insert
             // block below by faking the "successful upsert" path.

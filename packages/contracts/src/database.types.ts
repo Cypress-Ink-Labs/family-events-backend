@@ -378,6 +378,9 @@ export type Database = {
       events: {
         Row: {
           address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
@@ -409,6 +412,9 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          admin_last_edited_at?: string | null
+          admin_last_edited_by?: string | null
+          admin_locked_fields?: string[]
           age_max?: number | null
           age_min?: number | null
           ai_confidence?: number | null
@@ -440,6 +446,9 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          admin_last_edited_at?: string | null
+          admin_last_edited_by?: string | null
+          admin_locked_fields?: string[]
           age_max?: number | null
           age_min?: number | null
           ai_confidence?: number | null
@@ -1133,6 +1142,10 @@ export type Database = {
         Args: { enable: boolean }
         Returns: undefined
       }
+      admin_create_event: {
+        Args: { p_patch: Json; p_tag_ids?: string[] }
+        Returns: Database["public"]["Tables"]["events"]["Row"]
+      }
       admin_create_invite_code: {
         Args: { p_expires_at?: string; p_max_uses?: number; p_notes?: string }
         Returns: {
@@ -1176,6 +1189,19 @@ export type Database = {
       }
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
+      admin_unlock_event_fields: {
+        Args: { p_event_id: string }
+        Returns: boolean
+      }
+      admin_update_event: {
+        Args: {
+          p_event_id: string
+          p_lock_edited_fields?: boolean
+          p_patch: Json
+          p_tag_ids: string[]
+        }
+        Returns: Database["public"]["Tables"]["events"]["Row"]
+      }
       admin_set_cron_schedule: {
         Args: { p_job_name: string; p_schedule: string }
         Returns: undefined
