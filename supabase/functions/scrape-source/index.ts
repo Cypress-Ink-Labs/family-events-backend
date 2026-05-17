@@ -53,7 +53,6 @@ Deno.serve(async (req: Request) => {
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const supabase = createClient(supabaseUrl, serviceRoleKey);
   let requestedSourceId: string | null = null;
-
   const auth = await requireAdminOrService(
     req,
     supabase,

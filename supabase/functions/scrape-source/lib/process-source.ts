@@ -361,20 +361,27 @@ async function readResponseBodyCapped(response: Response, maxBytes: number): Pro
   const reader = response.body.getReader()
   const chunks: Uint8Array[] = []
   let total = 0
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      total += value.byteLength
-      if (total > maxBytes) {
-        await reader.cancel()
-        throw new Error(`Response body exceeded cap of ${maxBytes} bytes`)
-      }
-      chunks.push(value)
+
+  const readNextChunk = async (): Promise<void> => {
+    const { done, value } = await reader.read()
+    if (done) return
+
+    total += value.byteLength
+    if (total > maxBytes) {
+      await reader.cancel()
+      throw new Error(`Response body exceeded cap of ${maxBytes} bytes`)
     }
+
+    chunks.push(value)
+    await readNextChunk()
+  }
+
+  try {
+    await readNextChunk()
   } finally {
     reader.releaseLock()
   }
+
   const buf = new Uint8Array(total)
   let offset = 0
   for (const c of chunks) {
