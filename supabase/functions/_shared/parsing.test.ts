@@ -235,6 +235,16 @@ describe("stripShortcodes", () => {
   it("leaves bracket prose containing spaces alone", () => {
     expect(stripShortcodes("[See more details below]")).toBe("[See more details below]")
   })
+
+  it("strips trailing unclosed Divi shortcode (slice-before-clean legacy)", () => {
+    const input = `[et_pb_section fb_built="1"]Hello[et_pb_image src="https://example.org/x.png" title_text="Rock the Block"`
+    expect(stripShortcodes(input)).toBe("Hello")
+  })
+
+  it("strips trailing unclosed generic shortcode but keeps unclosed prose", () => {
+    expect(stripShortcodes(`Hello[caption id="x"`)).toBe("Hello")
+    expect(stripShortcodes("Hello [See details")).toBe("Hello [See details")
+  })
 })
 
 describe("cleanDescription", () => {
@@ -260,5 +270,12 @@ describe("cleanDescription", () => {
     expect(out).not.toContain("et_pb")
     expect(out).not.toContain("[")
     expect(out).toContain("Welcome to Rock the Block!")
+  })
+
+  it("cleans the 500-char-truncated Rock the Block DB row", () => {
+    const truncated = `[et_pb_section fb_built="1" _builder_version="4.16" global_colors_info="{}"][et_pb_row column_structure="2_5,3_5" _builder_version="4.27.6" background_size="initial" background_position="top_left" background_repeat="repeat" global_colors_info="{}"][et_pb_column type="2_5" _builder_version="4.16" custom_padding="|||" global_colors_info="{}" custom_padding__hover="|||"][et_pb_image src="https://acadianacenterforthearts.org/wp-content/uploads/2026/04/Rock-the-Block.png" title_text="Rock the Block" `
+    const out = cleanDescription(truncated)
+    expect(out).not.toContain("et_pb")
+    expect(out).not.toContain("[")
   })
 })

@@ -134,10 +134,20 @@ export function stripHtml(value: string): string {
  * alphanumeric + underscore so user-written `[notes]` prose survives.
  */
 export function stripShortcodes(value: string): string {
-  return value
-    .replace(/\[\/?et_pb_[a-z0-9_]*[^\]]*\]/gis, "")
-    // Lowercase-only shortcode names so user prose like `[See details]` survives.
-    .replace(/\[\/?[a-z][a-z0-9_]*(?:\s[^\]]*)?\]/gs, "")
+  return (
+    value
+      .replace(/\[\/?et_pb_[a-z0-9_]*[^\]]*\]/gis, "")
+      // Truncated trailing Divi shortcode (no closing `]`) — historic ingest
+      // sliced raw description to 500 chars before cleaning and left rows like
+      // `…[et_pb_image src="…" title_text="…"` in the DB. The closed-bracket
+      // rule above misses these.
+      .replace(/\[\/?et_pb_[a-z0-9_]*[^\]]*$/is, "")
+      // Lowercase-only shortcode names so user prose like `[See details]` survives.
+      .replace(/\[\/?[a-z][a-z0-9_]*(?:\s[^\]]*)?\]/gs, "")
+      // Trailing unclosed generic shortcode (requires whitespace after the
+      // name so we don't eat user prose like `[See details` at end-of-string).
+      .replace(/\[\/?[a-z][a-z0-9_]*\s[^\]]*$/s, "")
+  )
 }
 
 /**
