@@ -12,14 +12,18 @@ const DEFAULT_ALLOWED_ORIGINS = [
   "http://localhost:5173",
 ];
 
-function buildCorsHeaders(origin: string | null): HeadersInit {
+function resolveAllowedOrigin(origin: string | null): string | null {
   const configured = Deno.env.get("ALLOWED_ORIGINS");
   const allowlist = (configured?.split(",") ?? DEFAULT_ALLOWED_ORIGINS)
     .map((value) => value.trim())
     .filter((value) => value.length > 0);
-  const allowedOrigin = origin && allowlist.includes(origin)
-    ? origin
-    : allowlist[0] ?? "null";
+
+  if (!origin) return null;
+  return allowlist.includes(origin) ? origin : null;
+}
+
+function buildCorsHeaders(allowedOrigin: string | null): HeadersInit {
+  if (!allowedOrigin) return { Vary: "Origin" };
 
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
@@ -30,7 +34,15 @@ function buildCorsHeaders(origin: string | null): HeadersInit {
 }
 
 Deno.serve(async (req: Request) => {
-  const corsHeaders = buildCorsHeaders(req.headers.get("Origin"));
+  const allowedOrigin = resolveAllowedOrigin(req.headers.get("Origin"));
+  const corsHeaders = buildCorsHeaders(allowedOrigin);
+
+  if (req.headers.get("Origin") && !allowedOrigin) {
+    return new Response(JSON.stringify({ error: "origin not allowed" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
