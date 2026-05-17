@@ -127,6 +127,31 @@ export function stripHtml(value: string): string {
   return normalizeExtractedText(value.replaceAll(/<[^>]*>/g, " "))
 }
 
+/**
+ * Strip WordPress / Divi shortcodes like `[et_pb_section …]` and `[/et_pb_section]`.
+ * Sources scraped from Divi-built WordPress sites leak these into the description
+ * column otherwise. Conservative — only matches `[name …]` where name is
+ * alphanumeric + underscore so user-written `[notes]` prose survives.
+ */
+export function stripShortcodes(value: string): string {
+  return value
+    .replace(/\[\/?et_pb_[a-z0-9_]*[^\]]*\]/gis, "")
+    // Lowercase-only shortcode names so user prose like `[See details]` survives.
+    .replace(/\[\/?[a-z][a-z0-9_]*(?:\s[^\]]*)?\]/gs, "")
+}
+
+/**
+ * Full description cleanup: strip shortcodes, then strip HTML + normalize.
+ * Use at ingest time so the DB row holds presentable text and clients
+ * don't have to re-sanitize on every render.
+ */
+export function cleanDescription(value: string | null | undefined): string {
+  if (!value) {
+    return ""
+  }
+  return stripHtml(stripShortcodes(value))
+}
+
 export function extractPrice(text: string): { price: number | null; isFree: boolean } {
   const lower = text.toLowerCase()
 

@@ -1,5 +1,6 @@
 import { DOMParser } from "@b-fuze/deno-dom"
 import {
+  cleanDescription,
   extractPrice,
   normalizeExtractedText,
   parseIsoDate,
@@ -232,7 +233,7 @@ function parseStructuredEvents(
     }
 
     const endDatetime = parseIsoDate(pickText(candidate.endDate))
-    const description = pickText(candidate.description) ?? title
+    const description = cleanDescription(pickText(candidate.description)) || title
     const eventUrl = normalizeUrl(pickText(candidate.url), sourceUrl) ?? sourceUrl
     const venueName =
       pickText((candidate.location as Record<string, unknown> | undefined)?.name) ??
@@ -319,7 +320,7 @@ function parseMecCalendarEvents(
       const structured = structuredByUrl.get(eventUrl)
       const rawDescription = tooltip?.querySelector(".mec-tooltip-event-desc")?.textContent ?? ""
       const description =
-        structured?.description ?? stripHtml(rawDescription.replace(/\s*,\s*\.\.\.$/, ""))
+        structured?.description ?? cleanDescription(rawDescription.replace(/\s*,\s*\.\.\.$/, ""))
       const tooltipImage = tooltip?.querySelector("img")?.getAttribute("src") ?? null
       const imageUrl = structured?.imageUrl ?? normalizeUrl(tooltipImage, sourceUrl)
       const images = structured?.images.length ? structured.images : imageUrl ? [imageUrl] : []

@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest"
 import {
+  cleanDescription,
   decodeHtml,
   dedupKey,
   extractPrice,
   parseIcalDate,
   parseIsoDate,
   stripHtml,
+  stripShortcodes,
   unescapeIcalText,
 } from "./parsing"
 
@@ -207,5 +209,56 @@ describe("dedupKey", () => {
     const a = dedupKey("Event", "2026-04-15T10:00:00Z", "c")
     const b = dedupKey("Event", "2026-04-15T11:00:00Z", "c")
     expect(a).not.toBe(b)
+  })
+})
+
+describe("stripShortcodes", () => {
+  it("removes Divi opening shortcodes with attributes", () => {
+    const input = `[et_pb_section fb_built="1" _builder_version="4.16"]Hello`
+    expect(stripShortcodes(input)).toBe("Hello")
+  })
+
+  it("removes Divi closing shortcodes", () => {
+    expect(stripShortcodes("Hello[/et_pb_section]")).toBe("Hello")
+  })
+
+  it("removes nested Divi blocks", () => {
+    const input = `[et_pb_row column_structure="2_5,3_5"][et_pb_column type="2_5"]Content[/et_pb_column][/et_pb_row]`
+    expect(stripShortcodes(input)).toBe("Content")
+  })
+
+  it("removes generic WordPress shortcodes", () => {
+    expect(stripShortcodes(`[caption id="x"]My caption[/caption]`)).toBe("My caption")
+    expect(stripShortcodes("[gallery]")).toBe("")
+  })
+
+  it("leaves bracket prose containing spaces alone", () => {
+    expect(stripShortcodes("[See more details below]")).toBe("[See more details below]")
+  })
+})
+
+describe("cleanDescription", () => {
+  it("returns empty string for nullish input", () => {
+    expect(cleanDescription(null)).toBe("")
+    expect(cleanDescription(undefined)).toBe("")
+    expect(cleanDescription("")).toBe("")
+  })
+
+  it("strips Divi shortcodes and HTML together", () => {
+    const input = `[et_pb_section fb_built="1"]<p>Welcome to Rock the Block!</p>[/et_pb_section]`
+    expect(cleanDescription(input)).toBe("Welcome to Rock the Block!")
+  })
+
+  it("decodes entities and normalizes whitespace", () => {
+    const input = `<p>Tom&nbsp;&amp;&nbsp;Jerry&rsquo;s   show</p>`
+    expect(cleanDescription(input)).toBe("Tom & Jerry's show")
+  })
+
+  it("handles the Rock the Block fixture", () => {
+    const input = `[et_pb_section fb_built="1" _builder_version="4.16" global_colors_info="{}"][et_pb_row column_structure="2_5,3_5" _builder_version="4.27.6" background_size="initial" background_position="top_left" background_repeat="repeat" global_colors_info="{}"][et_pb_column type="2_5" _builder_version="4.16"][et_pb_image src="https://example.org/img.png" title_text="Rock the Block"][/et_pb_image][/et_pb_column][/et_pb_row][/et_pb_section]Welcome to Rock the Block!`
+    const out = cleanDescription(input)
+    expect(out).not.toContain("et_pb")
+    expect(out).not.toContain("[")
+    expect(out).toContain("Welcome to Rock the Block!")
   })
 })

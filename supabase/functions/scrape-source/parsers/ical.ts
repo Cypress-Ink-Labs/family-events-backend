@@ -1,4 +1,10 @@
-import { extractPrice, parseIcalDate, unescapeIcalText } from "../../_shared/parsing.ts"
+import {
+  cleanDescription,
+  extractPrice,
+  parseIcalDate,
+  stripShortcodes,
+  unescapeIcalText,
+} from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import type { ParsedEvent } from "../lib/types.ts"
 
@@ -158,7 +164,7 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
     }
 
     const rawDescription = byKey.get("DESCRIPTION")?.[0]?.value.trim() ?? ""
-    const description = unescapeIcalText(rawDescription)
+    const description = stripShortcodes(unescapeIcalText(rawDescription)).trim()
     const dtStart = byKey.get("DTSTART")?.[0]
     const dtEnd = byKey.get("DTEND")?.[0]
     const dtStartRaw = dtStart?.value.trim() ?? null

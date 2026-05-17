@@ -1,5 +1,11 @@
 import { XMLParser } from "npm:fast-xml-parser@4.5.0"
-import { decodeHtml, extractPrice, parseIsoDate, stripHtml } from "../../_shared/parsing.ts"
+import {
+  cleanDescription,
+  decodeHtml,
+  extractPrice,
+  parseIsoDate,
+  stripHtml,
+} from "../../_shared/parsing.ts"
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
 import type { ParsedEvent } from "../lib/types.ts"
 
@@ -196,7 +202,7 @@ export function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
 
     const rawDescription =
       textFromValue(pickValue(item, ["description", "summary", "content:encoded", "content"])) ?? ""
-    const description = stripHtml(rawDescription)
+    const description = cleanDescription(rawDescription)
 
     const dateValue = textFromValue(pickValue(item, ["pubDate", "updated", "published", "dc:date"]))
     const startDatetime = parseIsoDate(dateValue)
