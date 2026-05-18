@@ -65,9 +65,12 @@ supabase functions deploy share-og
 supabase functions deploy notify-email
 ```
 
-Verify OPENAI_API_KEY and OPENAI_MODEL are set in Supabase project secrets if
-you want AI tagging. Without them, tag-event falls back to keyword matching
-(check `events.ai_tag_provider` to audit which path is running).
+Verify AI provider secrets are set in Supabase if you want model-backed tagging.
+OpenAI is the default via OPENAI_API_KEY and OPENAI_MODEL. For a self-hosted
+OpenAI-compatible provider such as Ollama/Qwen3 on Railway, see
+[`LOCAL_LLM_TAGGING.md`](./LOCAL_LLM_TAGGING.md). Without a configured provider,
+tag-event falls back to keyword matching (check `events.ai_tag_provider` to
+audit which path is running).
 
 ## 5. Configure email (Resend)
 
