@@ -1,0 +1,470 @@
+Pager usage is off.
+Timing is on.
+== P0-003 RLS/RPC benchmark before ==
+          captured_at          | postgres_version | database_name 
+-------------------------------+------------------+---------------
+ 2026-05-18 00:25:56.798905+00 | 17.6             | postgres
+(1 row)
+
+Time: 0.503 ms
+BEGIN
+Time: 0.194 ms
+SET
+Time: 0.224 ms
+SET
+Time: 0.125 ms
+SET
+Time: 0.261 ms
+CREATE TABLE
+Time: 0.990 ms
+INSERT 0 1
+Time: 0.246 ms
+INSERT 0 1
+Time: 2.101 ms
+INSERT 0 2
+Time: 0.453 ms
+INSERT 0 1
+Time: 0.518 ms
+INSERT 0 1
+Time: 0.479 ms
+CREATE TABLE
+Time: 1.547 ms
+INSERT 0 3
+Time: 0.601 ms
+SELECT 12000
+Time: 9.510 ms
+INSERT 0 12000
+Time: 292.805 ms
+UPDATE 1
+Time: 1.144 ms
+INSERT 0 12400
+Time: 80.811 ms
+INSERT 0 541
+Time: 9.460 ms
+INSERT 0 447
+Time: 4.053 ms
+INSERT 0 792
+Time: 9.302 ms
+INSERT 0 935
+Time: 9.002 ms
+ANALYZE
+Time: 53.322 ms
+ANALYZE
+Time: 3.200 ms
+ANALYZE
+Time: 0.319 ms
+ANALYZE
+Time: 0.348 ms
+ANALYZE
+Time: 0.342 ms
+ANALYZE
+Time: 0.835 ms
+GRANT
+Time: 0.309 ms
+GRANT
+Time: 0.231 ms
+GRANT
+Time: 0.175 ms
+== dataset ==
+ events | event_tags | ratings | comments 
+--------+------------+---------+----------
+  12000 |      12400 |     792 |      935
+(1 row)
+
+Time: 3.287 ms
+== events_enriched: authenticated city/date list ==
+SET
+Time: 0.207 ms
+              set_config              
+--------------------------------------
+ 6156cecb-7a0f-4ca0-ad17-ba02f210e7c4
+(1 row)
+
+Time: 0.268 ms
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+Time: 0.131 ms
+== events_enriched body: authenticated representative plan ==
+                                                                                                               QUERY PLAN                                                                                                                
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=102.17..2434.73 rows=50 width=118) (actual time=0.361..1.091 rows=50 loops=1)
+   Buffers: shared hit=1100, local hit=3
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.001..0.001 rows=1 loops=1)
+           Buffers: local hit=1
+   InitPlan 2
+     ->  Seq Scan on p0_bench_context p0_bench_context_1  (cost=0.00..18.80 rows=880 width=16) (actual time=0.000..0.000 rows=1 loops=1)
+           Buffers: local hit=1
+   InitPlan 3
+     ->  Seq Scan on p0_bench_context p0_bench_context_2  (cost=0.00..18.80 rows=880 width=16) (actual time=0.002..0.002 rows=1 loops=1)
+           Buffers: local hit=1
+   InitPlan 4
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.107..0.107 rows=1 loops=1)
+           Buffers: shared hit=47
+   InitPlan 5
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.034..0.034 rows=1 loops=1)
+           Buffers: shared hit=2
+   InitPlan 6
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.031..0.031 rows=1 loops=1)
+           Buffers: shared hit=2
+   InitPlan 7
+     ->  Result  (cost=0.00..0.03 rows=1 width=16) (actual time=0.001..0.001 rows=1 loops=1)
+   InitPlan 8
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.025..0.025 rows=1 loops=1)
+           Buffers: shared hit=2
+   InitPlan 9
+     ->  Result  (cost=0.00..0.03 rows=1 width=16) (actual time=0.000..0.000 rows=1 loops=1)
+   ->  Nested Loop Left Join  (cost=44.67..52573.81 rows=1126 width=118) (actual time=0.360..1.088 rows=50 loops=1)
+         Buffers: shared hit=1100, local hit=3
+         ->  Nested Loop Left Join  (cost=44.40..52172.45 rows=1126 width=132) (actual time=0.356..1.033 rows=50 loops=1)
+               Buffers: shared hit=995, local hit=2
+               ->  Nested Loop Left Join  (cost=44.12..51756.28 rows=1126 width=116) (actual time=0.352..0.972 rows=50 loops=1)
+                     Buffers: shared hit=890, local hit=1
+                     ->  Nested Loop Left Join  (cost=17.95..22265.27 rows=1126 width=84) (actual time=0.156..0.410 rows=50 loops=1)
+                           Buffers: shared hit=229, local hit=1
+                           ->  Index Scan using events_city_id_start_datetime_idx on events e  (cost=0.30..2363.22 rows=1126 width=48) (actual time=0.151..0.208 rows=50 loops=1)
+                                 Index Cond: ((city_id = (InitPlan 3).col1) AND (start_datetime >= (date_trunc('day'::text, now()) - '1 day'::interval)) AND (start_datetime <= (date_trunc('day'::text, now()) + '14 days'::interval)))
+                                 Filter: ((status = 'published'::text) AND ((InitPlan 4).col1 OR ((InitPlan 5).col1 AND (status = 'published'::text)) OR (status = 'published'::text)))
+                                 Rows Removed by Filter: 8
+                                 Buffers: shared hit=109, local hit=1
+                           ->  Aggregate  (cost=17.65..17.66 rows=1 width=36) (actual time=0.004..0.004 rows=1 loops=50)
+                                 Buffers: shared hit=120
+                                 InitPlan 10
+                                   ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.054..0.054 rows=1 loops=1)
+                                         Buffers: shared hit=2
+                                 InitPlan 11
+                                   ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.026..0.026 rows=1 loops=1)
+                                         Buffers: shared hit=2
+                                 ->  Index Scan using ratings_event_id_idx on ratings r  (cost=0.28..17.12 rows=1 width=4) (actual time=0.004..0.004 rows=0 loops=50)
+                                       Index Cond: (event_id = e.id)
+                                       Filter: ((InitPlan 10).col1 OR ((InitPlan 11).col1 AND EXISTS(SubPlan 14)))
+                                       Buffers: shared hit=120
+                                       SubPlan 14
+                                         ->  Index Scan using events_pkey on events e_1  (cost=0.81..8.83 rows=1 width=0) (actual time=0.026..0.026 rows=1 loops=3)
+                                               Index Cond: (id = r.event_id)
+                                               Filter: ((status = 'published'::text) AND ((InitPlan 12).col1 OR ((InitPlan 13).col1 AND (status = 'published'::text)) OR (status = 'published'::text)))
+                                               Buffers: shared hit=13
+                                               InitPlan 12
+                                                 ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.048..0.048 rows=1 loops=1)
+                                                       Buffers: shared hit=2
+                                               InitPlan 13
+                                                 ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.026..0.026 rows=1 loops=1)
+                                                       Buffers: shared hit=2
+                     ->  Aggregate  (cost=26.17..26.18 rows=1 width=32) (actual time=0.011..0.011 rows=1 loops=50)
+                           Buffers: shared hit=661
+                           InitPlan 18
+                             ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.046..0.046 rows=1 loops=1)
+                                   Buffers: shared hit=2
+                           InitPlan 19
+                             ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.026..0.026 rows=1 loops=1)
+                                   Buffers: shared hit=2
+                           InitPlan 26
+                             ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.023..0.023 rows=1 loops=1)
+                                   Buffers: shared hit=2
+                           ->  Sort  (cost=25.38..25.38 rows=1 width=112) (actual time=0.009..0.009 rows=2 loops=50)
+                                 Sort Key: t.name
+                                 Sort Method: quicksort  Memory: 25kB
+                                 Buffers: shared hit=661
+                                 ->  Nested Loop  (cost=0.43..25.37 rows=1 width=112) (actual time=0.007..0.008 rows=2 loops=50)
+                                       Buffers: shared hit=661
+                                       ->  Index Only Scan using event_tags_pkey on event_tags et  (cost=0.29..17.13 rows=1 width=16) (actual time=0.006..0.007 rows=2 loops=50)
+                                             Index Cond: (event_id = e.id)
+                                             Filter: ((InitPlan 18).col1 OR ((InitPlan 19).col1 AND EXISTS(SubPlan 22)))
+                                             Heap Fetches: 100
+                                             Buffers: shared hit=459
+                                             SubPlan 22
+                                               ->  Index Scan using events_pkey on events e_2  (cost=0.81..8.83 rows=1 width=0) (actual time=0.001..0.001 rows=1 loops=100)
+                                                     Index Cond: (id = et.event_id)
+                                                     Filter: ((status = 'published'::text) AND ((InitPlan 20).col1 OR ((InitPlan 21).col1 AND (status = 'published'::text)) OR (status = 'published'::text)))
+                                                     Buffers: shared hit=304
+                                                     InitPlan 20
+                                                       ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.040..0.040 rows=1 loops=1)
+                                                             Buffers: shared hit=2
+                                                     InitPlan 21
+                                                       ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.024..0.024 rows=1 loops=1)
+                                                             Buffers: shared hit=2
+                                       ->  Index Scan using tags_pkey on tags t  (cost=0.15..8.17 rows=1 width=112) (actual time=0.000..0.000 rows=1 loops=100)
+                                             Index Cond: (id = et.tag_id)
+                                             Filter: (InitPlan 26).col1
+                                             Buffers: shared hit=202
+               ->  Result  (cost=0.28..0.37 rows=1 width=16) (actual time=0.001..0.001 rows=0 loops=50)
+                     One-Time Filter: ((InitPlan 7).col1 = (InitPlan 1).col1)
+                     Buffers: shared hit=105, local hit=1
+                     ->  Index Scan using favorites_event_id_idx on favorites f  (cost=0.28..0.37 rows=1 width=16) (actual time=0.001..0.001 rows=0 loops=50)
+                           Index Cond: (event_id = e.id)
+                           Filter: ((InitPlan 6).col1 AND (user_id = (InitPlan 1).col1))
+                           Buffers: shared hit=105
+         ->  Result  (cost=0.27..0.36 rows=1 width=16) (actual time=0.001..0.001 rows=0 loops=50)
+               One-Time Filter: ((InitPlan 9).col1 = (InitPlan 2).col1)
+               Buffers: shared hit=105, local hit=1
+               ->  Index Scan using user_calendar_events_event_id_idx on user_calendar_events c  (cost=0.27..0.36 rows=1 width=16) (actual time=0.001..0.001 rows=0 loops=50)
+                     Index Cond: (event_id = e.id)
+                     Filter: ((InitPlan 8).col1 AND (user_id = (InitPlan 2).col1))
+                     Buffers: shared hit=105
+ Planning:
+   Buffers: shared hit=292
+ Planning Time: 0.589 ms
+ Execution Time: 1.132 ms
+(118 rows)
+
+Time: 2.354 ms
+                                                               QUERY PLAN                                                                
+-----------------------------------------------------------------------------------------------------------------------------------------
+ Function Scan on events_enriched  (cost=37.87..47.87 rows=1000 width=676) (actual time=33.683..33.684 rows=50 loops=1)
+   Buffers: shared hit=32732, local hit=2
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.001..0.001 rows=1 loops=1)
+           Buffers: local hit=1
+   InitPlan 2
+     ->  Seq Scan on p0_bench_context p0_bench_context_1  (cost=0.00..18.80 rows=880 width=16) (actual time=0.000..0.000 rows=1 loops=1)
+           Buffers: local hit=1
+ Planning Time: 0.016 ms
+ Execution Time: 33.696 ms
+(10 rows)
+
+Time: 34.076 ms
+== search_events: authenticated filters + tag AND ==
+== search_events body: authenticated representative plan ==
+                                                                                                                        QUERY PLAN                                                                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=33436.91..33436.91 rows=1 width=636) (actual time=6.286..6.290 rows=50 loops=1)
+   Buffers: shared hit=14546, local hit=1
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.003..0.004 rows=1 loops=1)
+           Buffers: local hit=1
+   InitPlan 12
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (never executed)
+   InitPlan 13
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (never executed)
+   ->  Sort  (cost=33417.59..33417.59 rows=1 width=636) (actual time=6.286..6.288 rows=50 loops=1)
+         Sort Key: e.start_datetime
+         Sort Method: top-N heapsort  Memory: 108kB
+         Buffers: shared hit=14546, local hit=1
+         ->  Bitmap Heap Scan on events e  (cost=214.91..33417.58 rows=1 width=636) (actual time=0.492..6.246 rows=515 loops=1)
+               Recheck Cond: ((city_id = (InitPlan 1).col1) AND (status = 'published'::text) AND (start_datetime >= (date_trunc('day'::text, now()) - '1 day'::interval)) AND (start_datetime <= (date_trunc('day'::text, now()) + '14 days'::interval)))
+               Filter: (is_free AND (COALESCE(age_max, 99) >= 4) AND (COALESCE(age_min, 0) <= 9) AND ((title ~~* '%Benchmark%'::text) OR (description ~~* '%Benchmark%'::text)) AND ((SubPlan 11) = 2))
+               Rows Removed by Filter: 2287
+               Heap Blocks: exact=506
+               Buffers: shared hit=14546, local hit=1
+               ->  BitmapAnd  (cost=214.91..214.91 rows=1174 width=0) (actual time=0.212..0.213 rows=0 loops=1)
+                     Buffers: shared hit=17, local hit=1
+                     ->  Bitmap Index Scan on events_city_id_idx  (cost=0.00..102.32 rows=4005 width=0) (actual time=0.108..0.108 rows=9600 loops=1)
+                           Index Cond: (city_id = (InitPlan 1).col1)
+                           Buffers: shared hit=9, local hit=1
+                     ->  Bitmap Index Scan on events_status_start_datetime_idx  (cost=0.00..112.34 rows=3523 width=0) (actual time=0.084..0.084 rows=3497 loops=1)
+                           Index Cond: ((status = 'published'::text) AND (start_datetime >= (date_trunc('day'::text, now()) - '1 day'::interval)) AND (start_datetime <= (date_trunc('day'::text, now()) + '14 days'::interval)))
+                           Buffers: shared hit=8
+               SubPlan 11
+                 ->  Aggregate  (cost=27.45..27.46 rows=1 width=8) (actual time=0.003..0.003 rows=1 loops=1429)
+                       Buffers: shared hit=14023
+                       InitPlan 2
+                         ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.090..0.090 rows=1 loops=1)
+                               Buffers: shared hit=2
+                       InitPlan 3
+                         ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.034..0.034 rows=1 loops=1)
+                               Buffers: shared hit=2
+                       InitPlan 10
+                         ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.024..0.024 rows=1 loops=1)
+                               Buffers: shared hit=2
+                       ->  Sort  (cost=26.66..26.66 rows=1 width=32) (actual time=0.003..0.003 rows=1 loops=1429)
+                             Sort Key: t.slug
+                             Sort Method: quicksort  Memory: 25kB
+                             Buffers: shared hit=14023
+                             ->  Nested Loop  (cost=4.45..26.65 rows=1 width=32) (actual time=0.002..0.003 rows=1 loops=1429)
+                                   Join Filter: (et.tag_id = t.id)
+                                   Rows Removed by Join Filter: 0
+                                   Buffers: shared hit=14023
+                                   ->  Index Only Scan using event_tags_pkey on event_tags et  (cost=0.29..17.13 rows=1 width=16) (actual time=0.001..0.002 rows=1 loops=1429)
+                                         Index Cond: (event_id = e.id)
+                                         Filter: ((InitPlan 2).col1 OR ((InitPlan 3).col1 AND EXISTS(SubPlan 6)))
+                                         Heap Fetches: 1944
+                                         Buffers: shared hit=10133
+                                         SubPlan 6
+                                           ->  Index Scan using events_pkey on events e_1  (cost=0.81..8.83 rows=1 width=0) (actual time=0.001..0.001 rows=1 loops=1944)
+                                                 Index Cond: (id = et.event_id)
+                                                 Filter: ((status = 'published'::text) AND ((InitPlan 4).col1 OR ((InitPlan 5).col1 AND (status = 'published'::text)) OR (status = 'published'::text)))
+                                                 Buffers: shared hit=5836
+                                                 InitPlan 4
+                                                   ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.044..0.044 rows=1 loops=1)
+                                                         Buffers: shared hit=2
+                                                 InitPlan 5
+                                                   ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.025..0.025 rows=1 loops=1)
+                                                         Buffers: shared hit=2
+                                   ->  Bitmap Heap Scan on tags t  (cost=4.16..9.50 rows=1 width=48) (actual time=0.001..0.001 rows=1 loops=1944)
+                                         Recheck Cond: (slug = ANY ('{p0-sports,p0-art}'::text[]))
+                                         Filter: (InitPlan 10).col1
+                                         Heap Blocks: exact=1944
+                                         Buffers: shared hit=3890
+                                         ->  Bitmap Index Scan on tags_slug_key  (cost=0.00..4.16 rows=2 width=0) (actual time=0.000..0.000 rows=2 loops=1944)
+                                               Index Cond: (slug = ANY ('{p0-sports,p0-art}'::text[]))
+                                               Buffers: shared hit=1944
+ Planning:
+   Buffers: shared hit=26
+ Planning Time: 0.237 ms
+ Execution Time: 6.322 ms
+(75 rows)
+
+Time: 7.167 ms
+                                                      QUERY PLAN                                                      
+----------------------------------------------------------------------------------------------------------------------
+ Function Scan on search_events  (cost=19.07..29.07 rows=1000 width=595) (actual time=1.250..1.250 rows=50 loops=1)
+   Buffers: shared hit=2143, local hit=1
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.003..0.003 rows=1 loops=1)
+           Buffers: local hit=1
+ Planning Time: 0.024 ms
+ Execution Time: 1.261 ms
+(7 rows)
+
+Time: 1.602 ms
+== plan_events_first_nonempty_window: authenticated scoring ==
+== plan_events candidate body: authenticated representative plan ==
+                                                                                                                              QUERY PLAN                                                                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on events e  (cost=121.65..1122.82 rows=16 width=39) (actual time=0.211..2.945 rows=229 loops=1)
+   Recheck Cond: (city_id = (InitPlan 1).col1)
+   Filter: ((status = 'published'::text) AND ((InitPlan 2).col1 OR ((InitPlan 3).col1 AND (status = 'published'::text)) OR (status = 'published'::text)) AND (((start_datetime AT TIME ZONE timezone))::date = ((now() AT TIME ZONE 'America/Chicago'::text))::date))
+   Rows Removed by Filter: 9371
+   Heap Blocks: exact=859
+   Buffers: shared hit=872, local hit=1
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.001..0.002 rows=1 loops=1)
+           Buffers: local hit=1
+   InitPlan 2
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.048..0.048 rows=1 loops=1)
+           Buffers: shared hit=2
+   InitPlan 3
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.024..0.024 rows=1 loops=1)
+           Buffers: shared hit=2
+   ->  Bitmap Index Scan on events_city_id_idx  (cost=0.00..102.32 rows=4005 width=0) (actual time=0.094..0.094 rows=9600 loops=1)
+         Index Cond: (city_id = (InitPlan 1).col1)
+         Buffers: shared hit=9, local hit=1
+ Planning:
+   Buffers: shared hit=8
+ Planning Time: 0.156 ms
+ Execution Time: 2.958 ms
+(22 rows)
+
+Time: 3.422 ms
+== plan_events candidate body: authenticated no-city fallback ==
+                                                                                                                              QUERY PLAN                                                                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Seq Scan on events e  (cost=0.52..1252.01 rows=49 width=39) (actual time=0.083..3.140 rows=229 loops=1)
+   Filter: ((status = 'published'::text) AND ((InitPlan 1).col1 OR ((InitPlan 2).col1 AND (status = 'published'::text)) OR (status = 'published'::text)) AND (((start_datetime AT TIME ZONE timezone))::date = ((now() AT TIME ZONE 'America/Chicago'::text))::date))
+   Rows Removed by Filter: 11786
+   Buffers: shared hit=865
+   InitPlan 1
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.053..0.053 rows=1 loops=1)
+           Buffers: shared hit=2
+   InitPlan 2
+     ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual time=0.025..0.025 rows=1 loops=1)
+           Buffers: shared hit=2
+ Planning:
+   Buffers: shared hit=2
+ Planning Time: 0.035 ms
+ Execution Time: 3.151 ms
+(14 rows)
+
+Time: 3.410 ms
+                                                               QUERY PLAN                                                                
+-----------------------------------------------------------------------------------------------------------------------------------------
+ Function Scan on plan_events_first_nonempty_window  (cost=37.86..47.86 rows=1000 width=212) (actual time=5.455..5.455 rows=3 loops=1)
+   Buffers: shared hit=1573, local hit=2
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.002..0.003 rows=1 loops=1)
+           Buffers: local hit=1
+   InitPlan 2
+     ->  Seq Scan on p0_bench_context p0_bench_context_1  (cost=0.00..18.80 rows=880 width=16) (actual time=0.000..0.001 rows=1 loops=1)
+           Buffers: local hit=1
+ Planning Time: 0.028 ms
+ Execution Time: 5.464 ms
+(10 rows)
+
+Time: 5.807 ms
+== public_events: anon city/date view ==
+SET
+Time: 0.163 ms
+                                                                                                   QUERY PLAN                                                                                                    
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=19.10..119.44 rows=50 width=297) (actual time=0.009..0.036 rows=50 loops=1)
+   Buffers: shared hit=60, local hit=1
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.002..0.002 rows=1 loops=1)
+           Buffers: local hit=1
+   ->  Index Scan using events_city_id_start_datetime_idx on events e  (cost=0.30..2356.37 rows=1174 width=297) (actual time=0.009..0.035 rows=50 loops=1)
+         Index Cond: ((city_id = (InitPlan 1).col1) AND (start_datetime >= (date_trunc('day'::text, now()) - '1 day'::interval)) AND (start_datetime <= (date_trunc('day'::text, now()) + '14 days'::interval)))
+         Filter: (status = 'published'::text)
+         Rows Removed by Filter: 8
+         Buffers: shared hit=60, local hit=1
+ Planning:
+   Buffers: shared hit=5
+ Planning Time: 0.073 ms
+ Execution Time: 0.045 ms
+(14 rows)
+
+Time: 0.418 ms
+== comments: anon approved comments by event ==
+                                                                  QUERY PLAN                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=35.41..35.41 rows=1 width=89) (actual time=0.010..0.011 rows=1 loops=1)
+   Buffers: shared hit=6, local hit=1
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.001..0.001 rows=1 loops=1)
+           Buffers: local hit=1
+   ->  Sort  (cost=16.61..16.61 rows=1 width=89) (actual time=0.010..0.010 rows=1 loops=1)
+         Sort Key: comments.created_at DESC
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=6, local hit=1
+         ->  Index Scan using comments_event_id_idx on comments  (cost=0.28..16.60 rows=1 width=89) (actual time=0.009..0.009 rows=1 loops=1)
+               Index Cond: (event_id = (InitPlan 1).col1)
+               Filter: (is_approved AND is_approved AND EXISTS(SubPlan 2))
+               Buffers: shared hit=6, local hit=1
+               SubPlan 2
+                 ->  Index Scan using events_pkey on events e  (cost=0.29..8.30 rows=1 width=0) (actual time=0.003..0.003 rows=1 loops=1)
+                       Index Cond: (id = comments.event_id)
+                       Filter: (status = 'published'::text)
+                       Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=30
+ Planning Time: 0.071 ms
+ Execution Time: 0.017 ms
+(22 rows)
+
+Time: 0.248 ms
+== event_tags: anon tags by event ==
+                                                                    QUERY PLAN                                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=43.62..43.62 rows=1 width=64) (actual time=0.014..0.014 rows=1 loops=1)
+   Sort Key: t.slug
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=8, local hit=1
+   InitPlan 1
+     ->  Seq Scan on p0_bench_context  (cost=0.00..18.80 rows=880 width=16) (actual time=0.001..0.001 rows=1 loops=1)
+           Buffers: local hit=1
+   ->  Nested Loop  (cost=0.43..24.81 rows=1 width=64) (actual time=0.008..0.009 rows=1 loops=1)
+         Buffers: shared hit=8, local hit=1
+         ->  Index Only Scan using event_tags_pkey on event_tags et  (cost=0.29..16.61 rows=1 width=32) (actual time=0.007..0.007 rows=1 loops=1)
+               Index Cond: (event_id = (InitPlan 1).col1)
+               Filter: EXISTS(SubPlan 2)
+               Heap Fetches: 1
+               Buffers: shared hit=6, local hit=1
+               SubPlan 2
+                 ->  Index Scan using events_pkey on events e  (cost=0.29..8.30 rows=1 width=0) (actual time=0.001..0.001 rows=1 loops=1)
+                       Index Cond: (id = et.event_id)
+                       Filter: (status = 'published'::text)
+                       Buffers: shared hit=3
+         ->  Index Scan using tags_pkey on tags t  (cost=0.15..8.17 rows=1 width=48) (actual time=0.001..0.001 rows=1 loops=1)
+               Index Cond: (id = et.tag_id)
+               Buffers: shared hit=2
+ Planning:
+   Buffers: shared hit=4
+ Planning Time: 0.073 ms
+ Execution Time: 0.021 ms
+(26 rows)
+
+Time: 0.250 ms
+ROLLBACK
+Time: 0.426 ms
