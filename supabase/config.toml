@@ -78,3 +78,6 @@ verify_jwt = true
 
 [functions.process-tag-queue]
 verify_jwt = false
+
+[functions.scrape-due-sources]
+verify_jwt = false

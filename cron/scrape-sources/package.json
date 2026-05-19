@@ -1,0 +1,6 @@
+{
+  "name": "@family-events/cron-scrape-sources",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Railway cron service that hits scrape-due-sources every hour. Replaces broken Supabase pg_cron."
+}
