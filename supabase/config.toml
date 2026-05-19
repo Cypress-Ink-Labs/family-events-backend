@@ -102,3 +102,6 @@ verify_jwt = false
 
 [functions.scrape-due-sources]
 verify_jwt = false
+
+[functions.db-maintenance]
+verify_jwt = false
