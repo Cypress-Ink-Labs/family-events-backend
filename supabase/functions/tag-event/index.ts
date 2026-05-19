@@ -551,6 +551,7 @@ Deno.serve(async (req: Request) => {
       const updatePayload: Record<string, unknown> = {
         ai_confidence: topConfidence,
         ai_tag_provider: classification.provider,
+        ai_tag_model: classification.model,
         age_min: classification.ageMin,
         age_max: classification.ageMax,
       };
