@@ -1,0 +1,7 @@
+[build]
+builder        = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+cronSchedule      = "15 3 * * *"
+restartPolicyType = "ALWAYS"
