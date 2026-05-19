@@ -40,6 +40,25 @@ additional_redirect_urls = [
   "https://family-events.up.railway.app",
   "https://family-events.up.railway.app/**",
 ]
+
+[auth.external.apple]
+enabled          = true
+client_id        = "env(SUPABASE_AUTH_EXTERNAL_APPLE_CLIENT_ID)"
+secret           = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
+# Apple uses "secret" as the signed JWT computed from team ID + key ID + .p8.
+# For local supabase start the env can be left unset; OAuth will simply fail to
+# initialize but other auth methods stay functional.
+url              = ""
+redirect_uri     = ""
+skip_nonce_check = false
+
+[auth.external.google]
+enabled          = true
+client_id        = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret           = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+url              = ""
+redirect_uri     = ""
+skip_nonce_check = false
 jwt_expiry               = 3600
 enable_signup            = true
 
