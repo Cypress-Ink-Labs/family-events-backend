@@ -86,16 +86,23 @@ policy         = "oneshot"
 inspector_port = 55326
 
 [functions.scrape-source]
-verify_jwt = true
+# Called by run_due_source_scrapes / pg_net with the vault service role
+# secret (sb_secret_*). Gateway JWT check would reject that bearer; app-layer
+# requireAdminOrService still gates real admin access.
+verify_jwt = false
 
 [functions.tag-event]
-verify_jwt = true
+# Called by process-tag-queue worker with sb_secret_* bearer. App-layer
+# requireServiceRole still enforces auth.
+verify_jwt = false
 
 [functions.share-og]
 verify_jwt = true
 
 [functions.notify-email]
-verify_jwt = true
+# Triggered by dispatch_email_notification / pg_net with sb_secret_* bearer.
+# App-layer requireServiceRole still enforces auth.
+verify_jwt = false
 
 [functions.process-tag-queue]
 verify_jwt = false

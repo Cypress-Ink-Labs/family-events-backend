@@ -4,8 +4,8 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 cronSchedule = "0 * * * *"
-# ALWAYS (not NEVER): Railway's cron scheduler only re-fires a one-shot
-# container if the restart policy allows it. With NEVER the container stays
-# exited and the next scheduled run never spawns. Verified empirically on
-# this project.
-restartPolicyType = "ALWAYS"
+# ON_FAILURE: ALWAYS caused a tight restart loop (curl exits → instant
+# restart → curl exits → ...) and bypassed the cron schedule entirely. With
+# ON_FAILURE Railway only restarts on a non-zero exit, so a clean run waits
+# for the next cron tick.
+restartPolicyType = "ON_FAILURE"

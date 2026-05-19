@@ -4,4 +4,8 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 cronSchedule      = "15 3 * * *"
-restartPolicyType = "ALWAYS"
+# ON_FAILURE: ALWAYS caused a tight restart loop (curl exits → instant
+# restart → curl exits → ...) and bypassed the cron schedule entirely. With
+# ON_FAILURE Railway only restarts on a non-zero exit, so a clean run waits
+# for the next cron tick.
+restartPolicyType = "ON_FAILURE"
