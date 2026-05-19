@@ -10,7 +10,9 @@ import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
 //   - Sentry on dead-letter only (avoid noise from transient OpenAI 5xx)
 const MAX_ATTEMPTS = 5
 const BASE_BACKOFF_MS = 60_000
-const BATCH_SIZE = 20
+// Stay well under Supabase edge function 150s wall.
+// qwen3:1.7b averages ~10s/event (cold-start higher), so 20 was hitting 504s.
+const BATCH_SIZE = 8
 const PER_ITEM_TIMEOUT_MS = 30_000
 
 const corsHeaders = {

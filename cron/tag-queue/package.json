@@ -1,0 +1,6 @@
+{
+  "name": "@family-events/cron-tag-queue",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Railway cron service that hits process-tag-queue every minute. Replaces broken Supabase pg_cron."
+}
