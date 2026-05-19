@@ -5,6 +5,10 @@
   enabled-user helpers, even when `is_enabled = true`. Also verifies an
   expired admin loses admin powers.
 
+  Published event reads are intentionally public after the security-invoker
+  public_events hardening migration, so this test only asserts the access
+  helpers and user-scoped write/admin paths.
+
   Run with:
 
     psql "postgresql://postgres:postgres@127.0.0.1:55322/postgres" \
@@ -76,7 +80,7 @@ BEGIN
 END $$;
 
 -- -----------------------------------------------------------------------------
--- Expired user: events SELECT returns no published rows via RLS.
+-- Expired user: published events remain readable via the public SELECT policy.
 -- -----------------------------------------------------------------------------
 DO $$
 DECLARE
@@ -89,10 +93,10 @@ BEGIN
 
   SELECT count(*) INTO n FROM public.events WHERE status = 'published';
   RESET role;
-  IF n <> 0 THEN
-    RAISE EXCEPTION 'EVENTS_FAIL: expired user saw % published events, expected 0', n;
+  IF n < 1 THEN
+    RAISE EXCEPTION 'EVENTS_FAIL: expired user saw % published events, expected public read access', n;
   END IF;
-  RAISE NOTICE 'EVENTS_OK: expired user sees 0 published events via RLS.';
+  RAISE NOTICE 'EVENTS_OK: expired user keeps public published-event read access.';
 END $$;
 
 -- -----------------------------------------------------------------------------

@@ -3,7 +3,9 @@
 
   Verifies the security boundary for public event previews:
   - anon can read public.public_events
-  - anon cannot read raw public.events rows
+  - anon can read published raw public.events rows, matching the
+    security-invoker public_events policy
+  - anon cannot read draft raw public.events rows
   - anon-reachable child tables (event_tags, ratings, comments) honor
     the public_events boundary: visible for published events, blocked
     for draft events
@@ -132,34 +134,40 @@ SELECT
   true;
 
 -- -----------------------------------------------------------------------------
--- Anon: published event visible via view; raw events table blocked.
+-- Anon: published events visible via view and raw table; draft rows blocked.
 -- -----------------------------------------------------------------------------
 DO $$
 DECLARE
   pub_uuid uuid := (SELECT v::uuid FROM _fx_sat_plan WHERE k = 'published_event');
+  draft_uuid uuid := (SELECT v::uuid FROM _fx_sat_plan WHERE k = 'draft_event');
   view_visible boolean := false;
-  raw_visible boolean := false;
+  raw_pub_visible boolean := false;
+  raw_draft_visible boolean := false;
 BEGIN
   SET LOCAL role anon;
   SELECT EXISTS (SELECT 1 FROM public.public_events WHERE id = pub_uuid)
     INTO view_visible;
   SELECT EXISTS (SELECT 1 FROM public.events WHERE id = pub_uuid)
-    INTO raw_visible;
+    INTO raw_pub_visible;
+  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = draft_uuid)
+    INTO raw_draft_visible;
   RESET role;
 
   IF NOT view_visible THEN
     RAISE EXCEPTION 'PUBLIC_EVENTS_VIEW_FAIL: anon could not read public.public_events';
   END IF;
-  IF raw_visible THEN
-    RAISE EXCEPTION 'PUBLIC_EVENTS_BOUNDARY_FAIL: anon can read raw public.events';
+  IF NOT raw_pub_visible THEN
+    RAISE EXCEPTION 'PUBLIC_EVENTS_RAW_PUB_FAIL: anon could not read published raw public.events';
   END IF;
-  RAISE NOTICE 'PUBLIC_EVENTS_BOUNDARY_OK: anon reads view, raw table blocked.';
+  IF raw_draft_visible THEN
+    RAISE EXCEPTION 'PUBLIC_EVENTS_BOUNDARY_FAIL: anon can read draft raw public.events';
+  END IF;
+  RAISE NOTICE 'PUBLIC_EVENTS_BOUNDARY_OK: anon reads published view/raw rows; draft raw rows blocked.';
 END $$;
 
 -- -----------------------------------------------------------------------------
 -- Anon: event_tags visible for published, blocked for draft.
--- Catches the regression where the policy USING clause reads from public.events
--- (anon-denied) instead of public.public_events.
+-- Catches regressions where child-table policies expose draft event children.
 -- -----------------------------------------------------------------------------
 DO $$
 DECLARE

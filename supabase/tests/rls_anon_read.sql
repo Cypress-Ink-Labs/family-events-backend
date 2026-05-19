@@ -3,7 +3,9 @@
 
   Verifies the Saturday Plan public boundary:
   - anon can see published events via public.public_events
-  - anon cannot read raw public.events
+  - anon can read published raw public.events rows, matching the
+    security-invoker public_events policy
+  - anon cannot read draft raw public.events rows
   - anon can see active cities; anon cannot see inactive cities
 
   Run with:
@@ -51,7 +53,8 @@ DECLARE
   draft_id uuid;
   pub_visible_in_view boolean;
   draft_visible_in_view boolean;
-  raw_visible boolean;
+  raw_pub_visible boolean;
+  raw_draft_visible boolean;
 BEGIN
   SELECT (v)::uuid INTO pub_id FROM _fx WHERE k='pub_event';
   SELECT (v)::uuid INTO draft_id FROM _fx WHERE k='draft_event';
@@ -59,7 +62,8 @@ BEGIN
   SET LOCAL role anon;
   SELECT EXISTS (SELECT 1 FROM public.public_events WHERE id = pub_id) INTO pub_visible_in_view;
   SELECT EXISTS (SELECT 1 FROM public.public_events WHERE id = draft_id) INTO draft_visible_in_view;
-  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = pub_id) INTO raw_visible;
+  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = pub_id) INTO raw_pub_visible;
+  SELECT EXISTS (SELECT 1 FROM public.events WHERE id = draft_id) INTO raw_draft_visible;
   RESET role;
 
   IF NOT pub_visible_in_view THEN
@@ -68,10 +72,13 @@ BEGIN
   IF draft_visible_in_view THEN
     RAISE EXCEPTION 'PUBLIC_VIEW_DRAFT_FAIL: anon can see draft event in public view';
   END IF;
-  IF raw_visible THEN
-    RAISE EXCEPTION 'RAW_EVENTS_FAIL: anon can read raw events table';
+  IF NOT raw_pub_visible THEN
+    RAISE EXCEPTION 'RAW_EVENTS_PUB_FAIL: anon cannot read published raw event';
   END IF;
-  RAISE NOTICE 'PUBLIC_VIEW_OK: anon sees published via view, not draft, raw table blocked.';
+  IF raw_draft_visible THEN
+    RAISE EXCEPTION 'RAW_EVENTS_DRAFT_FAIL: anon can read draft raw event';
+  END IF;
+  RAISE NOTICE 'PUBLIC_VIEW_OK: anon sees published via view/raw table; draft rows blocked.';
 END $$;
 
 -- -----------------------------------------------------------------------------
