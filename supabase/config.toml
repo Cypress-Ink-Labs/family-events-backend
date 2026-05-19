@@ -45,11 +45,13 @@ additional_redirect_urls = [
 
 [auth.external.apple]
 enabled          = true
-client_id        = "env(SUPABASE_AUTH_EXTERNAL_APPLE_CLIENT_ID)"
+# Services ID is public; hardcode to prevent `supabase config push` from
+# clobbering prod when SUPABASE_AUTH_EXTERNAL_APPLE_CLIENT_ID is unset locally.
+client_id        = "com.familyevents.app"
 secret           = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
-# Apple uses "secret" as the signed JWT computed from team ID + key ID + .p8.
-# For local supabase start the env can be left unset; OAuth will simply fail to
-# initialize but other auth methods stay functional.
+# Apple "secret" is the signed JWT computed from team ID + key ID + .p8.
+# Never run `supabase config push` without setting the secret env var first,
+# or prod Apple auth will break.
 url              = ""
 redirect_uri     = ""
 skip_nonce_check = false
