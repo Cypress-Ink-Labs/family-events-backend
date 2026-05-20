@@ -27,23 +27,13 @@ variable "railway_fixture_path" {
 locals {
   validation_surface = "spacelift-before-plan"
 
+  cron_services_manifest = jsondecode(file("${path.module}/cron-services.json"))
+
   railway_cron_services = {
-    cron-tag-queue = {
-      config_path        = "apps/cron-tag-queue/railway.toml"
-      cron_schedule      = "* * * * *"
-      restart_policy     = "ON_FAILURE"
-      validation_surface = local.validation_surface
-    }
-    cron-scrape-sources = {
-      config_path        = "apps/cron-scrape-sources/railway.toml"
-      cron_schedule      = "0 * * * *"
-      restart_policy     = "ON_FAILURE"
-      validation_surface = local.validation_surface
-    }
-    cron-db-maintenance = {
-      config_path        = "apps/cron-db-maintenance/railway.toml"
-      cron_schedule      = "15 3 * * *"
-      restart_policy     = "ON_FAILURE"
+    for name, svc in local.cron_services_manifest : name => {
+      config_path        = svc.config_path
+      cron_schedule      = regex("cronSchedule\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0]
+      restart_policy     = regex("restartPolicyType\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0]
       validation_surface = local.validation_surface
     }
   }
@@ -175,7 +165,7 @@ locals {
 
 data "http" "railway_environment" {
   count  = local.railway_live_validation_enabled ? 1 : 0
-  url    = "https://backboard.railway.app/graphql/v2"
+  url    = "https://backboard.railway.com/graphql/v2"
   method = "POST"
 
   request_headers = merge(
@@ -203,13 +193,13 @@ output "railway_cron_poc_services" {
 
   precondition {
     condition     = length(local.railway_validation_diagnostics) == 0
-    error_message = nonsensitive(join("\n", local.railway_validation_diagnostics))
+    error_message = join("\n", local.railway_validation_diagnostics)
   }
 }
 
 output "railway_cron_live_services" {
   description = "Sanitized live Railway cron metadata used for validation."
-  value = nonsensitive({
+  value = {
     for expected_name, matches in local.railway_service_matches : expected_name => (
       length(matches) == 0 ? null : {
         service_name       = matches[0].service_name
@@ -219,5 +209,5 @@ output "railway_cron_live_services" {
         validation_surface = local.validation_surface
       }
     )
-  })
+  }
 }

@@ -4,20 +4,15 @@ import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-const serviceConfigs = [
-  {
-    name: "cron-tag-queue",
-    configPath: "apps/cron-tag-queue/railway.toml",
-  },
-  {
-    name: "cron-scrape-sources",
-    configPath: "apps/cron-scrape-sources/railway.toml",
-  },
-  {
-    name: "cron-db-maintenance",
-    configPath: "apps/cron-db-maintenance/railway.toml",
-  },
-]
+const manifestRelativePath = "infra/spacelift-railway-cron-poc/cron-services.json"
+
+function loadServiceConfigs(repoRoot) {
+  const manifest = JSON.parse(readFileSync(path.join(repoRoot, manifestRelativePath), "utf8"))
+  return Object.entries(manifest).map(([name, value]) => ({
+    name,
+    configPath: value.config_path,
+  }))
+}
 
 const secretKeyPattern = /(secret|token|key|password|credential|authorization|database_url)/i
 
@@ -100,7 +95,7 @@ function parseTomlScalar(rawValue) {
 }
 
 export function readExpectedCronConfigs(repoRoot = process.cwd()) {
-  return serviceConfigs.map((service) => {
+  return loadServiceConfigs(repoRoot).map((service) => {
     const configFile = path.join(repoRoot, service.configPath)
     if (!existsSync(configFile)) {
       throw new Error(`Missing Railway config: ${service.configPath}`)

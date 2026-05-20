@@ -1,0 +1,11 @@
+{
+  "cron-tag-queue": {
+    "config_path": "apps/cron-tag-queue/railway.toml"
+  },
+  "cron-scrape-sources": {
+    "config_path": "apps/cron-scrape-sources/railway.toml"
+  },
+  "cron-db-maintenance": {
+    "config_path": "apps/cron-db-maintenance/railway.toml"
+  }
+}
