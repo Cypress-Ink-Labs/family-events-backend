@@ -1,3 +1,5 @@
 FROM alpine:3.23
 RUN apk add --no-cache curl ca-certificates
-ENTRYPOINT ["/bin/sh", "-c", "curl --fail --silent --show-error --max-time 170 -X POST -H 'Content-Type: application/json' -H \"Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY\" \"$SCRAPE_DUE_SOURCES_URL\" -d '{}'"]
+COPY cron-runner.sh /usr/local/bin/cron-runner.sh
+RUN chmod +x /usr/local/bin/cron-runner.sh
+ENTRYPOINT ["/bin/sh", "-c", "/usr/local/bin/cron-runner.sh \"$SCRAPE_DUE_SOURCES_URL\" cron-scrape-sources"]

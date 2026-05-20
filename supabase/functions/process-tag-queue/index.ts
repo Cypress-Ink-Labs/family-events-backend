@@ -157,6 +157,7 @@ export async function processBatch(
   if (rows.length === 0) return summary
 
   for (const row of rows) {
+    const rowStart = Date.now()
     try {
       const inputs = await fetchEventInputs(supabase, row.event_id)
       if (!inputs || !inputs.title) {
@@ -164,12 +165,30 @@ export async function processBatch(
         // Don't retry — mark as a soft completion.
         await markSuccess(supabase, row.id)
         summary.succeeded += 1
+        logEdgeEvent("log", "tag-queue row skipped (event missing)", {
+          function: "process-tag-queue",
+          queue_row_id: row.id,
+          event_id: row.event_id,
+          attempt: row.attempt_count,
+          duration_ms: Date.now() - rowStart,
+          outcome: "skipped-missing-event",
+        })
         continue
       }
 
       await callTagEvent(supabaseUrl, serviceRoleKey, row, inputs)
       await markSuccess(supabase, row.id)
       summary.succeeded += 1
+      logEdgeEvent("log", "tag-queue row processed", {
+        function: "process-tag-queue",
+        queue_row_id: row.id,
+        event_id: row.event_id,
+        attempt: row.attempt_count,
+        duration_ms: Date.now() - rowStart,
+        title_chars: inputs.title.length,
+        description_chars: inputs.description.length,
+        outcome: "succeeded",
+      })
     } catch (err) {
       const { dead } = await markFailureOrDead(supabase, row, err).catch((markErr) => {
         // Updating the row itself failed — log loudly so we notice in Sentry.
@@ -205,6 +224,8 @@ export async function processBatch(
             queue_row_id: row.id,
             event_id: row.event_id,
             attempts: row.attempt_count,
+            duration_ms: Date.now() - rowStart,
+            outcome: "dead",
           })
         )
       } else {
@@ -212,9 +233,29 @@ export async function processBatch(
         // Transient failures intentionally NOT captured to Sentry to avoid
         // noise during OpenAI/edge outages. The queue_row itself preserves
         // last_error for inspection.
+        logEdgeEvent("warn", "tag-queue row retry scheduled", {
+          function: "process-tag-queue",
+          queue_row_id: row.id,
+          event_id: row.event_id,
+          attempt: row.attempt_count,
+          duration_ms: Date.now() - rowStart,
+          error: err instanceof Error ? err.message.slice(0, 300) : String(err).slice(0, 300),
+          outcome: "retry",
+        })
       }
     }
   }
+
+  // Snapshot queue depth after the batch so dashboards aren't the only signal.
+  const { count: depth } = await supabase
+    .from("event_tag_queue")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending")
+  logEdgeEvent("log", "tag-queue batch done", {
+    function: "process-tag-queue",
+    ...summary,
+    pending_after: depth ?? null,
+  })
 
   return summary
 }
@@ -246,10 +287,7 @@ if (import.meta.main) {
     try {
       const supabase = createClient(supabaseUrl, serviceRoleKey)
       const summary = await processBatch(supabase, supabaseUrl, serviceRoleKey)
-      logEdgeEvent("log", "process-tag-queue completed", {
-        function: "process-tag-queue",
-        ...summary,
-      })
+      // Batch-done log emitted from inside processBatch w/ pending_after depth.
       return new Response(JSON.stringify(summary), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
