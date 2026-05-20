@@ -1,11 +1,23 @@
 {
   "cron-tag-queue": {
-    "config_path": "apps/cron-tag-queue/railway.toml"
+    "config_path": "apps/cron-tag-queue/railway.toml",
+    "source_repo": "HexSleeves/family-events-v2",
+    "root_directory": "apps/cron-tag-queue",
+    "required_latest_deployment_status": "SUCCESS",
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
   },
   "cron-scrape-sources": {
-    "config_path": "apps/cron-scrape-sources/railway.toml"
+    "config_path": "apps/cron-scrape-sources/railway.toml",
+    "source_repo": "HexSleeves/family-events-v2",
+    "root_directory": "apps/cron-scrape-sources",
+    "required_latest_deployment_status": "SUCCESS",
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
   },
   "cron-db-maintenance": {
-    "config_path": "apps/cron-db-maintenance/railway.toml"
+    "config_path": "apps/cron-db-maintenance/railway.toml",
+    "source_repo": "HexSleeves/family-events-v2",
+    "root_directory": "apps/cron-db-maintenance",
+    "required_latest_deployment_status": "SUCCESS",
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
   }
 }

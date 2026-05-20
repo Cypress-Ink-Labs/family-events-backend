@@ -11,6 +11,10 @@ function loadServiceConfigs(repoRoot) {
   return Object.entries(manifest).map(([name, value]) => ({
     name,
     configPath: value.config_path,
+    sourceRepo: value.source_repo,
+    rootDirectory: value.root_directory,
+    requiredLatestDeploymentStatus: normalizeStatus(value.required_latest_deployment_status),
+    forbiddenInstanceStatuses: (value.forbidden_instance_statuses ?? []).map(normalizeStatus),
   }))
 }
 
@@ -106,6 +110,8 @@ export function readExpectedCronConfigs(repoRoot = process.cwd()) {
 
     return {
       ...service,
+      builder: normalizeStatus(deploy.builder ?? parsed.build?.builder ?? ""),
+      dockerfilePath: String(parsed.build?.dockerfilePath ?? ""),
       cronSchedule: String(deploy.cronSchedule ?? ""),
       restartPolicyType: normalizeRestartPolicy(deploy.restartPolicyType ?? ""),
     }
@@ -127,10 +133,10 @@ export function collectRailwayServiceState(serviceName, sources) {
       ]) ?? findFirstStringByKey(searchRoots, ["cronSchedule", "cron_schedule", "schedule"]),
     restartPolicyType: normalizeRestartPolicy(
       findFirstStringByPath(searchRoots, [
-        ["serviceManifest", "deploy", "restartPolicyType"],
-        ["latestDeployment", "meta", "serviceManifest", "deploy", "restartPolicyType"],
-        ["restartPolicyType"],
         ["latestDeployment", "meta", "fileServiceManifest", "deploy", "restartPolicyType"],
+        ["latestDeployment", "meta", "serviceManifest", "deploy", "restartPolicyType"],
+        ["serviceManifest", "deploy", "restartPolicyType"],
+        ["restartPolicyType"],
       ]) ??
         findFirstStringByKey(searchRoots, [
           "restartPolicyType",
@@ -139,6 +145,40 @@ export function collectRailwayServiceState(serviceName, sources) {
         ]) ??
         ""
     ),
+    sourceRepo:
+      findFirstStringByPath(searchRoots, [["source", "repo"], ["latestDeployment", "meta", "repo"]]) ??
+      findFirstStringByKey(searchRoots, ["repo"]) ??
+      "",
+    rootDirectory:
+      findFirstStringByPath(searchRoots, [["latestDeployment", "meta", "rootDirectory"]]) ??
+      findFirstStringByKey(searchRoots, ["rootDirectory", "root_directory"]) ??
+      "",
+    builder: normalizeStatus(
+      findFirstStringByPath(searchRoots, [
+        ["latestDeployment", "meta", "fileServiceManifest", "build", "builder"],
+        ["latestDeployment", "meta", "serviceManifest", "build", "builder"],
+        ["serviceManifest", "build", "builder"],
+      ]) ??
+        findFirstStringByKey(searchRoots, ["builder"]) ??
+        ""
+    ),
+    dockerfilePath:
+      findFirstStringByPath(searchRoots, [
+        ["latestDeployment", "meta", "fileServiceManifest", "build", "dockerfilePath"],
+        ["latestDeployment", "meta", "serviceManifest", "build", "dockerfilePath"],
+        ["serviceManifest", "build", "dockerfilePath"],
+      ]) ??
+      findFirstStringByKey(searchRoots, ["dockerfilePath", "dockerfile_path"]) ??
+      "",
+    latestDeploymentStatus: normalizeStatus(
+      findFirstStringByPath(searchRoots, [["latestDeployment", "status"]]) ??
+        findFirstStringByKey(searchRoots, ["latestDeploymentStatus", "deploymentStatus", "status"]) ??
+        ""
+    ),
+    instanceStatuses: findStringsByPath(searchRoots, [
+      ["latestDeployment", "instances", "*", "status"],
+      ["instances", "*", "status"],
+    ]).map(normalizeStatus),
   }
 }
 
@@ -182,6 +222,42 @@ function getPath(value, pathParts) {
     current = current[part]
   }
   return current
+}
+
+function findStringsByPath(values, paths) {
+  const results = []
+  for (const value of values) {
+    for (const pathParts of paths) {
+      for (const found of getPathMatches(value, pathParts)) {
+        if (typeof found === "string") {
+          results.push(found)
+        }
+      }
+    }
+  }
+  return results
+}
+
+function getPathMatches(value, pathParts) {
+  if (pathParts.length === 0) {
+    return [value]
+  }
+
+  const [part, ...rest] = pathParts
+  if (!value || typeof value !== "object") {
+    return []
+  }
+
+  if (part === "*") {
+    const children = Array.isArray(value) ? value : Object.values(value)
+    return children.flatMap((child) => getPathMatches(child, rest))
+  }
+
+  if (Array.isArray(value) || secretKeyPattern.test(part)) {
+    return []
+  }
+
+  return getPathMatches(value[part], rest)
 }
 
 function findFirstStringByKey(values, keys) {
@@ -238,14 +314,68 @@ export function validateRailwayCronState(expectedConfigs, liveSources) {
       diagnostics.push(formatMissing(expected, "restartPolicyType"))
       continue
     }
+    if (!live.sourceRepo) {
+      diagnostics.push(formatMissing(expected, "sourceRepo"))
+      continue
+    }
+    if (!live.rootDirectory) {
+      diagnostics.push(formatMissing(expected, "rootDirectory"))
+      continue
+    }
+    if (!live.builder) {
+      diagnostics.push(formatMissing(expected, "builder"))
+      continue
+    }
+    if (!live.dockerfilePath) {
+      diagnostics.push(formatMissing(expected, "dockerfilePath"))
+      continue
+    }
+    if (!live.latestDeploymentStatus) {
+      diagnostics.push(formatMissing(expected, "requiredLatestDeploymentStatus"))
+      continue
+    }
     if (live.cronSchedule !== expected.cronSchedule) {
       diagnostics.push(
         `${expected.name}: cronSchedule mismatch: expected "${expected.cronSchedule}" from ${expected.configPath}, live "${live.cronSchedule}"`
       )
     }
+    if (live.sourceRepo !== expected.sourceRepo) {
+      diagnostics.push(
+        `${expected.name}: source repo mismatch: expected "${expected.sourceRepo}" from manifest, live "${live.sourceRepo}"`
+      )
+    }
+    if (live.rootDirectory !== expected.rootDirectory) {
+      diagnostics.push(
+        `${expected.name}: rootDirectory mismatch: expected "${expected.rootDirectory}" from manifest, live "${live.rootDirectory}"`
+      )
+    }
+    if (live.builder !== expected.builder) {
+      diagnostics.push(
+        `${expected.name}: build.builder mismatch: expected "${expected.builder}" from ${expected.configPath}, live "${live.builder}"`
+      )
+    }
+    if (live.dockerfilePath !== expected.dockerfilePath) {
+      diagnostics.push(
+        `${expected.name}: build.dockerfilePath mismatch: expected "${expected.dockerfilePath}" from ${expected.configPath}, live "${live.dockerfilePath}"`
+      )
+    }
     if (live.restartPolicyType !== expected.restartPolicyType) {
       diagnostics.push(
         `${expected.name}: restartPolicyType mismatch: expected "${expected.restartPolicyType}" from ${expected.configPath}, live "${live.restartPolicyType}"`
+      )
+    }
+    if (live.latestDeploymentStatus !== expected.requiredLatestDeploymentStatus) {
+      diagnostics.push(
+        `${expected.name}: latestDeployment.status mismatch: expected "${expected.requiredLatestDeploymentStatus}", live "${live.latestDeploymentStatus}"`
+      )
+    }
+
+    const forbiddenStatuses = live.instanceStatuses.filter((status) => {
+      return expected.forbiddenInstanceStatuses.includes(status)
+    })
+    if (forbiddenStatuses.length > 0) {
+      diagnostics.push(
+        `${expected.name}: latestDeployment.instances include forbidden statuses ${forbiddenStatuses.join(", ")}`
       )
     }
   }
@@ -261,6 +391,10 @@ function formatMissing(expected, field) {
 }
 
 function normalizeRestartPolicy(value) {
+  return String(value).trim().toUpperCase()
+}
+
+function normalizeStatus(value) {
   return String(value).trim().toUpperCase()
 }
 
@@ -334,7 +468,7 @@ function main() {
 
     for (const service of expected) {
       console.log(
-        `${service.name}: ok cronSchedule="${service.cronSchedule}" restartPolicyType="${service.restartPolicyType}"`
+        `${service.name}: ok cronSchedule="${service.cronSchedule}" restartPolicyType="${service.restartPolicyType}" latestDeployment.status="${service.requiredLatestDeploymentStatus}"`
       )
     }
   } catch (error) {

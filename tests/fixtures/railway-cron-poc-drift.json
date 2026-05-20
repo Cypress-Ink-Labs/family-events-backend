@@ -12,13 +12,19 @@
                 "repo": "HexSleeves/family-events-v2",
                 "image": null
               },
-              "latestDeployment": {
-                "status": "SUCCESS",
-                "meta": {
-                  "serviceManifest": {
-                    "deploy": {
-                      "restartPolicyType": "ALWAYS"
-                    }
+            "latestDeployment": {
+              "status": "FAILED",
+              "instances": [{ "status": "CRASHED" }],
+              "meta": {
+                "rootDirectory": "apps/cron-tag-queue",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ALWAYS"
+                  }
                   }
                 }
               }
@@ -33,13 +39,19 @@
                 "repo": "HexSleeves/family-events-v2",
                 "image": null
               },
-              "latestDeployment": {
-                "status": "SUCCESS",
-                "meta": {
-                  "serviceManifest": {
-                    "deploy": {
-                      "restartPolicyType": "ON_FAILURE"
-                    }
+            "latestDeployment": {
+              "status": "SUCCESS",
+              "instances": [{ "status": "RUNNING" }],
+              "meta": {
+                "rootDirectory": "apps/cron-scrape-sources",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ON_FAILURE"
+                  }
                   }
                 }
               }
@@ -54,13 +66,19 @@
                 "repo": "HexSleeves/family-events-v2",
                 "image": null
               },
-              "latestDeployment": {
-                "status": "SUCCESS",
-                "meta": {
-                  "serviceManifest": {
-                    "deploy": {
-                      "restartPolicyType": "ON_FAILURE"
-                    }
+            "latestDeployment": {
+              "status": "SUCCESS",
+              "instances": [{ "status": "CREATED" }],
+              "meta": {
+                "rootDirectory": "apps/cron-db-maintenance",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ON_FAILURE"
+                  }
                   }
                 }
               }

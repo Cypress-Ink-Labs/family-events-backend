@@ -31,10 +31,16 @@ locals {
 
   railway_cron_services = {
     for name, svc in local.cron_services_manifest : name => {
-      config_path        = svc.config_path
-      cron_schedule      = regex("cronSchedule\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0]
-      restart_policy     = regex("restartPolicyType\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0]
-      validation_surface = local.validation_surface
+      config_path                       = svc.config_path
+      source_repo                       = svc.source_repo
+      root_directory                    = svc.root_directory
+      builder                           = upper(regex("builder\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0])
+      dockerfile_path                   = regex("dockerfilePath\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0]
+      cron_schedule                     = regex("cronSchedule\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0]
+      restart_policy                    = regex("restartPolicyType\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0]
+      required_latest_deployment_status = upper(svc.required_latest_deployment_status)
+      forbidden_instance_statuses       = [for status in svc.forbidden_instance_statuses : upper(status)]
+      validation_surface                = local.validation_surface
     }
   }
 
@@ -53,6 +59,10 @@ locals {
               }
               latestDeployment {
                 status
+                deploymentStopped
+                instances {
+                  status
+                }
                 meta
               }
             }
@@ -107,10 +117,27 @@ locals {
       repo       = try(edge.node.source.repo, "")
 
       cron_schedule = try(edge.node.cronSchedule, "")
-      restart_policy = upper(try(
-        edge.node.latestDeployment.meta.serviceManifest.deploy.restartPolicyType,
-        try(edge.node.latestDeployment.meta.fileServiceManifest.deploy.restartPolicyType, "")
+      root_directory = try(
+        edge.node.latestDeployment.meta.rootDirectory,
+        ""
+      )
+      builder = upper(try(
+        edge.node.latestDeployment.meta.fileServiceManifest.build.builder,
+        try(edge.node.latestDeployment.meta.serviceManifest.build.builder, "")
       ))
+      dockerfile_path = try(
+        edge.node.latestDeployment.meta.fileServiceManifest.build.dockerfilePath,
+        try(edge.node.latestDeployment.meta.serviceManifest.build.dockerfilePath, "")
+      )
+      restart_policy = upper(try(
+        edge.node.latestDeployment.meta.fileServiceManifest.deploy.restartPolicyType,
+        try(edge.node.latestDeployment.meta.serviceManifest.deploy.restartPolicyType, "")
+      ))
+      latest_deployment_status = upper(try(edge.node.latestDeployment.status, ""))
+      instance_statuses = [
+        for instance in try(edge.node.latestDeployment.instances, []) : upper(instance.status)
+        if try(instance.status, "") != ""
+      ]
     }
   }
 
@@ -144,14 +171,47 @@ locals {
       length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].cron_schedule, "") == "" ? [
         "${expected_name}: live Railway metadata missing cronSchedule; expected \"${expected.cron_schedule}\" from ${expected.config_path}"
       ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].repo, "") == "" ? [
+        "${expected_name}: live Railway metadata missing source repo; expected \"${expected.source_repo}\" from ${expected.config_path}"
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].root_directory, "") == "" ? [
+        "${expected_name}: live Railway metadata missing rootDirectory; expected \"${expected.root_directory}\" from ${expected.config_path}"
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].builder, "") == "" ? [
+        "${expected_name}: live Railway metadata missing build.builder; expected \"${expected.builder}\" from ${expected.config_path}"
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].dockerfile_path, "") == "" ? [
+        "${expected_name}: live Railway metadata missing build.dockerfilePath; expected \"${expected.dockerfile_path}\" from ${expected.config_path}"
+      ] : [],
       length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].restart_policy, "") == "" ? [
         "${expected_name}: live Railway metadata missing restartPolicyType; expected \"${expected.restart_policy}\" from ${expected.config_path}"
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") == "" ? [
+        "${expected_name}: live Railway metadata missing latestDeployment.status; expected \"${expected.required_latest_deployment_status}\""
       ] : [],
       length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != "" && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != expected.cron_schedule ? [
         "${expected_name}: cronSchedule mismatch: expected \"${expected.cron_schedule}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].cron_schedule, "")}\""
       ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].repo, "") != "" && try(local.railway_service_matches[expected_name][0].repo, "") != expected.source_repo ? [
+        "${expected_name}: source repo mismatch: expected \"${expected.source_repo}\" from manifest, live \"${try(local.railway_service_matches[expected_name][0].repo, "")}\""
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].root_directory, "") != "" && try(local.railway_service_matches[expected_name][0].root_directory, "") != expected.root_directory ? [
+        "${expected_name}: rootDirectory mismatch: expected \"${expected.root_directory}\" from manifest, live \"${try(local.railway_service_matches[expected_name][0].root_directory, "")}\""
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].builder, "") != "" && try(local.railway_service_matches[expected_name][0].builder, "") != expected.builder ? [
+        "${expected_name}: build.builder mismatch: expected \"${expected.builder}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].builder, "")}\""
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].dockerfile_path, "") != "" && try(local.railway_service_matches[expected_name][0].dockerfile_path, "") != expected.dockerfile_path ? [
+        "${expected_name}: build.dockerfilePath mismatch: expected \"${expected.dockerfile_path}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].dockerfile_path, "")}\""
+      ] : [],
       length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].restart_policy, "") != "" && try(local.railway_service_matches[expected_name][0].restart_policy, "") != expected.restart_policy ? [
         "${expected_name}: restartPolicyType mismatch: expected \"${expected.restart_policy}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].restart_policy, "")}\""
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") != "" && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") != expected.required_latest_deployment_status ? [
+        "${expected_name}: latestDeployment.status mismatch: expected \"${expected.required_latest_deployment_status}\", live \"${try(local.railway_service_matches[expected_name][0].latest_deployment_status, "")}\""
+      ] : [],
+      length(local.railway_service_matches[expected_name]) > 0 && length(setintersection(toset(try(local.railway_service_matches[expected_name][0].instance_statuses, [])), toset(expected.forbidden_instance_statuses))) > 0 ? [
+        "${expected_name}: latestDeployment.instances include forbidden statuses ${join(", ", setintersection(toset(try(local.railway_service_matches[expected_name][0].instance_statuses, [])), toset(expected.forbidden_instance_statuses)))}"
       ] : []
     )
   ])
@@ -204,8 +264,14 @@ output "railway_cron_live_services" {
       length(matches) == 0 ? null : {
         service_name       = matches[0].service_name
         service_id         = matches[0].service_id
+        repo               = matches[0].repo
+        root_directory     = matches[0].root_directory
+        builder            = matches[0].builder
+        dockerfile_path    = matches[0].dockerfile_path
         cron_schedule      = matches[0].cron_schedule
         restart_policy     = matches[0].restart_policy
+        deployment_status  = matches[0].latest_deployment_status
+        instance_statuses  = matches[0].instance_statuses
         validation_surface = local.validation_surface
       }
     )

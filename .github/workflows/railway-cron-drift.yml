@@ -1,0 +1,58 @@
+name: railway-cron-drift
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/railway-cron-drift.yml"
+      - ".spacelift/**"
+      - "apps/cron-*/railway.toml"
+      - "infra/spacelift-railway-cron-poc/**"
+      - "package.json"
+      - "scripts/spacelift-railway-cron-poc.mjs"
+      - "tests/fixtures/railway-cron-poc-*.json"
+      - "tests/railway-cron-poc.test.mjs"
+
+concurrency:
+  group: railway-cron-drift-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_VAR_railway_environment_id: 03e869e2-4e35-4849-84b7-6c0278c1c6fb
+  TF_VAR_railway_project_access_token: ${{ secrets.RAILWAY_POC_PROJECT_ACCESS_TOKEN }}
+
+jobs:
+  drift-guard:
+    name: drift guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Validate secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${TF_VAR_railway_project_access_token:?missing RAILWAY_POC_PROJECT_ACCESS_TOKEN secret}"
+
+      - name: Terraform init
+        run: terraform -chdir=infra/spacelift-railway-cron-poc init -backend=false
+
+      - name: Terraform validate
+        run: terraform -chdir=infra/spacelift-railway-cron-poc validate
+
+      - name: Railway cron drift guard
+        run: terraform -chdir=infra/spacelift-railway-cron-poc plan -input=false -lock=false
