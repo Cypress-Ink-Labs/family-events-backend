@@ -1,0 +1,25 @@
+{
+  "services": [
+    {
+      "name": "cron-tag-queue",
+      "deployment": {
+        "cronSchedule": "* * * * *",
+        "restartPolicyType": "ON_FAILURE"
+      }
+    },
+    {
+      "name": "cron-scrape-sources",
+      "deployment": {
+        "cronSchedule": "0 * * * *",
+        "restartPolicyType": "ON_FAILURE"
+      }
+    },
+    {
+      "name": "cron-db-maintenance",
+      "deployment": {
+        "cronSchedule": "15 3 * * *",
+        "restartPolicyType": "ON_FAILURE"
+      }
+    }
+  ]
+}
