@@ -42,6 +42,7 @@ const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
 const DEFAULT_AI_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_OLLAMA_API_KEY = "ollama";
 const SUPPORTED_AI_PROVIDERS = new Set(["openai", "ollama", "localai"]);
+const DEFAULT_OLLAMA_MODEL = "gemma3n:e4b";
 
 type TagProvider = "openai" | "ollama" | "localai" | "keyword-fallback";
 type LlmTagProvider = Exclude<TagProvider, "keyword-fallback">;
@@ -96,13 +97,16 @@ function resolveAiProvider(value: string | undefined): LlmTagProvider {
 
 function resolveAiConfig(): LlmConfig {
   const provider = resolveAiProvider(Deno.env.get("AI_PROVIDER"));
+
   const rawBaseUrl = Deno.env.get("AI_BASE_URL") ??
     (provider === "openai" ? DEFAULT_AI_BASE_URL : "");
   const baseUrl = normalizeAiBaseUrl(rawBaseUrl);
+
   const rawModel = Deno.env.get("AI_MODEL") ?? Deno.env.get("OPENAI_MODEL");
   const model = provider === "openai"
     ? (rawModel ?? DEFAULT_OPENAI_MODEL)
-    : (rawModel ?? "qwen3:1.7b");
+    : (rawModel ?? DEFAULT_OLLAMA_MODEL);
+
   const apiKey = Deno.env.get("AI_API_KEY") ??
     Deno.env.get("OPENAI_API_KEY") ??
     (provider === "localai" ? Deno.env.get("LOCALAI_API_KEY") : undefined) ??
