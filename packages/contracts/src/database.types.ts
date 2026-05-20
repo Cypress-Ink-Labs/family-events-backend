@@ -1,6 +1,11 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -211,6 +216,7 @@ export type Database = {
           auto_approve: boolean
           city_id: string | null
           created_at: string
+          date_window_days: number | null
           error_count: number
           id: string
           is_active: boolean
@@ -227,6 +233,7 @@ export type Database = {
           auto_approve?: boolean
           city_id?: string | null
           created_at?: string
+          date_window_days?: number | null
           error_count?: number
           id?: string
           is_active?: boolean
@@ -243,6 +250,7 @@ export type Database = {
           auto_approve?: boolean
           city_id?: string | null
           created_at?: string
+          date_window_days?: number | null
           error_count?: number
           id?: string
           is_active?: boolean
@@ -384,6 +392,7 @@ export type Database = {
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
+          ai_tag_model: string | null
           ai_tag_provider: string | null
           city_id: string | null
           created_at: string
@@ -418,6 +427,7 @@ export type Database = {
           age_max?: number | null
           age_min?: number | null
           ai_confidence?: number | null
+          ai_tag_model?: string | null
           ai_tag_provider?: string | null
           city_id?: string | null
           created_at?: string
@@ -452,6 +462,7 @@ export type Database = {
           age_max?: number | null
           age_min?: number | null
           ai_confidence?: number | null
+          ai_tag_model?: string | null
           ai_tag_provider?: string | null
           city_id?: string | null
           created_at?: string
@@ -547,6 +558,7 @@ export type Database = {
           id: string
           max_uses: number
           notes: string | null
+          revoked_at: string | null
           used_count: number
         }
         Insert: {
@@ -557,6 +569,7 @@ export type Database = {
           id?: string
           max_uses?: number
           notes?: string | null
+          revoked_at?: string | null
           used_count?: number
         }
         Update: {
@@ -567,6 +580,7 @@ export type Database = {
           id?: string
           max_uses?: number
           notes?: string | null
+          revoked_at?: string | null
           used_count?: number
         }
         Relationships: [
@@ -1144,7 +1158,47 @@ export type Database = {
       }
       admin_create_event: {
         Args: { p_patch: Json; p_tag_ids?: string[] }
-        Returns: Database["public"]["Tables"]["events"]["Row"]
+        Returns: {
+          address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
+          age_max: number | null
+          age_min: number | null
+          ai_confidence: number | null
+          ai_tag_model: string | null
+          ai_tag_provider: string | null
+          city_id: string | null
+          created_at: string
+          description: string | null
+          end_datetime: string | null
+          id: string
+          images: Json
+          is_featured: boolean
+          is_free: boolean
+          is_outdoor: boolean | null
+          latitude: number | null
+          longitude: number | null
+          price: number | null
+          recurrence_info: Json | null
+          search_vector: unknown
+          source_id: string | null
+          source_name: string | null
+          source_url: string | null
+          start_datetime: string
+          status: string
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string | null
+          view_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_create_invite_code: {
         Args: { p_expires_at?: string; p_max_uses?: number; p_notes?: string }
@@ -1169,6 +1223,7 @@ export type Database = {
           status: string
         }[]
       }
+      admin_delete_rating: { Args: { p_id: string }; Returns: boolean }
       admin_list_cron_jobs: {
         Args: never
         Returns: {
@@ -1183,12 +1238,43 @@ export type Database = {
           schedule: string
         }[]
       }
+      admin_list_railway_cron_jobs: {
+        Args: never
+        Returns: {
+          label: string
+          last_http_status: number
+          last_run_at: string
+          last_run_duration_s: number
+          last_run_status: string
+        }[]
+      }
+      admin_railway_cron_run_history: {
+        Args: { p_label?: string; p_limit?: number }
+        Returns: {
+          body: string
+          duration_s: number
+          http_status: number
+          id: number
+          label: string
+          ran_at: string
+          status: string
+        }[]
+      }
       admin_reject_invite_request: {
         Args: { p_notes?: string; p_request_id: string }
         Returns: boolean
       }
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
+      admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
+      admin_set_cron_schedule: {
+        Args: { p_job_name: string; p_schedule: string }
+        Returns: undefined
+      }
+      admin_toggle_cron_job: {
+        Args: { p_active: boolean; p_job_name: string }
+        Returns: undefined
+      }
       admin_unlock_event_fields: {
         Args: { p_event_id: string }
         Returns: boolean
@@ -1200,15 +1286,47 @@ export type Database = {
           p_patch: Json
           p_tag_ids: string[]
         }
-        Returns: Database["public"]["Tables"]["events"]["Row"]
-      }
-      admin_set_cron_schedule: {
-        Args: { p_job_name: string; p_schedule: string }
-        Returns: undefined
-      }
-      admin_toggle_cron_job: {
-        Args: { p_active: boolean; p_job_name: string }
-        Returns: undefined
+        Returns: {
+          address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
+          age_max: number | null
+          age_min: number | null
+          ai_confidence: number | null
+          ai_tag_model: string | null
+          ai_tag_provider: string | null
+          city_id: string | null
+          created_at: string
+          description: string | null
+          end_datetime: string | null
+          id: string
+          images: Json
+          is_featured: boolean
+          is_free: boolean
+          is_outdoor: boolean | null
+          latitude: number | null
+          longitude: number | null
+          price: number | null
+          recurrence_info: Json | null
+          search_vector: unknown
+          source_id: string | null
+          source_name: string | null
+          source_url: string | null
+          start_datetime: string
+          status: string
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string | null
+          view_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       claim_pending_invite_access: { Args: never; Returns: boolean }
       claim_tag_queue_batch: {
@@ -1233,6 +1351,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      delete_my_account: { Args: never; Returns: undefined }
       earth: { Args: never; Returns: number }
       events_enriched: {
         Args: {
@@ -1288,6 +1407,16 @@ export type Database = {
         Returns: undefined
       }
       is_enabled_user: { Args: never; Returns: boolean }
+      log_railway_cron_run: {
+        Args: {
+          p_body?: string
+          p_duration_s?: number
+          p_http_status?: number
+          p_label: string
+          p_status: string
+        }
+        Returns: undefined
+      }
       plan_events_first_nonempty_window: {
         Args: {
           p_city_id?: string
@@ -1342,6 +1471,7 @@ export type Database = {
         Args: { p_email: string; p_message?: string }
         Returns: boolean
       }
+      run_daily_maintenance: { Args: never; Returns: Json }
       run_due_source_scrapes: { Args: never; Returns: undefined }
       search_events: {
         Args: {
@@ -1360,9 +1490,13 @@ export type Database = {
         }
         Returns: {
           address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
+          ai_tag_model: string | null
           ai_tag_provider: string | null
           city_id: string | null
           created_at: string
