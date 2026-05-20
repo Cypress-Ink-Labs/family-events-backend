@@ -1,0 +1,92 @@
+{
+  "data": {
+    "environment": {
+      "serviceInstances": {
+        "edges": [
+          {
+            "node": {
+              "serviceName": "cron-tag-queue-seKl",
+              "serviceId": "92747fa2-b0fe-450e-91a5-5a16500b1dad",
+              "cronSchedule": "*/5 * * * *",
+              "source": {
+                "repo": "HexSleeves/family-events-v2",
+                "image": null
+              },
+            "latestDeployment": {
+              "status": "FAILED",
+              "instances": [{ "status": "CRASHED" }],
+              "meta": {
+                "rootDirectory": "apps/cron-tag-queue",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ALWAYS"
+                  }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "node": {
+              "serviceName": "cron-scrape-sources-yp-N",
+              "serviceId": "c48ad7ba-1454-4beb-9251-1ef090ff99cd",
+              "cronSchedule": "0 * * * *",
+              "source": {
+                "repo": "HexSleeves/family-events-v2",
+                "image": null
+              },
+            "latestDeployment": {
+              "status": "SUCCESS",
+              "instances": [{ "status": "RUNNING" }],
+              "meta": {
+                "rootDirectory": "apps/cron-scrape-sources",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ON_FAILURE"
+                  }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "node": {
+              "serviceName": "cron-db-maintenance",
+              "serviceId": "8ffaba4f-1d17-458f-b3b9-279736e10449",
+              "cronSchedule": "15 3 * * *",
+              "source": {
+                "repo": "HexSleeves/family-events-v2",
+                "image": null
+              },
+            "latestDeployment": {
+              "status": "SUCCESS",
+              "instances": [{ "status": "CREATED" }],
+              "meta": {
+                "rootDirectory": "apps/cron-db-maintenance",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ON_FAILURE"
+                  }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "errors": []
+}

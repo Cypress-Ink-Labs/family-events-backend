@@ -27,13 +27,63 @@ function resolveAllowedOrigin(origin: string | null): string | null {
   return allowlist.includes(origin) ? origin : null;
 }
 
+// Worker batch size (mirrors BATCH_SIZE in process-tag-queue). Kicking once per
+// batch lets newly-imported events start tagging immediately instead of waiting
+// up to a full cron tick (~60s). The Railway cron worker remains the safety net.
+const TAG_QUEUE_BATCH_SIZE = 8;
+const TAG_QUEUE_MAX_KICKS = 4;
+
+declare const EdgeRuntime:
+  | { waitUntil<T>(promise: Promise<T>): Promise<T> }
+  | undefined;
+
+function kickProcessTagQueue(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  imported: number,
+): void {
+  const kicks = Math.min(
+    TAG_QUEUE_MAX_KICKS,
+    Math.max(1, Math.ceil(imported / TAG_QUEUE_BATCH_SIZE)),
+  );
+  const url = `${supabaseUrl}/functions/v1/process-tag-queue`;
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${serviceRoleKey}`,
+  };
+
+  for (let i = 0; i < kicks; i++) {
+    const kick = fetch(url, { method: "POST", headers, body: "{}" })
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.text().catch(() => "");
+          throw new Error(
+            `process-tag-queue ${res.status}: ${body.slice(0, 200)}`,
+          );
+        }
+      })
+      .catch((err) => {
+        logEdgeEvent(
+          "warn",
+          "tag-queue kick failed",
+          errorContext(err, { function: "scrape-source", stage: "kick" }),
+        );
+      });
+
+    if (typeof EdgeRuntime !== "undefined") {
+      EdgeRuntime.waitUntil(kick);
+    }
+  }
+}
+
 function buildCorsHeaders(allowedOrigin: string | null): HeadersInit {
   if (!allowedOrigin) return { Vary: "Origin" };
 
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, X-Client-Info, Apikey",
     Vary: "Origin",
   };
 }
@@ -102,6 +152,14 @@ Deno.serve(async (req: Request) => {
     for (const source of dueSources) {
       const result = await processSource(supabase, source);
       results.push(result);
+    }
+
+    const totalImported = results.reduce(
+      (sum, r) => sum + r.eventsImported,
+      0,
+    );
+    if (totalImported > 0 && supabaseUrl && serviceRoleKey) {
+      kickProcessTagQueue(supabaseUrl, serviceRoleKey, totalImported);
     }
 
     return new Response(
