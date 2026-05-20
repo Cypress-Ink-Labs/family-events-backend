@@ -54,9 +54,21 @@ rm -f "$BODY_FILE"
 HTTP=$(printf '%d' "${HTTP_RAW:-0}" 2>/dev/null || echo 0)
 
 case "$HTTP" in
-  2*) emit info "ok" "$HTTP" "$DUR" "$BODY" ;;
-  0)  emit error "curl failed (network/timeout)" 0 "$DUR" "$BODY" ;;
-  *)  emit error "non-2xx response" "$HTTP" "$DUR" "$BODY" ;;
+  2*) CRON_STATUS="succeeded" ; emit info  "ok"                           "$HTTP" "$DUR" "$BODY" ;;
+  0)  CRON_STATUS="failed"    ; emit error "curl failed (network/timeout)" 0      "$DUR" "$BODY" ;;
+  *)  CRON_STATUS="failed"    ; emit error "non-2xx response"              "$HTTP" "$DUR" "$BODY" ;;
 esac
+
+# Persist run result to Supabase for admin UI observability (opt-in: set LOG_CRON_RUN_URL).
+if [ -n "${LOG_CRON_RUN_URL:-}" ]; then
+  CLEAN_BODY=$(printf '%s' "$BODY" | tr -d '\n\r' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | cut -c1-500)
+  curl --silent --max-time 10 \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+    "$LOG_CRON_RUN_URL" \
+    -d "{\"label\":\"$LABEL\",\"status\":\"$CRON_STATUS\",\"http_status\":$HTTP,\"duration_s\":$DUR,\"body\":\"$CLEAN_BODY\"}" \
+    > /dev/null 2>&1 || true
+fi
 
 exit 0
