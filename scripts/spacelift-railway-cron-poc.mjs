@@ -45,10 +45,40 @@ export function parseRailwayToml(text) {
     }
 
     const [, key, rawValue] = valueMatch
-    section[key] = parseTomlScalar(rawValue)
+    section[key] = parseTomlScalar(stripInlineTomlComment(rawValue))
   }
 
   return result
+}
+
+function stripInlineTomlComment(rawValue) {
+  let inString = false
+  let escaped = false
+
+  for (let index = 0; index < rawValue.length; index += 1) {
+    const char = rawValue[index]
+
+    if (escaped) {
+      escaped = false
+      continue
+    }
+
+    if (char === "\\") {
+      escaped = inString
+      continue
+    }
+
+    if (char === '"') {
+      inString = !inString
+      continue
+    }
+
+    if (char === "#" && !inString) {
+      return rawValue.slice(0, index).trim()
+    }
+  }
+
+  return rawValue.trim()
 }
 
 function parseTomlScalar(rawValue) {

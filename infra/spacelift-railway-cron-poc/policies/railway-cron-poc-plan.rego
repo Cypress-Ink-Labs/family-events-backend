@@ -8,7 +8,7 @@ deny contains message if {
 
 deny contains message if {
   some change in input.terraform.resource_changes
-  change.change.actions[_] == "delete"
+  "delete" in change.change.actions
   message := sprintf("Railway cron POC forbids deletes: %s", [change.address])
 }
 
