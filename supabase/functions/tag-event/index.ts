@@ -44,8 +44,7 @@ const DEFAULT_OLLAMA_API_KEY = "ollama";
 const SUPPORTED_AI_PROVIDERS = new Set(["openai", "ollama", "localai"]);
 const DEFAULT_OLLAMA_MODEL = "gemma3n:e4b";
 
-type TagProvider = "openai" | "ollama" | "localai" | "keyword-fallback";
-type LlmTagProvider = Exclude<TagProvider, "keyword-fallback">;
+type LlmTagProvider = "openai" | "ollama" | "localai";
 type ClassificationStatus = "success" | "fallback" | "error";
 type TriggerType = "import" | "reclassify" | "manual-review";
 
@@ -71,7 +70,7 @@ interface ClassificationResult {
   price: number | null;
   isFree: boolean;
   venueName: string | null;
-  provider: TagProvider;
+  provider: LlmTagProvider;
   reasoningSummary: string | null;
   status: ClassificationStatus;
   fallbackReason: string | null;
@@ -438,7 +437,7 @@ Deno.serve(async (req: Request) => {
           price: fallbackPrice.price,
           isFree: fallbackPrice.isFree,
           venueName: fallbackVenue.venueName,
-          provider: "keyword-fallback",
+          provider: aiConfig.provider,
           reasoningSummary: buildKeywordFallbackSummary(true),
           status: "fallback",
           fallbackReason: aiError instanceof Error
@@ -460,7 +459,7 @@ Deno.serve(async (req: Request) => {
         price: fallbackPrice.price,
         isFree: fallbackPrice.isFree,
         venueName: fallbackVenue.venueName,
-        provider: "keyword-fallback",
+        provider: aiConfig.provider,
         reasoningSummary: buildKeywordFallbackSummary(false),
         status: "fallback",
         fallbackReason: "AI provider is not configured",
@@ -587,6 +586,7 @@ Deno.serve(async (req: Request) => {
         ai_confidence: topConfidence,
         ai_tag_provider: classification.provider,
         ai_tag_model: classification.model,
+        ai_tag_status: classification.status,
         age_min: classification.ageMin,
         age_max: classification.ageMax,
       };

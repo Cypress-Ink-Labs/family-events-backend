@@ -67,7 +67,16 @@ VITE_SENTRY_TRACES_SAMPLE_RATE=0
 VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE=0
 VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE=0
 EOF
-ok ".env.development.local updated for local Supabase"
+ok ".env.development.local (root) updated for local Supabase"
+
+# Vite reads env files from the app root (apps/web/), not the monorepo root.
+# Keep apps/web/.env.development.local in sync so the dev server picks up
+# fresh keys after a `supabase db reset`.
+cat > "$ROOT_DIR/apps/web/.env.development.local" <<EOF
+VITE_SUPABASE_URL=$API_URL
+VITE_SUPABASE_ANON_KEY=$PUBLISHABLE_KEY
+EOF
+ok "apps/web/.env.development.local updated for local Supabase"
 
 # Invite gate: default off locally. Flip with REQUIRE_INVITE=true npm run setup:local
 REQUIRE_INVITE="${REQUIRE_INVITE:-false}"
