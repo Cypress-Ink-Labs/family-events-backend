@@ -62,8 +62,21 @@ else
   RAILWAY_AVAILABLE=true
 fi
 
-if [ -z "${RAILWAY_TOKEN:-}" ] && [ "$RAILWAY_AVAILABLE" = "true" ]; then
-  warn "RAILWAY_TOKEN not set — Railway targets may require interactive login"
+if [ "$RAILWAY_AVAILABLE" = "true" ]; then
+  if [ -z "${RAILWAY_TOKEN:-}" ]; then
+    warn "RAILWAY_TOKEN not set — Railway targets will use interactive login if available"
+  else
+    # Preflight: verify the token is valid before attempting any deploys
+    if ! RAILWAY_TOKEN="${RAILWAY_TOKEN}" railway whoami &>/dev/null; then
+      echo -e "${RED}✗${NC} Railway token is invalid or expired." >&2
+      echo    "  Refresh it with one of:" >&2
+      echo    "    railway login                       (browser-based)" >&2
+      echo    "    railway login --browserless         (copy-paste flow)" >&2
+      echo    "  Or generate a new token at https://railway.app/account/tokens" >&2
+      echo    "  and update RAILWAY_TOKEN in your .env file." >&2
+      RAILWAY_AVAILABLE=false
+    fi
+  fi
 fi
 
 if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
