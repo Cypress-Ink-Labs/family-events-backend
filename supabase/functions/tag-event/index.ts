@@ -127,6 +127,14 @@ function resolveOpenAiModel(configuredModel: string): string {
     : DEFAULT_OPENAI_MODEL;
 }
 
+interface LlmUsage {
+  promptTokens: number | null;
+  completionTokens: number | null;
+  totalTokens: number | null;
+  llmLatencyMs: number;
+  finishReason: string | null;
+}
+
 async function classifyWithLlm(
   config: LlmConfig,
   title: string,
@@ -140,6 +148,7 @@ async function classifyWithLlm(
   isFree: boolean;
   venueName: string | null;
   reasoningSummary: string | null;
+  usage: LlmUsage;
 }> {
   // Cap untrusted input. Long descriptions inflate cost AND give a prompt
   // injection more room to bury overrides. Slice happens before the prompt is
@@ -177,6 +186,7 @@ async function classifyWithLlm(
     `available_tags: ${JSON.stringify(availableTags)}`,
   ].join("\n");
 
+  const llmStart = Date.now();
   const response = await fetch(`${config.baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
@@ -206,10 +216,29 @@ async function classifyWithLlm(
   }
 
   const completion = await response.json();
+  const llmLatencyMs = Date.now() - llmStart;
   const rawContent = completion?.choices?.[0]?.message?.content;
   if (!rawContent) {
     throw new Error(`${config.provider} returned an empty response`);
   }
+
+  const usageRaw = completion?.usage ?? {};
+  const usage: LlmUsage = {
+    promptTokens: Number.isFinite(usageRaw.prompt_tokens)
+      ? Number(usageRaw.prompt_tokens)
+      : null,
+    completionTokens: Number.isFinite(usageRaw.completion_tokens)
+      ? Number(usageRaw.completion_tokens)
+      : null,
+    totalTokens: Number.isFinite(usageRaw.total_tokens)
+      ? Number(usageRaw.total_tokens)
+      : null,
+    llmLatencyMs,
+    finishReason:
+      typeof completion?.choices?.[0]?.finish_reason === "string"
+        ? completion.choices[0].finish_reason
+        : null,
+  };
 
   const parsed = JSON.parse(rawContent);
   const tags = Array.isArray(parsed?.tags)
@@ -237,7 +266,7 @@ async function classifyWithLlm(
     ? parsed.reasoning_summary
     : null;
 
-  return { tags, ageMin, ageMax, price, isFree, venueName, reasoningSummary };
+  return { tags, ageMin, ageMax, price, isFree, venueName, reasoningSummary, usage };
 }
 
 Deno.serve(async (req: Request) => {
@@ -347,6 +376,7 @@ Deno.serve(async (req: Request) => {
     }
 
     let classification: ClassificationResult;
+    let llmUsage: LlmUsage | null = null;
 
     if (aiConfig.configured) {
       try {
@@ -357,6 +387,7 @@ Deno.serve(async (req: Request) => {
           availableTags ?? [],
         );
 
+        llmUsage = aiResult.usage;
         classification = {
           tags: aiResult.tags,
           ageMin: aiResult.ageMin,
@@ -633,6 +664,31 @@ Deno.serve(async (req: Request) => {
         throw eventUpdateError;
       }
     }
+
+    logEdgeEvent("log", "tag-event classified", {
+      function: "tag-event",
+      event_id: eventId,
+      source_run_id: sourceRunId,
+      trigger_type: triggerType,
+      provider: classification.provider,
+      model: classification.model,
+      status: classification.status,
+      fallback_reason: classification.fallbackReason,
+      tags_assigned: normalizedTags.length,
+      overall_confidence: Number(topConfidence.toFixed(3)),
+      age_min: classification.ageMin,
+      age_max: classification.ageMax,
+      price: classification.price,
+      is_free: classification.isFree,
+      title_chars: title.length,
+      description_chars: description.length,
+      total_ms: Date.now() - traceStartedAt,
+      llm_ms: llmUsage?.llmLatencyMs ?? null,
+      prompt_tokens: llmUsage?.promptTokens ?? null,
+      completion_tokens: llmUsage?.completionTokens ?? null,
+      total_tokens: llmUsage?.totalTokens ?? null,
+      finish_reason: llmUsage?.finishReason ?? null,
+    });
 
     return new Response(
       JSON.stringify({
