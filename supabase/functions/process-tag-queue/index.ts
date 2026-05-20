@@ -34,6 +34,8 @@ interface ProcessSummary {
   succeeded: number
   failed: number
   dead: number
+  pending_after: number | null
+  duration_ms: number
 }
 
 async function fetchEventInputs(
@@ -145,7 +147,8 @@ export async function processBatch(
   supabaseUrl: string,
   serviceRoleKey: string
 ): Promise<ProcessSummary> {
-  const summary: ProcessSummary = { claimed: 0, succeeded: 0, failed: 0, dead: 0 }
+  const batchStart = Date.now()
+  const summary: ProcessSummary = { claimed: 0, succeeded: 0, failed: 0, dead: 0, pending_after: null, duration_ms: 0 }
 
   const { data: claimed, error: claimError } = await supabase.rpc("claim_tag_queue_batch", {
     p_limit: BATCH_SIZE,
@@ -154,7 +157,11 @@ export async function processBatch(
 
   const rows = (claimed ?? []) as QueueRow[]
   summary.claimed = rows.length
-  if (rows.length === 0) return summary
+  if (rows.length === 0) {
+    summary.duration_ms = Date.now() - batchStart
+    logEdgeEvent("log", "tag-queue batch done", { function: "process-tag-queue", ...summary })
+    return summary
+  }
 
   for (const row of rows) {
     const rowStart = Date.now()
@@ -251,10 +258,13 @@ export async function processBatch(
     .from("event_tag_queue")
     .select("id", { count: "exact", head: true })
     .eq("status", "pending")
+
+  summary.pending_after = depth ?? null
+  summary.duration_ms = Date.now() - batchStart
+
   logEdgeEvent("log", "tag-queue batch done", {
     function: "process-tag-queue",
     ...summary,
-    pending_after: depth ?? null,
   })
 
   return summary

@@ -37,6 +37,8 @@ if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
   exit 0
 fi
 
+printf '{"ts":"%s","label":"%s","level":"info","msg":"starting"}\n' "$TS" "$LABEL"
+
 START=$(date +%s)
 BODY_FILE=$(mktemp)
 HTTP_RAW=$(curl --silent --show-error --max-time 170 \
