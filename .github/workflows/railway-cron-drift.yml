@@ -4,15 +4,6 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [main]
-    paths:
-      - ".github/workflows/railway-cron-drift.yml"
-      - ".spacelift/**"
-      - "apps/cron-*/railway.toml"
-      - "infra/spacelift-railway-cron-poc/**"
-      - "package.json"
-      - "scripts/spacelift-railway-cron-poc.mjs"
-      - "tests/fixtures/railway-cron-poc-*.json"
-      - "tests/railway-cron-poc.test.mjs"
 
 concurrency:
   group: railway-cron-drift-${{ github.workflow }}-${{ github.ref }}
