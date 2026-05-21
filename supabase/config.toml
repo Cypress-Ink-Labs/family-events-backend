@@ -18,8 +18,6 @@ schema_paths = ["./migrations/*.sql"]
 [db.seed]
 enabled = true
 sql_paths = [
-  "./migrations/20260407154210_003_seed_initial_data.sql",
-  "./migrations/20260415114500_005_seed_event_sources.sql",
   "./seed.sql",
 ]
 

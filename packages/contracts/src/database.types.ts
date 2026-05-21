@@ -1,11 +1,12 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -145,7 +146,7 @@ export type Database = {
           predicted_fields: Json | null
           predicted_tags: Json
           processing_ms: number | null
-          provider: string
+          provider: string | null
           reasoning_summary: string | null
           source_run_id: string | null
           status: string
@@ -163,7 +164,7 @@ export type Database = {
           predicted_fields?: Json | null
           predicted_tags?: Json
           processing_ms?: number | null
-          provider: string
+          provider?: string | null
           reasoning_summary?: string | null
           source_run_id?: string | null
           status?: string
@@ -181,7 +182,7 @@ export type Database = {
           predicted_fields?: Json | null
           predicted_tags?: Json
           processing_ms?: number | null
-          provider?: string
+          provider?: string | null
           reasoning_summary?: string | null
           source_run_id?: string | null
           status?: string
@@ -397,6 +398,7 @@ export type Database = {
           ai_confidence: number | null
           ai_tag_model: string | null
           ai_tag_provider: string | null
+          ai_tag_status: string | null
           city_id: string | null
           created_at: string
           description: string | null
@@ -432,6 +434,7 @@ export type Database = {
           ai_confidence?: number | null
           ai_tag_model?: string | null
           ai_tag_provider?: string | null
+          ai_tag_status?: string | null
           city_id?: string | null
           created_at?: string
           description?: string | null
@@ -467,6 +470,7 @@ export type Database = {
           ai_confidence?: number | null
           ai_tag_model?: string | null
           ai_tag_provider?: string | null
+          ai_tag_status?: string | null
           city_id?: string | null
           created_at?: string
           description?: string | null
@@ -898,66 +902,6 @@ export type Database = {
           },
         ]
       }
-      source_scrape_queue: {
-        Row: {
-          attempt_count: number
-          enqueued_at: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          next_attempt_at: string
-          source_id: string | null
-          source_run_id: string | null
-          skip_reason: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type: string
-        }
-        Insert: {
-          attempt_count?: number
-          enqueued_at?: string
-          finished_at?: string | null
-          id?: never
-          last_error?: string | null
-          next_attempt_at?: string
-          source_id?: string | null
-          source_run_id?: string | null
-          skip_reason?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type?: string
-        }
-        Update: {
-          attempt_count?: number
-          enqueued_at?: string
-          finished_at?: string | null
-          id?: never
-          last_error?: string | null
-          next_attempt_at?: string
-          source_id?: string | null
-          source_run_id?: string | null
-          skip_reason?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "source_scrape_queue_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "event_sources"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "source_scrape_queue_source_run_id_fkey"
-            columns: ["source_run_id"]
-            isOneToOne: false
-            referencedRelation: "source_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       source_runs: {
         Row: {
           completed_at: string | null
@@ -1001,6 +945,66 @@ export type Database = {
             columns: ["source_id"]
             isOneToOne: false
             referencedRelation: "event_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      source_scrape_queue: {
+        Row: {
+          attempt_count: number
+          enqueued_at: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          next_attempt_at: string
+          skip_reason: string | null
+          source_id: string | null
+          source_run_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type: string
+        }
+        Insert: {
+          attempt_count?: number
+          enqueued_at?: string
+          finished_at?: string | null
+          id?: never
+          last_error?: string | null
+          next_attempt_at?: string
+          skip_reason?: string | null
+          source_id?: string | null
+          source_run_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type?: string
+        }
+        Update: {
+          attempt_count?: number
+          enqueued_at?: string
+          finished_at?: string | null
+          id?: never
+          last_error?: string | null
+          next_attempt_at?: string
+          skip_reason?: string | null
+          source_id?: string | null
+          source_run_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_scrape_queue_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "event_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_scrape_queue_source_run_id_fkey"
+            columns: ["source_run_id"]
+            isOneToOne: false
+            referencedRelation: "source_runs"
             referencedColumns: ["id"]
           },
         ]
@@ -1205,18 +1209,6 @@ export type Database = {
         }
         Relationships: []
       }
-      source_scrape_queue_summary: {
-        Row: {
-          avg_attempts: number | null
-          last_dead_letter_at: string | null
-          newest_finished_at: string | null
-          oldest_enqueued_at: string | null
-          oldest_processing_started_at: string | null
-          row_count: number | null
-          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null
-        }
-        Relationships: []
-      }
       public_events: {
         Row: {
           address: string | null
@@ -1294,6 +1286,26 @@ export type Database = {
           },
         ]
       }
+      source_scrape_queue_summary: {
+        Row: {
+          avg_attempts: number | null
+          last_dead_letter_at: string | null
+          newest_finished_at: string | null
+          oldest_enqueued_at: string | null
+          oldest_processing_started_at: string | null
+          row_count: number | null
+          status:
+            | Database["public"]["Enums"]["source_scrape_queue_status"]
+            | null
+        }
+        Relationships: []
+      }
+      timezone_names: {
+        Row: {
+          name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_approve_invite_request: {
@@ -1322,6 +1334,7 @@ export type Database = {
           ai_confidence: number | null
           ai_tag_model: string | null
           ai_tag_provider: string | null
+          ai_tag_status: string | null
           city_id: string | null
           created_at: string
           description: string | null
@@ -1418,8 +1431,11 @@ export type Database = {
         Args: { p_notes?: string; p_request_id: string }
         Returns: boolean
       }
+      admin_retry_source_scrape_queue: {
+        Args: { p_queue_id: number }
+        Returns: boolean
+      }
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
-      admin_retry_source_scrape_queue: { Args: { p_queue_id: number }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
       admin_set_cron_schedule: {
@@ -1451,6 +1467,7 @@ export type Database = {
           ai_confidence: number | null
           ai_tag_model: string | null
           ai_tag_provider: string | null
+          ai_tag_status: string | null
           city_id: string | null
           created_at: string
           description: string | null
@@ -1484,6 +1501,29 @@ export type Database = {
         }
       }
       claim_pending_invite_access: { Args: never; Returns: boolean }
+      claim_source_scrape_queue_batch: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempt_count: number
+          enqueued_at: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          next_attempt_at: string
+          skip_reason: string | null
+          source_id: string | null
+          source_run_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "source_scrape_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_tag_queue_batch: {
         Args: { p_limit?: number }
         Returns: {
@@ -1507,7 +1547,6 @@ export type Database = {
         }
       }
       delete_my_account: { Args: never; Returns: undefined }
-      earth: { Args: never; Returns: number }
       events_enriched: {
         Args: {
           p_city_id?: string
@@ -1572,6 +1611,55 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_source_scrape_queue_skipped: {
+        Args: { p_queue_id: number; p_skip_reason: string }
+        Returns: undefined
+      }
+      mark_source_scrape_queue_started: {
+        Args: { p_queue_id: number }
+        Returns: {
+          attempt_count: number
+          enqueued_at: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          next_attempt_at: string
+          skip_reason: string | null
+          source_id: string | null
+          source_run_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "source_scrape_queue"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      mark_tag_queue_row_started: {
+        Args: { p_queue_id: number }
+        Returns: {
+          attempt_count: number
+          enqueued_at: string
+          event_id: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          next_attempt_at: string
+          source_run_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["event_tag_queue_status"]
+          trigger_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "event_tag_queue"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       plan_events_first_nonempty_window: {
         Args: {
           p_city_id?: string
@@ -1616,16 +1704,26 @@ export type Database = {
           weather_score: number
         }[]
       }
+      reap_stuck_source_scrape_queue_rows: { Args: never; Returns: number }
       reap_stuck_tag_queue_rows: { Args: never; Returns: number }
       redeem_invite: { Args: { p_code: string }; Returns: boolean }
       redeem_invite_for_email: {
         Args: { p_code: string; p_email: string }
         Returns: boolean
       }
+      release_unstarted_source_scrape_queue_rows: {
+        Args: { p_claimed_ids: number[] }
+        Returns: number
+      }
+      release_unstarted_tag_queue_rows: {
+        Args: { p_claimed_ids: number[] }
+        Returns: number
+      }
       request_invite: {
         Args: { p_email: string; p_message?: string }
         Returns: boolean
       }
+      run_cleanup_stale_runs: { Args: never; Returns: undefined }
       run_daily_maintenance: { Args: never; Returns: Json }
       run_due_source_scrapes: { Args: never; Returns: undefined }
       search_events: {
@@ -1653,6 +1751,7 @@ export type Database = {
           ai_confidence: number | null
           ai_tag_model: string | null
           ai_tag_provider: string | null
+          ai_tag_status: string | null
           city_id: string | null
           created_at: string
           description: string | null
@@ -1685,12 +1784,26 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      source_scrape_queue_schedule_retry: {
+        Args: { p_attempt_count: number; p_error: string; p_queue_id: number }
+        Returns: undefined
+      }
     }
     Enums: {
-      event_tag_queue_status: "pending" | "processing" | "succeeded" | "failed" | "dead"
+      event_tag_queue_status:
+        | "pending"
+        | "processing"
+        | "failed"
+        | "dead"
+        | "succeeded"
       invite_request_status: "pending" | "approved" | "rejected"
       source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
-      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
+      source_scrape_queue_status:
+        | "pending"
+        | "processing"
+        | "retrying"
+        | "succeeded"
+        | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1721,8 +1834,10 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1816,10 +1931,27 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      event_tag_queue_status: ["pending", "processing", "succeeded", "failed", "dead"],
+      event_tag_queue_status: [
+        "pending",
+        "processing",
+        "failed",
+        "dead",
+        "succeeded",
+      ],
       invite_request_status: ["pending", "approved", "rejected"],
-      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
-      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
+      source_extraction_mode: [
+        "deterministic",
+        "llm",
+        "deterministic_then_llm",
+      ],
+      source_scrape_queue_status: [
+        "pending",
+        "processing",
+        "retrying",
+        "succeeded",
+        "dead",
+      ],
     },
   },
 } as const
+
