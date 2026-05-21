@@ -1,0 +1,6 @@
+{
+  "name": "@family-events/cron-cleanup-stale",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Railway cron service that hits cleanup-stale-runs every 30 min. Replaces broken Supabase pg_cron cleanup-stale-source-runs."
+}

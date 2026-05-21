@@ -1,0 +1,15 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Every 30 minutes. Mirrors the pg_cron cleanup-stale-source-runs cadence
+# that ran from 20260601005400_perf_slow_query_wins onward. The reaper
+# marks source_runs stuck in 'running' for >15 min as 'error' so the admin
+# sources page reflects failure within one cron tick. Idempotent.
+cronSchedule = "*/30 * * * *"
+# ON_FAILURE: ALWAYS caused a tight restart loop (curl exits → instant
+# restart → curl exits → ...) and bypassed the cron schedule entirely. With
+# ON_FAILURE Railway only restarts on a non-zero exit, so a clean run waits
+# for the next cron tick.
+restartPolicyType = "ON_FAILURE"
