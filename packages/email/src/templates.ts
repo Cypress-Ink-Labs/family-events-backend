@@ -1,8 +1,8 @@
 export const TEMPLATES = {
-  welcome: 'family-events-welcome',
-  magicLink: 'family-events-magic-link',
-  eventInvite: 'family-events-event-invite',
-  eventReminder: 'family-events-event-reminder',
+  welcome: "family-events-welcome",
+  magicLink: "family-events-magic-link",
+  eventInvite: "family-events-event-invite",
+  eventReminder: "family-events-event-reminder",
 } as const
 
 export type TemplateAlias = (typeof TEMPLATES)[keyof typeof TEMPLATES]

@@ -1,2 +1,2 @@
-export { TEMPLATES } from './templates.ts'
-export type { TemplateAlias } from './templates.ts'
+export { TEMPLATES } from "./templates.ts"
+export type { TemplateAlias } from "./templates.ts"

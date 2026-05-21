@@ -22,6 +22,7 @@ DECLARE
   maintenance_rpc_exists boolean;
   railway_jobs_rpc_exists boolean;
   railway_history_rpc_exists boolean;
+  cleanup_job_exists boolean;
 BEGIN
   SELECT EXISTS (
     SELECT 1
@@ -79,6 +80,16 @@ BEGIN
   END IF;
   IF NOT railway_history_rpc_exists THEN
     RAISE EXCEPTION 'REFERENCE_DATA_FAIL: admin_railway_cron_run_history RPC is missing';
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.admin_list_railway_cron_jobs()
+    WHERE label = 'cron-cleanup-stale'
+  ) INTO cleanup_job_exists;
+
+  IF NOT cleanup_job_exists THEN
+    RAISE EXCEPTION 'REFERENCE_DATA_FAIL: cron-cleanup-stale Railway job is missing from admin list';
   END IF;
 
   RAISE NOTICE 'REFERENCE_DATA_OK';

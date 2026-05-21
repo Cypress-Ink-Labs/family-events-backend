@@ -3,6 +3,11 @@
 # Wraps `curl` to a Supabase edge function and emits one JSON line per run:
 #   {"ts":"...","label":"cron-tag-queue","level":"info","url":"...","http":200,"duration_s":12,"body":"..."}
 #
+# Also POSTs the same run summary to the `log-cron-run` Supabase edge function
+# (env LOG_CRON_RUN_URL) so the admin Scheduled Jobs page can render last-run
+# status + duration + HTTP code per Railway service. Best-effort: a failure
+# to log never fails the cron run itself.
+#
 # Usage: cron-runner.sh <URL> <LABEL>
 #   <URL>   - full edge-function URL (env-var expanded by the caller)
 #   <LABEL> - short identifier for the cron job (used in log lines)
@@ -25,6 +30,34 @@ emit() {
   ebody=$(printf '%s' "$body" | tr -d '\n\r' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | cut -c1-2000)
   printf '{"ts":"%s","label":"%s","level":"%s","msg":"%s","url":"%s","http":%s,"duration_s":%s,"body":"%s"}\n' \
     "$TS" "$LABEL" "$level" "$msg" "$URL" "$http" "$dur" "$ebody"
+}
+
+# POST run result to the log-cron-run edge function. Best-effort: silenced
+# stderr, swallowed exit code. private.railway_cron_runs.status accepts only
+# 'succeeded' or 'failed', so anything non-2xx maps to 'failed'.
+log_run() {
+  status="$1"
+  http="$2"
+  dur="$3"
+  body="$4"
+
+  if [ -z "${LOG_CRON_RUN_URL:-}" ]; then
+    return 0
+  fi
+  if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+    return 0
+  fi
+
+  ebody=$(printf '%s' "$body" | tr -d '\n\r' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | cut -c1-2000)
+  payload=$(printf '{"label":"%s","status":"%s","http_status":%s,"duration_s":%s,"body":"%s"}' \
+    "$LABEL" "$status" "$http" "$dur" "$ebody")
+
+  curl --silent --show-error --max-time 10 \
+    -o /dev/null \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+    "$LOG_CRON_RUN_URL" -d "$payload" 2>/dev/null || true
 }
 
 if [ -z "$URL" ]; then
@@ -56,9 +89,9 @@ rm -f "$BODY_FILE"
 HTTP=$(printf '%d' "${HTTP_RAW:-0}" 2>/dev/null || echo 0)
 
 case "$HTTP" in
-  2*) emit info "ok" "$HTTP" "$DUR" "$BODY" ;;
-  0)  emit error "curl failed (network/timeout)" 0 "$DUR" "$BODY" ;;
-  *)  emit error "non-2xx response" "$HTTP" "$DUR" "$BODY" ;;
+  2*) emit info "ok" "$HTTP" "$DUR" "$BODY"; log_run "succeeded" "$HTTP" "$DUR" "$BODY" ;;
+  0)  emit error "curl failed (network/timeout)" 0 "$DUR" "$BODY"; log_run "failed" 0 "$DUR" "$BODY" ;;
+  *)  emit error "non-2xx response" "$HTTP" "$DUR" "$BODY"; log_run "failed" "$HTTP" "$DUR" "$BODY" ;;
 esac
 
 exit 0

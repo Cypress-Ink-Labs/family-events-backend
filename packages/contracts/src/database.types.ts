@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
   public: {
@@ -1294,9 +1288,7 @@ export type Database = {
           oldest_enqueued_at: string | null
           oldest_processing_started_at: string | null
           row_count: number | null
-          status:
-            | Database["public"]["Enums"]["source_scrape_queue_status"]
-            | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null
         }
         Relationships: []
       }
@@ -1790,20 +1782,10 @@ export type Database = {
       }
     }
     Enums: {
-      event_tag_queue_status:
-        | "pending"
-        | "processing"
-        | "failed"
-        | "dead"
-        | "succeeded"
+      event_tag_queue_status: "pending" | "processing" | "failed" | "dead" | "succeeded"
       invite_request_status: "pending" | "approved" | "rejected"
       source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
-      source_scrape_queue_status:
-        | "pending"
-        | "processing"
-        | "retrying"
-        | "succeeded"
-        | "dead"
+      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1834,10 +1816,8 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1931,27 +1911,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      event_tag_queue_status: [
-        "pending",
-        "processing",
-        "failed",
-        "dead",
-        "succeeded",
-      ],
+      event_tag_queue_status: ["pending", "processing", "failed", "dead", "succeeded"],
       invite_request_status: ["pending", "approved", "rejected"],
-      source_extraction_mode: [
-        "deterministic",
-        "llm",
-        "deterministic_then_llm",
-      ],
-      source_scrape_queue_status: [
-        "pending",
-        "processing",
-        "retrying",
-        "succeeded",
-        "dead",
-      ],
+      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
+      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
     },
   },
 } as const
-

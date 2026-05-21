@@ -1478,7 +1478,8 @@ CREATE OR REPLACE FUNCTION "private"."list_railway_cron_jobs"() RETURNS TABLE("l
     SELECT unnest(ARRAY[
       'cron-db-maintenance',
       'cron-tag-queue',
-      'cron-scrape-sources'
+      'cron-scrape-sources',
+      'cron-cleanup-stale'
     ]::text[]) AS label
   ),
   last_runs AS (
@@ -5625,5 +5626,4 @@ CREATE OR REPLACE TRIGGER "enforce_invited_oauth_signup" BEFORE INSERT ON "auth"
 
 
 CREATE OR REPLACE TRIGGER "on_auth_user_created" AFTER INSERT ON "auth"."users" FOR EACH ROW EXECUTE FUNCTION "public"."handle_new_user"();
-
 
