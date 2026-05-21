@@ -38,6 +38,11 @@ type Payload =
       kind: "request_rejected"
       email: string
     }
+  | {
+      kind: "welcome"
+      email: string
+      username: string
+    }
 
 function escapeHtml(value: string): string {
   return value
@@ -187,6 +192,37 @@ async function sendViaResend(args: {
   return { ok: true, id: data.id ?? "" }
 }
 
+async function sendViaResendTemplate(args: {
+  apiKey: string
+  from: string
+  to: string
+  templateAlias: string
+  variables: Record<string, string>
+}): Promise<{ ok: true; id: string } | { ok: false; status: number; body: string }> {
+  const response = await fetch(RESEND_API_ENDPOINT, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${args.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: args.from,
+      to: [args.to],
+      template_alias: args.templateAlias,
+      variables: args.variables,
+    }),
+    signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+  })
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "")
+    return { ok: false, status: response.status, body: body.slice(0, 500) }
+  }
+
+  const data = (await response.json().catch(() => ({}))) as { id?: string }
+  return { ok: true, id: data.id ?? "" }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders })
@@ -218,6 +254,60 @@ Deno.serve(async (req: Request) => {
   const appUrl = Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app"
 
   try {
+    // welcome: send via deployed Resend template
+    if (payload.kind === "welcome") {
+      if (!resendApiKey) {
+        logEdgeEvent("warn", "notify-email: RESEND_API_KEY not configured; would have sent welcome", {
+          function: "notify-email",
+          kind: payload.kind,
+          to: payload.email,
+        })
+        return new Response(JSON.stringify({ sent: false, dev: true }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
+
+      const result = await sendViaResendTemplate({
+        apiKey: resendApiKey,
+        from: resendFrom,
+        to: payload.email,
+        templateAlias: "family-events-welcome",
+        variables: {
+          USERNAME: payload.username,
+          APP_URL: appUrl,
+        },
+      })
+
+      if (!result.ok) {
+        logEdgeEvent("error", "notify-email: Resend rejected welcome email", {
+          function: "notify-email",
+          kind: payload.kind,
+          status: result.status,
+          body: result.body,
+        })
+        await captureEdgeException(
+          new Error(`Resend ${result.status}: ${result.body.slice(0, 200)}`),
+          { function: "notify-email", kind: payload.kind }
+        )
+        return new Response(JSON.stringify({ sent: false, error: `resend_${result.status}` }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
+
+      logEdgeEvent("log", "notify-email: sent", {
+        function: "notify-email",
+        kind: payload.kind,
+        resend_id: result.id,
+      })
+      return new Response(JSON.stringify({ sent: true, id: result.id }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
+    }
+
+    // Inline-rendered email kinds
     let rendered: RenderedEmail
     if (payload.kind === "admin_request") {
       if (!adminEmail) {
