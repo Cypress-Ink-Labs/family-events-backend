@@ -42,7 +42,7 @@ const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
 const DEFAULT_AI_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_OLLAMA_API_KEY = "ollama";
 const SUPPORTED_AI_PROVIDERS = new Set(["openai", "ollama", "localai"]);
-const DEFAULT_OLLAMA_MODEL = "gemma3n:e4b";
+const DEFAULT_OLLAMA_MODEL = "qwen3:1.7b";
 
 type LlmTagProvider = "openai" | "ollama" | "localai";
 type ClassificationStatus = "success" | "fallback" | "error";

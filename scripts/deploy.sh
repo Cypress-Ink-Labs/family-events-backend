@@ -88,7 +88,7 @@ ALL_TARGETS=(
   "cron-db-maintenance                   |railway|cron-db-maintenance"
   "cron-tag-queue                        |railway|cron-tag-queue-seKl"
   "llm-proxy                             |railway|llm-proxy"
-  "llm-ollama (gemma3n:e4b)               |railway|llm-ollama"
+  "llm-ollama (qwen3:1.7b)               |railway|llm-ollama"
 )
 
 # Build display list (separators are not selectable)
