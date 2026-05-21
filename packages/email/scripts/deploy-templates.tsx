@@ -67,9 +67,22 @@ const templates = [
 
 for (const template of templates) {
   console.log(`Deploying template: ${template.name}`)
-  const { react, ...rest } = template
-  const html = await render(react)
-  const result = await resend.templates.create({ ...rest, html }).publish()
+  // Build the create payload explicitly. resend@6.x's Templates.performCreate
+  // checks `if (payload.react)` and then calls a `renderAsync` it pulls from
+  // `@react-email/render`. v2.x of that package only exports `render`, not
+  // `renderAsync`, so any payload that still carries the JSX field crashes
+  // with "this.renderAsync is not a function" even when we passed pre-rendered
+  // HTML. Strip `react` out and pass html directly to keep that branch dormant.
+  const html = await render(template.react)
+  const result = await resend.templates
+    .create({
+      name: template.name,
+      alias: template.alias,
+      subject: template.subject,
+      variables: template.variables,
+      html,
+    })
+    .publish()
   console.log(`  Created template id: ${result.data?.id ?? 'unknown'}`)
 }
 
