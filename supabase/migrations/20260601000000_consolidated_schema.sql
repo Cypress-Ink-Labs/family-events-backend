@@ -5522,6 +5522,9 @@ GRANT SELECT,INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public
 GRANT ALL ON TABLE "public"."user_profiles" TO "service_role";
 
 
+REVOKE UPDATE ON TABLE "public"."user_profiles" FROM "anon", "authenticated";
+
+
 
 GRANT UPDATE("email") ON TABLE "public"."user_profiles" TO "authenticated";
 
@@ -5622,6 +5625,5 @@ CREATE OR REPLACE TRIGGER "enforce_invited_oauth_signup" BEFORE INSERT ON "auth"
 
 
 CREATE OR REPLACE TRIGGER "on_auth_user_created" AFTER INSERT ON "auth"."users" FOR EACH ROW EXECUTE FUNCTION "public"."handle_new_user"();
-
 
 
