@@ -237,7 +237,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.run_due_source_scrapes()
-RETURNS jsonb
+RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
@@ -256,12 +256,11 @@ BEGIN
   ON CONFLICT DO NOTHING;
 
   GET DIAGNOSTICS v_enqueued = ROW_COUNT;
-  RETURN jsonb_build_object('enqueued', v_enqueued);
 END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.admin_run_due_scrapes()
-RETURNS jsonb
+RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
@@ -271,7 +270,7 @@ BEGIN
     RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
   END IF;
 
-  RETURN public.run_due_source_scrapes();
+  PERFORM public.run_due_source_scrapes();
 END;
 $$;
 

@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
+import { kickProcessSourceQueue } from "../scrape-source/lib/source-queue.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,6 +11,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "Content-Type, Authorization, X-Client-Info, Apikey",
 };
+
+declare const EdgeRuntime:
+  | { waitUntil<T>(promise: Promise<T>): Promise<T> }
+  | undefined;
 
 export function normalizeDueScrapePayload(
   value: unknown,
@@ -50,6 +55,23 @@ Deno.serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const { data, error } = await supabase.rpc("run_due_source_scrapes");
     if (error) throw error;
+    const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch(
+      (kickError) => {
+        logEdgeEvent(
+          "warn",
+          "source-queue safety kick failed",
+          errorContext(kickError, {
+            function: "scrape-due-sources",
+            stage: "kick-source",
+          }),
+        );
+      },
+    );
+    if (typeof EdgeRuntime !== "undefined") {
+      EdgeRuntime.waitUntil(kick);
+    } else {
+      await kick;
+    }
     logEdgeEvent("log", "scrape-due-sources dispatched", {
       function: "scrape-due-sources",
     });

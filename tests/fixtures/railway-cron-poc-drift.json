@@ -32,36 +32,9 @@
           },
           {
             "node": {
-              "serviceName": "cron-process-source-queue",
-              "serviceId": "7c8509ab-f398-43bb-8200-3d68bf1bcf41",
-              "cronSchedule": "* * * * *",
-              "source": {
-                "repo": "HexSleeves/family-events-v2",
-                "image": null
-              },
-            "latestDeployment": {
-              "status": "SUCCESS",
-              "instances": [{ "status": "EXITED" }],
-              "meta": {
-                "rootDirectory": "apps/cron-process-source-queue",
-                "fileServiceManifest": {
-                  "build": {
-                    "builder": "DOCKERFILE",
-                    "dockerfilePath": "Dockerfile"
-                  },
-                  "deploy": {
-                    "restartPolicyType": "ON_FAILURE"
-                  }
-                  }
-                }
-              }
-            }
-          },
-          {
-            "node": {
               "serviceName": "cron-scrape-sources-yp-N",
               "serviceId": "c48ad7ba-1454-4beb-9251-1ef090ff99cd",
-              "cronSchedule": "0 * * * *",
+              "cronSchedule": "* * * * *",
               "source": {
                 "repo": "HexSleeves/family-events-v2",
                 "image": null

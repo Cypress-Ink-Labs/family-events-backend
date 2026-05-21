@@ -1421,7 +1421,7 @@ export type Database = {
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
       admin_retry_source_scrape_queue: { Args: { p_queue_id: number }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
-      admin_run_due_scrapes: { Args: never; Returns: Json }
+      admin_run_due_scrapes: { Args: never; Returns: undefined }
       admin_set_cron_schedule: {
         Args: { p_job_name: string; p_schedule: string }
         Returns: undefined
@@ -1627,7 +1627,7 @@ export type Database = {
         Returns: boolean
       }
       run_daily_maintenance: { Args: never; Returns: Json }
-      run_due_source_scrapes: { Args: never; Returns: Json }
+      run_due_source_scrapes: { Args: never; Returns: undefined }
       search_events: {
         Args: {
           p_age_max?: number
