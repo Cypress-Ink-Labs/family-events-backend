@@ -146,7 +146,7 @@ function renderRequestRejected(
           Thanks for asking to join Family Events. After review, we're not able to approve your request at this time.
         </p>
         <p style="color: #475569; font-size: 13px;">
-          No further action is needed on your end. If you think this was a mistake, you're welcome to reach out to the person who runs the site.
+          No further action is needed on your end. If you think this was a mistake, please send an email to <a href="mailto:support@familyevents.app">support@familyevents.app</a>.
         </p>
         <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
           Didn't request this? You can ignore this email.
