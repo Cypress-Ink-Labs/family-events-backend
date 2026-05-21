@@ -809,6 +809,13 @@ export async function processSource(
           error_count: status === "success" ? 0 : source.error_count + (status === "error" ? 1 : 0),
         })
         .eq("id", source.id)
+      // Kick the tag-queue worker if we imported anything. The RPC fires
+      // net.http_post (async) and returns immediately — scrape-source does not
+      // wait for tagging to complete. Errors are intentionally swallowed so a
+      // tagging hiccup never affects the scrape status.
+      if (eventsImported > 0) {
+        await supabase.rpc("invoke_process_tag_queue").catch(() => {})
+      }
     } catch (finalizeError) {
       await captureEdgeException(
         finalizeError,
