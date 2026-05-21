@@ -11,9 +11,9 @@ import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
 const MAX_ATTEMPTS = 5
 const BASE_BACKOFF_MS = 60_000
 // Stay well under Supabase edge function 150s wall.
-// qwen3:1.7b averages ~10s/event (cold-start higher), so 20 was hitting 504s.
-const BATCH_SIZE = 8
-const PER_ITEM_TIMEOUT_MS = 30_000
+// qwen3:1.7b: ~5-15s/event on CPU. Batch of 4 fits in ~60s with headroom.
+const BATCH_SIZE = 4
+const PER_ITEM_TIMEOUT_MS = 60_000
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
