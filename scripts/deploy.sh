@@ -85,9 +85,9 @@ ALL_TARGETS=(
   "── Railway ───────────────────────────|separator|"
   "all apps                              |railway_all|"
   "web                                   |railway|web"
-  "cron-scrape-sources                   |railway|cron-scrape-sources-yp-N"
+  "cron-scrape-sources                   |railway|cron-scrape-sources"
   "cron-db-maintenance                   |railway|cron-db-maintenance"
-  "cron-tag-queue                        |railway|cron-tag-queue-seKl"
+  "cron-tag-queue                        |railway|cron-tag-queue"
   "llm-proxy                             |railway|llm-proxy"
   "llm-ollama (qwen3:1.7b)               |railway|llm-ollama"
 )
@@ -211,9 +211,9 @@ railway_service_dir() {
   local service="$1"
   case "$service" in
     web)                      echo "" ;;          # ROOT_DIR
-    cron-scrape-sources-yp-N) echo "cron-scrape-sources" ;;
+    cron-scrape-sources) echo "cron-scrape-sources" ;;
     cron-db-maintenance)      echo "cron-db-maintenance" ;;
-    cron-tag-queue-seKl)      echo "cron-tag-queue" ;;
+    cron-tag-queue)      echo "cron-tag-queue" ;;
     llm-proxy)                echo "llm-proxy" ;;
     llm-ollama)               echo "qwen-ollama" ;;
     *)                        echo "$service" ;;  # fallback: same name
@@ -253,7 +253,7 @@ deploy_railway() {
 
 deploy_railway_all() {
   # Use the real Railway service names here
-  local services=(web cron-scrape-sources-yp-N cron-db-maintenance cron-tag-queue-seKl llm-proxy llm-ollama)
+  local services=(web cron-scrape-sources cron-db-maintenance cron-tag-queue llm-proxy llm-ollama)
   step "Railway — all apps"
   for service in "${services[@]}"; do
     deploy_railway "$service" || { warn "Railway deploy failed: $service"; ERRORS=$((ERRORS + 1)); }
