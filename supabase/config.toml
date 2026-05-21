@@ -27,10 +27,10 @@ sql_paths = [
 enabled = true
 
 [auth]
-enabled                  = true
-site_url                 = "http://localhost:5173"
-jwt_expiry               = 3600
-enable_signup            = true
+enabled       = true
+site_url      = "http://localhost:5173"
+jwt_expiry    = 3600
+enable_signup = true
 # Keep this list in sync with Supabase Dashboard → Authentication → URL
 # Configuration → Redirect URLs. The dashboard list governs the hosted
 # project; this list governs `supabase start` only. Both must include any
@@ -44,11 +44,11 @@ additional_redirect_urls = [
 ]
 
 [auth.external.apple]
-enabled          = true
+enabled = true
 # Services ID is public; hardcode to prevent `supabase config push` from
 # clobbering prod when SUPABASE_AUTH_EXTERNAL_APPLE_CLIENT_ID is unset locally.
-client_id        = "com.familyevents.app"
-secret           = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
+client_id = "com.familyevents.app"
+secret    = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
 # Apple "secret" is the signed JWT computed from team ID + key ID + .p8.
 # Never run `supabase config push` without setting the secret env var first,
 # or prod Apple auth will break.
@@ -125,9 +125,13 @@ verify_jwt = false
 # Routes all Supabase Auth emails (magic link, signup confirmation, recovery,
 # email change) through the send-auth-email edge function → Resend templates.
 #
-# Local dev: host.docker.internal resolves to the Docker host from within the
-# Supabase container network where the Auth service runs.
-# Production: set this URI to your Supabase project functions URL in the
-# Supabase Dashboard → Authentication → Hooks, and configure a webhook secret.
+# Configure the hook in the Supabase Dashboard instead:
+#   Authentication → Hooks → Send Email
+#   URI:     https://<ref>.supabase.co/functions/v1/send-auth-email
+#   Secret:  <generate with: openssl rand -base64 32>
+#
+# For local dev, configure it in Supabase Studio (port 55323) or leave it
+# unset — auth emails will fall through to Inbucket (port 55324).
 enabled = true
-uri = "http://host.docker.internal:54321/functions/v1/send-auth-email"
+uri     = "https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/send-auth-email"
+secrets = "env(SEND_EMAIL_HOOK_SECRET)"
