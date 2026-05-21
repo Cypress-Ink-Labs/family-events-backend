@@ -159,6 +159,7 @@ function renderRequestRejected(
 async function sendViaResend(args: {
   apiKey: string
   from: string
+  replyTo?: string
   email: RenderedEmail
 }): Promise<{ ok: true; id: string } | { ok: false; status: number; body: string }> {
   const response = await fetch(RESEND_API_ENDPOINT, {
@@ -172,6 +173,7 @@ async function sendViaResend(args: {
       to: [args.email.to],
       subject: args.email.subject,
       html: args.email.html,
+      ...(args.replyTo ? { reply_to: args.replyTo } : {}),
     }),
     signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
   })
@@ -211,6 +213,7 @@ Deno.serve(async (req: Request) => {
 
   const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
   const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
+  const resendReplyTo = Deno.env.get("RESEND_REPLY_TO") ?? ""
   const adminEmail = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? ""
   const appUrl = Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app"
 
@@ -257,6 +260,7 @@ Deno.serve(async (req: Request) => {
     const result = await sendViaResend({
       apiKey: resendApiKey,
       from: resendFrom,
+      replyTo: resendReplyTo || undefined,
       email: rendered,
     })
 

@@ -171,6 +171,9 @@ deploy_supabase_migrate() {
   ok "Migrations applied."
 }
 
+# Edge-function import map is auto-discovered from supabase/functions/deno.json
+# by the CLI bundler. The legacy --import-map flag was removed in CLI 2.101+.
+
 deploy_supabase_fn() {
   local fn_name="$1"
   step "Supabase — function: $fn_name"
@@ -178,7 +181,11 @@ deploy_supabase_fn() {
     fail "SUPABASE_PROJECT_REF not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
   fi
   info "Running: supabase functions deploy $fn_name --project-ref $SUPABASE_PROJECT_REF"
-  bash "$SUPABASE" functions deploy "$fn_name" --project-ref "$SUPABASE_PROJECT_REF"
+  if ! bash "$SUPABASE" functions deploy "$fn_name" \
+        --project-ref "$SUPABASE_PROJECT_REF"; then
+    warn "Function '$fn_name' deploy FAILED."
+    return 1
+  fi
   ok "Function '$fn_name' deployed."
 }
 
@@ -198,11 +205,21 @@ deploy_supabase_fn_all() {
   if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
     fail "SUPABASE_PROJECT_REF not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
   fi
+  local failed=()
   for fn_name in "${functions[@]}"; do
     info "Deploying: $fn_name"
-    bash "$SUPABASE" functions deploy "$fn_name" --project-ref "$SUPABASE_PROJECT_REF"
-    ok "$fn_name deployed."
+    if bash "$SUPABASE" functions deploy "$fn_name" \
+        --project-ref "$SUPABASE_PROJECT_REF"; then
+      ok "$fn_name deployed."
+    else
+      warn "$fn_name deploy FAILED."
+      failed+=("$fn_name")
+    fi
   done
+  if [ ${#failed[@]} -gt 0 ]; then
+    warn "Failed functions: ${failed[*]}"
+    return 1
+  fi
 }
 
 # Maps Railway service name → local app subdirectory (relative to apps/).
