@@ -61,6 +61,7 @@ export async function geocodeViaNominatim(query: string): Promise<GeocodeResult 
         "User-Agent": NOMINATIM_UA,
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(5_000),
     })
     if (!res.ok) return null
 
