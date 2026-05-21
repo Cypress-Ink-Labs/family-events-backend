@@ -6,9 +6,9 @@
 #   bash scripts/deploy.sh --all     # deploy everything non-interactively
 #
 # Requirements:
-#   gum    (brew install gum)        — interactive picker
-#   railway (brew install railway)   — Railway CLI
-#   supabase CLI                     — wrapped via scripts/supabase.sh
+#   gum     (brew install gum)      — interactive picker
+#   railway (brew install railway)  — Railway CLI  (run `railway login` first)
+#   supabase CLI                    — wrapped via scripts/supabase.sh
 
 set -euo pipefail
 
@@ -29,20 +29,7 @@ warn() { echo -e "${YELLOW}!${NC} $*"; }
 fail() { echo -e "${RED}✗${NC} $*" >&2; exit 1; }
 step() { echo -e "\n${BOLD}$*${NC}"; }
 
-# ── load .env for Railway + Supabase vars ────────────────────────────────────
-if [ -f "$ROOT_DIR/.env" ]; then
-  while IFS='=' read -r key value; do
-    [[ "$key" =~ ^(RAILWAY_TOKEN|RAILWAY_PROJECT_ID|RAILWAY_ENVIRONMENT)$ ]] || continue
-    # Strip surrounding quotes if present
-    value="${value%\"}"
-    value="${value#\"}"
-    value="${value%\'}"
-    value="${value#\'}"
-    export "$key=$value"
-  done < <(grep -v '^#' "$ROOT_DIR/.env" | grep -E '^(RAILWAY_TOKEN|RAILWAY_PROJECT_ID|RAILWAY_ENVIRONMENT)=')
-fi
-
-# Read Supabase project ref from the linked-project file written by `supabase link`
+# ── Supabase project ref ──────────────────────────────────────────────────────
 SUPABASE_PROJECT_REF_FILE="$ROOT_DIR/supabase/.temp/project-ref"
 if [ -f "$SUPABASE_PROJECT_REF_FILE" ]; then
   SUPABASE_PROJECT_REF="$(cat "$SUPABASE_PROJECT_REF_FILE")"
@@ -59,23 +46,14 @@ if ! command -v railway &>/dev/null; then
   warn "railway CLI not found — Railway targets will be skipped (brew install railway)"
   RAILWAY_AVAILABLE=false
 else
-  RAILWAY_AVAILABLE=true
-fi
-
-if [ "$RAILWAY_AVAILABLE" = "true" ]; then
-  if [ -z "${RAILWAY_TOKEN:-}" ]; then
-    warn "RAILWAY_TOKEN not set — Railway targets will use interactive login if available"
+  # Rely entirely on the Railway CLI session (~/.railway/config.json).
+  # Run `railway login` once to authenticate; no token env var needed.
+  if ! railway whoami &>/dev/null; then
+    echo -e "${RED}✗${NC} Not logged in to Railway." >&2
+    echo    "  Run: railway login" >&2
+    RAILWAY_AVAILABLE=false
   else
-    # Preflight: verify the token is valid before attempting any deploys
-    if ! RAILWAY_TOKEN="${RAILWAY_TOKEN}" railway whoami &>/dev/null; then
-      echo -e "${RED}✗${NC} Railway token is invalid or expired." >&2
-      echo    "  Refresh it with one of:" >&2
-      echo    "    railway login                       (browser-based)" >&2
-      echo    "    railway login --browserless         (copy-paste flow)" >&2
-      echo    "  Or generate a new token at https://railway.app/account/tokens" >&2
-      echo    "  and update RAILWAY_TOKEN in your .env file." >&2
-      RAILWAY_AVAILABLE=false
-    fi
+    RAILWAY_AVAILABLE=true
   fi
 fi
 
@@ -83,16 +61,13 @@ if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
   warn "Supabase project ref not found. Run: bash scripts/supabase.sh link --project-ref <ref>"
 fi
 
-# Railway environment — defaults to 'production'
-RAILWAY_ENVIRONMENT="${RAILWAY_ENVIRONMENT:-production}"
-
 # ── deployable targets ────────────────────────────────────────────────────────
 #
 # Format: "DISPLAY_NAME|TYPE|ARG"
-#   TYPE = supabase_migrate | supabase_fn | railway
+#   TYPE = supabase_migrate | supabase_fn_all | supabase_fn | railway_all | railway
 #   ARG  = function name  (supabase_fn)
 #        = service name   (railway)
-#        = ignored        (supabase_migrate)
+#        = ignored        (everything else)
 
 ALL_TARGETS=(
   "── Supabase ──────────────────────────|separator|"
@@ -109,31 +84,30 @@ ALL_TARGETS=(
   "── Railway ───────────────────────────|separator|"
   "all apps                              |railway_all|"
   "web                                   |railway|web"
-  "cron-scrape-sources                   |railway|cron-scrape-sources"
+  "cron-scrape-sources                   |railway|cron-scrape-sources-yp-N"
   "cron-db-maintenance                   |railway|cron-db-maintenance"
-  "cron-tag-queue                        |railway|cron-tag-queue"
+  "cron-tag-queue                        |railway|cron-tag-queue-seKl"
   "llm-proxy                             |railway|llm-proxy"
-  "qwen-ollama                           |railway|qwen-ollama"
+  "qwen3 (ollama)                        |railway|qwen3"
 )
 
-# Build display list and parallel index list (separators are not selectable)
+# Build display list (separators are not selectable)
 DISPLAY_ITEMS=()
 SELECTABLE_TARGETS=()
 for entry in "${ALL_TARGETS[@]}"; do
   label="${entry%%|*}"
   rest="${entry#*|}"
-  type="${rest%%|*}"
-  if [ "$type" != "separator" ]; then
+  deploy_type="${rest%%|*}"
+  if [ "$deploy_type" != "separator" ]; then
     DISPLAY_ITEMS+=("$label")
     SELECTABLE_TARGETS+=("$entry")
   fi
 done
 
-# ── --all flag: skip picker and deploy everything ────────────────────────────
+# ── --all flag: skip picker ───────────────────────────────────────────────────
 if [ "${1:-}" = "--all" ]; then
   SELECTED_TARGETS=("${SELECTABLE_TARGETS[@]}")
 else
-  # Interactive multi-select via gum
   echo ""
   echo -e "${BOLD}family-events-ui — Deploy${NC}"
   echo "Use space to select, enter to confirm."
@@ -152,7 +126,6 @@ else
     exit 0
   fi
 
-  # Map chosen display names back to full target entries
   SELECTED_TARGETS=()
   for chosen_label in "${CHOSEN[@]}"; do
     for entry in "${SELECTABLE_TARGETS[@]}"; do
@@ -171,8 +144,6 @@ if [ ${#SELECTED_TARGETS[@]} -eq 0 ]; then
 fi
 
 # ── deduplication ─────────────────────────────────────────────────────────────
-# If "all functions" or "all apps" was chosen, drop the individual entries so
-# they don't run twice.
 HAS_FN_ALL=false
 HAS_RAILWAY_ALL=false
 for entry in "${SELECTED_TARGETS[@]}"; do
@@ -203,7 +174,7 @@ deploy_supabase_fn() {
   local fn_name="$1"
   step "Supabase — function: $fn_name"
   if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
-    fail "SUPABASE_PROJECT_REF is not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
+    fail "SUPABASE_PROJECT_REF not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
   fi
   info "Running: supabase functions deploy $fn_name --project-ref $SUPABASE_PROJECT_REF"
   bash "$SUPABASE" functions deploy "$fn_name" --project-ref "$SUPABASE_PROJECT_REF"
@@ -223,7 +194,7 @@ deploy_supabase_fn_all() {
   )
   step "Supabase — all edge functions"
   if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
-    fail "SUPABASE_PROJECT_REF is not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
+    fail "SUPABASE_PROJECT_REF not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
   fi
   for fn_name in "${functions[@]}"; do
     info "Deploying: $fn_name"
@@ -232,52 +203,62 @@ deploy_supabase_fn_all() {
   done
 }
 
-deploy_railway_all() {
-  local services=(web cron-scrape-sources cron-db-maintenance cron-tag-queue llm-proxy qwen-ollama)
-  step "Railway — all apps"
-  for service in "${services[@]}"; do
-    deploy_railway "$service" || { warn "Railway deploy failed: $service"; ERRORS=$((ERRORS + 1)); }
-  done
+# Maps Railway service name → local app subdirectory (relative to apps/).
+# "web" is special-cased to ROOT_DIR. Add entries here when Railway renames a service.
+railway_service_dir() {
+  local service="$1"
+  case "$service" in
+    web)                      echo "" ;;          # ROOT_DIR
+    cron-scrape-sources-yp-N) echo "cron-scrape-sources" ;;
+    cron-db-maintenance)      echo "cron-db-maintenance" ;;
+    cron-tag-queue-seKl)      echo "cron-tag-queue" ;;
+    llm-proxy)                echo "llm-proxy" ;;
+    qwen3)                    echo "qwen-ollama" ;;
+    *)                        echo "$service" ;;  # fallback: same name
+  esac
 }
 
 deploy_railway() {
   local service="$1"
 
   if [ "$RAILWAY_AVAILABLE" = "false" ]; then
-    warn "Skipping Railway service '$service' — railway CLI not available."
-    return
+    warn "Skipping Railway service '$service' — not logged in. Run: railway login"
+    return 1
   fi
 
   step "Railway — service: $service"
 
-  # Determine working directory for this service
+  local subdir
+  subdir="$(railway_service_dir "$service")"
+
   local work_dir="$ROOT_DIR"
-  if [ "$service" != "web" ]; then
-    local app_dir="$ROOT_DIR/apps/$service"
-    if [ ! -d "$app_dir" ]; then
-      warn "Directory not found: $app_dir — skipping '$service'."
-      return
+  if [ -n "$subdir" ]; then
+    work_dir="$ROOT_DIR/apps/$subdir"
+    if [ ! -d "$work_dir" ]; then
+      warn "Directory not found: $work_dir — skipping '$service'."
+      return 1
     fi
-    work_dir="$app_dir"
   fi
 
   info "Deploying from: $work_dir"
-  info "Running: railway up --service $service --environment $RAILWAY_ENVIRONMENT --detach"
+  info "Running: railway up --service $service --detach"
 
-  (
-    cd "$work_dir"
-    RAILWAY_TOKEN="${RAILWAY_TOKEN:-}" \
-    railway up \
-      --service "$service" \
-      --environment "$RAILWAY_ENVIRONMENT" \
-      ${RAILWAY_PROJECT_ID:+--project "$RAILWAY_PROJECT_ID"} \
-      --detach
-  ) || { warn "railway up failed for '$service' (exit $?)"; return 1; }
+  (cd "$work_dir" && railway up --service "$service" --detach) \
+    || { warn "railway up failed for '$service'"; return 1; }
 
-  ok "Railway deploy triggered for '$service'. Monitor at: https://railway.app/project/${RAILWAY_PROJECT_ID:-<project-id>}"
+  ok "Railway deploy triggered for '$service'."
 }
 
-# ── execute selected targets ──────────────────────────────────────────────────
+deploy_railway_all() {
+  # Use the real Railway service names here
+  local services=(web cron-scrape-sources-yp-N cron-db-maintenance cron-tag-queue-seKl llm-proxy qwen3)
+  step "Railway — all apps"
+  for service in "${services[@]}"; do
+    deploy_railway "$service" || { warn "Railway deploy failed: $service"; ERRORS=$((ERRORS + 1)); }
+  done
+}
+
+# ── execute ───────────────────────────────────────────────────────────────────
 ERRORS=0
 
 echo ""
