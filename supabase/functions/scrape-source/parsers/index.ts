@@ -4,6 +4,7 @@ import { rssParser } from "./rss.ts"
 import { icalParser } from "./ical.ts"
 import { manualParser } from "./manual.ts"
 import { macaroniKidParser } from "./macaroni-kid.ts"
+import { brecParser } from "./brec.ts"
 
 export const parsers = {
   [websiteParser.type]: websiteParser,
@@ -11,6 +12,7 @@ export const parsers = {
   [icalParser.type]: icalParser,
   [manualParser.type]: manualParser,
   [macaroniKidParser.type]: macaroniKidParser,
+  [brecParser.type]: brecParser,
 } as const satisfies Record<string, SourceParser>
 
 export type SourceType = keyof typeof parsers

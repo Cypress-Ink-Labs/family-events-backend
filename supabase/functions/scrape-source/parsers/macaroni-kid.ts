@@ -136,11 +136,12 @@ export function mapMacaroniKidEvent(
   if (!title) return null;
 
   const startDatetime = parseIsoDate(
-    asString(node.start) ?? asString(node.startDate),
+    asString(node.startDateTime) ?? asString(node.start) ??
+      asString(node.startDate),
   );
   if (!startDatetime) return null;
   const endDatetime = parseIsoDate(
-    asString(node.end) ?? asString(node.endDate),
+    asString(node.endDateTime) ?? asString(node.end) ?? asString(node.endDate),
   );
 
   const id = asString(node._id) ?? asString(node.id);

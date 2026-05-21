@@ -250,19 +250,15 @@ deploy_railway() {
   local subdir
   subdir="$(railway_service_dir "$service")"
 
-  local work_dir="$ROOT_DIR"
-  if [ -n "$subdir" ]; then
-    work_dir="$ROOT_DIR/apps/$subdir"
-    if [ ! -d "$work_dir" ]; then
-      warn "Directory not found: $work_dir — skipping '$service'."
-      return 1
-    fi
+  if [ -n "$subdir" ] && [ ! -d "$ROOT_DIR/apps/$subdir" ]; then
+    warn "Directory not found: $ROOT_DIR/apps/$subdir — skipping '$service'."
+    return 1
   fi
 
-  info "Deploying from: $work_dir"
+  info "Deploying from: $ROOT_DIR (Railway resolves rootDirectory from service config)"
   info "Running: railway up --service $service --detach"
 
-  (cd "$work_dir" && railway up --service "$service" --detach) \
+  (cd "$ROOT_DIR" && railway up --service "$service" --detach) \
     || { warn "railway up failed for '$service'"; return 1; }
 
   ok "Railway deploy triggered for '$service'."

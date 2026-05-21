@@ -57,6 +57,23 @@ if (typeof Deno !== "undefined") {
     assertEquals(mapMacaroniKidEvent(null, "https://x.example/events"), null)
   })
 
+  Deno.test("mapMacaroniKidEvent accepts startDateTime/endDateTime (real API shape)", () => {
+    // Macaroni Kid API returns startDateTime/endDateTime, not start/end or startDate/endDate.
+    // Earlier regression: all events dropped because parser only checked start/startDate.
+    const raw = {
+      _id: "real1",
+      title: "Real API Event",
+      startDateTime: "2026-07-01T15:00:00.000Z",
+      endDateTime: "2026-07-01T17:00:00.000Z",
+      location: { name: "Some Venue" },
+    }
+    const parsed = mapMacaroniKidEvent(raw, "https://lafayettela.macaronikid.com/events")
+    if (!parsed) throw new Error("expected parsed event")
+    assertEquals(parsed.title, "Real API Event")
+    assertEquals(parsed.startDatetime, "2026-07-01T15:00:00.000Z")
+    assertEquals(parsed.endDatetime, "2026-07-01T17:00:00.000Z")
+  })
+
   Deno.test("fetchMacaroniKidEvents two-hop fetch + town extraction + mapping", async () => {
     const html = await readFixture("macaronikid/lafayette-page.html")
     const apiJson = await readFixture("macaronikid/lafayette-api.json")

@@ -36,8 +36,17 @@ function eventNodes(value: unknown): Record<string, unknown>[] {
   const isEvent = typeValues.some((entry) =>
     entry === "event" || entry.endsWith(":event")
   );
-  const graphEvents = eventNodes(node["@graph"]);
-  return isEvent ? [node, ...graphEvents] : graphEvents;
+  // Descend into common JSON-LD wrappers that nest Event objects:
+  // @graph, ItemList.itemListElement[].item, mainEntity, hasPart.
+  // Eventbrite uses ItemList → ListItem.item where item is @type:Event.
+  const nested = [
+    ...eventNodes(node["@graph"]),
+    ...eventNodes(node["itemListElement"]),
+    ...eventNodes(node["item"]),
+    ...eventNodes(node["mainEntity"]),
+    ...eventNodes(node["hasPart"]),
+  ];
+  return isEvent ? [node, ...nested] : nested;
 }
 
 function pickText(value: unknown): string | null {

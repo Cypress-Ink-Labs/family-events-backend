@@ -78,4 +78,47 @@ if (typeof Deno !== "undefined") {
     )
     assertEquals(events.length, 0)
   })
+
+  Deno.test("parseWebsite extracts Events nested inside ItemList.itemListElement (Eventbrite shape)", () => {
+    // Eventbrite serves JSON-LD as ItemList -> ListItem.item where item is @type:Event.
+    // Earlier regression: parser only recursed into @graph, missed all ItemList events.
+    const html = `
+      <html><body>
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@type": "Event",
+                "name": "Family Meditation",
+                "startDate": "2026-05-23T15:00:00-05:00",
+                "url": "https://www.eventbrite.com/e/family-meditation-tickets-1",
+                "location": { "name": "Riverside Park" }
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "item": {
+                "@type": "Event",
+                "name": "Kid Fest",
+                "startDate": "2026-06-10T10:00:00-05:00",
+                "url": "https://www.eventbrite.com/e/kid-fest-tickets-2"
+              }
+            }
+          ]
+        }
+        </script>
+      </body></html>
+    `
+    const events = parseWebsite(html, "https://www.eventbrite.com/d/la--baton-rouge/family-events/")
+    assertEquals(events.length, 2)
+    assertEquals(events[0].title, "Family Meditation")
+    assertEquals(events[0].sourceUrl, "https://www.eventbrite.com/e/family-meditation-tickets-1")
+    assertEquals(events[1].title, "Kid Fest")
+  })
 }
