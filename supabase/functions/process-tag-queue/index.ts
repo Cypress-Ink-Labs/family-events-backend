@@ -1,65 +1,70 @@
-import "@supabase/functions-js/edge-runtime.d.ts"
-import { createClient, type SupabaseClient } from "@supabase/supabase-js"
-import { requireServiceRole } from "../_shared/auth.ts"
-import { captureEdgeException } from "../_shared/sentry.ts"
-import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
+import "@supabase/functions-js/edge-runtime.d.ts";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { requireServiceRole } from "../_shared/auth.ts";
+import { captureEdgeException } from "../_shared/sentry.ts";
+import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
+import {
+  resolveCompletedTagQueueStatus,
+  shouldStopBeforeStartingNextTagRow,
+} from "./queue-policy.ts";
 
 // Retry policy (chosen in plan):
 //   - exponential backoff (1, 2, 4, 8, 16 min) via next_attempt_at
 //   - dead-letter after MAX_ATTEMPTS=5
 //   - Sentry on dead-letter only (avoid noise from transient OpenAI 5xx)
-const MAX_ATTEMPTS = 5
-const BASE_BACKOFF_MS = 60_000
+const MAX_ATTEMPTS = 5;
+const BASE_BACKOFF_MS = 60_000;
 // Stay well under Supabase edge function 150s wall.
 // qwen3:1.7b: ~5-15s/event on CPU. Batch of 4 fits in ~60s with headroom.
-const BATCH_SIZE = 4
-const PER_ITEM_TIMEOUT_MS = 60_000
+const BATCH_SIZE = 4;
+const PER_ITEM_TIMEOUT_MS = 60_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-}
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, X-Client-Info, Apikey",
+};
 
 interface QueueRow {
-  id: number
-  event_id: string
-  source_run_id: string | null
-  trigger_type: "import" | "reclassify" | "manual-review"
-  attempt_count: number
+  id: number;
+  event_id: string;
+  source_run_id: string | null;
+  trigger_type: "import" | "reclassify" | "manual-review";
+  attempt_count: number;
 }
 
 interface ProcessSummary {
-  claimed: number
-  succeeded: number
-  failed: number
-  dead: number
-  pending_after: number | null
-  duration_ms: number
+  claimed: number;
+  succeeded: number;
+  failed: number;
+  dead: number;
+  pending_after: number | null;
+  duration_ms: number;
 }
 
 async function fetchEventInputs(
   supabase: SupabaseClient,
-  eventId: string
+  eventId: string,
 ): Promise<{ title: string; description: string } | null> {
   const { data, error } = await supabase
     .from("events")
     .select("title, description")
     .eq("id", eventId)
-    .maybeSingle()
-  if (error) throw error
-  if (!data) return null
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
   return {
     title: String((data as { title?: unknown }).title ?? ""),
     description: String((data as { description?: unknown }).description ?? ""),
-  }
+  };
 }
 
 async function callTagEvent(
   supabaseUrl: string,
   serviceRoleKey: string,
   row: QueueRow,
-  inputs: { title: string; description: string }
+  inputs: { title: string; description: string },
 ): Promise<void> {
   const response = await fetch(`${supabaseUrl}/functions/v1/tag-event`, {
     method: "POST",
@@ -75,43 +80,37 @@ async function callTagEvent(
       description: inputs.description,
     }),
     signal: AbortSignal.timeout(PER_ITEM_TIMEOUT_MS),
-  })
+  });
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "")
-    throw new Error(`tag-event ${response.status}: ${body.slice(0, 200)}`)
+    const body = await response.text().catch(() => "");
+    throw new Error(`tag-event ${response.status}: ${body.slice(0, 200)}`);
   }
 }
 
 async function markSuccess(
   supabase: SupabaseClient,
-  rowId: number
+  rowId: number,
 ): Promise<void> {
-  // 'failed' here means "no longer pending/processing"; the queue uses
-  // 'failed' as a soft completion state and 'dead' as the terminal one.
-  // Successful items also leave the active set — pick 'failed' as the
-  // generic "done" status so the partial-unique index releases the event.
-  // (We don't need a 'succeeded' enum: most observability cares about
-  // pending depth + dead-letter count.)
   const { error } = await supabase
     .from("event_tag_queue")
     .update({
-      status: "failed",
+      status: resolveCompletedTagQueueStatus(),
       finished_at: new Date().toISOString(),
       last_error: null,
     })
-    .eq("id", rowId)
-  if (error) throw error
+    .eq("id", rowId);
+  if (error) throw error;
 }
 
 async function markFailureOrDead(
   supabase: SupabaseClient,
   row: QueueRow,
-  err: unknown
+  err: unknown,
 ): Promise<{ dead: boolean }> {
-  const errMsg = err instanceof Error ? err.message : String(err)
-  const attempts = row.attempt_count // already incremented by claim_tag_queue_batch
-  const isDead = attempts >= MAX_ATTEMPTS
+  const errMsg = err instanceof Error ? err.message : String(err);
+  const attempts = row.attempt_count; // already incremented by claim_tag_queue_batch
+  const isDead = attempts >= MAX_ATTEMPTS;
 
   if (isDead) {
     const { error } = await supabase
@@ -121,14 +120,14 @@ async function markFailureOrDead(
         finished_at: new Date().toISOString(),
         last_error: errMsg.slice(0, 1000),
       })
-      .eq("id", row.id)
-    if (error) throw error
-    return { dead: true }
+      .eq("id", row.id);
+    if (error) throw error;
+    return { dead: true };
   }
 
   // Exponential backoff. attempts=1 → 1 min, attempts=2 → 2 min, … attempts=4 → 8 min.
-  const backoffMs = BASE_BACKOFF_MS * Math.pow(2, attempts - 1)
-  const nextAttemptAt = new Date(Date.now() + backoffMs).toISOString()
+  const backoffMs = BASE_BACKOFF_MS * Math.pow(2, attempts - 1);
+  const nextAttemptAt = new Date(Date.now() + backoffMs).toISOString();
   const { error } = await supabase
     .from("event_tag_queue")
     .update({
@@ -137,118 +136,159 @@ async function markFailureOrDead(
       next_attempt_at: nextAttemptAt,
       last_error: errMsg.slice(0, 1000),
     })
-    .eq("id", row.id)
-  if (error) throw error
-  return { dead: false }
+    .eq("id", row.id);
+  if (error) throw error;
+  return { dead: false };
 }
 
 export async function processBatch(
   supabase: SupabaseClient,
   supabaseUrl: string,
-  serviceRoleKey: string
+  serviceRoleKey: string,
 ): Promise<ProcessSummary> {
-  const batchStart = Date.now()
-  const summary: ProcessSummary = { claimed: 0, succeeded: 0, failed: 0, dead: 0, pending_after: null, duration_ms: 0 }
+  const batchStart = Date.now();
+  const summary: ProcessSummary = {
+    claimed: 0,
+    succeeded: 0,
+    failed: 0,
+    dead: 0,
+    pending_after: null,
+    duration_ms: 0,
+  };
 
-  const { data: claimed, error: claimError } = await supabase.rpc("claim_tag_queue_batch", {
-    p_limit: BATCH_SIZE,
-  })
-  if (claimError) throw claimError
+  const { data: claimed, error: claimError } = await supabase.rpc(
+    "claim_tag_queue_batch",
+    {
+      p_limit: BATCH_SIZE,
+    },
+  );
+  if (claimError) throw claimError;
 
-  const rows = (claimed ?? []) as QueueRow[]
-  summary.claimed = rows.length
+  const rows = (claimed ?? []) as QueueRow[];
+  summary.claimed = rows.length;
   if (rows.length === 0) {
-    summary.duration_ms = Date.now() - batchStart
-    logEdgeEvent("log", "tag-queue batch done", { function: "process-tag-queue", ...summary })
-    return summary
+    summary.duration_ms = Date.now() - batchStart;
+    logEdgeEvent("log", "tag-queue batch done", {
+      function: "process-tag-queue",
+      ...summary,
+    });
+    return summary;
   }
 
   for (const row of rows) {
-    const rowStart = Date.now()
+    const unstartedRowIds = rows.slice(rows.indexOf(row)).map((item) =>
+      item.id
+    );
+    if (shouldStopBeforeStartingNextTagRow(Date.now() - batchStart, 110_000)) {
+      await supabase.rpc("release_unstarted_tag_queue_rows", {
+        p_claimed_ids: unstartedRowIds,
+      });
+      break;
+    }
+
+    const rowStart = Date.now();
+    let activeRow = row;
     try {
-      const inputs = await fetchEventInputs(supabase, row.event_id)
+      const { data: startedRow, error: startedError } = await supabase.rpc(
+        "mark_tag_queue_row_started",
+        { p_queue_id: row.id },
+      );
+      if (startedError) throw startedError;
+      activeRow = {
+        ...row,
+        attempt_count: Number(
+          (startedRow as { attempt_count?: unknown } | null)?.attempt_count ??
+            row.attempt_count + 1,
+        ),
+      };
+
+      const inputs = await fetchEventInputs(supabase, activeRow.event_id);
       if (!inputs || !inputs.title) {
         // Event was deleted between enqueue and claim, or has no title.
         // Don't retry — mark as a soft completion.
-        await markSuccess(supabase, row.id)
-        summary.succeeded += 1
+        await markSuccess(supabase, activeRow.id);
+        summary.succeeded += 1;
         logEdgeEvent("log", "tag-queue row skipped (event missing)", {
           function: "process-tag-queue",
-          queue_row_id: row.id,
-          event_id: row.event_id,
-          attempt: row.attempt_count,
+          queue_row_id: activeRow.id,
+          event_id: activeRow.event_id,
+          attempt: activeRow.attempt_count,
           duration_ms: Date.now() - rowStart,
           outcome: "skipped-missing-event",
-        })
-        continue
+        });
+        continue;
       }
 
-      await callTagEvent(supabaseUrl, serviceRoleKey, row, inputs)
-      await markSuccess(supabase, row.id)
-      summary.succeeded += 1
+      await callTagEvent(supabaseUrl, serviceRoleKey, activeRow, inputs);
+      await markSuccess(supabase, activeRow.id);
+      summary.succeeded += 1;
       logEdgeEvent("log", "tag-queue row processed", {
         function: "process-tag-queue",
-        queue_row_id: row.id,
-        event_id: row.event_id,
-        attempt: row.attempt_count,
+        queue_row_id: activeRow.id,
+        event_id: activeRow.event_id,
+        attempt: activeRow.attempt_count,
         duration_ms: Date.now() - rowStart,
         title_chars: inputs.title.length,
         description_chars: inputs.description.length,
         outcome: "succeeded",
-      })
+      });
     } catch (err) {
-      const { dead } = await markFailureOrDead(supabase, row, err).catch((markErr) => {
-        // Updating the row itself failed — log loudly so we notice in Sentry.
-        void captureEdgeException(
-          markErr,
-          errorContext(markErr, {
-            function: "process-tag-queue",
-            queue_row_id: row.id,
-            event_id: row.event_id,
-            stage: "mark-failure",
-          })
-        )
-        return { dead: false }
-      })
+      const { dead } = await markFailureOrDead(supabase, activeRow, err).catch(
+        (markErr) => {
+          // Updating the row itself failed — log loudly so we notice in Sentry.
+          void captureEdgeException(
+            markErr,
+            errorContext(markErr, {
+              function: "process-tag-queue",
+              queue_row_id: activeRow.id,
+              event_id: activeRow.event_id,
+              stage: "mark-failure",
+            }),
+          );
+          return { dead: false };
+        },
+      );
 
       if (dead) {
-        summary.dead += 1
+        summary.dead += 1;
         await captureEdgeException(
           err,
           errorContext(err, {
             function: "process-tag-queue",
-            queue_row_id: row.id,
-            event_id: row.event_id,
-            attempts: row.attempt_count,
+            queue_row_id: activeRow.id,
+            event_id: activeRow.event_id,
+            attempts: activeRow.attempt_count,
             status: "dead",
-          })
-        )
+          }),
+        );
         logEdgeEvent(
           "error",
           "tag-queue row dead-lettered",
           errorContext(err, {
             function: "process-tag-queue",
-            queue_row_id: row.id,
-            event_id: row.event_id,
-            attempts: row.attempt_count,
+            queue_row_id: activeRow.id,
+            event_id: activeRow.event_id,
+            attempts: activeRow.attempt_count,
             duration_ms: Date.now() - rowStart,
             outcome: "dead",
-          })
-        )
+          }),
+        );
       } else {
-        summary.failed += 1
+        summary.failed += 1;
         // Transient failures intentionally NOT captured to Sentry to avoid
         // noise during OpenAI/edge outages. The queue_row itself preserves
         // last_error for inspection.
         logEdgeEvent("warn", "tag-queue row retry scheduled", {
           function: "process-tag-queue",
-          queue_row_id: row.id,
-          event_id: row.event_id,
-          attempt: row.attempt_count,
+          queue_row_id: activeRow.id,
+          event_id: activeRow.event_id,
+          attempt: activeRow.attempt_count,
           duration_ms: Date.now() - rowStart,
-          error: err instanceof Error ? err.message.slice(0, 300) : String(err).slice(0, 300),
+          error: err instanceof Error
+            ? err.message.slice(0, 300)
+            : String(err).slice(0, 300),
           outcome: "retry",
-        })
+        });
       }
     }
   }
@@ -257,65 +297,68 @@ export async function processBatch(
   const { count: depth } = await supabase
     .from("event_tag_queue")
     .select("id", { count: "exact", head: true })
-    .eq("status", "pending")
+    .eq("status", "pending");
 
-  summary.pending_after = depth ?? null
-  summary.duration_ms = Date.now() - batchStart
+  summary.pending_after = depth ?? null;
+  summary.duration_ms = Date.now() - batchStart;
 
   logEdgeEvent("log", "tag-queue batch done", {
     function: "process-tag-queue",
     ...summary,
-  })
+  });
 
-  return summary
+  return summary;
 }
 
 if (import.meta.main) {
   Deno.serve(async (req: Request) => {
     if (req.method === "OPTIONS") {
-      return new Response(null, { status: 200, headers: corsHeaders })
+      return new Response(null, { status: 200, headers: corsHeaders });
     }
 
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 
-    const auth = requireServiceRole(req, serviceRoleKey)
+    const auth = requireServiceRole(req, serviceRoleKey);
     if (!auth.ok) {
       return new Response(JSON.stringify({ error: auth.message }), {
         status: auth.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      })
+      });
     }
 
     if (!supabaseUrl) {
-      return new Response(JSON.stringify({ error: "SUPABASE_URL not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      })
+      return new Response(
+        JSON.stringify({ error: "SUPABASE_URL not configured" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     try {
-      const supabase = createClient(supabaseUrl, serviceRoleKey)
-      const summary = await processBatch(supabase, supabaseUrl, serviceRoleKey)
+      const supabase = createClient(supabaseUrl, serviceRoleKey);
+      const summary = await processBatch(supabase, supabaseUrl, serviceRoleKey);
       // Batch-done log emitted from inside processBatch w/ pending_after depth.
       return new Response(JSON.stringify(summary), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      })
+      });
     } catch (err) {
       await captureEdgeException(
         err,
-        errorContext(err, { function: "process-tag-queue", stage: "outer" })
-      )
+        errorContext(err, { function: "process-tag-queue", stage: "outer" }),
+      );
       logEdgeEvent(
         "error",
         "process-tag-queue outer failure",
-        errorContext(err, { function: "process-tag-queue" })
-      )
+        errorContext(err, { function: "process-tag-queue" }),
+      );
       return new Response(JSON.stringify({ error: String(err) }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      })
+      });
     }
-  })
+  });
 }

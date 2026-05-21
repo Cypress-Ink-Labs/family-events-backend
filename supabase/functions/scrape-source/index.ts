@@ -3,9 +3,14 @@ import { createClient } from "@supabase/supabase-js";
 import { requireAdminOrService } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
-import { processSource } from "./lib/process-source.ts";
 import { isSourceDue } from "./lib/schedule.ts";
-import type { EventSourceRow, SourceResult } from "./lib/types.ts";
+import {
+  buildScrapeSourceResponse,
+  enqueueSourceScrape,
+  kickProcessSourceQueue,
+  type SourceScrapeEnqueueResponseRow,
+} from "./lib/source-queue.ts";
+import type { EventSourceRow } from "./lib/types.ts";
 
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://family-events.up.railway.app",
@@ -27,54 +32,9 @@ function resolveAllowedOrigin(origin: string | null): string | null {
   return allowlist.includes(origin) ? origin : null;
 }
 
-// Worker batch size (mirrors BATCH_SIZE in process-tag-queue). Kicking once per
-// batch lets newly-imported events start tagging immediately instead of waiting
-// up to a full cron tick (~60s). The Railway cron worker remains the safety net.
-const TAG_QUEUE_BATCH_SIZE = 8;
-const TAG_QUEUE_MAX_KICKS = 4;
-
 declare const EdgeRuntime:
   | { waitUntil<T>(promise: Promise<T>): Promise<T> }
   | undefined;
-
-function kickProcessTagQueue(
-  supabaseUrl: string,
-  serviceRoleKey: string,
-  imported: number,
-): void {
-  const kicks = Math.min(
-    TAG_QUEUE_MAX_KICKS,
-    Math.max(1, Math.ceil(imported / TAG_QUEUE_BATCH_SIZE)),
-  );
-  const url = `${supabaseUrl}/functions/v1/process-tag-queue`;
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${serviceRoleKey}`,
-  };
-
-  for (let i = 0; i < kicks; i++) {
-    const kick = fetch(url, { method: "POST", headers, body: "{}" })
-      .then(async (res) => {
-        if (!res.ok) {
-          const body = await res.text().catch(() => "");
-          throw new Error(
-            `process-tag-queue ${res.status}: ${body.slice(0, 200)}`,
-          );
-        }
-      })
-      .catch((err) => {
-        logEdgeEvent(
-          "warn",
-          "tag-queue kick failed",
-          errorContext(err, { function: "scrape-source", stage: "kick" }),
-        );
-      });
-
-    if (typeof EdgeRuntime !== "undefined") {
-      EdgeRuntime.waitUntil(kick);
-    }
-  }
-}
 
 function buildCorsHeaders(allowedOrigin: string | null): HeadersInit {
   if (!allowedOrigin) return { Vary: "Origin" };
@@ -147,26 +107,45 @@ Deno.serve(async (req: Request) => {
     const dueSources = requestedSourceId
       ? sources
       : sources.filter(isSourceDue);
-    const results: SourceResult[] = [];
+    const results: SourceScrapeEnqueueResponseRow[] = [];
 
     for (const source of dueSources) {
-      const result = await processSource(supabase, source);
-      results.push(result);
+      const enqueue = await enqueueSourceScrape(
+        supabase,
+        source.id,
+        requestedSourceId ? "manual" : "scheduled",
+      );
+      await supabase
+        .from("event_sources")
+        .update({ last_status: "pending" })
+        .eq("id", source.id);
+      results.push({
+        source_id: source.id,
+        queue_id: enqueue.queue_id,
+        deduped: enqueue.deduped,
+      });
     }
 
-    const totalImported = results.reduce(
-      (sum, r) => sum + r.eventsImported,
-      0,
-    );
-    if (totalImported > 0 && supabaseUrl && serviceRoleKey) {
-      kickProcessTagQueue(supabaseUrl, serviceRoleKey, totalImported);
+    if (results.length > 0 && supabaseUrl && serviceRoleKey) {
+      const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch(
+        (err) => {
+          logEdgeEvent(
+            "warn",
+            "source-queue kick failed",
+            errorContext(err, {
+              function: "scrape-source",
+              stage: "kick-source",
+            }),
+          );
+        },
+      );
+      if (typeof EdgeRuntime !== "undefined") {
+        EdgeRuntime.waitUntil(kick);
+      }
     }
 
     return new Response(
-      JSON.stringify({
-        processed_sources: results.length,
-        results,
-      }),
+      JSON.stringify(buildScrapeSourceResponse(results)),
       {
         status: 200,
         headers: {

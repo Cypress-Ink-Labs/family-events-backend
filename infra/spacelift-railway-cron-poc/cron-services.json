@@ -13,6 +13,13 @@
     "required_latest_deployment_status": "SUCCESS",
     "forbidden_instance_statuses": ["CRASHED", "FAILED"]
   },
+  "cron-process-source-queue": {
+    "config_path": "apps/cron-process-source-queue/railway.toml",
+    "source_repo": "HexSleeves/family-events-v2",
+    "root_directory": "apps/cron-process-source-queue",
+    "required_latest_deployment_status": "SUCCESS",
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+  },
   "cron-db-maintenance": {
     "config_path": "apps/cron-db-maintenance/railway.toml",
     "source_repo": "HexSleeves/family-events-v2",

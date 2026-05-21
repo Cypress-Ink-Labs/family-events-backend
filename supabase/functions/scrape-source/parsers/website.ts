@@ -1,65 +1,69 @@
-import { DOMParser } from "@b-fuze/deno-dom"
+import { DOMParser } from "@b-fuze/deno-dom";
 import {
   cleanDescription,
   extractPrice,
   normalizeExtractedText,
   parseIsoDate,
   stripHtml,
-} from "../../_shared/parsing.ts"
-import { validateExternalUrl } from "../../_shared/url-validation.ts"
-import type { ParsedEvent } from "../lib/types.ts"
-import type { SourceParser } from "./_lib/types.ts"
+} from "../../_shared/parsing.ts";
+import { validateExternalUrl } from "../../_shared/url-validation.ts";
+import type { ParsedEvent } from "../lib/types.ts";
+import type { SourceParser } from "./_lib/types.ts";
 
 type StructuredEvent = ParsedEvent & {
-  sourceUrl: string | null
-}
+  sourceUrl: string | null;
+};
 
 function toArray(value: unknown): unknown[] {
   if (Array.isArray(value)) {
-    return value
+    return value;
   }
-  return value === null || value === undefined ? [] : [value]
+  return value === null || value === undefined ? [] : [value];
 }
 
 function eventNodes(value: unknown): Record<string, unknown>[] {
   if (Array.isArray(value)) {
-    return value.flatMap((item) => eventNodes(item))
+    return value.flatMap((item) => eventNodes(item));
   }
   if (!value || typeof value !== "object") {
-    return []
+    return [];
   }
 
-  const node = value as Record<string, unknown>
-  const typeValues = toArray(node["@type"]).map((entry) => String(entry).toLowerCase())
-  const isEvent = typeValues.some((entry) => entry === "event" || entry.endsWith(":event"))
-  const graphEvents = eventNodes(node["@graph"])
-  return isEvent ? [node, ...graphEvents] : graphEvents
+  const node = value as Record<string, unknown>;
+  const typeValues = toArray(node["@type"]).map((entry) =>
+    String(entry).toLowerCase()
+  );
+  const isEvent = typeValues.some((entry) =>
+    entry === "event" || entry.endsWith(":event")
+  );
+  const graphEvents = eventNodes(node["@graph"]);
+  return isEvent ? [node, ...graphEvents] : graphEvents;
 }
 
 function pickText(value: unknown): string | null {
   if (typeof value === "string") {
-    const trimmed = stripHtml(value)
-    return trimmed.length > 0 ? trimmed : null
+    const trimmed = stripHtml(value);
+    return trimmed.length > 0 ? trimmed : null;
   }
   if (value && typeof value === "object") {
-    const node = value as Record<string, unknown>
-    return pickText(node["@value"] ?? node.name ?? node.text)
+    const node = value as Record<string, unknown>;
+    return pickText(node["@value"] ?? node.name ?? node.text);
   }
-  return null
+  return null;
 }
 
 function extractImageUrls(value: unknown): string[] {
   if (typeof value === "string") {
-    return [value]
+    return [value];
   }
   if (Array.isArray(value)) {
-    return value.flatMap((entry) => extractImageUrls(entry))
+    return value.flatMap((entry) => extractImageUrls(entry));
   }
   if (value && typeof value === "object") {
-    const node = value as Record<string, unknown>
-    return extractImageUrls(node.url ?? node.contentUrl)
+    const node = value as Record<string, unknown>;
+    return extractImageUrls(node.url ?? node.contentUrl);
   }
-  return []
+  return [];
 }
 
 function getTimeZoneOffset(date: Date, timeZone: string): number {
@@ -72,9 +76,9 @@ function getTimeZoneOffset(date: Date, timeZone: string): number {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-  })
+  });
 
-  const parts = formatter.formatToParts(date)
+  const parts = formatter.formatToParts(date);
   const parsed = {
     year: Number(parts.find((part) => part.type === "year")?.value),
     month: Number(parts.find((part) => part.type === "month")?.value),
@@ -82,7 +86,7 @@ function getTimeZoneOffset(date: Date, timeZone: string): number {
     hour: Number(parts.find((part) => part.type === "hour")?.value),
     minute: Number(parts.find((part) => part.type === "minute")?.value),
     second: Number(parts.find((part) => part.type === "second")?.value),
-  }
+  };
 
   const asUtc = Date.UTC(
     parsed.year,
@@ -90,175 +94,206 @@ function getTimeZoneOffset(date: Date, timeZone: string): number {
     parsed.day,
     parsed.hour,
     parsed.minute,
-    parsed.second
-  )
+    parsed.second,
+  );
 
-  return asUtc - date.getTime()
+  return asUtc - date.getTime();
 }
 
 function localDateTimeToIso(
   dateStamp: string,
   hour: number,
   minute: number,
-  timeZone: string
+  timeZone: string,
 ): string | null {
-  const match = dateStamp.match(/^(\d{4})(\d{2})(\d{2})$/)
+  const match = dateStamp.match(/^(\d{4})(\d{2})(\d{2})$/);
   if (!match) {
-    return null
+    return null;
   }
 
-  const [, year, month, day] = match
-  const utcGuess = Date.UTC(Number(year), Number(month) - 1, Number(day), hour, minute, 0)
+  const [, year, month, day] = match;
+  const utcGuess = Date.UTC(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    hour,
+    minute,
+    0,
+  );
 
   try {
-    const initialOffset = getTimeZoneOffset(new Date(utcGuess), timeZone)
-    let adjusted = utcGuess - initialOffset
-    const followupOffset = getTimeZoneOffset(new Date(adjusted), timeZone)
+    const initialOffset = getTimeZoneOffset(new Date(utcGuess), timeZone);
+    let adjusted = utcGuess - initialOffset;
+    const followupOffset = getTimeZoneOffset(new Date(adjusted), timeZone);
     if (followupOffset !== initialOffset) {
-      adjusted = utcGuess - followupOffset
+      adjusted = utcGuess - followupOffset;
     }
-    return new Date(adjusted).toISOString()
+    return new Date(adjusted).toISOString();
   } catch {
-    return new Date(utcGuess).toISOString()
+    return new Date(utcGuess).toISOString();
   }
 }
 
 function parseClock(value: string): { hour: number; minute: number } | null {
-  const match = value.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i)
+  const match = value.trim().match(
+    /^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i,
+  );
   if (!match) {
-    return null
+    return null;
   }
 
-  let hour = Number(match[1])
-  const minute = match[2] ? Number(match[2]) : 0
+  let hour = Number(match[1]);
+  const minute = match[2] ? Number(match[2]) : 0;
   if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
-    return null
+    return null;
   }
 
-  const period = match[3].toLowerCase()
+  const period = match[3].toLowerCase();
   if (period === "p" && hour !== 12) {
-    hour += 12
+    hour += 12;
   }
   if (period === "a" && hour === 12) {
-    hour = 0
+    hour = 0;
   }
 
-  return { hour, minute }
+  return { hour, minute };
 }
 
 function parseMecTimeRange(
   dateStamp: string,
   rawTime: string,
-  timeZone: string
+  timeZone: string,
 ): { startDatetime: string; endDatetime: string | null } | null {
   const normalized = normalizeExtractedText(rawTime)
     .replace(/^[^\d]+/, "")
-    .replace(/\s+/g, " ")
-  const [rawStart, rawEnd] = normalized.split(/\s*(?:-|–|—|to)\s*/i)
-  const startClock = parseClock(rawStart ?? "")
+    .replace(/\s+/g, " ");
+  const [rawStart, rawEnd] = normalized.split(/\s*(?:-|–|—|to)\s*/i);
+  const startClock = parseClock(rawStart ?? "");
   if (!startClock) {
-    return null
+    return null;
   }
 
-  const startDatetime = localDateTimeToIso(dateStamp, startClock.hour, startClock.minute, timeZone)
+  const startDatetime = localDateTimeToIso(
+    dateStamp,
+    startClock.hour,
+    startClock.minute,
+    timeZone,
+  );
   if (!startDatetime) {
-    return null
+    return null;
   }
 
-  const endClock = parseClock(rawEnd ?? "")
+  const endClock = parseClock(rawEnd ?? "");
   let endDatetime = endClock
     ? localDateTimeToIso(dateStamp, endClock.hour, endClock.minute, timeZone)
-    : null
-  if (endDatetime && new Date(endDatetime).getTime() <= new Date(startDatetime).getTime()) {
-    endDatetime = new Date(new Date(endDatetime).getTime() + 24 * 60 * 60 * 1000).toISOString()
+    : null;
+  if (
+    endDatetime &&
+    new Date(endDatetime).getTime() <= new Date(startDatetime).getTime()
+  ) {
+    endDatetime = new Date(
+      new Date(endDatetime).getTime() + 24 * 60 * 60 * 1000,
+    ).toISOString();
   }
 
-  return { startDatetime, endDatetime }
+  return { startDatetime, endDatetime };
 }
 
 function normalizeUrl(value: string | null, baseUrl: string): string | null {
   if (!value) {
-    return null
+    return null;
   }
   try {
-    return new URL(value, baseUrl).toString()
+    return new URL(value, baseUrl).toString();
   } catch {
-    return null
+    return null;
   }
 }
 
 function offerPrice(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) {
-    return value
+    return value;
   }
   if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value)
-    return Number.isFinite(parsed) ? parsed : null
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   }
-  return null
+  return null;
 }
 
 function parseStructuredEvents(
   doc: ReturnType<DOMParser["parseFromString"]>,
-  sourceUrl: string
+  sourceUrl: string,
 ): StructuredEvent[] {
   if (!doc) {
-    return []
+    return [];
   }
 
-  const eventCandidates: Record<string, unknown>[] = []
-  for (const script of doc.querySelectorAll('script[type="application/ld+json"]')) {
-    const rawJson = script.textContent?.trim() ?? ""
+  const eventCandidates: Record<string, unknown>[] = [];
+  for (
+    const script of doc.querySelectorAll('script[type="application/ld+json"]')
+  ) {
+    const rawJson = script.textContent?.trim() ?? "";
     if (!rawJson) {
-      continue
+      continue;
     }
 
     try {
-      const parsed = JSON.parse(rawJson)
-      eventCandidates.push(...eventNodes(parsed))
+      const parsed = JSON.parse(rawJson);
+      eventCandidates.push(...eventNodes(parsed));
     } catch {
-      continue
+      continue;
     }
   }
 
-  const events: StructuredEvent[] = []
+  const events: StructuredEvent[] = [];
   for (const candidate of eventCandidates) {
-    const title = pickText(candidate.name)
+    const title = pickText(candidate.name);
     if (!title) {
-      continue
+      continue;
     }
 
-    const startDatetime = parseIsoDate(pickText(candidate.startDate))
+    const startDatetime = parseIsoDate(pickText(candidate.startDate));
     if (!startDatetime) {
-      continue
+      continue;
     }
 
-    const endDatetime = parseIsoDate(pickText(candidate.endDate))
-    const description = cleanDescription(pickText(candidate.description)) || title
-    const eventUrl = normalizeUrl(pickText(candidate.url), sourceUrl) ?? sourceUrl
-    const venueName =
-      pickText((candidate.location as Record<string, unknown> | undefined)?.name) ??
-      pickText(candidate.location)
-    const address =
-      pickText((candidate.location as Record<string, unknown> | undefined)?.address) ??
-      pickText((candidate.location as Record<string, unknown> | undefined)?.["streetAddress"]) ??
-      venueName
+    const endDatetime = parseIsoDate(pickText(candidate.endDate));
+    const description = cleanDescription(pickText(candidate.description)) ||
+      title;
+    const eventUrl = normalizeUrl(pickText(candidate.url), sourceUrl) ??
+      sourceUrl;
+    const venueName = pickText(
+      (candidate.location as Record<string, unknown> | undefined)?.name,
+    ) ??
+      pickText(candidate.location);
+    const address = pickText(
+      (candidate.location as Record<string, unknown> | undefined)?.address,
+    ) ??
+      pickText(
+        (candidate.location as Record<string, unknown> | undefined)
+          ?.["streetAddress"],
+      ) ??
+      venueName;
 
-    const webImages: string[] = []
+    const webImages: string[] = [];
     for (const image of extractImageUrls(candidate.image)) {
-      const normalized = normalizeUrl(image, sourceUrl)
-      if (normalized && validateExternalUrl(normalized).ok && !webImages.includes(normalized)) {
-        webImages.push(normalized)
+      const normalized = normalizeUrl(image, sourceUrl);
+      if (
+        normalized && validateExternalUrl(normalized).ok &&
+        !webImages.includes(normalized)
+      ) {
+        webImages.push(normalized);
       }
       if (webImages.length >= 5) {
-        break
+        break;
       }
     }
 
-    const offers = candidate.offers as Record<string, unknown> | undefined
-    const priceFromOffers = offerPrice(offers?.price)
-    const isFreeFromOffers = priceFromOffers === 0
-    const priceInfo = extractPrice(description)
+    const offers = candidate.offers as Record<string, unknown> | undefined;
+    const priceFromOffers = offerPrice(offers?.price);
+    const isFreeFromOffers = priceFromOffers === 0;
+    const priceInfo = extractPrice(description);
 
     events.push({
       title,
@@ -272,67 +307,83 @@ function parseStructuredEvents(
       images: webImages,
       price: priceFromOffers ?? priceInfo.price,
       isFree: isFreeFromOffers || priceInfo.isFree,
-    })
+    });
   }
 
-  return events
+  return events;
 }
 
 function parseMecCalendarEvents(
   doc: ReturnType<DOMParser["parseFromString"]>,
   sourceUrl: string,
   timeZone: string,
-  structuredEvents: StructuredEvent[]
+  structuredEvents: StructuredEvent[],
 ): ParsedEvent[] {
   if (!doc) {
-    return []
+    return [];
   }
 
   const structuredByUrl = new Map(
     structuredEvents
       .filter((event) => event.sourceUrl)
-      .map((event) => [event.sourceUrl as string, event])
-  )
-  const seenKeys = new Set<string>()
-  const events: ParsedEvent[] = []
+      .map((event) => [event.sourceUrl as string, event]),
+  );
+  const seenKeys = new Set<string>();
+  const events: ParsedEvent[] = [];
 
-  for (const dayNode of doc.querySelectorAll(".mec-calendar-day[data-mec-cell]")) {
-    const dateStamp = dayNode.getAttribute("data-mec-cell") ?? ""
-    for (const link of dayNode.querySelectorAll(
-      "a.event-single-link-simple[data-tooltip-content]"
-    )) {
-      const title = pickText(link.querySelector(".mec-event-title")?.textContent)
+  for (
+    const dayNode of doc.querySelectorAll(".mec-calendar-day[data-mec-cell]")
+  ) {
+    const dateStamp = dayNode.getAttribute("data-mec-cell") ?? "";
+    for (
+      const link of dayNode.querySelectorAll(
+        "a.event-single-link-simple[data-tooltip-content]",
+      )
+    ) {
+      const title = pickText(
+        link.querySelector(".mec-event-title")?.textContent,
+      );
       if (!title) {
-        continue
+        continue;
       }
 
-      const tooltipSelector = link.getAttribute("data-tooltip-content")
-      const tooltip = tooltipSelector ? doc.querySelector(tooltipSelector) : null
+      const tooltipSelector = link.getAttribute("data-tooltip-content");
+      const tooltip = tooltipSelector
+        ? doc.querySelector(tooltipSelector)
+        : null;
       const parsedTime = parseMecTimeRange(
         dateStamp,
         tooltip?.querySelector(".mec-tooltip-event-time")?.textContent ?? "",
-        timeZone
-      )
+        timeZone,
+      );
       if (!parsedTime) {
-        continue
+        continue;
       }
 
-      const eventUrl = normalizeUrl(link.getAttribute("href"), sourceUrl) ?? sourceUrl
-      const structured = structuredByUrl.get(eventUrl)
-      const rawDescription = tooltip?.querySelector(".mec-tooltip-event-desc")?.textContent ?? ""
-      const description =
-        structured?.description ?? cleanDescription(rawDescription.replace(/\s*,\s*\.\.\.$/, ""))
-      const tooltipImage = tooltip?.querySelector("img")?.getAttribute("src") ?? null
-      const imageUrl = structured?.imageUrl ?? normalizeUrl(tooltipImage, sourceUrl)
-      const images = structured?.images.length ? structured.images : imageUrl ? [imageUrl] : []
-      const priceInfo = extractPrice(description)
+      const eventUrl = normalizeUrl(link.getAttribute("href"), sourceUrl) ??
+        sourceUrl;
+      const structured = structuredByUrl.get(eventUrl);
+      const rawDescription =
+        tooltip?.querySelector(".mec-tooltip-event-desc")?.textContent ?? "";
+      const description = structured?.description ??
+        cleanDescription(rawDescription.replace(/\s*,\s*\.\.\.$/, ""));
+      const tooltipImage = tooltip?.querySelector("img")?.getAttribute("src") ??
+        null;
+      const imageUrl = structured?.imageUrl ??
+        normalizeUrl(tooltipImage, sourceUrl);
+      const images = structured?.images.length
+        ? structured.images
+        : imageUrl
+        ? [imageUrl]
+        : [];
+      const priceInfo = extractPrice(description);
 
-      const key = `${eventUrl}::${parsedTime.startDatetime}`
+      const key = `${eventUrl}::${parsedTime.startDatetime}`;
       if (seenKeys.has(key)) {
-        continue
+        continue;
       }
 
-      seenKeys.add(key)
+      seenKeys.add(key);
       events.push({
         title,
         description: description.slice(0, 500),
@@ -345,46 +396,65 @@ function parseMecCalendarEvents(
         images,
         price: structured?.price ?? priceInfo.price,
         isFree: structured?.isFree ?? priceInfo.isFree,
-      })
+      });
     }
   }
 
-  return events
+  return events;
 }
 
-export function parseWebsite(html: string, sourceUrl: string, timeZone = "UTC"): ParsedEvent[] {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(html, "text/html")
+export function parseWebsite(
+  html: string,
+  sourceUrl: string,
+  timeZone = "UTC",
+): ParsedEvent[] {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
   if (!doc) {
-    return []
+    return [];
   }
 
-  const structuredEvents = parseStructuredEvents(doc, sourceUrl)
-  const mecEvents = parseMecCalendarEvents(doc, sourceUrl, timeZone, structuredEvents)
+  const structuredEvents = parseStructuredEvents(doc, sourceUrl);
+  const mecEvents = parseMecCalendarEvents(
+    doc,
+    sourceUrl,
+    timeZone,
+    structuredEvents,
+  );
   if (mecEvents.length > 0) {
-    return mecEvents
+    return mecEvents;
   }
 
-  const seenKeys = new Set<string>()
-  const events: ParsedEvent[] = []
+  const seenKeys = new Set<string>();
+  const events: ParsedEvent[] = [];
   for (const structured of structuredEvents) {
-    const key = `${structured.title.toLowerCase()}::${structured.startDatetime}`
+    const key =
+      `${structured.title.toLowerCase()}::${structured.startDatetime}`;
     if (seenKeys.has(key)) {
-      continue
+      continue;
     }
-    seenKeys.add(key)
-    events.push(structured)
+    seenKeys.add(key);
+    events.push(structured);
   }
 
-  return events
+  return events;
 }
 
 export const websiteParser: SourceParser<"website"> = {
   type: "website",
-  async fetchAndParse(source, ctx) {
+  async fetchArtifact(source, ctx) {
     const html = await ctx.fetchText(source.url, {
       accept: "text/html,application/xml,text/xml,*/*",
-    })
-    return parseWebsite(html, source.url, ctx.timezone)
+    });
+    return { url: source.url, contentType: "text/html", body: html };
   },
-}
+  extractEvents(source, artifact, ctx) {
+    return Promise.resolve(
+      parseWebsite(artifact.body, artifact.url || source.url, ctx.timezone),
+    );
+  },
+  async fetchAndParse(source, ctx) {
+    const artifact = await this.fetchArtifact(source, ctx);
+    return this.extractEvents(source, artifact, ctx);
+  },
+};

@@ -218,6 +218,7 @@ export type Database = {
           created_at: string
           date_window_days: number | null
           error_count: number
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
           id: string
           is_active: boolean
           last_scraped_at: string | null
@@ -235,6 +236,7 @@ export type Database = {
           created_at?: string
           date_window_days?: number | null
           error_count?: number
+          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"]
           id?: string
           is_active?: boolean
           last_scraped_at?: string | null
@@ -252,6 +254,7 @@ export type Database = {
           created_at?: string
           date_window_days?: number | null
           error_count?: number
+          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"]
           id?: string
           is_active?: boolean
           last_scraped_at?: string | null
@@ -816,6 +819,145 @@ export type Database = {
           },
         ]
       }
+      source_extraction_traces: {
+        Row: {
+          created_at: string
+          error: string | null
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
+          extractor: string
+          fallback_reason: string | null
+          id: number
+          input_bytes: number | null
+          latency_ms: number | null
+          model: string | null
+          parsed_event_count: number
+          provider: string | null
+          reasoning_summary: string | null
+          source_id: string | null
+          source_queue_id: number | null
+          source_run_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
+          extractor: string
+          fallback_reason?: string | null
+          id?: never
+          input_bytes?: number | null
+          latency_ms?: number | null
+          model?: string | null
+          parsed_event_count?: number
+          provider?: string | null
+          reasoning_summary?: string | null
+          source_id?: string | null
+          source_queue_id?: number | null
+          source_run_id?: string | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"]
+          extractor?: string
+          fallback_reason?: string | null
+          id?: never
+          input_bytes?: number | null
+          latency_ms?: number | null
+          model?: string | null
+          parsed_event_count?: number
+          provider?: string | null
+          reasoning_summary?: string | null
+          source_id?: string | null
+          source_queue_id?: number | null
+          source_run_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_extraction_traces_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "event_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_extraction_traces_source_queue_id_fkey"
+            columns: ["source_queue_id"]
+            isOneToOne: false
+            referencedRelation: "source_scrape_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_extraction_traces_source_run_id_fkey"
+            columns: ["source_run_id"]
+            isOneToOne: false
+            referencedRelation: "source_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      source_scrape_queue: {
+        Row: {
+          attempt_count: number
+          enqueued_at: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          next_attempt_at: string
+          source_id: string | null
+          source_run_id: string | null
+          skip_reason: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type: string
+        }
+        Insert: {
+          attempt_count?: number
+          enqueued_at?: string
+          finished_at?: string | null
+          id?: never
+          last_error?: string | null
+          next_attempt_at?: string
+          source_id?: string | null
+          source_run_id?: string | null
+          skip_reason?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type?: string
+        }
+        Update: {
+          attempt_count?: number
+          enqueued_at?: string
+          finished_at?: string | null
+          id?: never
+          last_error?: string | null
+          next_attempt_at?: string
+          source_id?: string | null
+          source_run_id?: string | null
+          skip_reason?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_scrape_queue_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "event_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_scrape_queue_source_run_id_fkey"
+            columns: ["source_run_id"]
+            isOneToOne: false
+            referencedRelation: "source_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       source_runs: {
         Row: {
           completed_at: string | null
@@ -1063,6 +1205,18 @@ export type Database = {
         }
         Relationships: []
       }
+      source_scrape_queue_summary: {
+        Row: {
+          avg_attempts: number | null
+          last_dead_letter_at: string | null
+          newest_finished_at: string | null
+          oldest_enqueued_at: string | null
+          oldest_processing_started_at: string | null
+          row_count: number | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null
+        }
+        Relationships: []
+      }
       public_events: {
         Row: {
           address: string | null
@@ -1265,8 +1419,9 @@ export type Database = {
         Returns: boolean
       }
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
+      admin_retry_source_scrape_queue: { Args: { p_queue_id: number }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
-      admin_run_due_scrapes: { Args: never; Returns: undefined }
+      admin_run_due_scrapes: { Args: never; Returns: Json }
       admin_set_cron_schedule: {
         Args: { p_job_name: string; p_schedule: string }
         Returns: undefined
@@ -1472,7 +1627,7 @@ export type Database = {
         Returns: boolean
       }
       run_daily_maintenance: { Args: never; Returns: Json }
-      run_due_source_scrapes: { Args: never; Returns: undefined }
+      run_due_source_scrapes: { Args: never; Returns: Json }
       search_events: {
         Args: {
           p_age_max?: number
@@ -1532,8 +1687,10 @@ export type Database = {
       }
     }
     Enums: {
-      event_tag_queue_status: "pending" | "processing" | "failed" | "dead"
+      event_tag_queue_status: "pending" | "processing" | "succeeded" | "failed" | "dead"
       invite_request_status: "pending" | "approved" | "rejected"
+      source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
+      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1659,8 +1816,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      event_tag_queue_status: ["pending", "processing", "failed", "dead"],
+      event_tag_queue_status: ["pending", "processing", "succeeded", "failed", "dead"],
       invite_request_status: ["pending", "approved", "rejected"],
+      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
+      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
     },
   },
 } as const

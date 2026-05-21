@@ -107,6 +107,9 @@ verify_jwt = false
 [functions.process-tag-queue]
 verify_jwt = false
 
+[functions.process-source-queue]
+verify_jwt = false
+
 [functions.scrape-due-sources]
 verify_jwt = false
 

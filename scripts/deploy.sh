@@ -76,6 +76,7 @@ ALL_TARGETS=(
   "fn: db-maintenance                    |supabase_fn|db-maintenance"
   "fn: log-cron-run                      |supabase_fn|log-cron-run"
   "fn: notify-email                      |supabase_fn|notify-email"
+  "fn: process-source-queue              |supabase_fn|process-source-queue"
   "fn: process-tag-queue                 |supabase_fn|process-tag-queue"
   "fn: scrape-due-sources                |supabase_fn|scrape-due-sources"
   "fn: scrape-source                     |supabase_fn|scrape-source"
@@ -86,6 +87,7 @@ ALL_TARGETS=(
   "web                                   |railway|web"
   "cron-scrape-sources                   |railway|cron-scrape-sources-yp-N"
   "cron-db-maintenance                   |railway|cron-db-maintenance"
+  "cron-process-source-queue             |railway|cron-process-source-queue"
   "cron-tag-queue                        |railway|cron-tag-queue-seKl"
   "llm-proxy                             |railway|llm-proxy"
   "llm-ollama (qwen3:1.7b)               |railway|llm-ollama"
@@ -186,6 +188,7 @@ deploy_supabase_fn_all() {
     db-maintenance
     log-cron-run
     notify-email
+    process-source-queue
     process-tag-queue
     scrape-due-sources
     scrape-source
@@ -211,6 +214,7 @@ railway_service_dir() {
     web)                      echo "" ;;          # ROOT_DIR
     cron-scrape-sources-yp-N) echo "cron-scrape-sources" ;;
     cron-db-maintenance)      echo "cron-db-maintenance" ;;
+    cron-process-source-queue) echo "cron-process-source-queue" ;;
     cron-tag-queue-seKl)      echo "cron-tag-queue" ;;
     llm-proxy)                echo "llm-proxy" ;;
     llm-ollama)               echo "qwen-ollama" ;;
@@ -251,7 +255,7 @@ deploy_railway() {
 
 deploy_railway_all() {
   # Use the real Railway service names here
-  local services=(web cron-scrape-sources-yp-N cron-db-maintenance cron-tag-queue-seKl llm-proxy llm-ollama)
+  local services=(web cron-scrape-sources-yp-N cron-db-maintenance cron-process-source-queue cron-tag-queue-seKl llm-proxy llm-ollama)
   step "Railway — all apps"
   for service in "${services[@]}"; do
     deploy_railway "$service" || { warn "Railway deploy failed: $service"; ERRORS=$((ERRORS + 1)); }
