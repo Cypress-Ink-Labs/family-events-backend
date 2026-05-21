@@ -34,7 +34,7 @@
             "node": {
               "serviceName": "cron-scrape-sources-yp-N",
               "serviceId": "c48ad7ba-1454-4beb-9251-1ef090ff99cd",
-              "cronSchedule": "* * * * *",
+              "cronSchedule": "*/5 * * * *",
               "source": {
                 "repo": "HexSleeves/family-events-v2",
                 "image": null
