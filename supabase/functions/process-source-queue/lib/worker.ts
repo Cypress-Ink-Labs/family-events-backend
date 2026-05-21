@@ -1,5 +1,5 @@
 import { type SupabaseClient } from "@supabase/supabase-js";
-import { logEdgeEvent } from "../../_shared/logger.ts";
+import { errorMessage, logEdgeEvent } from "../../_shared/logger.ts";
 import { parsers } from "../../scrape-source/parsers/index.ts";
 import {
   buildParserContext,
@@ -285,7 +285,7 @@ async function handleExtractionFailure(
   extractor: "deterministic" | "llm",
   err: unknown,
 ): Promise<ProcessSourceQueueResult> {
-  const message = err instanceof Error ? err.message : String(err);
+  const message = errorMessage(err);
   await persistExtractionTrace(
     supabase,
     buildExtractionErrorTrace({
@@ -396,7 +396,7 @@ export async function processQueueRow(
           sourceId: source.id,
           extractionMode: source.extraction_mode,
           extractor: "deterministic",
-          error: err instanceof Error ? err.message : String(err),
+          error: errorMessage(err),
         }),
       );
     }

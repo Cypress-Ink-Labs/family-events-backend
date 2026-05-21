@@ -2,7 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
+import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
 import {
   resolveCompletedTagQueueStatus,
   shouldStopBeforeStartingNextTagRow,
@@ -109,7 +109,7 @@ async function markFailureOrDead(
   row: QueueRow,
   err: unknown,
 ): Promise<{ dead: boolean }> {
-  const errMsg = err instanceof Error ? err.message : String(err);
+  const errMsg = errorMessage(err);
   const attempts = row.attempt_count; // already incremented by claim_tag_queue_batch
   const isDead = attempts >= MAX_ATTEMPTS;
 
@@ -292,9 +292,7 @@ export async function processBatch(
           event_id: activeRow.event_id,
           attempt: activeRow.attempt_count,
           duration_ms: Date.now() - rowStart,
-          error: err instanceof Error
-            ? err.message.slice(0, 300)
-            : String(err).slice(0, 300),
+          error: errorMessage(err).slice(0, 300),
           outcome: "retry",
         });
       }

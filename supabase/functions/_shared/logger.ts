@@ -80,6 +80,18 @@ export function toError(error: unknown): Error {
   return new Error(String(error))
 }
 
+export function errorMessage(error: unknown): string {
+  // Single-line summary suitable for last_error text columns / log fields.
+  // Handles PostgrestError (plain object with code/message/details/hint) so
+  // we never write the literal "[object Object]" again.
+  const s = serializeError(error)
+  const parts = [s.message]
+  if (s.code) parts.push(`code=${s.code}`)
+  const details = (s as { details?: string | null }).details
+  if (details) parts.push(`details=${details}`)
+  return parts.filter(Boolean).join(" ")
+}
+
 export function logEdgeEvent(level: EdgeLogLevel, message: string, context: EdgeLogContext = {}) {
   const payload = {
     timestamp: new Date().toISOString(),

@@ -3,7 +3,12 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-cronSchedule = "* * * * *"
+# Every 5 minutes. run_due_source_scrapes checks event_sources for due rows
+# using last_scraped_at + scrape_interval_hours; the finest scrape_interval
+# used in production is 1h, so a 5-min poller still hits every due window
+# with <5 min of jitter. Previously every minute, which cost ~22s/day in
+# pg_stat_statements for no scheduling benefit.
+cronSchedule = "*/5 * * * *"
 # ON_FAILURE: ALWAYS caused a tight restart loop (curl exits → instant
 # restart → curl exits → ...) and bypassed the cron schedule entirely. With
 # ON_FAILURE Railway only restarts on a non-zero exit, so a clean run waits

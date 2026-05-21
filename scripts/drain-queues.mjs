@@ -12,12 +12,21 @@ Examples:
 const DEFAULT_ROUNDS = 20;
 const DEFAULT_PAUSE_MS = 1200;
 
-const envUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL ?? "";
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const envUrl =
+  process.env.SUPABASE_URL ??
+  process.env.API_URL ??
+  process.env.VITE_SUPABASE_URL ??
+  process.env.PUBLIC_SUPABASE_URL ??
+  "";
+const serviceRoleKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ??
+  process.env.SERVICE_ROLE_KEY ??
+  process.env.SUPABASE_SERVICE_ROLE ??
+  "";
 
 if (!envUrl || !serviceRoleKey) {
   console.error(
-    "Missing environment variables. Required: SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY.",
+    "Missing environment variables. Required: SUPABASE_URL (or API_URL/VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY (or SERVICE_ROLE_KEY).",
   );
   process.exit(1);
 }
@@ -71,6 +80,12 @@ async function callJson(url, init = {}) {
 
   if (!response.ok) {
     const detail = typeof body === "string" ? body : (body?.error ?? bodyText);
+    if (response.status === 401 && body?.code === "42501") {
+      throw new Error(
+        `${response.status} ${response.statusText}: ${detail ?? "empty body"}. ` +
+          "This RPC is service-role only. Verify SUPABASE_SERVICE_ROLE_KEY / SERVICE_ROLE_KEY is correct.",
+      );
+    }
     throw new Error(
       `${response.status} ${response.statusText}: ${detail ?? "empty body"}`,
     );
@@ -84,8 +99,7 @@ async function callFunction(functionName) {
   return await callJson(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${serviceRoleKey}`,
+      ...baseHeaders,
     },
     body: "{}",
   });
@@ -106,13 +120,20 @@ async function callRpc(functionName, args = {}) {
   const text = await response.text();
   if (!response.ok) {
     let body = text;
+    let parsed;
     try {
-      const parsed = JSON.parse(text);
+      parsed = JSON.parse(text);
       if (typeof parsed === "object" && parsed?.error) {
         body = parsed.error;
       }
     } catch {
       // keep raw text.
+    }
+    if (response.status === 401 && parsed?.code === "42501") {
+      throw new Error(
+        `${response.status} ${response.statusText}: ${body}. ` +
+          "This RPC is service-role only. Verify SUPABASE_SERVICE_ROLE_KEY / SERVICE_ROLE_KEY is correct.",
+      );
     }
     throw new Error(`${response.status} ${response.statusText}: ${body}`);
   }
