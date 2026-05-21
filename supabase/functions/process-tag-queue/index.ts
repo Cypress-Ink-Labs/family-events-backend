@@ -36,6 +36,7 @@ interface QueueRow {
 
 interface ProcessSummary {
   claimed: number;
+  reaped: number;
   succeeded: number;
   failed: number;
   dead: number;
@@ -149,12 +150,19 @@ export async function processBatch(
   const batchStart = Date.now();
   const summary: ProcessSummary = {
     claimed: 0,
+    reaped: 0,
     succeeded: 0,
     failed: 0,
     dead: 0,
     pending_after: null,
     duration_ms: 0,
   };
+
+  const { data: reaped, error: reapError } = await supabase.rpc(
+    "reap_stuck_tag_queue_rows",
+  );
+  if (reapError) throw reapError;
+  summary.reaped = Number(reaped ?? 0);
 
   const { data: claimed, error: claimError } = await supabase.rpc(
     "claim_tag_queue_batch",
