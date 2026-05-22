@@ -10,9 +10,8 @@ CREATE INDEX IF NOT EXISTS events_published_start_id_idx
   ON public.events (start_datetime, id)
   WHERE status = 'published';
 
-CREATE INDEX IF NOT EXISTS events_published_city_start_id_idx
-  ON public.events (city_id, start_datetime, id)
-  WHERE status = 'published';
+-- events_published_city_start_id_idx duplicates events_published_feed_idx from
+-- 006800; dropped in 007600 to keep advisor lint clean.
 
 -- ---------------------------------------------------------------------------
 -- Function 1: events_enriched_v2
