@@ -32,11 +32,10 @@ NC='\033[0m'
 # like turbo on the web app build from repo root). Add new exceptions here.
 INTENTIONAL_NULL_ROOTDIR=(web)
 
-# Service-name → expected apps/ subdir. llm-ollama maps to apps/qwen-ollama
-# because the dir was renamed but the service kept the old name.
-declare -A SERVICE_ROOT_OVERRIDE=(
-  ["llm-ollama"]="apps/qwen-ollama"
-)
+# Service-name → expected apps/ subdir. Used for overrides where the
+# Railway service name doesn't match the apps/<service-name> convention.
+# Currently empty after llm-ollama/llm-proxy teardown.
+declare -A SERVICE_ROOT_OVERRIDE=()
 
 TOKEN=$(jq -r '.user.accessToken' ~/.railway/config.json)
 if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then

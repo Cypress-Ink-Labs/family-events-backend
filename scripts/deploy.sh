@@ -97,8 +97,6 @@ ALL_TARGETS=(
   "cron-db-maintenance                   |railway|cron-db-maintenance"
   "cron-tag-queue                        |railway|cron-tag-queue"
   "cron-cleanup-stale                    |railway|cron-cleanup-stale"
-  "llm-proxy                             |railway|llm-proxy"
-  "llm-ollama (qwen3:1.7b)               |railway|llm-ollama"
 )
 
 # Build display list (separators are not selectable)
@@ -296,8 +294,6 @@ railway_service_dir() {
     cron-db-maintenance)      echo "cron-db-maintenance" ;;
     cron-tag-queue)      echo "cron-tag-queue" ;;
     cron-cleanup-stale)  echo "cron-cleanup-stale" ;;
-    llm-proxy)                echo "llm-proxy" ;;
-    llm-ollama)               echo "qwen-ollama" ;;
     *)                        echo "$service" ;;  # fallback: same name
   esac
 }
@@ -388,7 +384,7 @@ deploy_railway() {
 
 deploy_railway_all() {
   # Use the real Railway service names here
-  local services=(web cron-scrape-sources cron-db-maintenance cron-tag-queue cron-cleanup-stale llm-proxy llm-ollama)
+  local services=(web cron-scrape-sources cron-db-maintenance cron-tag-queue cron-cleanup-stale cron-enrich-events)
   step "Railway — all apps"
   for service in "${services[@]}"; do
     deploy_railway "$service" || { warn "Railway deploy failed: $service"; ERRORS=$((ERRORS + 1)); }

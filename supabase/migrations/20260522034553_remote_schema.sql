@@ -3,6 +3,7 @@ create extension if not exists "hypopg" with schema "extensions";
 create extension if not exists "index_advisor" with schema "extensions";
 
 create schema if not exists "pgmq";
+create schema if not exists "private";
 
 set check_function_bodies = off;
 
