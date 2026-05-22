@@ -1,6 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { captureEdgeException } from "../_shared/sentry.ts"
-import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
+import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
 
 // send-auth-email
 // ----------------------------------------------------------------
@@ -221,6 +221,6 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     await captureEdgeException(err, errorContext(err, { function: "send-auth-email" }))
     logEdgeEvent("error", "send-auth-email outer failure", errorContext(err, { function: "send-auth-email" }))
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500 })
+    return new Response(JSON.stringify({ error: errorMessage(err) }), { status: 500 })
   }
 })

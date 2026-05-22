@@ -2,7 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
 import { requireServiceRole } from "../_shared/auth.ts"
 import { captureEdgeException } from "../_shared/sentry.ts"
-import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
+import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
       err,
       errorContext(err, { function: "cleanup-stale-runs", stage: "rpc" })
     )
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: errorMessage(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })

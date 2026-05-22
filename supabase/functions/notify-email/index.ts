@@ -1,7 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { requireServiceRole } from "../_shared/auth.ts"
 import { captureEdgeException } from "../_shared/sentry.ts"
-import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
+import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
 
 // notify-email
 // ----------------------------------------------------------------
@@ -479,7 +479,7 @@ Deno.serve(async (req: Request) => {
       "notify-email outer failure",
       errorContext(err, { function: "notify-email" })
     )
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: errorMessage(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })

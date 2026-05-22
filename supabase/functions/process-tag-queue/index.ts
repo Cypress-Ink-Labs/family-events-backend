@@ -23,8 +23,11 @@ const BASE_BACKOFF_MS = 60_000;
 //
 // Old: BATCH_SIZE=4 serial → 4 events / ~60s = 240/hr.
 // New: BATCH_SIZE=16, CONCURRENCY=4 → 16 events / ~60s = 960/hr (4x).
+// CONCURRENCY must match the Ollama OLLAMA_NUM_PARALLEL env in
+// apps/qwen-ollama/Dockerfile. Exceeding it queues requests inside Ollama
+// past tag-event's 45s edge timeout. Bump in both places together.
 const BATCH_SIZE = 20;
-const CONCURRENCY = 8;
+const CONCURRENCY = 4;
 const PER_ITEM_TIMEOUT_MS = 60_000;
 
 const corsHeaders = {
@@ -380,7 +383,7 @@ if (import.meta.main) {
         "process-tag-queue outer failure",
         errorContext(err, { function: "process-tag-queue" }),
       );
-      return new Response(JSON.stringify({ error: String(err) }), {
+      return new Response(JSON.stringify({ error: errorMessage(err) }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
