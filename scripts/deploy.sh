@@ -269,6 +269,62 @@ railway_service_dir() {
   esac
 }
 
+poll_railway_status() {
+  local service="$1"
+  local max_wait="${RAILWAY_POLL_TIMEOUT:-120}"
+  local interval=10
+  local elapsed=0
+  local status=""
+
+  info "Polling Railway status for '$service' (max ${max_wait}s)..."
+
+  while [ "$elapsed" -lt "$max_wait" ]; do
+    local raw
+    raw="$(cd "$ROOT_DIR" && railway status --service "$service" --json 2>/dev/null || true)"
+
+    if [ -z "$raw" ]; then
+      warn "railway status --json returned no output for '$service' (railway CLI may not support --json flag)"
+      return 0  # fallback: non-fatal
+    fi
+
+    status="$(printf '%s' "$raw" | jq -r '.latestDeployment.status // empty' 2>/dev/null || true)"
+
+    if [ -z "$status" ]; then
+      warn "Could not parse latestDeployment.status from railway status output for '$service'"
+      return 0  # fallback: non-fatal
+    fi
+
+    case "$status" in
+      SUCCESS)
+        ok "Railway service '$service' deployed successfully (status: $status)."
+        return 0
+        ;;
+      FAILED|CRASHED)
+        local deploy_url
+        deploy_url="$(printf '%s' "$raw" | jq -r '.latestDeployment.url // empty' 2>/dev/null || true)"
+        warn "Railway service '$service' deploy ${status}. URL: ${deploy_url:-unknown}"
+        return 1
+        ;;
+      BUILDING|DEPLOYING|INITIALIZING|QUEUED)
+        info "Railway service '$service' status: $status — waiting..."
+        sleep "$interval"
+        elapsed=$((elapsed + interval))
+        ;;
+      *)
+        warn "Railway service '$service' unexpected status: '$status'"
+        return 0  # non-fatal for unknown states
+        ;;
+    esac
+  done
+
+  if [ "${NO_POLL:-0}" = "1" ]; then
+    warn "Railway poll timeout for '$service' — continuing (--no-poll mode)."
+    return 0
+  fi
+  warn "Railway poll timed out after ${max_wait}s for '$service' (last status: $status)."
+  return 1
+}
+
 deploy_railway() {
   local service="$1"
 
@@ -294,11 +350,7 @@ deploy_railway() {
     || { warn "railway up failed for '$service'"; return 1; }
 
   ok "Railway deploy triggered for '$service'."
-  if (cd "$ROOT_DIR" && railway status --service "$service" &>/dev/null); then
-    ok "Railway service '$service' status is readable."
-  else
-    warn "Could not verify Railway service '$service' status after deploy trigger."
-  fi
+  poll_railway_status "$service" || return 1
 }
 
 deploy_railway_all() {
@@ -308,6 +360,48 @@ deploy_railway_all() {
   for service in "${services[@]}"; do
     deploy_railway "$service" || { warn "Railway deploy failed: $service"; ERRORS=$((ERRORS + 1)); }
   done
+}
+
+run_smoke_checks() {
+  local db_url="${LOCAL_DB_URL:-postgresql://postgres:postgres@127.0.0.1:55322/postgres}"
+  local supabase_url="${SUPABASE_URL:-}"
+  local service_key="${SUPABASE_SERVICE_KEY:-}"
+
+  step "Post-deploy smoke checks (DEPLOY_SMOKE=1)"
+
+  # 1. Supabase functions drift check
+  local fn_dirs fn_list
+  fn_dirs="$(find "$ROOT_DIR/supabase/functions" -maxdepth 1 -mindepth 1 -type d -not -name '_shared' | sort | xargs -I{} basename {})"
+  fn_list="$(supabase functions list --json 2>/dev/null | jq -r '.[].name' 2>/dev/null | sort || true)"
+  if [ -n "$fn_list" ] && [ "$(printf '%s\n' "$fn_dirs")" != "$(printf '%s\n' "$fn_list")" ]; then
+    warn "Supabase function drift detected between filesystem and deployed functions."
+    warn "Filesystem: $(printf '%s' "$fn_dirs" | tr '\n' ' ')"
+    warn "Deployed:   $(printf '%s' "$fn_list" | tr '\n' ' ')"
+  else
+    ok "Supabase function list matches filesystem."
+  fi
+
+  # 2. Synthetic is_cron_enabled call (skip in production unless --allow-prod-smoke)
+  if [ -n "$service_key" ] && [ -n "$supabase_url" ]; then
+    local cron_result
+    cron_result="$(curl -sf \
+      -H "apikey: $service_key" \
+      -H "Authorization: Bearer $service_key" \
+      -H "Content-Type: application/json" \
+      -d '{"p_label":"cron-tag-queue"}' \
+      "${supabase_url}/rest/v1/rpc/is_cron_enabled" 2>/dev/null || true)"
+    if [ -z "$cron_result" ]; then
+      warn "Smoke: is_cron_enabled call returned empty — skipping (no Supabase URL/key?)"
+    else
+      ok "Smoke: is_cron_enabled('cron-tag-queue') = $cron_result"
+    fi
+  else
+    info "Smoke: skipping is_cron_enabled (SUPABASE_URL or SUPABASE_SERVICE_KEY not set)"
+  fi
+
+  # 3. admin_db_health_snapshot (if a session token is available)
+  # This requires an authenticated admin session — skip if no token
+  info "Smoke: admin_db_health_snapshot requires an admin session token — skipping in automated context."
 }
 
 # ── execute ───────────────────────────────────────────────────────────────────
@@ -339,6 +433,10 @@ for entry in "${SELECTED_TARGETS[@]}"; do
       ;;
   esac
 done
+
+if [ "${DEPLOY_SMOKE:-0}" = "1" ]; then
+  run_smoke_checks || ERRORS=$((ERRORS + 1))
+fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
 echo ""

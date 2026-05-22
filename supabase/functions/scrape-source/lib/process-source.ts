@@ -553,7 +553,6 @@ export async function processSource(
     // Write total found immediately so the UI shows "X found" while import runs.
     await flushProgress();
 
-    const index = await buildExistingEventIndex(supabase, source, parsedEvents);
     const sourceCityContext = await fetchSourceCityContext(
       supabase,
       source.city_id,
@@ -567,247 +566,137 @@ export async function processSource(
       return true;
     });
 
-    for (const parsed of validEvents) {
-      // Prefer within-source match (source_url), fall back to cross-source dedup
-      const sourceUrlMatch = parsed.sourceUrl
-        ? index.bySourceUrl.get(parsed.sourceUrl)
-        : null;
-      const crossSourceMatch = index.byDedupKey.get(
-        dedupKey(parsed.title, parsed.startDatetime, source.city_id),
-      );
-      const existingEventId = sourceUrlMatch ?? crossSourceMatch ?? null;
-
-      // Skip if this is a cross-source dupe from ANOTHER source (don't overwrite)
-      if (!sourceUrlMatch && crossSourceMatch) {
-        eventsSkipped += 1;
-        continue;
+    if (validEvents.length === 0) {
+      await flushProgress();
+    } else {
+      // Pre-flight: which source_urls in this batch already exist for this
+      // source? Lets us skip per-event geocode/image HTTP work for updates,
+      // which is the long pole of the per-tick wall clock budget.
+      const candidateUrls = validEvents
+        .map((p) => p.sourceUrl)
+        .filter((u): u is string => Boolean(u));
+      const existingSet = new Set<string>();
+      if (candidateUrls.length > 0) {
+        const { data: existingRows, error: existingErr } = await supabase
+          .from("events")
+          .select("source_url")
+          .eq("source_id", source.id)
+          .in("source_url", candidateUrls);
+        if (existingErr) throw existingErr;
+        for (const row of (existingRows ?? []) as Array<{ source_url: string }>) {
+          existingSet.add(row.source_url);
+        }
       }
 
-      const validatedImages = await sanitizeImagesForIngest(parsed, source.url);
-      const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed);
-      const geocodedCoordinates = existingEventId
-        ? { latitude: null, longitude: null }
-        : await resolveCoordinatesForParsedEvent(parsed, sourceCityContext);
+      const PREP_CONCURRENCY = 10;
 
-      const payload = {
-        title: parsed.title,
-        description: parsed.description || null,
-        start_datetime: parsed.startDatetime,
-        end_datetime: parsed.endDatetime,
-        timezone,
-        venue_name: parsed.venueName,
-        address: parsed.address,
-        city_id: source.city_id,
-        source_url: parsed.sourceUrl,
-        source_name: source.name,
-        source_id: source.id,
-        images: validatedImages,
-        price: parsed.price,
-        is_free: parsed.isFree,
-        is_outdoor: isOutdoor,
-        status: (!existingEventId && source.auto_approve)
-          ? "published" as const
-          : "draft" as const,
-        ...(existingEventId ? {} : {
-          latitude: geocodedCoordinates.latitude,
-          longitude: geocodedCoordinates.longitude,
-        }),
-      };
-
-      // INSERT path uses plain insert. The partial UNIQUE index
-      // events_source_id_source_url_uniq still prevents double-inserts from
-      // concurrent runs at the DB level — it raises 23505 (unique_violation)
-      // which we treat as benign ("another worker already imported this").
-      //
-      // Note: we cannot use .upsert(... onConflict: "source_id,source_url")
-      // here because the underlying constraint is a *partial* unique index
-      // (WHERE source_url IS NOT NULL), and PostgREST's on_conflict parameter
-      // doesn't carry the WHERE predicate. PostgreSQL then raises 42P10
-      // ("no unique or exclusion constraint matching the ON CONFLICT
-      // specification") on every insert attempt — which is exactly the bug
-      // that broke imports until we restored this plain-insert path.
-      let upsertedEvent: { id: string } | null = null;
-      let upsertError: { code?: string; message?: string } | null = null;
-      if (existingEventId) {
-        const lockedFields = await fetchAdminLockedFields(
-          supabase,
-          existingEventId,
+      async function prepEventPayload(
+        parsed: ParsedEvent,
+      ): Promise<Record<string, unknown>> {
+        const isExisting = Boolean(
+          parsed.sourceUrl && existingSet.has(parsed.sourceUrl),
         );
-        const unlockedPayload = applyAdminFieldLocks(payload, lockedFields);
-        if (Object.keys(unlockedPayload).length === 0) {
-          upsertedEvent = { id: existingEventId };
+        // Skip image + geocode HTTP for updates — the SQL bulk RPC keeps the
+        // existing images/coords when those fields are admin-locked, and the
+        // parser's images list rarely changes between scrapes anyway.
+        const validatedImages = isExisting
+          ? []
+          : await sanitizeImagesForIngest(parsed, source.url);
+        const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed);
+        const geocoded = isExisting
+          ? { latitude: null, longitude: null }
+          : await resolveCoordinatesForParsedEvent(parsed, sourceCityContext);
+
+        return {
+          title: parsed.title,
+          description: parsed.description ?? null,
+          start_datetime: parsed.startDatetime,
+          end_datetime: parsed.endDatetime ?? null,
+          timezone,
+          venue_name: parsed.venueName ?? null,
+          address: parsed.address ?? null,
+          city_id: source.city_id,
+          source_url: parsed.sourceUrl ?? null,
+          source_name: source.name,
+          images: validatedImages,
+          price: parsed.price ?? null,
+          is_free: Boolean(parsed.isFree),
+          is_outdoor: isOutdoor,
+          latitude: geocoded.latitude,
+          longitude: geocoded.longitude,
+          dedup_key: dedupKey(
+            parsed.title,
+            parsed.startDatetime,
+            source.city_id,
+          ),
+        };
+      }
+
+      const payloads: Record<string, unknown>[] = [];
+      for (let i = 0; i < validEvents.length; i += PREP_CONCURRENCY) {
+        const chunk = validEvents.slice(i, i + PREP_CONCURRENCY);
+        const prepared = await Promise.all(chunk.map(prepEventPayload));
+        payloads.push(...prepared);
+      }
+
+      // Single bulk RPC: classify + INSERT + UPDATE + event_tag_queue enqueue
+      // all in one SQL transaction. Replaces the prior per-event loop (which
+      // blew the 150s edge function wall at ~145/605 events).
+      const { data: bulkResult, error: bulkError } = await supabase.rpc(
+        "bulk_import_scrape_events",
+        {
+          p_run_id: runId,
+          p_source_id: source.id,
+          p_events: payloads,
+        },
+      );
+      if (bulkError) {
+        if (bulkError.code === "42883" || bulkError.code === "42P01") {
+          // RPC missing → phase-7 migration not applied yet. Surface loudly.
+          pipelineSetupError =
+            "bulk_import_scrape_events RPC missing. Run `supabase db push --linked` to apply migration 20260601007000.";
         } else {
-          const result = await supabase
-            .from("events")
-            .update(unlockedPayload)
-            .eq("id", existingEventId)
-            .select("id")
-            .single();
-          upsertedEvent = result.data;
-          upsertError = result.error;
+          throw bulkError;
         }
       } else {
-        const result = await supabase.from("events").insert(payload).select(
-          "id",
-        ).single();
-        upsertedEvent = result.data;
-        upsertError = result.error;
-      }
-      if (upsertError) {
-        // 23505 = the partial unique index caught a concurrent insert. Look up
-        // the existing row by (source_id, source_url) and continue as if we
-        // had updated it, so progress counters and queue enqueue still fire.
-        if (upsertError.code === "23505" && payload.source_url) {
-          const { data: existingByUrl } = await supabase
-            .from("events")
-            .select("id")
-            .eq("source_id", source.id)
-            .eq("source_url", payload.source_url)
-            .maybeSingle();
-          if (existingByUrl) {
-            const lockedFields = await fetchAdminLockedFields(
-              supabase,
-              existingByUrl.id,
-            );
-            const unlockedPayload = applyAdminFieldLocks(payload, lockedFields);
-            if (Object.keys(unlockedPayload).length > 0) {
-              await supabase.from("events").update(unlockedPayload).eq(
-                "id",
-                existingByUrl.id,
-              );
-            }
-            eventsImported += 1;
-            // Skip enqueue + progress flush — fall through to the post-insert
-            // block below by faking the "successful upsert" path.
-            // (The continue keeps the loop clean; the dedup index ensures we
-            // never insert a duplicate event_tag_queue row anyway.)
-            continue;
-          }
+        const result = bulkResult as {
+          imported?: number;
+          updated?: number;
+          skipped?: number;
+          enqueued?: number;
+        } | null;
+        const imported = result?.imported ?? 0;
+        const updated = result?.updated ?? 0;
+        const skipped = result?.skipped ?? 0;
+        const enqueued = result?.enqueued ?? 0;
+        eventsImported = imported + updated;
+        eventsSkipped += skipped;
+        // The RPC enqueues into event_tag_queue under ON CONFLICT DO NOTHING.
+        // If imported+updated > enqueued, some rows were already pending in
+        // the queue from a prior run — benign, not an error.
+        if (imported + updated > 0 && enqueued < imported + updated) {
+          logEdgeEvent("log", "tag-queue enqueue partial (existing rows)", {
+            function: "scrape-source",
+            run_id: runId,
+            imported,
+            updated,
+            enqueued,
+          });
         }
-
-        await captureEdgeException(
-          upsertError,
-          errorContext(upsertError, {
-            function: "scrape-source",
-            source_id: source.id,
-            source_name: source.name,
-            run_id: runId,
-            event_title: parsed.title,
-          }),
-        );
-        logEdgeEvent(
-          "error",
-          "scrape-source event import failed",
-          errorContext(upsertError, {
-            function: "scrape-source",
-            source_id: source.id,
-            source_name: source.name,
-            run_id: runId,
-            event_title: parsed.title,
-          }),
-        );
-        eventsSkipped += 1;
-        continue;
-      }
-      if (!upsertedEvent) {
-        const error = new Error("Event upsert returned no row.");
-        await captureEdgeException(
-          error,
-          errorContext(error, {
-            function: "scrape-source",
-            source_id: source.id,
-            source_name: source.name,
-            run_id: runId,
-            event_title: parsed.title,
-          }),
-        );
-        logEdgeEvent(
-          "error",
-          "scrape-source event import failed",
-          errorContext(error, {
-            function: "scrape-source",
-            source_id: source.id,
-            source_name: source.name,
-            run_id: runId,
-            event_title: parsed.title,
-          }),
-        );
-        eventsSkipped += 1;
-        continue;
       }
 
-      eventsImported += 1;
-
-      // Enqueue tag-event work. The process-tag-queue worker drains the queue
-      // every minute. Three error classes are handled distinctly so the
-      // source_run row reflects pipeline health rather than just import counts:
-      //   - 23505 (already enqueued, partial-unique violation): benign, swallow
-      //   - 42P01 (table doesn't exist) → queue migration not deployed: fatal,
-      //     short-circuit and mark the whole run as 'error' so the admin
-      //     dashboard surfaces it instead of showing green while events are
-      //     silently un-tagged
-      //   - any other PostgrestError: count as a non-fatal failure; the run
-      //     downgrades to 'partial' if any occurred
-      const { error: enqueueError } = await supabase
-        .from("event_tag_queue")
-        .insert({
-          event_id: upsertedEvent.id,
-          source_run_id: runId,
-          trigger_type: "import",
-        });
-      if (enqueueError && enqueueError.code !== "23505") {
-        await captureEdgeException(
-          enqueueError,
-          errorContext(enqueueError, {
-            function: "scrape-source",
-            stage: "enqueue-tag",
-            event_id: upsertedEvent.id,
-            run_id: runId,
-          }),
-        );
-        logEdgeEvent(
-          "error",
-          "failed to enqueue tag-event work",
-          errorContext(enqueueError, {
-            function: "scrape-source",
-            event_id: upsertedEvent.id,
-            run_id: runId,
-          }),
-        );
-
-        if (enqueueError.code === "42P01") {
-          // Queue table missing — phase-4 migration not applied to this DB.
-          // Continuing the loop is pointless because every subsequent enqueue
-          // will hit the same error. Surface it loudly.
-          pipelineSetupError =
-            "event_tag_queue table is missing. Run `supabase db push --linked` to apply phase-4 migrations, then `supabase functions deploy process-tag-queue --linked`.";
-          break;
-        }
-        enqueueFailures += 1;
-      }
-
-      // Flush progress every N events so the UI shows live counts.
-      if (eventsImported % PROGRESS_BATCH === 0) {
-        await flushProgress();
-      }
+      await flushProgress();
     }
 
     // Status derivation precedence:
-    //   1. pipelineSetupError (queue table missing) → 'error' + actionable hint
+    //   1. pipelineSetupError (bulk RPC missing) → 'error' + actionable hint
     //   2. found events but imported none → 'partial'
-    //   3. any non-fatal enqueue failures → 'partial' (events landed but
-    //      tag-event pipeline is unhealthy for some of them)
-    //   4. otherwise 'success' (default initial value)
+    //   3. otherwise 'success' (default initial value)
     if (pipelineSetupError) {
       status = "error";
       errorMessage = pipelineSetupError;
     } else if (eventsImported === 0 && eventsFound > 0) {
       status = "partial";
-    } else if (enqueueFailures > 0) {
-      status = "partial";
-      errorMessage = `Imported ${eventsImported} event${
-        eventsImported === 1 ? "" : "s"
-      } but ${enqueueFailures} failed to enqueue for tag-event classification (check Sentry for details).`;
     }
   } catch (error) {
     status = "error";

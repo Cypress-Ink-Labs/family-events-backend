@@ -12,6 +12,8 @@ import {
 import type { EventSourceRow } from "./lib/types.ts";
 
 const DEFAULT_ALLOWED_ORIGINS = [
+  "https://family-events.org",
+  "https://www.family-events.org",
   "https://family-events.up.railway.app",
   "http://localhost:5173",
   "http://localhost:5174",

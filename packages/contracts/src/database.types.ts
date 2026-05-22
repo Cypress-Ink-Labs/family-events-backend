@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -1413,7 +1408,6 @@ export type Database = {
       admin_list_railway_cron_jobs: {
         Args: never
         Returns: {
-          enabled: boolean
           label: string
           last_http_status: number
           last_run_at: string
@@ -1444,10 +1438,6 @@ export type Database = {
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
-      admin_set_cron_enabled: {
-        Args: { p_enabled: boolean; p_label: string }
-        Returns: undefined
-      }
       admin_set_cron_schedule: {
         Args: { p_job_name: string; p_schedule: string }
         Returns: undefined
@@ -1631,13 +1621,60 @@ export type Database = {
           view_count: number
         }[]
       }
+      events_enriched_v2: {
+        Args: {
+          p_after_id?: string
+          p_after_start_datetime?: string
+          p_city_id?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_event_ids?: string[]
+          p_limit?: number
+          p_status?: string
+          p_user_id?: string
+        }
+        Returns: {
+          address: string
+          age_max: number
+          age_min: number
+          ai_confidence: number
+          ai_tag_provider: string
+          avg_rating: number
+          city_id: string
+          created_at: string
+          description: string
+          end_datetime: string
+          id: string
+          images: Json
+          is_favorited: boolean
+          is_featured: boolean
+          is_free: boolean
+          is_in_calendar: boolean
+          latitude: number
+          longitude: number
+          price: number
+          rating_count: number
+          recurrence_info: Json
+          search_vector: unknown
+          source_id: string
+          source_name: string
+          source_url: string
+          start_datetime: string
+          status: string
+          tags: Json
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string
+          view_count: number
+        }[]
+      }
       invites_required: { Args: never; Returns: boolean }
       invoke_process_tag_queue: { Args: never; Returns: undefined }
       invoke_scrape_source: {
         Args: { source_uuid: string }
         Returns: undefined
       }
-      is_cron_enabled: { Args: { p_label: string }; Returns: boolean }
       is_enabled_user: { Args: never; Returns: boolean }
       log_railway_cron_run: {
         Args: {
@@ -1766,6 +1803,66 @@ export type Database = {
       run_due_source_scrapes: { Args: never; Returns: undefined }
       search_events: {
         Args: {
+          p_age_max?: number
+          p_age_min?: number
+          p_city_id?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_is_featured?: boolean
+          p_is_free?: boolean
+          p_keyword?: string
+          p_limit?: number
+          p_offset?: number
+          p_status?: string
+          p_tag_slugs?: string[]
+        }
+        Returns: {
+          address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
+          age_max: number | null
+          age_min: number | null
+          ai_confidence: number | null
+          ai_tag_model: string | null
+          ai_tag_provider: string | null
+          ai_tag_status: string | null
+          city_id: string | null
+          created_at: string
+          description: string | null
+          end_datetime: string | null
+          id: string
+          images: Json
+          is_featured: boolean
+          is_free: boolean
+          is_outdoor: boolean | null
+          latitude: number | null
+          longitude: number | null
+          price: number | null
+          recurrence_info: Json | null
+          search_vector: unknown
+          source_id: string | null
+          source_name: string | null
+          source_url: string | null
+          start_datetime: string
+          status: string
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string | null
+          view_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      search_events_v2: {
+        Args: {
+          p_after_id?: string
+          p_after_start_datetime?: string
           p_age_max?: number
           p_age_min?: number
           p_city_id?: string
