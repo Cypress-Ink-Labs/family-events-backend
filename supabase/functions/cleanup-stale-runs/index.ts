@@ -1,57 +1,17 @@
-import "@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "@supabase/supabase-js"
-import { requireServiceRole } from "../_shared/auth.ts"
-import { captureEdgeException } from "../_shared/sentry.ts"
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
+import "@supabase/functions-js/edge-runtime.d.ts";
+import { logEdgeEvent } from "../_shared/logger.ts";
+import { serveServiceRoleJson } from "../_shared/service-role-handler.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-}
-
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders })
-  }
-
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
-
-  const auth = requireServiceRole(req, serviceRoleKey)
-  if (!auth.ok) {
-    return new Response(JSON.stringify({ error: auth.message }), {
-      status: auth.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    })
-  }
-
-  if (!supabaseUrl) {
-    return new Response(JSON.stringify({ error: "SUPABASE_URL not configured" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    })
-  }
-
-  try {
-    const supabase = createClient(supabaseUrl, serviceRoleKey)
-    const { error } = await supabase.rpc("run_cleanup_stale_runs")
-    if (error) throw error
+serveServiceRoleJson(
+  { functionName: "cleanup-stale-runs", errorStage: "rpc" },
+  async ({
+    supabase,
+  }) => {
+    const { error } = await supabase.rpc("run_cleanup_stale_runs");
+    if (error) throw error;
     logEdgeEvent("log", "cleanup-stale-runs completed", {
       function: "cleanup-stale-runs",
-    })
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    })
-  } catch (err) {
-    await captureEdgeException(
-      err,
-      errorContext(err, { function: "cleanup-stale-runs", stage: "rpc" })
-    )
-    return new Response(JSON.stringify({ error: errorMessage(err) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    })
-  }
-})
+    });
+    return { ok: true };
+  },
+);

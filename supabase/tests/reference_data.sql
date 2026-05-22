@@ -23,6 +23,8 @@ DECLARE
   maintenance_rpc_exists boolean;
   railway_jobs_rpc_exists boolean;
   railway_history_rpc_exists boolean;
+  delete_dead_source_rpc_exists boolean;
+  delete_dead_tag_rpc_exists boolean;
   cleanup_job_exists boolean;
 BEGIN
   SELECT EXISTS (
@@ -82,6 +84,10 @@ BEGIN
     INTO railway_jobs_rpc_exists;
   SELECT to_regprocedure('public.admin_railway_cron_run_history(text, integer)') IS NOT NULL
     INTO railway_history_rpc_exists;
+  SELECT to_regprocedure('public.admin_delete_dead_source_queue(bigint)') IS NOT NULL
+    INTO delete_dead_source_rpc_exists;
+  SELECT to_regprocedure('public.admin_delete_dead_tag_queue(bigint)') IS NOT NULL
+    INTO delete_dead_tag_rpc_exists;
 
   IF NOT cleanup_rpc_exists THEN
     RAISE EXCEPTION 'REFERENCE_DATA_FAIL: run_cleanup_stale_runs RPC is missing';
@@ -94,6 +100,12 @@ BEGIN
   END IF;
   IF NOT railway_history_rpc_exists THEN
     RAISE EXCEPTION 'REFERENCE_DATA_FAIL: admin_railway_cron_run_history RPC is missing';
+  END IF;
+  IF NOT delete_dead_source_rpc_exists THEN
+    RAISE EXCEPTION 'REFERENCE_DATA_FAIL: admin_delete_dead_source_queue RPC is missing';
+  END IF;
+  IF NOT delete_dead_tag_rpc_exists THEN
+    RAISE EXCEPTION 'REFERENCE_DATA_FAIL: admin_delete_dead_tag_queue RPC is missing';
   END IF;
 
   SELECT EXISTS (
