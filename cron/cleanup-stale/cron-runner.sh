@@ -3,10 +3,13 @@
 # Wraps `curl` to a Supabase edge function and emits one JSON line per run:
 #   {"ts":"...","label":"cron-tag-queue","level":"info","url":"...","http":200,"duration_s":12,"body":"..."}
 #
-# Also POSTs the same run summary to the `log-cron-run` Supabase edge function
-# (env LOG_CRON_RUN_URL) so the admin Scheduled Jobs page can render last-run
-# status + duration + HTTP code per Railway service. Best-effort: a failure
-# to log never fails the cron run itself.
+# Also:
+#   - Pre-flight checks IS_CRON_ENABLED_URL (PostgREST RPC) for a per-label
+#     kill switch. If the RPC returns "false" the main curl is skipped and
+#     status='failed' is logged with body=disabled. Default if RPC is
+#     unreachable: assume enabled (fail-open).
+#   - POSTs run summary to LOG_CRON_RUN_URL so admin Scheduled Jobs page can
+#     render last-run status. Best-effort; failures never fail the cron run.
 #
 # Usage: cron-runner.sh <URL> <LABEL>
 #   <URL>   - full edge-function URL (env-var expanded by the caller)
@@ -32,9 +35,8 @@ emit() {
     "$TS" "$LABEL" "$level" "$msg" "$URL" "$http" "$dur" "$ebody"
 }
 
-# POST run result to the log-cron-run edge function. Best-effort: silenced
-# stderr, swallowed exit code. private.railway_cron_runs.status accepts only
-# 'succeeded' or 'failed', so anything non-2xx maps to 'failed'.
+# POST run result to log-cron-run edge fn. Best-effort. private.railway_cron_runs.status
+# only accepts 'succeeded' or 'failed'; non-2xx HTTP and skipped runs both map to 'failed'.
 log_run() {
   status="$1"
   http="$2"
@@ -60,6 +62,31 @@ log_run() {
     "$LOG_CRON_RUN_URL" -d "$payload" 2>/dev/null || true
 }
 
+# Check the per-label DB kill switch. Returns 0 (enabled) or 1 (disabled).
+# Fail-open: any error talking to PostgREST treats the cron as enabled so a
+# transient network blip can't accidentally pause every cron at once.
+is_enabled() {
+  if [ -z "${IS_CRON_ENABLED_URL:-}" ]; then
+    return 0
+  fi
+  if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+    return 0
+  fi
+
+  resp=$(curl --silent --show-error --max-time 10 \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+    -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+    "$IS_CRON_ENABLED_URL" -d "$(printf '{"p_label":"%s"}' "$LABEL")" 2>/dev/null || echo "")
+
+  # PostgREST returns scalar `false` body when disabled.
+  case "$resp" in
+    false) return 1 ;;
+    *)     return 0 ;;
+  esac
+}
+
 if [ -z "$URL" ]; then
   emit error "missing URL arg" 0 0 ""
   exit 0
@@ -67,6 +94,12 @@ fi
 
 if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
   emit error "SUPABASE_SERVICE_ROLE_KEY not set" 0 0 ""
+  exit 0
+fi
+
+if ! is_enabled; then
+  emit info "skipped (disabled)" 0 0 "disabled"
+  log_run "failed" 0 0 "disabled via cron_enabled toggle"
   exit 0
 fi
 
