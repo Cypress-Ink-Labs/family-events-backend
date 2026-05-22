@@ -50,7 +50,8 @@ Deno.serve(async (req: Request) => {
       err,
       errorContext(err, { function: "db-maintenance", stage: "rpc" })
     )
-    return new Response(JSON.stringify({ error: String(err) }), {
+    const errMsg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? JSON.stringify(err)
+    return new Response(JSON.stringify({ error: errMsg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })
