@@ -23,8 +23,8 @@ const BASE_BACKOFF_MS = 60_000;
 //
 // Old: BATCH_SIZE=4 serial → 4 events / ~60s = 240/hr.
 // New: BATCH_SIZE=16, CONCURRENCY=4 → 16 events / ~60s = 960/hr (4x).
-const BATCH_SIZE = 16;
-const CONCURRENCY = 4;
+const BATCH_SIZE = 20;
+const CONCURRENCY = 8;
 const PER_ITEM_TIMEOUT_MS = 60_000;
 
 const corsHeaders = {

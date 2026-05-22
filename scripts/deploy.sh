@@ -188,15 +188,46 @@ deploy_supabase_migrate() {
 # Edge-function import map is auto-discovered from supabase/functions/deno.json
 # by the CLI bundler. The legacy --import-map flag was removed in CLI 2.101+.
 
+# Edge functions that accept the Supabase service-role key (`sb_secret_*`,
+# opaque non-JWT) need verify_jwt=false because the platform gateway rejects
+# anything that isn't a parseable JWT BEFORE the function body runs. Each
+# function still authenticates via `requireServiceRole` in its body. Listed
+# explicitly so a new function gets the safe default (verify_jwt=true) unless
+# we opt in here. Only share-og — the public OG image endpoint — is intentionally
+# left with verify_jwt=true.
+NO_VERIFY_JWT_FUNCTIONS=(
+  backfill-event-enrichment
+  cleanup-stale-runs
+  db-maintenance
+  log-cron-run
+  notify-email
+  process-source-queue
+  process-tag-queue
+  scrape-due-sources
+  scrape-source
+  send-auth-email
+  tag-event
+)
+
 deploy_supabase_fn() {
   local fn_name="$1"
   step "Supabase — function: $fn_name"
   if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
     fail "SUPABASE_PROJECT_REF not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
   fi
-  info "Running: supabase functions deploy $fn_name --project-ref $SUPABASE_PROJECT_REF"
+
+  local extra_args=()
+  for skip_jwt_fn in "${NO_VERIFY_JWT_FUNCTIONS[@]}"; do
+    if [ "$skip_jwt_fn" = "$fn_name" ]; then
+      extra_args+=("--no-verify-jwt")
+      break
+    fi
+  done
+
+  info "Running: supabase functions deploy $fn_name --project-ref $SUPABASE_PROJECT_REF ${extra_args[*]}"
   if ! bash "$SUPABASE" functions deploy "$fn_name" \
-        --project-ref "$SUPABASE_PROJECT_REF"; then
+        --project-ref "$SUPABASE_PROJECT_REF" \
+        "${extra_args[@]}"; then
     warn "Function '$fn_name' deploy FAILED."
     return 1
   fi
