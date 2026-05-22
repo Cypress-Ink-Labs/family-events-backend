@@ -110,6 +110,33 @@
                 }
               }
             }
+          },
+          {
+            "node": {
+              "serviceName": "cron-enrich-events",
+              "serviceId": "d4f2a1b3-8e5c-4d7f-a9b2-1c3e5f7a9d2b",
+              "cronSchedule": "*/15 * * * *",
+              "source": {
+                "repo": "HexSleeves/family-events-v2",
+                "image": null
+              },
+            "latestDeployment": {
+              "status": "SUCCESS",
+              "instances": [{ "status": "EXITED" }],
+              "meta": {
+                "rootDirectory": "apps/cron-enrich-events",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ON_FAILURE"
+                  }
+                  }
+                }
+              }
+            }
           }
         ]
       }
