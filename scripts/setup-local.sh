@@ -29,7 +29,7 @@ echo "────────────────────────�
 
 # ── 1. Pull config from supabase status ──────────────────────────────────────
 SUPABASE_CLI="$ROOT_DIR/scripts/supabase.sh"
-STATUS=$(bash "$SUPABASE_CLI" status --output env 2>/dev/null) || fail "supabase is not running. Start it with: npm run supabase:start"
+STATUS=$(bash "$SUPABASE_CLI" status --output env 2>/dev/null) || fail "supabase is not running. Start it with: pnpm run db:start"
 
 SERVICE_ROLE_KEY=$(echo "$STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d'"' -f2)
 DB_URL=$(echo "$STATUS"           | grep '^DB_URL='          | cut -d'"' -f2)

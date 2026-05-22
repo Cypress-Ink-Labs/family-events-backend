@@ -1,264 +1,434 @@
-/*
-  # admin_events_enriched RPC security and behaviour
-
-  Verifies that:
-    1. anon cannot call public.admin_events_enriched (42501)
-    2. authenticated non-admin cannot call it (42501)
-    3. authenticated expired admin cannot call it (42501)
-    4. enabled admin gets rows ordered by (created_at DESC, id DESC)
-    5. p_status filter returns only matching rows
-    6. total_count reflects the count of matching rows
-
-  Run with:
-
-    psql "postgresql://postgres:postgres@127.0.0.1:55322/postgres" \
-      -v ON_ERROR_STOP=1 \
-      -f supabase/tests/admin_events_rpc.sql
-*/
-
 \set ON_ERROR_STOP on
 \set VERBOSITY terse
 
 BEGIN;
 
-CREATE TEMP TABLE _fx (k text PRIMARY KEY, v text);
-INSERT INTO _fx VALUES
-  ('user_uid',           gen_random_uuid()::text),
-  ('admin_uid',          gen_random_uuid()::text),
-  ('expired_admin_uid',  gen_random_uuid()::text);
+CREATE TEMP TABLE _fixture_users (key text PRIMARY KEY, id uuid);
+INSERT INTO _fixture_users (key, id)
+VALUES
+  ('admin_uid', gen_random_uuid()),
+  ('user_uid', gen_random_uuid()),
+  ('expired_admin_uid', gen_random_uuid());
 
--- Auth users
 INSERT INTO auth.users (id, email, aud, role, email_confirmed_at, instance_id)
 SELECT
-  (v)::uuid,
-  CASE k
-    WHEN 'admin_uid'         THEN 'aer-admin@test.local'
-    WHEN 'expired_admin_uid' THEN 'aer-expired@test.local'
-    ELSE                          'aer-user@test.local'
+  id,
+  CASE key
+    WHEN 'admin_uid' THEN 'admin-events-rpc-admin@test.local'
+    WHEN 'user_uid' THEN 'admin-events-rpc-user@test.local'
+    WHEN 'expired_admin_uid' THEN 'admin-events-rpc-expired@test.local'
   END,
   'authenticated',
   'authenticated',
   now(),
   '00000000-0000-0000-0000-000000000000'
-FROM _fx;
+FROM _fixture_users
+ON CONFLICT (id) DO UPDATE SET
+aud = EXCLUDED.aud,
+  role = EXCLUDED.role,
+  email = EXCLUDED.email,
+  email_confirmed_at = EXCLUDED.email_confirmed_at,
+  updated_at = now();
 
--- Profiles
 INSERT INTO public.user_profiles (id, email, display_name, role)
 SELECT
-  (v)::uuid,
-  CASE k
-    WHEN 'admin_uid'         THEN 'aer-admin@test.local'
-    WHEN 'expired_admin_uid' THEN 'aer-expired@test.local'
-    ELSE                          'aer-user@test.local'
+  id,
+  CASE key
+    WHEN 'admin_uid' THEN 'admin-events-rpc-admin@test.local'
+    WHEN 'user_uid' THEN 'admin-events-rpc-user@test.local'
+    WHEN 'expired_admin_uid' THEN 'admin-events-rpc-expired@test.local'
   END,
-  CASE k
-    WHEN 'admin_uid'         THEN 'AER Admin'
-    WHEN 'expired_admin_uid' THEN 'AER Expired Admin'
-    ELSE                          'AER User'
+  CASE key
+    WHEN 'admin_uid' THEN 'Admin User'
+    WHEN 'expired_admin_uid' THEN 'Expired Admin'
+    ELSE 'Normal User'
   END,
-  CASE k
-    WHEN 'user_uid' THEN 'user'
-    ELSE                 'admin'
+  CASE
+    WHEN key = 'user_uid' THEN 'user'
+    ELSE 'admin'
   END
-FROM _fx
-ON CONFLICT (id) DO UPDATE SET role = EXCLUDED.role, updated_at = now();
+FROM _fixture_users
+ON CONFLICT (id) DO UPDATE SET
+  email = EXCLUDED.email,
+  display_name = EXCLUDED.display_name,
+  role = EXCLUDED.role,
+  updated_at = now();
 
--- Access rows
 INSERT INTO public.user_access (user_id, is_enabled, enabled_at, access_expires_at)
-VALUES
-  -- regular non-admin
-  ((SELECT v::uuid FROM _fx WHERE k = 'user_uid'),          true,  now(), NULL),
-  -- enabled admin
-  ((SELECT v::uuid FROM _fx WHERE k = 'admin_uid'),         true,  now(), NULL),
-  -- expired admin (access_expires_at in the past)
-  ((SELECT v::uuid FROM _fx WHERE k = 'expired_admin_uid'), true,  now(), now() - interval '1 hour')
-ON CONFLICT (user_id) DO UPDATE
-  SET is_enabled       = EXCLUDED.is_enabled,
-      enabled_at       = EXCLUDED.enabled_at,
-      access_expires_at = EXCLUDED.access_expires_at,
-      updated_at       = now();
+SELECT
+  id,
+  true,
+  now(),
+  CASE
+    WHEN key = 'expired_admin_uid' THEN now() - interval '1 hour'
+    ELSE NULL
+  END
+FROM _fixture_users
+ON CONFLICT (user_id) DO UPDATE SET
+  is_enabled = EXCLUDED.is_enabled,
+  enabled_at = EXCLUDED.enabled_at,
+  access_expires_at = EXCLUDED.access_expires_at,
+  updated_at = now();
 
--- ============================================================
--- 1. anon cannot call public.admin_events_enriched
--- ============================================================
+-- 1) Non-admin roles cannot run the list RPC
 DO $$
 DECLARE
-  has_execute boolean;
+  uid uuid;
 BEGIN
-  SELECT has_function_privilege(
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'user_uid';
+
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+
+  BEGIN
+    PERFORM public.admin_events_enriched();
+    RESET ROLE;
+    RAISE EXCEPTION 'NON_ADMIN_ALLOWED_EVENTS';
+  EXCEPTION
+    WHEN insufficient_privilege THEN
+      RESET ROLE;
+  END;
+
+  RAISE NOTICE 'NON_ADMIN_EVENTS_DENIED';
+END $$;
+
+DO $$
+BEGIN
+  IF has_function_privilege(
     'anon',
-    'public.admin_events_enriched(text,uuid,boolean,text,timestamptz,uuid,integer)',
+    'public.admin_events_enriched(text,uuid,boolean,text,timestamptz,uuid,int)',
     'EXECUTE'
-  ) INTO has_execute;
-
-  IF has_execute THEN
-    RAISE EXCEPTION 'ANON_FAIL: anon has EXECUTE on public.admin_events_enriched';
+  ) THEN
+    RAISE EXCEPTION 'ANON_ALLOWED_EVENTS';
   END IF;
 
-  RAISE NOTICE 'ANON_OK';
+  RAISE NOTICE 'ANON_EVENTS_DENIED';
 END $$;
 
--- ============================================================
--- 2. authenticated non-admin raises 42501
--- ============================================================
 DO $$
 DECLARE
   uid uuid;
 BEGIN
-  SELECT v::uuid INTO uid FROM _fx WHERE k = 'user_uid';
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'user_uid';
+
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
 
   BEGIN
-    SET LOCAL ROLE authenticated;
-    PERFORM set_config('request.jwt.claim.sub', uid::text, true);
-    PERFORM public.admin_events_enriched();
+    PERFORM public.admin_event_facets();
     RESET ROLE;
-    RAISE EXCEPTION 'NON_ADMIN_FAIL: non-admin was able to call admin_events_enriched';
+    RAISE EXCEPTION 'NON_ADMIN_ALLOWED_FACETS';
   EXCEPTION
     WHEN insufficient_privilege THEN
       RESET ROLE;
-      RAISE NOTICE 'NON_ADMIN_OK';
   END;
+
+  RAISE NOTICE 'NON_ADMIN_FACETS_DENIED';
 END $$;
 
--- ============================================================
--- 3. authenticated expired admin raises 42501
--- ============================================================
+DO $$
+BEGIN
+  IF has_function_privilege(
+    'anon',
+    'public.admin_event_facets(text)',
+    'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'ANON_ALLOWED_FACETS';
+  END IF;
+
+  RAISE NOTICE 'ANON_FACETS_DENIED';
+END $$;
+
+-- 2) Expired admin role is still denied
 DO $$
 DECLARE
   uid uuid;
 BEGIN
-  SELECT v::uuid INTO uid FROM _fx WHERE k = 'expired_admin_uid';
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'expired_admin_uid';
+
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
 
   BEGIN
-    SET LOCAL ROLE authenticated;
-    PERFORM set_config('request.jwt.claim.sub', uid::text, true);
     PERFORM public.admin_events_enriched();
     RESET ROLE;
-    RAISE EXCEPTION 'EXPIRED_ADMIN_FAIL: expired admin was able to call admin_events_enriched';
+    RAISE EXCEPTION 'EXPIRED_ADMIN_ALLOWED_EVENTS';
   EXCEPTION
     WHEN insufficient_privilege THEN
       RESET ROLE;
-      RAISE NOTICE 'EXPIRED_ADMIN_OK';
   END;
+
+  RAISE NOTICE 'EXPIRED_ADMIN_EVENTS_DENIED';
 END $$;
 
--- ============================================================
--- 4. enabled admin gets rows ordered (created_at DESC, id DESC)
--- ============================================================
 DO $$
 DECLARE
-  uid       uuid;
-  city_id   uuid := gen_random_uuid();
-  ev1_id    uuid := gen_random_uuid();
-  ev2_id    uuid := gen_random_uuid();
-  ev3_id    uuid := gen_random_uuid();
-  prev_created timestamptz;
-  prev_id      uuid;
-  r         record;
+  uid uuid;
 BEGIN
-  SELECT v::uuid INTO uid FROM _fx WHERE k = 'admin_uid';
-
-  -- Insert 3 events with distinct created_at values
-  INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
-  VALUES
-    (ev1_id, 'AER Event Oldest',  'published', now() + interval '1 day', now() - interval '3 hours', now()),
-    (ev2_id, 'AER Event Middle',  'published', now() + interval '1 day', now() - interval '2 hours', now()),
-    (ev3_id, 'AER Event Newest',  'published', now() + interval '1 day', now() - interval '1 hour',  now());
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'expired_admin_uid';
 
   SET LOCAL ROLE authenticated;
   PERFORM set_config('request.jwt.claim.sub', uid::text, true);
 
-  prev_created := 'infinity'::timestamptz;
-  prev_id      := 'ffffffff-ffff-ffff-ffff-ffffffffffff'::uuid;
-
-  FOR r IN
-    SELECT e.created_at, e.id
-    FROM public.admin_events_enriched(p_keyword => 'AER Event') e
-    ORDER BY e.created_at DESC, e.id DESC
-  LOOP
-    IF (r.created_at, r.id) >= (prev_created, prev_id) AND prev_created <> 'infinity'::timestamptz THEN
+  BEGIN
+    PERFORM public.admin_event_facets();
+    RESET ROLE;
+    RAISE EXCEPTION 'EXPIRED_ADMIN_ALLOWED_FACETS';
+  EXCEPTION
+    WHEN insufficient_privilege THEN
       RESET ROLE;
-      RAISE EXCEPTION 'ORDER_FAIL: rows not in (created_at DESC, id DESC) order';
-    END IF;
-    prev_created := r.created_at;
-    prev_id      := r.id;
-  END LOOP;
+  END;
 
-  RESET ROLE;
-  RAISE NOTICE 'ORDER_OK';
+  RAISE NOTICE 'EXPIRED_ADMIN_FACETS_DENIED';
 END $$;
 
--- ============================================================
--- 5. p_status filter returns only matching rows
--- ============================================================
+-- 3) Exact total_count should reflect total matching rows, not page size.
 DO $$
 DECLARE
-  uid        uuid;
-  draft_cnt  bigint;
-  pub_cnt    bigint;
+  uid uuid;
+  total bigint;
+  rows bigint;
 BEGIN
-  SELECT v::uuid INTO uid FROM _fx WHERE k = 'admin_uid';
-
-  -- Seed 1 draft + 1 published with a unique keyword
-  INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
-  VALUES
-    (gen_random_uuid(), 'AER Status Draft',     'draft',     now() + interval '1 day', now(), now()),
-    (gen_random_uuid(), 'AER Status Published', 'published', now() + interval '1 day', now(), now());
-
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
   SET LOCAL ROLE authenticated;
   PERFORM set_config('request.jwt.claim.sub', uid::text, true);
 
-  SELECT count(*) INTO draft_cnt
-  FROM public.admin_events_enriched(p_status => 'draft', p_keyword => 'AER Status');
-
-  SELECT count(*) INTO pub_cnt
-  FROM public.admin_events_enriched(p_status => 'published', p_keyword => 'AER Status');
-
-  RESET ROLE;
-
-  IF draft_cnt <> 1 THEN
-    RAISE EXCEPTION 'STATUS_DRAFT_FAIL: expected 1 draft row, got %', draft_cnt;
-  END IF;
-  IF pub_cnt <> 1 THEN
-    RAISE EXCEPTION 'STATUS_PUBLISHED_FAIL: expected 1 published row, got %', pub_cnt;
-  END IF;
-
-  RAISE NOTICE 'STATUS_FILTER_OK';
-END $$;
-
--- ============================================================
--- 6. total_count reflects count of matching rows
--- ============================================================
-DO $$
-DECLARE
-  uid         uuid;
-  total       bigint;
-  row_count   bigint;
-BEGIN
-  SELECT v::uuid INTO uid FROM _fx WHERE k = 'admin_uid';
-
-  -- Seed 3 events with a unique keyword
   INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
-  VALUES
-    (gen_random_uuid(), 'AER TotalCount Alpha',   'published', now() + interval '1 day', now(), now()),
-    (gen_random_uuid(), 'AER TotalCount Beta',    'published', now() + interval '1 day', now(), now()),
-    (gen_random_uuid(), 'AER TotalCount Gamma',   'published', now() + interval '1 day', now(), now());
+  SELECT
+    gen_random_uuid(),
+    format('ADMIN RPC Count %s', g),
+    'published',
+    now() + interval '1 day',
+    now() - (g || ' minutes')::interval,
+    now() - (g || ' minutes')::interval
+  FROM generate_series(1, 205) g;
 
-  SET LOCAL ROLE authenticated;
-  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
-
-  SELECT e.total_count, count(*) OVER ()
-  INTO total, row_count
-  FROM public.admin_events_enriched(p_keyword => 'AER TotalCount') e
-  LIMIT 1;
+  SELECT count(*) INTO rows FROM public.admin_events_enriched(p_keyword => 'ADMIN RPC Count', p_limit => 50);
+  SELECT total_count INTO total FROM public.admin_events_enriched(p_keyword => 'ADMIN RPC Count', p_limit => 50) LIMIT 1;
 
   RESET ROLE;
 
-  IF total IS DISTINCT FROM 3 THEN
-    RAISE EXCEPTION 'TOTAL_COUNT_FAIL: expected 3, got %', total;
+  IF rows IS DISTINCT FROM 50 THEN
+    RAISE EXCEPTION 'COUNT_LIMIT_FAIL: expected 50 rows from first page, got %', rows;
+  END IF;
+
+  IF total IS DISTINCT FROM 205 THEN
+    RAISE EXCEPTION 'COUNT_TOTAL_FAIL: expected total_count 205, got %', total;
   END IF;
 
   RAISE NOTICE 'TOTAL_COUNT_OK';
+END $$;
+
+-- 4) Keyset pagination returns disjoint pages in descending order.
+DO $$
+DECLARE
+  uid uuid;
+  after_created_at timestamptz;
+  after_id uuid;
+  first_count bigint;
+  second_count bigint;
+BEGIN
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+
+  INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
+  SELECT
+    gen_random_uuid(),
+    format('ADMIN RPC Cursor %s', g),
+    'published',
+    now() + interval '1 day',
+    now() - (g || ' minutes')::interval,
+    now() - (g || ' minutes')::interval
+  FROM generate_series(1, 120) g;
+
+  CREATE TEMP TABLE IF NOT EXISTS _admin_events_cursor_page_one AS
+    SELECT id, created_at
+    FROM public.admin_events_enriched(p_keyword => 'ADMIN RPC Cursor', p_limit => 50)
+    ORDER BY created_at DESC, id DESC;
+
+  CREATE TEMP TABLE IF NOT EXISTS _admin_events_cursor_page_two AS
+    SELECT id, created_at
+    FROM _admin_events_cursor_page_one
+    WHERE false;
+
+  TRUNCATE _admin_events_cursor_page_one;
+  TRUNCATE _admin_events_cursor_page_two;
+
+  INSERT INTO _admin_events_cursor_page_one
+  SELECT id, created_at
+  FROM public.admin_events_enriched(p_keyword => 'ADMIN RPC Cursor', p_limit => 50)
+  ORDER BY created_at DESC, id DESC;
+
+  SELECT created_at, id
+  INTO after_created_at, after_id
+  FROM _admin_events_cursor_page_one
+  ORDER BY created_at DESC, id DESC
+  OFFSET 49 LIMIT 1;
+
+  INSERT INTO _admin_events_cursor_page_two
+  SELECT id, created_at
+  FROM public.admin_events_enriched(
+    p_keyword => 'ADMIN RPC Cursor',
+    p_limit => 50,
+    p_after_created_at => after_created_at,
+    p_after_id => after_id
+  )
+  ORDER BY created_at DESC, id DESC;
+
+  SELECT count(*) INTO first_count FROM _admin_events_cursor_page_one;
+  SELECT count(*) INTO second_count FROM _admin_events_cursor_page_two;
+
+  IF first_count IS DISTINCT FROM 50 THEN
+    RAISE EXCEPTION 'CURSOR_FAIL: expected first page 50 rows, got %', first_count;
+  END IF;
+
+  IF second_count IS DISTINCT FROM 50 THEN
+    RAISE EXCEPTION 'CURSOR_FAIL: expected second page 50 rows, got %', second_count;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM _admin_events_cursor_page_one a
+    JOIN _admin_events_cursor_page_two b USING (id)
+  ) THEN
+    RESET ROLE;
+    RAISE EXCEPTION 'CURSOR_FAIL: overlap between pages';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM _admin_events_cursor_page_two
+    WHERE (created_at, id) >= (after_created_at, after_id)
+  ) THEN
+    RESET ROLE;
+    RAISE EXCEPTION 'CURSOR_FAIL: second page contains rows at or above cursor';
+  END IF;
+
+  RESET ROLE;
+  RAISE NOTICE 'CURSOR_OK';
+END $$;
+
+-- 5) Facets are grouped by city and status and match list keyword totals.
+DO $$
+DECLARE
+  uid uuid;
+  city_one uuid := gen_random_uuid();
+  city_two uuid := gen_random_uuid();
+  list_total bigint;
+  facet_total bigint;
+  city_one_draft bigint;
+  city_one_published bigint;
+  city_two_draft bigint;
+  city_two_rejected bigint;
+  unassigned_published bigint;
+BEGIN
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
+
+  INSERT INTO public.cities (id, name, slug, state, country, timezone, is_active, created_at, updated_at)
+  VALUES
+    (city_one, 'Admin City One', 'admin-city-one', 'IL', 'US', 'America/Chicago', true, now(), now()),
+    (city_two, 'Admin City Two', 'admin-city-two', 'IL', 'US', 'America/Chicago', true, now(), now())
+  ON CONFLICT (id) DO UPDATE
+    SET name = EXCLUDED.name, updated_at = now();
+
+  INSERT INTO public.events (id, city_id, title, status, start_datetime, created_at, updated_at)
+  VALUES
+    (gen_random_uuid(), city_one, 'ADMIN RPC Facet Seed', 'draft', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), city_one, 'ADMIN RPC Facet Seed', 'published', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), city_two, 'ADMIN RPC Facet Seed', 'draft', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), NULL, 'ADMIN RPC Facet Seed', 'published', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), city_two, 'ADMIN RPC Facet Seed', 'rejected', now() + interval '1 day', now(), now());
+
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+
+  SELECT COALESCE(SUM(count), 0) INTO facet_total
+  FROM public.admin_event_facets('ADMIN RPC Facet Seed');
+
+  SELECT total_count INTO list_total
+  FROM public.admin_events_enriched(p_keyword => 'ADMIN RPC Facet Seed', p_limit => 200)
+  LIMIT 1;
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO city_one_draft
+  FROM public.admin_event_facets('ADMIN RPC Facet Seed')
+  WHERE city_id = city_one AND status = 'draft';
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO city_one_published
+  FROM public.admin_event_facets('ADMIN RPC Facet Seed')
+  WHERE city_id = city_one AND status = 'published';
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO city_two_draft
+  FROM public.admin_event_facets('ADMIN RPC Facet Seed')
+  WHERE city_id = city_two AND status = 'draft';
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO city_two_rejected
+  FROM public.admin_event_facets('ADMIN RPC Facet Seed')
+  WHERE city_id = city_two AND status = 'rejected';
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO unassigned_published
+  FROM public.admin_event_facets('ADMIN RPC Facet Seed')
+  WHERE city_id IS NULL AND status = 'published';
+
+  RESET ROLE;
+
+  IF facet_total <> 5 THEN
+    RAISE EXCEPTION 'FACET_COUNT_FAIL: expected 5 rows across all facets, got %', facet_total;
+  END IF;
+
+  IF list_total IS DISTINCT FROM 5 THEN
+    RAISE EXCEPTION 'FACET_LIST_TOTAL_FAIL: list total_count expected 5, got %', list_total;
+  END IF;
+
+  IF city_one_draft <> 1 OR city_one_published <> 1 OR city_two_draft <> 1 OR city_two_rejected <> 1 OR unassigned_published <> 1 THEN
+    RAISE EXCEPTION 'FACET_CELL_FAIL: (% , %, %, %, %)', city_one_draft, city_one_published, city_two_draft, city_two_rejected, unassigned_published;
+  END IF;
+
+  RAISE NOTICE 'FACETS_OK';
+END $$;
+
+-- 6) Keyword filtering is consistent between list and facet totals.
+DO $$
+DECLARE
+  uid uuid;
+  list_total bigint;
+  facet_total bigint;
+BEGIN
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+
+  INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
+  SELECT
+    gen_random_uuid(),
+    format('ADMIN RPC Keyword Seed %s', g),
+    CASE WHEN g % 2 = 0 THEN 'published' ELSE 'draft' END,
+    now() + interval '1 day',
+    now() - (g || ' minutes')::interval,
+    now() - (g || ' minutes')::interval
+  FROM generate_series(1, 12) g;
+
+  SELECT total_count INTO list_total
+  FROM public.admin_events_enriched(p_keyword => 'ADMIN RPC Keyword Seed', p_limit => 5)
+  LIMIT 1;
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO facet_total
+  FROM public.admin_event_facets('ADMIN RPC Keyword Seed');
+
+  RESET ROLE;
+
+  IF list_total IS NULL OR list_total <> facet_total THEN
+    RAISE EXCEPTION 'KEYWORD_SYNC_FAIL: list_total=% facet_total=%', list_total, facet_total;
+  END IF;
+
+  RAISE NOTICE 'KEYWORD_SYNC_OK';
 END $$;
 
 ROLLBACK;

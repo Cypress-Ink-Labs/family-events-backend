@@ -7,7 +7,7 @@
             "node": {
               "serviceName": "cron-tag-queue-seKl",
               "serviceId": "92747fa2-b0fe-450e-91a5-5a16500b1dad",
-              "cronSchedule": "* * * * *",
+              "cronSchedule": "*/5 * * * *",
               "source": {
                 "repo": "HexSleeves/family-events-v2",
                 "image": null

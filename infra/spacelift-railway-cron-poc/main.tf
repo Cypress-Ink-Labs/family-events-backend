@@ -189,25 +189,25 @@ locals {
       length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") == "" ? [
         "${expected_name}: live Railway metadata missing latestDeployment.status; expected \"${expected.required_latest_deployment_status}\""
       ] : [],
-      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != "" && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != expected.cron_schedule ? [
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].cron_schedule, null) != null && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != "" && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != expected.cron_schedule ? [
         "${expected_name}: cronSchedule mismatch: expected \"${expected.cron_schedule}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].cron_schedule, "")}\""
       ] : [],
-      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].repo, "") != "" && try(local.railway_service_matches[expected_name][0].repo, "") != expected.source_repo ? [
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].repo, null) != null && try(local.railway_service_matches[expected_name][0].repo, "") != "" && try(local.railway_service_matches[expected_name][0].repo, "") != expected.source_repo ? [
         "${expected_name}: source repo mismatch: expected \"${expected.source_repo}\" from manifest, live \"${try(local.railway_service_matches[expected_name][0].repo, "")}\""
       ] : [],
-      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].root_directory, "") != "" && try(local.railway_service_matches[expected_name][0].root_directory, "") != expected.root_directory ? [
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].root_directory, null) != null && try(local.railway_service_matches[expected_name][0].root_directory, "") != "" && try(local.railway_service_matches[expected_name][0].root_directory, "") != expected.root_directory ? [
         "${expected_name}: rootDirectory mismatch: expected \"${expected.root_directory}\" from manifest, live \"${try(local.railway_service_matches[expected_name][0].root_directory, "")}\""
       ] : [],
-      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].builder, "") != "" && try(local.railway_service_matches[expected_name][0].builder, "") != expected.builder ? [
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].builder, null) != null && try(local.railway_service_matches[expected_name][0].builder, "") != "" && try(local.railway_service_matches[expected_name][0].builder, "") != expected.builder ? [
         "${expected_name}: build.builder mismatch: expected \"${expected.builder}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].builder, "")}\""
       ] : [],
-      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].dockerfile_path, "") != "" && try(local.railway_service_matches[expected_name][0].dockerfile_path, "") != expected.dockerfile_path ? [
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].dockerfile_path, null) != null && try(local.railway_service_matches[expected_name][0].dockerfile_path, "") != "" && try(local.railway_service_matches[expected_name][0].dockerfile_path, "") != expected.dockerfile_path ? [
         "${expected_name}: build.dockerfilePath mismatch: expected \"${expected.dockerfile_path}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].dockerfile_path, "")}\""
       ] : [],
-      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].restart_policy, "") != "" && try(local.railway_service_matches[expected_name][0].restart_policy, "") != expected.restart_policy ? [
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].restart_policy, null) != null && try(local.railway_service_matches[expected_name][0].restart_policy, "") != "" && try(local.railway_service_matches[expected_name][0].restart_policy, "") != expected.restart_policy ? [
         "${expected_name}: restartPolicyType mismatch: expected \"${expected.restart_policy}\" from ${expected.config_path}, live \"${try(local.railway_service_matches[expected_name][0].restart_policy, "")}\""
       ] : [],
-      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") != "" && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") != expected.required_latest_deployment_status ? [
+      length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].latest_deployment_status, null) != null && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") != "" && try(local.railway_service_matches[expected_name][0].latest_deployment_status, "") != expected.required_latest_deployment_status ? [
         "${expected_name}: latestDeployment.status mismatch: expected \"${expected.required_latest_deployment_status}\", live \"${try(local.railway_service_matches[expected_name][0].latest_deployment_status, "")}\""
       ] : [],
       length(local.railway_service_matches[expected_name]) > 0 && length(setintersection(toset(try(local.railway_service_matches[expected_name][0].instance_statuses, [])), toset(expected.forbidden_instance_statuses))) > 0 ? [

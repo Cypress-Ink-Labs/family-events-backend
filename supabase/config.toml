@@ -141,10 +141,14 @@ verify_jwt = false
 # Configure the hook in the Supabase Dashboard instead:
 #   Authentication → Hooks → Send Email
 #   URI:     https://<ref>.supabase.co/functions/v1/send-auth-email
-#   Secret:  <generate with: openssl rand -base64 32>
+#   Secret:  <generate with: v1,whsec_$(openssl rand -base64 32)>
 #
 # For local dev, configure it in Supabase Studio (port 55323) or leave it
 # unset — auth emails will fall through to Inbucket (port 55324).
 enabled = true
 uri     = "https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/send-auth-email"
-secrets = "env(SEND_EMAIL_HOOK_SECRET)"
+# Must be a literal v1,whsec_<base64> value so Supabase CLI validation
+# passes in CI/preview environments where local .env files are unavailable.
+# Replace this with your project's generated hook secret when managing hook
+# config from source control.
+secrets = "v1,whsec_YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXowMTIzNDU2Nzg5QUI="

@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
   public: {
@@ -407,7 +401,6 @@ export type Database = {
           images: Json
           is_featured: boolean
           is_free: boolean
-          is_outdoor: boolean | null
           latitude: number | null
           longitude: number | null
           price: number | null
@@ -1294,9 +1287,7 @@ export type Database = {
           oldest_enqueued_at: string | null
           oldest_processing_started_at: string | null
           row_count: number | null
-          status:
-            | Database["public"]["Enums"]["source_scrape_queue_status"]
-            | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null
         }
         Relationships: []
       }
@@ -1390,7 +1381,64 @@ export type Database = {
           status: string
         }[]
       }
+      admin_db_health_snapshot: { Args: never; Returns: Json }
       admin_delete_rating: { Args: { p_id: string }; Returns: boolean }
+      admin_event_facets: {
+        Args: { p_keyword?: string }
+        Returns: {
+          city_id: string | null
+          count: number
+          status: string
+        }[]
+      }
+      admin_events_enriched: {
+        Args: {
+          p_after_created_at?: string
+          p_after_id?: string
+          p_city_id?: string
+          p_city_is_null?: boolean
+          p_keyword?: string
+          p_limit?: number
+          p_status?: string
+        }
+        Returns: {
+          address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
+          age_max: number | null
+          age_min: number | null
+          ai_confidence: number | null
+          ai_tag_model: string | null
+          ai_tag_provider: string | null
+          ai_tag_status: string | null
+          city_id: string | null
+          created_at: string
+          description: string | null
+          end_datetime: string | null
+          id: string
+          images: Json
+          is_featured: boolean
+          is_free: boolean
+          is_outdoor: boolean | null
+          latitude: number | null
+          longitude: number | null
+          price: number | null
+          recurrence_info: Json | null
+          search_vector: string | null
+          source_id: string | null
+          source_name: string | null
+          source_url: string | null
+          start_datetime: string
+          status: string
+          timezone: string
+          title: string
+          total_count: number
+          updated_at: string
+          venue_name: string | null
+          view_count: number
+        }[]
+      }
       admin_list_cron_jobs: {
         Args: never
         Returns: {
@@ -1408,6 +1456,7 @@ export type Database = {
       admin_list_railway_cron_jobs: {
         Args: never
         Returns: {
+          enabled: boolean
           label: string
           last_http_status: number
           last_run_at: string
@@ -1431,15 +1480,25 @@ export type Database = {
         Args: { p_notes?: string; p_request_id: string }
         Returns: boolean
       }
+      admin_delete_dead_source_queue: {
+        Args: { p_queue_id: number }
+        Returns: boolean
+      }
+      admin_delete_dead_tag_queue: {
+        Args: { p_queue_id: number }
+        Returns: boolean
+      }
       admin_retry_source_scrape_queue: {
         Args: { p_queue_id: number }
         Returns: boolean
       }
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
-      admin_delete_dead_source_queue: { Args: { p_queue_id: number }; Returns: boolean }
-      admin_delete_dead_tag_queue: { Args: { p_queue_id: number }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
+      admin_set_cron_enabled: {
+        Args: { p_enabled: boolean; p_label: string }
+        Returns: undefined
+      }
       admin_set_cron_schedule: {
         Args: { p_job_name: string; p_schedule: string }
         Returns: undefined
@@ -1677,6 +1736,7 @@ export type Database = {
         Args: { source_uuid: string }
         Returns: undefined
       }
+      is_cron_enabled: { Args: { p_label: string }; Returns: boolean }
       is_enabled_user: { Args: never; Returns: boolean }
       log_railway_cron_run: {
         Args: {
@@ -1927,20 +1987,10 @@ export type Database = {
       }
     }
     Enums: {
-      event_tag_queue_status:
-        | "pending"
-        | "processing"
-        | "failed"
-        | "dead"
-        | "succeeded"
+      event_tag_queue_status: "pending" | "processing" | "failed" | "dead" | "succeeded"
       invite_request_status: "pending" | "approved" | "rejected"
       source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
-      source_scrape_queue_status:
-        | "pending"
-        | "processing"
-        | "retrying"
-        | "succeeded"
-        | "dead"
+      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1971,10 +2021,8 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -2068,27 +2116,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      event_tag_queue_status: [
-        "pending",
-        "processing",
-        "failed",
-        "dead",
-        "succeeded",
-      ],
+      event_tag_queue_status: ["pending", "processing", "failed", "dead", "succeeded"],
       invite_request_status: ["pending", "approved", "rejected"],
-      source_extraction_mode: [
-        "deterministic",
-        "llm",
-        "deterministic_then_llm",
-      ],
-      source_scrape_queue_status: [
-        "pending",
-        "processing",
-        "retrying",
-        "succeeded",
-        "dead",
-      ],
+      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
+      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
     },
   },
 } as const
-
