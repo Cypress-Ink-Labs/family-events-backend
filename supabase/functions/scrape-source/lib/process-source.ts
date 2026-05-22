@@ -746,23 +746,38 @@ export async function processSource(
             : source.error_count + (status === "error" ? 1 : 0),
         })
         .eq("id", source.id);
-      // Kick the tag-queue worker if we imported anything. The RPC fires
-      // net.http_post (async) and returns immediately — scrape-source does not
-      // wait for tagging to complete. Errors are intentionally swallowed so a
-      // tagging hiccup never affects the scrape status.
+      // Kick the tag-queue worker if we imported anything. Each RPC call
+      // fires net.http_post (async) and returns immediately, so this is a
+      // fan-out, not a blocking loop. process-tag-queue claims BATCH_SIZE=20
+      // events per invocation via SKIP LOCKED, so N kicks = up to N×20 events
+      // drained in parallel — without waiting for the 1-min cron tick.
+      //
+      // Cap matches process-tag-queue CONCURRENCY×2 to leave headroom for
+      // the OpenAI rate limit (the LLM is the actual bottleneck). The cron
+      // */1 keeps backfilling whatever a burst leaves behind.
       if (eventsImported > 0) {
-        const { error: tagKickError } = await supabase.rpc(
-          "invoke_process_tag_queue",
+        const TAG_QUEUE_BATCH_SIZE = 20;
+        const MAX_KICKS = 8;
+        const kicks = Math.min(
+          Math.max(1, Math.ceil(eventsImported / TAG_QUEUE_BATCH_SIZE)),
+          MAX_KICKS,
         );
-        if (tagKickError) {
+        const results = await Promise.allSettled(
+          Array.from({ length: kicks }, () =>
+            supabase.rpc("invoke_process_tag_queue")),
+        );
+        const failed = results.filter((r) => r.status === "rejected").length;
+        if (failed > 0) {
           logEdgeEvent(
             "warn",
-            "tag-queue kick failed after source processing",
+            "tag-queue kick(s) failed after source processing",
             {
               function: "process-source",
               source_id: source.id,
               run_id: runId,
-              error: tagKickError.message,
+              events_imported: eventsImported,
+              kicks_attempted: kicks,
+              kicks_failed: failed,
             },
           );
         }
