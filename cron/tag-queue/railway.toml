@@ -3,10 +3,13 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Every minute. Each tick claims BATCH_SIZE (4) rows from event_tag_queue;
-# at */15 the backlog grew faster than throughput (4/15min = 16/hr vs ~50/hr
-# enqueue). Per-batch wall is ~60s well under the 150s edge function limit.
-cronSchedule = "* * * * *"
+# Every 5 minutes — Railway's hard minimum interval (any cronSchedule below
+# 5min is silently ignored by the scheduler, even though serviceInstance
+# stores it). Faster cadence comes from process-tag-queue's self-chain at
+# the end of each batch: when pending_after > 0, it fires a fresh
+# invoke_process_tag_queue RPC, kicking the next batch via net.http_post.
+# Cron */5 is the safety net + recovery from chain failures.
+cronSchedule = "*/5 * * * *"
 # ON_FAILURE: ALWAYS caused a tight restart loop (curl exits → instant
 # restart → curl exits → ...) and bypassed the cron schedule entirely. With
 # ON_FAILURE Railway only restarts on a non-zero exit, so a clean run waits

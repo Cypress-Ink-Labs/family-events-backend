@@ -4,8 +4,6 @@ create extension if not exists "index_advisor" with schema "extensions";
 
 create schema if not exists "pgmq";
 
-CREATE INDEX event_tag_queue_finished_at_idx ON public.event_tag_queue USING btree (finished_at);
-
 set check_function_bodies = off;
 
 CREATE OR REPLACE FUNCTION private.bulk_import_scrape_events(p_run_id uuid, p_source_id uuid, p_events jsonb)

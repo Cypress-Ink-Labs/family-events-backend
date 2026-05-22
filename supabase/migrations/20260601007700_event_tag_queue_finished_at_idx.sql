@@ -1,3 +1,4 @@
+-- no-transaction
 -- pg_stat_statements index_advisor: admin tag queue query (1278 calls, ~23 ms mean)
 -- filters by status, orders by finished_at DESC — seq scan costs 1365→275 with this index.
 

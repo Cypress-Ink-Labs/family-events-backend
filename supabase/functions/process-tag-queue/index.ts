@@ -335,6 +335,32 @@ export async function processBatch(
     ...summary,
   });
 
+  // Self-chain: if work remains AND we actually got through some this tick,
+  // fire-and-forget invoke_process_tag_queue (net.http_post) to trigger the
+  // next batch immediately. Bypasses Railway's hard 5-min minimum cron
+  // interval so the queue drains at edge-fn speed, not at cron cadence.
+  //
+  // Guards against runaway:
+  //   - require pending_after > 0 (no work → stop chain)
+  //   - require claimed > 0 (no progress this tick → stop chain, let cron retry)
+  //   - require failed < claimed (don't loop on persistent errors)
+  if (
+    (summary.pending_after ?? 0) > 0 &&
+    summary.claimed > 0 &&
+    summary.failed < summary.claimed
+  ) {
+    const { error: chainError } = await supabase.rpc(
+      "invoke_process_tag_queue",
+    );
+    if (chainError) {
+      logEdgeEvent("warn", "tag-queue self-chain kick failed", {
+        function: "process-tag-queue",
+        pending_after: summary.pending_after,
+        error: chainError.message,
+      });
+    }
+  }
+
   return summary;
 }
 
