@@ -9,7 +9,6 @@ import {
   buildGeocodeQuery,
   geocodeViaNominatim,
 } from "../../_shared/geocode.ts";
-import { dedupKey } from "../../_shared/parsing.ts";
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
 import { resolveAndCheckPublicIp } from "../../_shared/url-resolve.ts";
 import type { ParserContext } from "../parsers/_lib/context.ts";
@@ -626,11 +625,6 @@ export async function processSource(
           is_outdoor: isOutdoor,
           latitude: null as number | null,
           longitude: null as number | null,
-          dedup_key: dedupKey(
-            parsed.title,
-            parsed.startDatetime,
-            source.city_id,
-          ),
         };
       }
 

@@ -14,9 +14,17 @@ import {
 //   - Sentry on dead-letter only (avoid noise from transient OpenAI 5xx)
 const MAX_ATTEMPTS = 5;
 const BASE_BACKOFF_MS = 60_000;
-// Stay well under Supabase edge function 150s wall.
-// qwen3:1.7b: ~5-15s/event on CPU. Batch of 4 fits in ~60s with headroom.
-const BATCH_SIZE = 4;
+// Stay well under Supabase edge function 150s wall. Per-event work is a
+// single LLM call (qwen3:1.7b ~5-15s on CPU) plus a few DB round-trips —
+// independent across rows. Process the claim batch in CONCURRENCY-sized
+// parallel chunks via Promise.all so wall scales with chunk count, not
+// batch count. Ollama serves concurrent requests fine; the bottleneck was
+// the serial JS loop, not the model.
+//
+// Old: BATCH_SIZE=4 serial → 4 events / ~60s = 240/hr.
+// New: BATCH_SIZE=16, CONCURRENCY=4 → 16 events / ~60s = 960/hr (4x).
+const BATCH_SIZE = 16;
+const CONCURRENCY = 4;
 const PER_ITEM_TIMEOUT_MS = 60_000;
 
 const corsHeaders = {
@@ -183,17 +191,9 @@ export async function processBatch(
     return summary;
   }
 
-  for (const row of rows) {
-    const unstartedRowIds = rows.slice(rows.indexOf(row)).map((item) =>
-      item.id
-    );
-    if (shouldStopBeforeStartingNextTagRow(Date.now() - batchStart, 110_000)) {
-      await supabase.rpc("release_unstarted_tag_queue_rows", {
-        p_claimed_ids: unstartedRowIds,
-      });
-      break;
-    }
-
+  // Process each row in an isolated try/catch so a single failure doesn't
+  // poison its chunk. Returned to the caller as an awaitable for Promise.all.
+  async function processOneRow(row: QueueRow): Promise<void> {
     const rowStart = Date.now();
     let activeRow = row;
     try {
@@ -224,7 +224,7 @@ export async function processBatch(
           duration_ms: Date.now() - rowStart,
           outcome: "skipped-missing-event",
         });
-        continue;
+        return;
       }
 
       await callTagEvent(supabaseUrl, serviceRoleKey, activeRow, inputs);
@@ -297,6 +297,25 @@ export async function processBatch(
         });
       }
     }
+  }
+
+  // Run CONCURRENCY rows in parallel per chunk. Each row is its own LLM call
+  // + ~3 DB round-trips and is fully independent — Promise.all serializes
+  // the wait, not the work. The wall budget check runs before each chunk so
+  // we release the rest of the batch if a previous chunk took unexpectedly
+  // long, instead of starting more LLM calls we can't finish.
+  for (let i = 0; i < rows.length; i += CONCURRENCY) {
+    if (shouldStopBeforeStartingNextTagRow(Date.now() - batchStart, 110_000)) {
+      const unstartedRowIds = rows.slice(i).map((item) => item.id);
+      if (unstartedRowIds.length > 0) {
+        await supabase.rpc("release_unstarted_tag_queue_rows", {
+          p_claimed_ids: unstartedRowIds,
+        });
+      }
+      break;
+    }
+    const chunk = rows.slice(i, i + CONCURRENCY);
+    await Promise.all(chunk.map((row) => processOneRow(row)));
   }
 
   // Snapshot queue depth after the batch so dashboards aren't the only signal.

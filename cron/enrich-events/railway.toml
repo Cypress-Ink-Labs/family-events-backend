@@ -1,0 +1,16 @@
+[build]
+builder        = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Every 15 minutes. Each tick pulls up to 25 events needing coord/image
+# enrichment (set DEFAULT_BATCH in backfill-event-enrichment/index.ts).
+# Nominatim has a 1 req/sec public rate limit so the tick wall budget is
+# ~50-60s for 25 events. */15 keeps the rolling backlog small without
+# pounding Nominatim.
+cronSchedule = "*/15 * * * *"
+# ON_FAILURE: ALWAYS caused a tight restart loop (curl exits → instant
+# restart → curl exits → ...) and bypassed the cron schedule entirely. With
+# ON_FAILURE Railway only restarts on a non-zero exit, so a clean run waits
+# for the next cron tick.
+restartPolicyType = "ON_FAILURE"

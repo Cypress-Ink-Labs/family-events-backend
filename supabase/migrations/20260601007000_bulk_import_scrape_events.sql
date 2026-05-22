@@ -8,11 +8,11 @@
     - Parser/extractor (HTML/RSS/iCal → ParsedEvent[])
     - Geocode for NEW events (Nominatim HTTP)
     - Image HEAD validation (HTTP)
-    - dedup_key precomputed via parsing.ts dedupKey()
+    - Source URL is the sole dedup key (UNIQUE index on source_id + source_url)
 
   Per-event work that moves to SQL:
-    - Lookup existing by (source_id, source_url) AND by dedup_key
-    - Classify: cross_dupe (skip) | update | insert
+    - Lookup existing by (source_id, source_url) via UNIQUE partial index
+    - Classify: update | insert
     - Apply admin_locked_fields per-row via CASE-per-field
     - INSERT new events
     - UPDATE existing events (only unlocked fields)
@@ -22,8 +22,11 @@
 
   Idempotent — UNIQUE partial index on (source_id, source_url) catches
   any concurrent insert and the planner short-circuits via the existing
-  ON CONFLICT path. The cross-source dedup_key check prevents cross-source
-  overwrites (the original JS logic).
+  ON CONFLICT path.
+
+  Cross-source dedup (title + start + city) is intentionally excluded here.
+  The per-row LATERAL scan was O(N×events) with no usable index. That work
+  runs as a separate periodic job instead.
 */
 
 BEGIN;
@@ -55,10 +58,9 @@ BEGIN
   -- =============================================================
   -- 1. Expand jsonb input to typed rows + classify each
   -- =============================================================
-  -- inputs:       parsed event payload (text/numeric typed)
-  -- classified:   adds source_url_match (within-source) and
-  --               cross_source_match (other source) lookups
-  -- decision:     'insert' | 'update' | 'skip_cross_dupe'
+  -- inputs:    parsed event payload (text/numeric typed)
+  -- classified: adds source_url_match via UNIQUE(source_id, source_url) index
+  -- decision:  'insert' | 'update'
   -- =============================================================
   CREATE TEMP TABLE _bulk_input ON COMMIT DROP AS
   WITH inputs AS (
@@ -79,15 +81,13 @@ BEGIN
       COALESCE((elem->>'is_free')::boolean, false) AS is_free,
       NULLIF(elem->>'is_outdoor', '')::boolean  AS is_outdoor,
       NULLIF(elem->>'latitude', '')::numeric    AS latitude,
-      NULLIF(elem->>'longitude', '')::numeric   AS longitude,
-      (elem->>'dedup_key')::text                AS dedup_key
+      NULLIF(elem->>'longitude', '')::numeric   AS longitude
     FROM jsonb_array_elements(p_events) WITH ORDINALITY AS j(elem, idx)
   ),
   classified AS (
     SELECT
       i.*,
-      su.id AS source_url_match,
-      cs.id AS cross_source_match
+      su.id AS source_url_match
     FROM inputs i
     LEFT JOIN LATERAL (
       SELECT e.id FROM public.events e
@@ -96,34 +96,18 @@ BEGIN
         AND e.source_url = i.source_url
       LIMIT 1
     ) su ON i.source_url IS NOT NULL
-    LEFT JOIN LATERAL (
-      SELECT e.id FROM public.events e
-      WHERE e.source_id IS DISTINCT FROM p_source_id
-        AND COALESCE(e.city_id::text, 'null')
-            || '::' || to_char(e.start_datetime AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI')
-            || '::' || lower(trim(e.title)) = i.dedup_key
-      LIMIT 1
-    ) cs ON true
   )
   SELECT
     c.*,
     CASE
-      WHEN c.source_url_match IS NULL AND c.cross_source_match IS NOT NULL
-        THEN 'skip_cross_dupe'
-      WHEN c.source_url_match IS NOT NULL
-        THEN 'update'
+      WHEN c.source_url_match IS NOT NULL THEN 'update'
       ELSE 'insert'
     END AS decision,
-    COALESCE(c.source_url_match, c.cross_source_match) AS target_event_id
+    c.source_url_match AS target_event_id
   FROM classified c;
 
   -- =============================================================
-  -- 2. Skip counter for cross-source duplicates
-  -- =============================================================
-  SELECT COUNT(*) INTO v_skipped FROM _bulk_input WHERE decision = 'skip_cross_dupe';
-
-  -- =============================================================
-  -- 3. INSERT new events
+  -- 2. INSERT new events
   --    23505 (partial UNIQUE on source_id+source_url) → ignored: a
   --    concurrent run already inserted this row. Re-classifies as
   --    'update' below via _bulk_inserted reconciliation.
@@ -171,7 +155,7 @@ BEGIN
          AND NOT EXISTS (SELECT 1 FROM _bulk_inserted i WHERE i.source_url = b.source_url));
 
   -- =============================================================
-  -- 4. UPDATE existing events. Per-row admin_locked_fields exclusion
+  -- 3. UPDATE existing events. Per-row admin_locked_fields exclusion
   --    via CASE-per-field: locked → keep existing, unlocked → use new.
   -- =============================================================
   WITH updated AS (
@@ -200,7 +184,7 @@ BEGIN
   SELECT COUNT(*) INTO v_updated FROM updated;
 
   -- =============================================================
-  -- 5. Enqueue event_tag_queue for every imported / updated row.
+  -- 4. Enqueue event_tag_queue for every imported / updated row.
   --    23505 (partial UNIQUE on event_id WHERE status NOT IN
   --    ('succeeded','dead')) is benign — row already queued.
   -- =============================================================
@@ -254,7 +238,7 @@ GRANT  EXECUTE ON FUNCTION public.bulk_import_scrape_events(uuid, uuid, jsonb)
 
 COMMENT ON FUNCTION public.bulk_import_scrape_events(uuid, uuid, jsonb) IS
   'Bulk-import a batch of parsed events for a single scrape run. JS-side prepares
-   the jsonb payload (with geocoded coords, sanitized images, dedup_key) and calls
+   the jsonb payload (with geocoded coords, sanitized images) and calls
    this once instead of looping per-event. Returns {imported, updated, skipped, enqueued}.';
 
 COMMIT;
