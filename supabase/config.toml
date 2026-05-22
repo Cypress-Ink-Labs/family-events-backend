@@ -108,6 +108,21 @@ verify_jwt = false
 [functions.process-source-queue]
 verify_jwt = false
 
+[functions.backfill-event-enrichment]
+# Called by cron-enrich-events with sb_secret_* bearer. App-layer
+# requireServiceRole still enforces auth.
+verify_jwt = false
+
+[functions.cleanup-stale-runs]
+# Called by cron-cleanup-stale with sb_secret_* bearer. App-layer
+# requireServiceRole still enforces auth.
+verify_jwt = false
+
+[functions.log-cron-run]
+# Called by all cron-runner.sh scripts with sb_secret_* bearer. App-layer
+# requireServiceRole still enforces auth.
+verify_jwt = false
+
 [functions.scrape-due-sources]
 verify_jwt = false
 
