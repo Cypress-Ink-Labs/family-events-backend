@@ -23,15 +23,38 @@ function makeRequest(token: string): Request {
   })
 }
 
-function makeServiceClient(role: "admin" | "user"): SupabaseClient {
+function makeServiceClient(options: {
+  role: "admin" | "user"
+  isEnabled?: boolean
+  accessExpiresAt?: string | null
+  profileError?: Error | null
+  accessError?: Error | null
+}): SupabaseClient {
   return {
-    from() {
+    from(table: string) {
       return {
         select() {
           return {
             eq() {
               return {
-                maybeSingle: async () => ({ data: { role }, error: null }),
+                maybeSingle: async () => {
+                  if (table === "user_profiles") {
+                    return {
+                      data: { role: options.role },
+                      error: options.profileError ?? null,
+                    }
+                  }
+                  if (table === "user_access") {
+                    return {
+                      data: {
+                        is_enabled: options.isEnabled ?? true,
+                        access_expires_at: options.accessExpiresAt ?? null,
+                      },
+                      error: options.accessError ?? null,
+                    }
+                  }
+                  return { data: null, error: new Error(`unexpected table ${table}`) }
+                },
               }
             },
           }
@@ -58,7 +81,7 @@ if (typeof Deno !== "undefined") {
 
     const result = await requireAdminOrService(
       makeRequest(serviceKey),
-      makeServiceClient("admin"),
+      makeServiceClient({ role: "admin" }),
       "https://project.supabase.co",
       serviceKey,
       "anon-key"
@@ -72,7 +95,7 @@ if (typeof Deno !== "undefined") {
 
     const result = await requireAdminOrService(
       makeRequest("sb_secret_wrong_key"),
-      makeServiceClient("admin"),
+      makeServiceClient({ role: "admin" }),
       "https://project.supabase.co",
       serviceKey,
       "anon-key",
@@ -88,7 +111,7 @@ if (typeof Deno !== "undefined") {
 
     const result = await requireAdminOrService(
       makeRequest(legacyServiceRoleKey),
-      makeServiceClient("admin"),
+      makeServiceClient({ role: "admin" }),
       "https://project.supabase.co",
       legacyServiceRoleKey,
       "anon-key"
@@ -102,7 +125,7 @@ if (typeof Deno !== "undefined") {
 
     const result = await requireAdminOrService(
       makeRequest("eyJhbGciOiJIUzI1NiJ9.user.jwt"),
-      makeServiceClient("user"),
+      makeServiceClient({ role: "user" }),
       "https://project.supabase.co",
       serviceKey,
       "anon-key",
@@ -117,7 +140,7 @@ if (typeof Deno !== "undefined") {
 
     await requireAdminOrService(
       makeRequest("eyJhbGciOiJIUzI1NiJ9.user.jwt"),
-      makeServiceClient("admin"),
+      makeServiceClient({ role: "admin" }),
       "https://project.supabase.co",
       "sb_secret_expected_key",
       "anon-key",
@@ -128,5 +151,47 @@ if (typeof Deno !== "undefined") {
     )
 
     assert(called, "Expected injected user client factory to be called")
+  })
+
+  Deno.test("requireAdminOrService rejects disabled admin users", async () => {
+    const serviceKey = "sb_secret_expected_key"
+
+    const result = await requireAdminOrService(
+      makeRequest("eyJhbGciOiJIUzI1NiJ9.user.jwt"),
+      makeServiceClient({ role: "admin", isEnabled: false }),
+      "https://project.supabase.co",
+      serviceKey,
+      "anon-key",
+      () => makeUserClient("admin-123")
+    )
+
+    assertEquals(result, {
+      ok: false,
+      status: 403,
+      message: "enabled admin access required",
+    })
+  })
+
+  Deno.test("requireAdminOrService rejects expired admin users", async () => {
+    const serviceKey = "sb_secret_expected_key"
+
+    const result = await requireAdminOrService(
+      makeRequest("eyJhbGciOiJIUzI1NiJ9.user.jwt"),
+      makeServiceClient({
+        role: "admin",
+        isEnabled: true,
+        accessExpiresAt: "2020-01-01T00:00:00.000Z",
+      }),
+      "https://project.supabase.co",
+      serviceKey,
+      "anon-key",
+      () => makeUserClient("admin-123")
+    )
+
+    assertEquals(result, {
+      ok: false,
+      status: 403,
+      message: "enabled admin access required",
+    })
   })
 }

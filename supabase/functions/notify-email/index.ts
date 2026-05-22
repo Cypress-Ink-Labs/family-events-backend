@@ -44,6 +44,98 @@ type Payload =
       username: string
     }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+}
+
+function readString(
+  value: Record<string, unknown>,
+  key: string,
+  options: { required?: boolean; maxLength?: number } = {}
+): string | null {
+  const raw = value[key]
+  if (raw == null) {
+    if (options.required) throw new Error(`missing ${key}`)
+    return null
+  }
+  if (typeof raw !== "string") throw new Error(`invalid ${key}`)
+
+  const trimmed = raw.trim()
+  if (options.required && !trimmed) throw new Error(`missing ${key}`)
+  if (options.maxLength && trimmed.length > options.maxLength) {
+    throw new Error(`invalid ${key}`)
+  }
+
+  return trimmed
+}
+
+function readOptionalString(value: Record<string, unknown>, key: string, maxLength: number): string | undefined {
+  const raw = value[key]
+  if (raw == null) return undefined
+  if (typeof raw !== "string") throw new Error(`invalid ${key}`)
+  const trimmed = raw.trim()
+  if (!trimmed) return undefined
+  if (trimmed.length > maxLength) throw new Error(`invalid ${key}`)
+  return trimmed
+}
+
+function readNullableString(value: Record<string, unknown>, key: string, maxLength: number): string | null {
+  const raw = value[key]
+  if (raw == null) return null
+  if (typeof raw !== "string") throw new Error(`invalid ${key}`)
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  if (trimmed.length > maxLength) throw new Error(`invalid ${key}`)
+  return trimmed
+}
+
+function assertEmail(value: string): string {
+  if (value.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    throw new Error("invalid email")
+  }
+  return value.toLowerCase()
+}
+
+function parsePayload(value: unknown): Payload {
+  if (!isRecord(value)) throw new Error("invalid payload")
+  const kind = readString(value, "kind", { required: true, maxLength: 64 })
+
+  if (kind === "admin_request") {
+    return {
+      kind,
+      request_id: readString(value, "request_id", { required: true, maxLength: 128 }) ?? "",
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
+      message: readNullableString(value, "message", 2000),
+    }
+  }
+
+  if (kind === "request_approved") {
+    return {
+      kind,
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
+      code: readString(value, "code", { required: true, maxLength: 64 }) ?? "",
+      app_url: readOptionalString(value, "app_url", 2048),
+    }
+  }
+
+  if (kind === "request_rejected") {
+    return {
+      kind,
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
+    }
+  }
+
+  if (kind === "welcome") {
+    return {
+      kind,
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
+      username: readString(value, "username", { required: true, maxLength: 120 }) ?? "",
+    }
+  }
+
+  throw new Error("unknown kind")
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -239,9 +331,9 @@ Deno.serve(async (req: Request) => {
 
   let payload: Payload
   try {
-    payload = (await req.json()) as Payload
-  } catch {
-    return new Response(JSON.stringify({ error: "invalid JSON body" }), {
+    payload = parsePayload(await req.json())
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "invalid JSON body" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })

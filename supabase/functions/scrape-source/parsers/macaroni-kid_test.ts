@@ -12,6 +12,7 @@ function buildSource(overrides: Partial<EventSourceRow> = {}): EventSourceRow {
     name: "Macaroni Kid Lafayette",
     url: "https://lafayettela.macaronikid.com/events",
     source_type: "macaronikid",
+    extraction_mode: "deterministic",
     city_id: "00000000-0000-0000-0000-0000000000aa",
     is_active: true,
     auto_approve: false,

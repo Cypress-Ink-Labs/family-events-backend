@@ -2871,8 +2871,6 @@ CREATE OR REPLACE FUNCTION "public"."run_due_source_scrapes"() RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO ''
     AS $$
-DECLARE
-  v_enqueued int := 0;
 BEGIN
   INSERT INTO public.source_scrape_queue (source_id, trigger_type)
   SELECT s.id, 'scheduled'
@@ -2883,8 +2881,6 @@ BEGIN
       OR s.last_scraped_at + make_interval(hours => s.scrape_interval_hours) <= now()
     )
   ON CONFLICT DO NOTHING;
-
-  GET DIAGNOSTICS v_enqueued = ROW_COUNT;
 END;
 $$;
 
@@ -5626,4 +5622,3 @@ CREATE OR REPLACE TRIGGER "enforce_invited_oauth_signup" BEFORE INSERT ON "auth"
 
 
 CREATE OR REPLACE TRIGGER "on_auth_user_created" AFTER INSERT ON "auth"."users" FOR EACH ROW EXECUTE FUNCTION "public"."handle_new_user"();
-

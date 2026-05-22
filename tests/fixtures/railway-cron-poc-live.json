@@ -83,6 +83,33 @@
                 }
               }
             }
+          },
+          {
+            "node": {
+              "serviceName": "cron-cleanup-stale",
+              "serviceId": "b9551035-93bf-447a-9172-81f56c7fa33d",
+              "cronSchedule": "*/30 * * * *",
+              "source": {
+                "repo": "HexSleeves/family-events-v2",
+                "image": null
+              },
+            "latestDeployment": {
+              "status": "SUCCESS",
+              "instances": [{ "status": "EXITED" }],
+              "meta": {
+                "rootDirectory": "apps/cron-cleanup-stale",
+                "fileServiceManifest": {
+                  "build": {
+                    "builder": "DOCKERFILE",
+                    "dockerfilePath": "Dockerfile"
+                  },
+                  "deploy": {
+                    "restartPolicyType": "ON_FAILURE"
+                  }
+                  }
+                }
+              }
+            }
           }
         ]
       }

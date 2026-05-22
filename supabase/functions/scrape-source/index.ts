@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { requireAdminOrService } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
-import { isSourceDue } from "./lib/schedule.ts";
 import {
   buildScrapeSourceResponse,
   enqueueSourceScrape,
@@ -48,6 +47,12 @@ function buildCorsHeaders(allowedOrigin: string | null): HeadersInit {
   };
 }
 
+function dueSourceLimit(): number {
+  const parsed = Number(Deno.env.get("DUE_SOURCE_LIMIT") ?? "200");
+  if (!Number.isFinite(parsed)) return 200;
+  return Math.max(1, Math.min(Math.floor(parsed), 500));
+}
+
 Deno.serve(async (req: Request) => {
   const allowedOrigin = resolveAllowedOrigin(req.headers.get("Origin"));
   const corsHeaders = buildCorsHeaders(allowedOrigin);
@@ -90,23 +95,29 @@ Deno.serve(async (req: Request) => {
       ? body.source_id
       : null;
 
-    let sourceQuery = supabase.from("event_sources").select("*").eq(
-      "is_active",
-      true,
-    );
+    let sourcesRaw: unknown[] | null = null;
+    let sourceError: unknown = null;
+
     if (requestedSourceId) {
-      sourceQuery = sourceQuery.eq("id", requestedSourceId);
+      const response = await supabase.from("event_sources").select("*").eq(
+        "is_active",
+        true,
+      ).eq("id", requestedSourceId);
+      sourcesRaw = response.data;
+      sourceError = response.error;
+    } else {
+      const response = await supabase.rpc("due_event_sources", {
+        p_limit: dueSourceLimit(),
+      });
+      sourcesRaw = response.data;
+      sourceError = response.error;
     }
 
-    const { data: sourcesRaw, error: sourceError } = await sourceQuery;
     if (sourceError) {
       throw sourceError;
     }
 
-    const sources = (sourcesRaw ?? []) as EventSourceRow[];
-    const dueSources = requestedSourceId
-      ? sources
-      : sources.filter(isSourceDue);
+    const dueSources = (sourcesRaw ?? []) as EventSourceRow[];
     const results: SourceScrapeEnqueueResponseRow[] = [];
 
     for (const source of dueSources) {

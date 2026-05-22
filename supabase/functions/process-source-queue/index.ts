@@ -17,10 +17,8 @@ const corsHeaders = {
     "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-function sourceBatchSize(): number {
-  const parsed = Number(Deno.env.get("SOURCE_BATCH_SIZE") ?? "1");
-  if (!Number.isFinite(parsed)) return 1;
-  return Math.max(1, Math.min(Math.floor(parsed), 5));
+function sourceClaimLimit(): number {
+  return 1;
 }
 
 export async function processSourceQueueBatch(
@@ -39,7 +37,7 @@ export async function processSourceQueueBatch(
 
   const { data: claimed, error: claimError } = await supabase.rpc(
     "claim_source_scrape_queue_batch",
-    { p_limit: sourceBatchSize() },
+    { p_limit: sourceClaimLimit() },
   );
   if (claimError) throw claimError;
 

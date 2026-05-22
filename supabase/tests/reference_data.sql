@@ -84,7 +84,7 @@ BEGIN
 
   SELECT EXISTS (
     SELECT 1
-    FROM public.admin_list_railway_cron_jobs()
+    FROM private.list_railway_cron_jobs()
     WHERE label = 'cron-cleanup-stale'
   ) INTO cleanup_job_exists;
 

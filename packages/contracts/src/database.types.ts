@@ -1539,6 +1539,33 @@ export type Database = {
         }
       }
       delete_my_account: { Args: never; Returns: undefined }
+      due_event_sources: {
+        Args: { p_limit?: number }
+        Returns: {
+          auto_approve: boolean
+          city_id: string | null
+          created_at: string
+          date_window_days: number | null
+          error_count: number
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
+          id: string
+          is_active: boolean
+          last_scraped_at: string | null
+          last_status: string | null
+          name: string
+          notes: string | null
+          scrape_interval_hours: number
+          source_type: string
+          updated_at: string
+          url: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "event_sources"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       events_enriched: {
         Args: {
           p_city_id?: string

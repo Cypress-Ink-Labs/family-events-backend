@@ -3,7 +3,10 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-cronSchedule = "*/15 * * * *"
+# Every minute. Each tick claims BATCH_SIZE (4) rows from event_tag_queue;
+# at */15 the backlog grew faster than throughput (4/15min = 16/hr vs ~50/hr
+# enqueue). Per-batch wall is ~60s well under the 150s edge function limit.
+cronSchedule = "* * * * *"
 # ON_FAILURE: ALWAYS caused a tight restart loop (curl exits → instant
 # restart → curl exits → ...) and bypassed the cron schedule entirely. With
 # ON_FAILURE Railway only restarts on a non-zero exit, so a clean run waits

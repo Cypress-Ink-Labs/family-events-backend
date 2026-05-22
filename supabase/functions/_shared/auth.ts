@@ -75,7 +75,7 @@ function isServiceRoleToken(token: string, serviceRoleKey: string): boolean {
 /**
  * Verify that the caller is either:
  *   1. Using the service role key (internal / cron calls), OR
- *   2. An authenticated user with role = 'admin' in user_profiles.
+ *   2. An authenticated, enabled, non-expired admin user.
  *
  * Anything else is rejected (401 missing, 403 forbidden).
  *
@@ -98,7 +98,8 @@ export async function requireAdminOrService(
     return { ok: true, source: "service_role", userId: null }
   }
 
-  // User-facing call: verify JWT and check role
+  // User-facing call: verify JWT, role, and access row. This mirrors
+  // private.is_admin() so Edge Functions do not bypass disabled access.
   const userClient = userClientFactory(supabaseUrl, anonKey, {
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
@@ -125,6 +126,24 @@ export async function requireAdminOrService(
 
   if (profile?.role !== "admin") {
     return { ok: false, status: 403, message: "admin role required" }
+  }
+
+  const { data: access, error: accessError } = await serviceClient
+    .from("user_access")
+    .select("is_enabled, access_expires_at")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (accessError) {
+    return { ok: false, status: 403, message: "access lookup failed" }
+  }
+
+  if (access?.is_enabled !== true) {
+    return { ok: false, status: 403, message: "enabled admin access required" }
+  }
+
+  if (access.access_expires_at && new Date(access.access_expires_at) <= new Date()) {
+    return { ok: false, status: 403, message: "enabled admin access required" }
   }
 
   return { ok: true, source: "admin", userId: user.id }

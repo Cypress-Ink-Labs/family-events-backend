@@ -31,6 +31,11 @@ step() { echo -e "\n${BOLD}$*${NC}"; }
 
 # ── Supabase project ref ──────────────────────────────────────────────────────
 SUPABASE_PROJECT_REF_FILE="$ROOT_DIR/supabase/.temp/project-ref"
+DEPLOY_ALL=false
+if [ "${1:-}" = "--all" ]; then
+  DEPLOY_ALL=true
+fi
+
 if [ -f "$SUPABASE_PROJECT_REF_FILE" ]; then
   SUPABASE_PROJECT_REF="$(cat "$SUPABASE_PROJECT_REF_FILE")"
 else
@@ -38,7 +43,7 @@ else
 fi
 
 # ── preflight checks ──────────────────────────────────────────────────────────
-if ! command -v gum &>/dev/null; then
+if [ "$DEPLOY_ALL" = "false" ] && ! command -v gum &>/dev/null; then
   fail "gum is required for the interactive picker: brew install gum"
 fi
 
@@ -81,6 +86,7 @@ ALL_TARGETS=(
   "fn: process-tag-queue                 |supabase_fn|process-tag-queue"
   "fn: scrape-due-sources                |supabase_fn|scrape-due-sources"
   "fn: scrape-source                     |supabase_fn|scrape-source"
+  "fn: send-auth-email                   |supabase_fn|send-auth-email"
   "fn: share-og                          |supabase_fn|share-og"
   "fn: tag-event                         |supabase_fn|tag-event"
   "── Railway ───────────────────────────|separator|"
@@ -108,7 +114,7 @@ for entry in "${ALL_TARGETS[@]}"; do
 done
 
 # ── --all flag: skip picker ───────────────────────────────────────────────────
-if [ "${1:-}" = "--all" ]; then
+if [ "$DEPLOY_ALL" = "true" ]; then
   SELECTED_TARGETS=("${SELECTABLE_TARGETS[@]}")
 else
   echo ""
@@ -168,6 +174,12 @@ SELECTED_TARGETS=("${DEDUPED[@]}")
 
 deploy_supabase_migrate() {
   step "Supabase — DB Migrations"
+  info "Preflight: supabase migration list --linked"
+  bash "$SUPABASE" migration list --linked || warn "Could not read linked migration list."
+  info "Preflight: supabase db lint --linked"
+  bash "$SUPABASE" db lint --linked || warn "Supabase db lint failed or is unavailable for this environment."
+  info "Preflight: supabase db push --linked --dry-run"
+  bash "$SUPABASE" db push --linked --dry-run || warn "Supabase db push dry-run failed or is unavailable; continuing with explicit db push."
   info "Running: supabase db push --linked"
   bash "$SUPABASE" db push --linked
   ok "Migrations applied."
@@ -201,12 +213,28 @@ deploy_supabase_fn_all() {
     process-tag-queue
     scrape-due-sources
     scrape-source
+    send-auth-email
     share-og
     tag-event
   )
   step "Supabase — all edge functions"
   if [ -z "${SUPABASE_PROJECT_REF:-}" ]; then
     fail "SUPABASE_PROJECT_REF not set. Run: bash scripts/supabase.sh link --project-ref <ref>"
+  fi
+  local discovered=()
+  mapfile -t discovered < <(
+    find "$ROOT_DIR/supabase/functions" -mindepth 1 -maxdepth 1 -type d \
+      -not -name '_shared' \
+      -not -name 'node_modules' \
+      -exec basename {} \; | sort
+  )
+  local expected_sorted=()
+  mapfile -t expected_sorted < <(printf '%s\n' "${functions[@]}" | sort)
+  if [ "$(printf '%s\n' "${discovered[@]}")" != "$(printf '%s\n' "${expected_sorted[@]}")" ]; then
+    warn "Function deploy list does not match supabase/functions directories."
+    warn "Expected: ${expected_sorted[*]}"
+    warn "Found: ${discovered[*]}"
+    return 1
   fi
   local failed=()
   for fn_name in "${functions[@]}"; do
@@ -266,6 +294,11 @@ deploy_railway() {
     || { warn "railway up failed for '$service'"; return 1; }
 
   ok "Railway deploy triggered for '$service'."
+  if (cd "$ROOT_DIR" && railway status --service "$service" &>/dev/null); then
+    ok "Railway service '$service' status is readable."
+  else
+    warn "Could not verify Railway service '$service' status after deploy trigger."
+  fi
 }
 
 deploy_railway_all() {
