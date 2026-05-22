@@ -78,6 +78,7 @@ ALL_TARGETS=(
   "── Supabase ──────────────────────────|separator|"
   "DB Migrations                         |supabase_migrate|"
   "fn: all functions                     |supabase_fn_all|"
+  "fn: backfill-event-enrichment         |supabase_fn|backfill-event-enrichment"
   "fn: cleanup-stale-runs                |supabase_fn|cleanup-stale-runs"
   "fn: db-maintenance                    |supabase_fn|db-maintenance"
   "fn: log-cron-run                      |supabase_fn|log-cron-run"
@@ -236,6 +237,7 @@ deploy_supabase_fn() {
 
 deploy_supabase_fn_all() {
   local functions=(
+    backfill-event-enrichment
     cleanup-stale-runs
     db-maintenance
     log-cron-run
