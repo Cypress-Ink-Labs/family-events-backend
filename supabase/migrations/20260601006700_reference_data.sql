@@ -98,9 +98,9 @@ WITH source_data AS (
     'Science museum family events'
   UNION ALL SELECT
     'Lafayette Public Library',
-    'https://lafayettela.libcal.com/rss.php',
-    'rss', 'lafayette', 6, NULL,
-    'Library story times and kids programming'
+    'https://lafayettela.libcal.com/ical_subscribe.php?src=p&cid=11334',
+    'ical', 'lafayette', 6, NULL,
+    'Library story times and kids programming via LibCal iCal feed'
   UNION ALL SELECT
     'Eventbrite Lafayette Family',
     'https://www.eventbrite.com/d/la--lafayette/family-events/',

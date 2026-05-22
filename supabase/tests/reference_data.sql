@@ -17,6 +17,7 @@ DO $$
 DECLARE
   brec_ok boolean;
   ebrpl_exists boolean;
+  lpl_ok boolean;
   macaroni_ok boolean;
   cleanup_rpc_exists boolean;
   maintenance_rpc_exists boolean;
@@ -45,6 +46,19 @@ BEGIN
 
   IF ebrpl_exists THEN
     RAISE EXCEPTION 'REFERENCE_DATA_FAIL: EBRPL LibCal source should not be present in reset baseline';
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.event_sources
+    WHERE name = 'Lafayette Public Library'
+      AND url = 'https://lafayettela.libcal.com/ical_subscribe.php?src=p&cid=11334'
+      AND source_type = 'ical'
+      AND is_active
+  ) INTO lpl_ok;
+
+  IF NOT lpl_ok THEN
+    RAISE EXCEPTION 'REFERENCE_DATA_FAIL: Lafayette Public Library source must use the LibCal iCal feed';
   END IF;
 
   SELECT EXISTS (
