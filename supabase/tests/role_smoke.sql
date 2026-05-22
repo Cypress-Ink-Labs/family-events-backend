@@ -126,19 +126,19 @@ BEGIN
   RAISE NOTICE 'ANON_SEARCH_EVENTS_OK';
 END $$;
 
--- 9. anon CANNOT call public.is_cron_enabled (expect 42501)
+-- 9. anon CANNOT call public.is_cron_enabled
 DO $$
+DECLARE
+  has_execute boolean;
 BEGIN
-  BEGIN
-    SET LOCAL ROLE anon;
-    PERFORM public.is_cron_enabled('cron-tag-queue');
-    RESET ROLE;
-    RAISE EXCEPTION 'ANON_IS_CRON_ENABLED_FAIL: anon was able to call is_cron_enabled';
-  EXCEPTION
-    WHEN insufficient_privilege THEN
-      RESET ROLE;
-      RAISE NOTICE 'ANON_IS_CRON_ENABLED_DENIED_OK';
-  END;
+  SELECT has_function_privilege('anon', 'public.is_cron_enabled(text)', 'EXECUTE')
+  INTO has_execute;
+
+  IF has_execute THEN
+    RAISE EXCEPTION 'ANON_IS_CRON_ENABLED_FAIL: anon has EXECUTE on public.is_cron_enabled';
+  END IF;
+
+  RAISE NOTICE 'ANON_IS_CRON_ENABLED_DENIED_OK';
 END $$;
 
 -- =============================================================================

@@ -82,17 +82,20 @@ ON CONFLICT (user_id) DO UPDATE
 -- 1. anon cannot call public.admin_events_enriched
 -- ============================================================
 DO $$
+DECLARE
+  has_execute boolean;
 BEGIN
-  BEGIN
-    SET LOCAL ROLE anon;
-    PERFORM public.admin_events_enriched();
-    RESET ROLE;
-    RAISE EXCEPTION 'ANON_FAIL: anon was able to call admin_events_enriched';
-  EXCEPTION
-    WHEN insufficient_privilege THEN
-      RESET ROLE;
-      RAISE NOTICE 'ANON_OK';
-  END;
+  SELECT has_function_privilege(
+    'anon',
+    'public.admin_events_enriched(text,uuid,boolean,text,timestamptz,uuid,integer)',
+    'EXECUTE'
+  ) INTO has_execute;
+
+  IF has_execute THEN
+    RAISE EXCEPTION 'ANON_FAIL: anon has EXECUTE on public.admin_events_enriched';
+  END IF;
+
+  RAISE NOTICE 'ANON_OK';
 END $$;
 
 -- ============================================================
@@ -156,11 +159,11 @@ BEGIN
   SELECT v::uuid INTO uid FROM _fx WHERE k = 'admin_uid';
 
   -- Insert 3 events with distinct created_at values
-  INSERT INTO public.events (id, title, status, created_at, updated_at)
+  INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
   VALUES
-    (ev1_id, 'AER Event Oldest',  'published', now() - interval '3 hours', now()),
-    (ev2_id, 'AER Event Middle',  'published', now() - interval '2 hours', now()),
-    (ev3_id, 'AER Event Newest',  'published', now() - interval '1 hour',  now());
+    (ev1_id, 'AER Event Oldest',  'published', now() + interval '1 day', now() - interval '3 hours', now()),
+    (ev2_id, 'AER Event Middle',  'published', now() + interval '1 day', now() - interval '2 hours', now()),
+    (ev3_id, 'AER Event Newest',  'published', now() + interval '1 day', now() - interval '1 hour',  now());
 
   SET LOCAL ROLE authenticated;
   PERFORM set_config('request.jwt.claim.sub', uid::text, true);
@@ -197,10 +200,10 @@ BEGIN
   SELECT v::uuid INTO uid FROM _fx WHERE k = 'admin_uid';
 
   -- Seed 1 draft + 1 published with a unique keyword
-  INSERT INTO public.events (id, title, status, created_at, updated_at)
+  INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
   VALUES
-    (gen_random_uuid(), 'AER Status Draft',     'draft',     now(), now()),
-    (gen_random_uuid(), 'AER Status Published', 'published', now(), now());
+    (gen_random_uuid(), 'AER Status Draft',     'draft',     now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), 'AER Status Published', 'published', now() + interval '1 day', now(), now());
 
   SET LOCAL ROLE authenticated;
   PERFORM set_config('request.jwt.claim.sub', uid::text, true);
@@ -235,11 +238,11 @@ BEGIN
   SELECT v::uuid INTO uid FROM _fx WHERE k = 'admin_uid';
 
   -- Seed 3 events with a unique keyword
-  INSERT INTO public.events (id, title, status, created_at, updated_at)
+  INSERT INTO public.events (id, title, status, start_datetime, created_at, updated_at)
   VALUES
-    (gen_random_uuid(), 'AER TotalCount Alpha',   'published', now(), now()),
-    (gen_random_uuid(), 'AER TotalCount Beta',    'published', now(), now()),
-    (gen_random_uuid(), 'AER TotalCount Gamma',   'published', now(), now());
+    (gen_random_uuid(), 'AER TotalCount Alpha',   'published', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), 'AER TotalCount Beta',    'published', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), 'AER TotalCount Gamma',   'published', now() + interval '1 day', now(), now());
 
   SET LOCAL ROLE authenticated;
   PERFORM set_config('request.jwt.claim.sub', uid::text, true);

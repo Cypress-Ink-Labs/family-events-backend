@@ -94,13 +94,19 @@ BEGIN
     RAISE EXCEPTION 'ANON_LOG_FAIL: anon user can execute cron log RPC';
   END IF;
 
-  IF has_function_privilege(
-    'authenticated',
-    'private.list_railway_cron_jobs()',
-    'EXECUTE'
-  ) THEN
-    RAISE EXCEPTION 'PRIVATE_LIST_FAIL: authenticated user can execute private cron list RPC';
-  END IF;
+  -- The EXECUTE grant on private.list_railway_cron_jobs() to authenticated exists (needed by
+  -- the SECURITY INVOKER public wrapper), but the function body enforces the admin check.
+  -- Verify that calling the public wrapper as non-admin raises 42501 rather than succeeding.
+  BEGIN
+    SET LOCAL ROLE authenticated;
+    PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+    PERFORM public.admin_list_railway_cron_jobs();
+    RESET ROLE;
+    RAISE EXCEPTION 'PRIVATE_LIST_FAIL: non-admin authenticated user could list cron jobs';
+  EXCEPTION
+    WHEN insufficient_privilege THEN
+      RESET ROLE;
+  END;
 
   IF has_function_privilege(
     'authenticated',

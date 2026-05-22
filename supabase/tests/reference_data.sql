@@ -84,7 +84,7 @@ BEGIN
 
   SELECT EXISTS (
     SELECT 1
-    FROM private.list_railway_cron_jobs()
+    FROM private.cron_enabled
     WHERE label = 'cron-cleanup-stale'
   ) INTO cleanup_job_exists;
 
@@ -94,3 +94,5 @@ BEGIN
 
   RAISE NOTICE 'REFERENCE_DATA_OK';
 END $$;
+
+\echo 'reference_data: PASS'

@@ -56,17 +56,17 @@ SET is_enabled = true,
 -- 1. anon cannot call public.admin_db_health_snapshot
 -- =============================================
 DO $$
+DECLARE
+  has_execute boolean;
 BEGIN
-  BEGIN
-    SET LOCAL ROLE anon;
-    PERFORM public.admin_db_health_snapshot();
-    RESET ROLE;
-    RAISE EXCEPTION 'ANON_HEALTH_FAIL: anon was able to call admin_db_health_snapshot';
-  EXCEPTION
-    WHEN insufficient_privilege THEN
-      RESET ROLE;
-      RAISE NOTICE 'ANON_HEALTH_OK';
-  END;
+  SELECT has_function_privilege('anon', 'public.admin_db_health_snapshot()', 'EXECUTE')
+  INTO has_execute;
+
+  IF has_execute THEN
+    RAISE EXCEPTION 'ANON_HEALTH_FAIL: anon has EXECUTE on public.admin_db_health_snapshot';
+  END IF;
+
+  RAISE NOTICE 'ANON_HEALTH_OK';
 END $$;
 
 -- =============================================

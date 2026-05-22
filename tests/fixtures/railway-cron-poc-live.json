@@ -7,7 +7,7 @@
             "node": {
               "serviceName": "cron-tag-queue-seKl",
               "serviceId": "92747fa2-b0fe-450e-91a5-5a16500b1dad",
-              "cronSchedule": "*/15 * * * *",
+              "cronSchedule": "* * * * *",
               "source": {
                 "repo": "HexSleeves/family-events-v2",
                 "image": null
@@ -34,7 +34,7 @@
             "node": {
               "serviceName": "cron-scrape-sources-yp-N",
               "serviceId": "c48ad7ba-1454-4beb-9251-1ef090ff99cd",
-              "cronSchedule": "*/5 * * * *",
+              "cronSchedule": "0 * * * *",
               "source": {
                 "repo": "HexSleeves/family-events-v2",
                 "image": null

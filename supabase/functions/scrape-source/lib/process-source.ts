@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { captureEdgeException } from "../../_shared/sentry.ts";
-import { errorContext, logEdgeEvent } from "../../_shared/logger.ts";
+import {
+  errorContext,
+  errorMessage as formatError,
+  logEdgeEvent,
+} from "../../_shared/logger.ts";
 import {
   buildGeocodeQuery,
   geocodeViaNominatim,
@@ -9,7 +13,6 @@ import { dedupKey } from "../../_shared/parsing.ts";
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
 import { resolveAndCheckPublicIp } from "../../_shared/url-resolve.ts";
 import type { ParserContext } from "../parsers/_lib/context.ts";
-import { buildExistingEventIndex } from "./dedupe.ts";
 import { resolveCityTimezone } from "./schedule.ts";
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
 // scrape-source now just enqueues, returning immediately.
@@ -526,11 +529,10 @@ export async function processSource(
   let eventsImported = 0;
   let eventsSkipped = 0;
   let errorMessage: string | null = null;
-  // Counts non-fatal enqueue failures (e.g. transient RLS/network) so the run
-  // can be downgraded to 'partial' if any occurred. Fatal pipeline-deploy
-  // errors (queue table missing) are tracked separately and short-circuit
-  // the loop because no further work can succeed.
-  let enqueueFailures = 0;
+  // Fatal pipeline-deploy errors (bulk RPC missing) short-circuit the run
+  // because no further work can succeed. Non-fatal enqueue failures are
+  // logged but don't propagate — the SQL bulk RPC handles them via
+  // ON CONFLICT DO NOTHING and returns a count we cross-check below.
   let pipelineSetupError: string | null = null;
 
   // Flush live progress to source_runs so the UI can show incremental counts.
@@ -576,36 +578,36 @@ export async function processSource(
         .map((p) => p.sourceUrl)
         .filter((u): u is string => Boolean(u));
       const existingSet = new Set<string>();
-      if (candidateUrls.length > 0) {
+      // PostgREST encodes each URL into the query string for `.in()`. Past
+      // ~100 URLs the request line exceeds the proxy's 8K limit and we get
+      // "Bad Request" before the query reaches Postgres. Chunk to stay safe.
+      const PREFLIGHT_CHUNK = 100;
+      for (let i = 0; i < candidateUrls.length; i += PREFLIGHT_CHUNK) {
+        const chunk = candidateUrls.slice(i, i + PREFLIGHT_CHUNK);
         const { data: existingRows, error: existingErr } = await supabase
           .from("events")
           .select("source_url")
           .eq("source_id", source.id)
-          .in("source_url", candidateUrls);
+          .in("source_url", chunk);
         if (existingErr) throw existingErr;
-        for (const row of (existingRows ?? []) as Array<{ source_url: string }>) {
+        for (
+          const row of (existingRows ?? []) as Array<{ source_url: string }>
+        ) {
           existingSet.add(row.source_url);
         }
       }
 
-      const PREP_CONCURRENCY = 10;
-
-      async function prepEventPayload(
+      // Geocode + image-validation HTTP work was per-event in the JS loop —
+      // ~2 HTTP fetches × 460 new events × ~500ms = ~460s, well past the
+      // 150s edge wall. Move that work to a separate backfill job (TODO:
+      // wire enrich-events.ts or new backfill RPC) so the hot scrape path
+      // runs in pure SQL with no per-event HTTP. Coords stored NULL, images
+      // empty — the SQL bulk RPC's admin_locked_fields handling preserves
+      // any prior coords/images on UPDATE so we never overwrite admin work.
+      function prepEventPayload(
         parsed: ParsedEvent,
-      ): Promise<Record<string, unknown>> {
-        const isExisting = Boolean(
-          parsed.sourceUrl && existingSet.has(parsed.sourceUrl),
-        );
-        // Skip image + geocode HTTP for updates — the SQL bulk RPC keeps the
-        // existing images/coords when those fields are admin-locked, and the
-        // parser's images list rarely changes between scrapes anyway.
-        const validatedImages = isExisting
-          ? []
-          : await sanitizeImagesForIngest(parsed, source.url);
+      ): Record<string, unknown> {
         const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed);
-        const geocoded = isExisting
-          ? { latitude: null, longitude: null }
-          : await resolveCoordinatesForParsedEvent(parsed, sourceCityContext);
 
         return {
           title: parsed.title,
@@ -618,12 +620,12 @@ export async function processSource(
           city_id: source.city_id,
           source_url: parsed.sourceUrl ?? null,
           source_name: source.name,
-          images: validatedImages,
+          images: [] as string[],
           price: parsed.price ?? null,
           is_free: Boolean(parsed.isFree),
           is_outdoor: isOutdoor,
-          latitude: geocoded.latitude,
-          longitude: geocoded.longitude,
+          latitude: null as number | null,
+          longitude: null as number | null,
           dedup_key: dedupKey(
             parsed.title,
             parsed.startDatetime,
@@ -632,12 +634,7 @@ export async function processSource(
         };
       }
 
-      const payloads: Record<string, unknown>[] = [];
-      for (let i = 0; i < validEvents.length; i += PREP_CONCURRENCY) {
-        const chunk = validEvents.slice(i, i + PREP_CONCURRENCY);
-        const prepared = await Promise.all(chunk.map(prepEventPayload));
-        payloads.push(...prepared);
-      }
+      const payloads = validEvents.map(prepEventPayload);
 
       // Single bulk RPC: classify + INSERT + UPDATE + event_tag_queue enqueue
       // all in one SQL transaction. Replaces the prior per-event loop (which
@@ -700,9 +697,10 @@ export async function processSource(
     }
   } catch (error) {
     status = "error";
-    errorMessage = error instanceof Error
-      ? error.message
-      : "Unknown scrape failure.";
+    // formatError surfaces PostgrestError code + details (plain-object
+    // errors don't pass `instanceof Error`, so the original code silently
+    // collapsed them to "Unknown scrape failure").
+    errorMessage = formatError(error) || "Unknown scrape failure.";
     await captureEdgeException(
       error,
       errorContext(error, {

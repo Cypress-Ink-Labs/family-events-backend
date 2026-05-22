@@ -40,16 +40,20 @@ BEGIN
 
     'recent_cron_runs_by_label_status',
     (
+      WITH cron_stats AS (
+        SELECT
+          label,
+          COUNT(*) FILTER (WHERE status = 'success') AS succeeded,
+          COUNT(*) FILTER (WHERE status = 'error')   AS failed
+        FROM private.railway_cron_runs
+        WHERE ran_at >= now() - interval '24 hours'
+        GROUP BY label
+      )
       SELECT jsonb_object_agg(
         label,
-        jsonb_build_object(
-          'succeeded', COUNT(*) FILTER (WHERE status = 'success'),
-          'failed',    COUNT(*) FILTER (WHERE status = 'error')
-        )
+        jsonb_build_object('succeeded', succeeded, 'failed', failed)
       )
-      FROM private.railway_cron_runs
-      WHERE ran_at >= now() - interval '24 hours'
-      GROUP BY label
+      FROM cron_stats
     ),
 
     'snapshot_at', now()

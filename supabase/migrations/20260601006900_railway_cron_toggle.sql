@@ -128,10 +128,16 @@ RETURNS TABLE (
   last_run_duration_s int,
   last_http_status    int
 )
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
   WITH known AS (
     SELECT unnest(ARRAY[
       'cron-db-maintenance',
@@ -156,6 +162,7 @@ AS $$
   FROM known k
   LEFT JOIN last_runs lr ON lr.label = k.label
   ORDER BY k.label;
+END;
 $$;
 
 REVOKE EXECUTE ON FUNCTION private.list_railway_cron_jobs() FROM PUBLIC, anon, authenticated;
