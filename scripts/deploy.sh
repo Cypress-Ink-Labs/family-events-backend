@@ -273,7 +273,14 @@ deploy_supabase_fn_all() {
     return 1
   fi
   local failed=()
+  local first_function=true
   for fn_name in "${functions[@]}"; do
+    if [ "$first_function" = "true" ]; then
+      first_function=false
+    else
+      echo ""
+    fi
+
     local extra_args=()
     for skip_jwt_fn in "${NO_VERIFY_JWT_FUNCTIONS[@]}"; do
       if [ "$skip_jwt_fn" = "$fn_name" ]; then
@@ -365,10 +372,10 @@ poll_railway_status() {
 
   while [ "$elapsed" -lt "$max_wait" ]; do
     local raw
-    raw="$(cd "$ROOT_DIR" && railway status --service "$service" --json 2>/dev/null || true)"
+    raw="$(cd "$ROOT_DIR" && railway service status --service "$service" --json 2>/dev/null || true)"
 
     if [ -z "$raw" ]; then
-      warn "railway status --json returned no output for '$service' (railway CLI may not support --json flag)"
+      warn "railway service status --json returned no output for '$service' (railway CLI may not support --json flag)"
       return 0  # fallback: non-fatal
     fi
 
@@ -440,9 +447,9 @@ deploy_railway() {
   fi
 
   if [ -n "$subdir" ]; then
-    info "Deploying from: $ROOT_DIR/apps/$subdir"
-    info "Running: railway up $ROOT_DIR/apps/$subdir --path-as-root --service $service --detach"
-    (cd "$ROOT_DIR" && railway up "$ROOT_DIR/apps/$subdir" --path-as-root --service "$service" --detach) \
+    info "Deploying from: $ROOT_DIR (Railway rootDirectory: apps/$subdir)"
+    info "Running: railway up --service $service --detach"
+    (cd "$ROOT_DIR" && railway up --service "$service" --detach) \
       || { warn "railway up failed for '$service'"; return 1; }
   else
     info "Deploying from: $ROOT_DIR"

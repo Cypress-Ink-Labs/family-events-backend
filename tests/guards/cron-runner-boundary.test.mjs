@@ -28,3 +28,10 @@ test("sync script includes every Railway cron service", () => {
     assert.match(script, new RegExp(`\\b${app}\\b`))
   }
 })
+
+test("deploy script uploads from repo root for rootDirectory-based cron services", () => {
+  const script = readFileSync(path.join(repoRoot, "scripts", "deploy.sh"), "utf8")
+  assert.doesNotMatch(script, /railway up "\$ROOT_DIR\/apps\/\$subdir" --path-as-root/)
+  assert.match(script, /railway up --service "\$service" --detach/)
+  assert.match(script, /railway service status --service "\$service" --json/)
+})
