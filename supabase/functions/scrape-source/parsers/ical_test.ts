@@ -18,6 +18,24 @@ function assertStringIncludes(actual: string, expected: string): void {
   }
 }
 
+function assertThrows(fn: () => unknown, expectedMessageSubstring: string): void {
+  let thrown: unknown = null
+  try {
+    fn()
+  } catch (err) {
+    thrown = err
+  }
+  if (!thrown) {
+    throw new Error(`Expected throw containing "${expectedMessageSubstring}"`)
+  }
+  const message = thrown instanceof Error ? thrown.message : String(thrown)
+  if (!message.includes(expectedMessageSubstring)) {
+    throw new Error(
+      `Expected throw to include "${expectedMessageSubstring}", got "${message}"`,
+    )
+  }
+}
+
 async function readFixture(relativePath: string): Promise<string> {
   return await Deno.readTextFile(new URL(`../__fixtures__/${relativePath}`, import.meta.url))
 }
@@ -46,5 +64,19 @@ if (typeof Deno !== "undefined") {
     assertEquals(events[0].startDatetime, "2026-06-01T09:00:00.000Z")
     assertEquals(events[0].endDatetime, "2026-06-01T11:00:00.000Z")
     assertEquals(events[0].sourceUrl, "https://calendar.example.com/events/market")
+  })
+
+  Deno.test("parseIcalFeed throws on truncated feed missing END:VCALENDAR", () => {
+    // Real-world failure mode: upstream returned a 23-byte fragment of a
+    // VCALENDAR. The parser used to silently emit zero events; the worker
+    // then surfaced a generic "no valid events" error that masked the
+    // transport-layer truncation.
+    const truncated = "BEGIN:VCALENDAR\nVERSI"
+    assertThrows(() => parseIcalFeed(truncated), "Truncated iCal feed")
+  })
+
+  Deno.test("parseIcalFeed returns [] for empty body without VCALENDAR header", () => {
+    assertEquals(parseIcalFeed("").length, 0)
+    assertEquals(parseIcalFeed("\n\n").length, 0)
   })
 }

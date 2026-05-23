@@ -91,6 +91,19 @@ function parseIcalDateWithTz(
 }
 
 export function parseIcalFeed(icalContent: string): ParsedEvent[] {
+  // Upstream calendar hosts occasionally truncate their HTTP responses
+  // mid-stream (observed: libcal returned 23 bytes of a 369KB feed).
+  // Without this guard the parser silently emits zero events and the
+  // worker reports "no valid events" — which masks the transport bug.
+  if (
+    icalContent.includes("BEGIN:VCALENDAR") &&
+    !icalContent.includes("END:VCALENDAR")
+  ) {
+    throw new Error(
+      `Truncated iCal feed (received ${icalContent.length} bytes, missing END:VCALENDAR)`,
+    );
+  }
+
   const unfoldedLines = unfoldIcalLines(icalContent);
   const blocks: string[][] = [];
   let currentBlock: string[] | null = null;
