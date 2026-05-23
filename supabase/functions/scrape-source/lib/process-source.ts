@@ -32,11 +32,6 @@ const OUTDOOR_TAG_HINTS = [
 const INDOOR_TAG_HINTS = ["museum", "indoor", "library", "theater", "theatre"];
 const MAX_RAW_IMAGE_CANDIDATES = 20;
 
-interface SourceCityContext {
-  latitude: number | null;
-  longitude: number | null;
-}
-
 export function deriveIsOutdoorFromParsedEvent(
   parsed: ParsedEvent,
 ): boolean | null {
@@ -81,31 +76,17 @@ export function deriveRawImageCandidates(parsed: ParsedEvent): string[] {
   return [...seen];
 }
 
-async function fetchSourceCityContext(
+async function fetchCityCentroid(
   supabase: SupabaseClient,
   cityId: string | null,
-): Promise<SourceCityContext | null> {
+): Promise<{ latitude: number | null; longitude: number | null } | null> {
   if (!cityId) return null;
   const { data } = await supabase
     .from("cities")
     .select("latitude, longitude")
     .eq("id", cityId)
     .maybeSingle();
-
-  if (!data) return null;
-  return {
-    latitude: data.latitude,
-    longitude: data.longitude,
-  };
-}
-
-function deriveEventCoordinates(
-  cityContext: SourceCityContext | null,
-): { latitude: number | null; longitude: number | null } {
-  return {
-    latitude: cityContext?.latitude ?? null,
-    longitude: cityContext?.longitude ?? null,
-  };
+  return data ?? null;
 }
 
 async function readResponseBodyCapped(
@@ -223,8 +204,10 @@ export async function importParsedSourceEvents(
   }
 
   try {
-    const timezone = await resolveCityTimezone(supabase, source.city_id);
-    const cityContext = await fetchSourceCityContext(supabase, source.city_id);
+    const [timezone, cityCentroid] = await Promise.all([
+      resolveCityTimezone(supabase, source.city_id),
+      fetchCityCentroid(supabase, source.city_id),
+    ]);
     eventsFound = parsedEvents.length;
 
     // Write total found immediately so the UI shows "X found" while import runs.
@@ -246,7 +229,6 @@ export async function importParsedSourceEvents(
       ): Record<string, unknown> {
         const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed);
         const imageCandidates = deriveRawImageCandidates(parsed);
-        const coordinates = deriveEventCoordinates(cityContext);
 
         return {
           title: parsed.title,
@@ -263,8 +245,8 @@ export async function importParsedSourceEvents(
           price: parsed.price ?? null,
           is_free: Boolean(parsed.isFree),
           is_outdoor: isOutdoor,
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude,
+          latitude: cityCentroid?.latitude ?? null,
+          longitude: cityCentroid?.longitude ?? null,
         };
       }
 

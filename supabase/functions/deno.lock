@@ -10,8 +10,7 @@
     "jsr:@std/internal@^1.0.12": "1.0.13",
     "jsr:@std/path@1": "1.1.4",
     "jsr:@std/path@^1.1.4": "1.1.4",
-    "npm:@supabase/functions-js@2.106.1": "2.106.1",
-    "npm:@supabase/supabase-js@2.106.1": "2.106.1",
+    "npm:@supabase/supabase-js@2": "2.106.1",
     "npm:fast-xml-parser@4.5.0": "4.5.0"
   },
   "jsr": {
@@ -131,8 +130,8 @@
   "workspace": {
     "dependencies": [
       "jsr:@b-fuze/deno-dom@*",
-      "npm:@supabase/functions-js@2.106.1",
-      "npm:@supabase/supabase-js@2.106.1"
+      "jsr:@supabase/functions-js@*",
+      "npm:@supabase/supabase-js@2"
     ]
   }
 }

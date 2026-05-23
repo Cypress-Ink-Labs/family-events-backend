@@ -1,7 +1,7 @@
 {
   "extends": "./base.json",
   "compilerOptions": {
-    "lib": ["ES2023", "deno.ns"],
+    "lib": ["ES2023"],
     "types": ["node"]
   }
 }
