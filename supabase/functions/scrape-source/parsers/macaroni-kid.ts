@@ -246,8 +246,4 @@ export const macaroniKidParser: SourceParser<"macaronikid"> = {
     }
     return events;
   },
-  async fetchAndParse(source, ctx) {
-    const artifact = await this.fetchArtifact(source, ctx);
-    return this.extractEvents(source, artifact, ctx);
-  },
 };

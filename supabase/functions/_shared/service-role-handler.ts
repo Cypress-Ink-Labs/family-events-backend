@@ -13,6 +13,7 @@ const corsHeaders = {
 const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
 
 interface ServiceRoleJsonContext {
+  request: Request;
   serviceRoleKey: string;
   supabase: SupabaseClient;
   supabaseUrl: string;
@@ -25,9 +26,23 @@ interface ServiceRoleJsonOptions {
 
 type ServiceRoleJsonHandler = (
   context: ServiceRoleJsonContext,
-) => Promise<Record<string, unknown>>;
+) => Promise<unknown>;
 
-function jsonResponse(body: Record<string, unknown>, status = 200) {
+export class ServiceRoleJsonError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ServiceRoleJsonError";
+  }
+}
+
+export function serviceRoleJsonError(status: number, message: string) {
+  return new ServiceRoleJsonError(status, message);
+}
+
+function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: jsonHeaders,
@@ -65,9 +80,12 @@ export function serveServiceRoleJson(
     try {
       const supabase = createClient(supabaseUrl, serviceRoleKey);
       return jsonResponse(
-        await handler({ serviceRoleKey, supabase, supabaseUrl }),
+        await handler({ request: req, serviceRoleKey, supabase, supabaseUrl }),
       );
     } catch (err) {
+      if (err instanceof ServiceRoleJsonError) {
+        return jsonResponse({ error: err.message }, err.status);
+      }
       await captureEdgeException(
         err,
         errorContext(err, { function: functionName, stage: errorStage }),

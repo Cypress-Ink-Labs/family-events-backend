@@ -6,6 +6,7 @@ import {
   unescapeIcalText,
 } from "../../_shared/parsing.ts";
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
+import { wallClockToIso } from "../lib/date.ts";
 import type { ParsedEvent } from "../lib/types.ts";
 import type { SourceParser } from "./_lib/types.ts";
 
@@ -55,40 +56,6 @@ function parseIcalLine(line: string): ParsedIcalLine | null {
   return { key: key.toUpperCase(), params, value };
 }
 
-function getTimeZoneOffset(date: Date, timeZone: string): number {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hour12: false,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  const parts = formatter.formatToParts(date);
-  const parsed = {
-    year: Number(parts.find((part) => part.type === "year")?.value),
-    month: Number(parts.find((part) => part.type === "month")?.value),
-    day: Number(parts.find((part) => part.type === "day")?.value),
-    hour: Number(parts.find((part) => part.type === "hour")?.value),
-    minute: Number(parts.find((part) => part.type === "minute")?.value),
-    second: Number(parts.find((part) => part.type === "second")?.value),
-  };
-
-  const asUtc = Date.UTC(
-    parsed.year,
-    parsed.month - 1,
-    parsed.day,
-    parsed.hour,
-    parsed.minute,
-    parsed.second,
-  );
-
-  return asUtc - date.getTime();
-}
-
 function parseIcalDateWithTz(
   value: string | null,
   tzid: string | null,
@@ -109,26 +76,18 @@ function parseIcalDateWithTz(
   }
 
   const [, year, month, day, hour, minute, second] = dateTimeMatch;
-  const utcGuess = Date.UTC(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    Number(hour),
-    Number(minute),
-    Number(second),
-  );
-
-  try {
-    const initialOffset = getTimeZoneOffset(new Date(utcGuess), tzid);
-    let adjusted = utcGuess - initialOffset;
-    const followupOffset = getTimeZoneOffset(new Date(adjusted), tzid);
-    if (followupOffset !== initialOffset) {
-      adjusted = utcGuess - followupOffset;
-    }
-    return new Date(adjusted).toISOString();
-  } catch {
-    return parseIcalDate(compact);
-  }
+  return wallClockToIso(
+    {
+      year: Number(year),
+      month: Number(month),
+      day: Number(day),
+      hour: Number(hour),
+      minute: Number(minute),
+      second: Number(second),
+    },
+    tzid,
+    { fallback: "null" },
+  ) ?? parseIcalDate(compact);
 }
 
 export function parseIcalFeed(icalContent: string): ParsedEvent[] {
@@ -232,9 +191,5 @@ export const icalParser: SourceParser<"ical"> = {
   },
   extractEvents(_source, artifact) {
     return Promise.resolve(parseIcalFeed(artifact.body));
-  },
-  async fetchAndParse(source, ctx) {
-    const artifact = await this.fetchArtifact(source, ctx);
-    return this.extractEvents(source, artifact, ctx);
   },
 };

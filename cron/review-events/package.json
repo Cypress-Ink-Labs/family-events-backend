@@ -1,0 +1,6 @@
+{
+  "name": "@family-events/cron-review-events",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Railway cron service that drains event_llm_review_queue via process-event-review-queue."
+}

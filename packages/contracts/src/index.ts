@@ -9,4 +9,11 @@ export type {
   TablesInsert,
   TablesUpdate,
 } from "./database.types"
+export type {
+  EventProcessingMode,
+  EventTagQueueStatus,
+  InviteRequestStatus,
+  SourceExtractionMode,
+  SourceScrapeQueueStatus,
+} from "./database-enums"
 export type { EventContract } from "./event"

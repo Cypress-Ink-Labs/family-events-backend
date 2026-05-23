@@ -1,8 +1,18 @@
-import type { SourceType } from "../parsers/index.ts";
+import type {
+  EventProcessingMode,
+  SourceExtractionMode,
+} from "../../../../packages/contracts/src/database-enums.ts";
 
-export type { SourceType };
+export type SourceType =
+  | "brec"
+  | "ical"
+  | "macaronikid"
+  | "manual"
+  | "rss"
+  | "website";
 export type RunStatus = "running" | "success" | "error" | "partial";
-export type ExtractionMode = "deterministic" | "llm" | "deterministic_then_llm";
+export type ExtractionMode = SourceExtractionMode;
+export type { EventProcessingMode };
 
 export interface FetchedArtifact {
   url: string;
@@ -16,6 +26,7 @@ export interface EventSourceRow {
   url: string;
   source_type: SourceType;
   extraction_mode: ExtractionMode;
+  processing_mode?: EventProcessingMode | null;
   city_id: string | null;
   is_active: boolean;
   auto_approve: boolean;
@@ -47,9 +58,4 @@ export interface SourceResult {
   eventsImported: number;
   eventsSkipped: number;
   error: string | null;
-}
-
-export interface ExistingEventIndex {
-  bySourceUrl: Map<string, string>;
-  byDedupKey: Map<string, string>;
 }

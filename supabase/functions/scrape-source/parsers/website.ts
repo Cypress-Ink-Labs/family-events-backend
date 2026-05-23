@@ -7,6 +7,7 @@ import {
   stripHtml,
 } from "../../_shared/parsing.ts";
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
+import { dateStampToWallClockIso } from "../lib/date.ts";
 import type { ParsedEvent } from "../lib/types.ts";
 import type { SourceParser } from "./_lib/types.ts";
 
@@ -75,74 +76,6 @@ function extractImageUrls(value: unknown): string[] {
   return [];
 }
 
-function getTimeZoneOffset(date: Date, timeZone: string): number {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hour12: false,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  const parts = formatter.formatToParts(date);
-  const parsed = {
-    year: Number(parts.find((part) => part.type === "year")?.value),
-    month: Number(parts.find((part) => part.type === "month")?.value),
-    day: Number(parts.find((part) => part.type === "day")?.value),
-    hour: Number(parts.find((part) => part.type === "hour")?.value),
-    minute: Number(parts.find((part) => part.type === "minute")?.value),
-    second: Number(parts.find((part) => part.type === "second")?.value),
-  };
-
-  const asUtc = Date.UTC(
-    parsed.year,
-    parsed.month - 1,
-    parsed.day,
-    parsed.hour,
-    parsed.minute,
-    parsed.second,
-  );
-
-  return asUtc - date.getTime();
-}
-
-function localDateTimeToIso(
-  dateStamp: string,
-  hour: number,
-  minute: number,
-  timeZone: string,
-): string | null {
-  const match = dateStamp.match(/^(\d{4})(\d{2})(\d{2})$/);
-  if (!match) {
-    return null;
-  }
-
-  const [, year, month, day] = match;
-  const utcGuess = Date.UTC(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    hour,
-    minute,
-    0,
-  );
-
-  try {
-    const initialOffset = getTimeZoneOffset(new Date(utcGuess), timeZone);
-    let adjusted = utcGuess - initialOffset;
-    const followupOffset = getTimeZoneOffset(new Date(adjusted), timeZone);
-    if (followupOffset !== initialOffset) {
-      adjusted = utcGuess - followupOffset;
-    }
-    return new Date(adjusted).toISOString();
-  } catch {
-    return new Date(utcGuess).toISOString();
-  }
-}
-
 function parseClock(value: string): { hour: number; minute: number } | null {
   const match = value.trim().match(
     /^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i,
@@ -182,7 +115,7 @@ function parseMecTimeRange(
     return null;
   }
 
-  const startDatetime = localDateTimeToIso(
+  const startDatetime = dateStampToWallClockIso(
     dateStamp,
     startClock.hour,
     startClock.minute,
@@ -194,7 +127,12 @@ function parseMecTimeRange(
 
   const endClock = parseClock(rawEnd ?? "");
   let endDatetime = endClock
-    ? localDateTimeToIso(dateStamp, endClock.hour, endClock.minute, timeZone)
+    ? dateStampToWallClockIso(
+      dateStamp,
+      endClock.hour,
+      endClock.minute,
+      timeZone,
+    )
     : null;
   if (
     endDatetime &&
@@ -461,9 +399,5 @@ export const websiteParser: SourceParser<"website"> = {
     return Promise.resolve(
       parseWebsite(artifact.body, artifact.url || source.url, ctx.timezone),
     );
-  },
-  async fetchAndParse(source, ctx) {
-    const artifact = await this.fetchArtifact(source, ctx);
-    return this.extractEvents(source, artifact, ctx);
   },
 };

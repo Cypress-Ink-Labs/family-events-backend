@@ -1,4 +1,6 @@
-export function resolveCompletedTagQueueStatus(): "succeeded" {
+import type { EventTagQueueStatus } from "../../../packages/contracts/src/database-enums.ts";
+
+export function resolveCompletedTagQueueStatus(): EventTagQueueStatus {
   return "succeeded";
 }
 

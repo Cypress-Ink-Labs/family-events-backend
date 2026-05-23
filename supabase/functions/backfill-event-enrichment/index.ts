@@ -2,16 +2,9 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
-import {
-  errorContext,
-  errorMessage,
-  logEdgeEvent,
-} from "../_shared/logger.ts";
-import {
-  buildGeocodeQuery,
-  geocodeViaNominatim,
-} from "../_shared/geocode.ts";
-import { sanitizeImagesForIngest } from "../scrape-source/lib/process-source.ts";
+import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
+import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts";
+import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts";
 import type { ParsedEvent } from "../scrape-source/lib/types.ts";
 
 const corsHeaders = {
@@ -93,7 +86,10 @@ async function enrichOne(
     let cityCtx: SourceCityContext | null = null;
     if (row.city_id) {
       if (!cityCache.has(row.city_id)) {
-        cityCache.set(row.city_id, await fetchCityContext(supabase, row.city_id));
+        cityCache.set(
+          row.city_id,
+          await fetchCityContext(supabase, row.city_id),
+        );
       }
       cityCtx = cityCache.get(row.city_id) ?? null;
     }
@@ -111,7 +107,10 @@ async function enrichOne(
         longitude = geo.longitude;
       }
     }
-    if ((latitude === null || longitude === null) && cityCtx?.latitude != null && cityCtx?.longitude != null) {
+    if (
+      (latitude === null || longitude === null) && cityCtx?.latitude != null &&
+      cityCtx?.longitude != null
+    ) {
       latitude = cityCtx.latitude;
       longitude = cityCtx.longitude;
     }
@@ -119,7 +118,10 @@ async function enrichOne(
 
   if (row.needs_images && row.source_id) {
     if (!sourceCache.has(row.source_id)) {
-      sourceCache.set(row.source_id, await fetchSourceUrl(supabase, row.source_id));
+      sourceCache.set(
+        row.source_id,
+        await fetchSourceUrl(supabase, row.source_id),
+      );
     }
     const sourceUrl = sourceCache.get(row.source_id) ?? null;
     if (sourceUrl) {
@@ -185,10 +187,13 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!supabaseUrl) {
-    return new Response(JSON.stringify({ error: "SUPABASE_URL not configured" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "SUPABASE_URL not configured" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 
   try {
@@ -200,7 +205,13 @@ Deno.serve(async (req: Request) => {
     if (error) throw error;
 
     const rows = (data ?? []) as EventNeedingEnrichment[];
-    const summary = { claimed: rows.length, updated: 0, coords: 0, images: 0, errors: 0 };
+    const summary = {
+      claimed: rows.length,
+      updated: 0,
+      coords: 0,
+      images: 0,
+      errors: 0,
+    };
     const cityCache = new Map<string, SourceCityContext | null>();
     const sourceCache = new Map<string, string | null>();
 
@@ -231,7 +242,10 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     await captureEdgeException(
       err,
-      errorContext(err, { function: "backfill-event-enrichment", stage: "outer" }),
+      errorContext(err, {
+        function: "backfill-event-enrichment",
+        stage: "outer",
+      }),
     );
     return new Response(JSON.stringify({ error: errorMessage(err) }), {
       status: 500,

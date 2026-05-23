@@ -12,7 +12,4 @@ export const manualParser: SourceParser<"manual"> = {
   extractEvents() {
     return Promise.resolve([]);
   },
-  fetchAndParse() {
-    return Promise.resolve([]);
-  },
 };

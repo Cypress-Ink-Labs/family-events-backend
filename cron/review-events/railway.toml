@@ -1,0 +1,9 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Railway minimum cadence is 5 minutes. process-event-review-queue can be
+# invoked manually/on-demand via SQL RPC between cron ticks when needed.
+cronSchedule = "*/5 * * * *"
+restartPolicyType = "ON_FAILURE"

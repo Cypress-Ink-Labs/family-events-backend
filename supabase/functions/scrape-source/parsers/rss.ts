@@ -289,8 +289,4 @@ export const rssParser: SourceParser<"rss"> = {
       parseRssFeed(artifact.body, artifact.url || source.url),
     );
   },
-  async fetchAndParse(source, ctx) {
-    const artifact = await this.fetchArtifact(source, ctx);
-    return this.extractEvents(source, artifact, ctx);
-  },
 };

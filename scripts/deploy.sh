@@ -84,6 +84,7 @@ ALL_TARGETS=(
   "fn: log-cron-run                      |supabase_fn|log-cron-run"
   "fn: notify-email                      |supabase_fn|notify-email"
   "fn: process-source-queue              |supabase_fn|process-source-queue"
+  "fn: process-event-review-queue        |supabase_fn|process-event-review-queue"
   "fn: process-tag-queue                 |supabase_fn|process-tag-queue"
   "fn: scrape-due-sources                |supabase_fn|scrape-due-sources"
   "fn: scrape-source                     |supabase_fn|scrape-source"
@@ -96,6 +97,7 @@ ALL_TARGETS=(
   "cron-scrape-sources                   |railway|cron-scrape-sources"
   "cron-db-maintenance                   |railway|cron-db-maintenance"
   "cron-tag-queue                        |railway|cron-tag-queue"
+  "cron-review-events                    |railway|cron-review-events"
   "cron-cleanup-stale                    |railway|cron-cleanup-stale"
 )
 
@@ -201,6 +203,7 @@ NO_VERIFY_JWT_FUNCTIONS=(
   log-cron-run
   notify-email
   process-source-queue
+  process-event-review-queue
   process-tag-queue
   scrape-due-sources
   scrape-source
@@ -241,6 +244,7 @@ deploy_supabase_fn_all() {
     log-cron-run
     notify-email
     process-source-queue
+    process-event-review-queue
     process-tag-queue
     scrape-due-sources
     scrape-source
@@ -293,6 +297,7 @@ railway_service_dir() {
     cron-scrape-sources) echo "cron-scrape-sources" ;;
     cron-db-maintenance)      echo "cron-db-maintenance" ;;
     cron-tag-queue)      echo "cron-tag-queue" ;;
+    cron-review-events)  echo "cron-review-events" ;;
     cron-cleanup-stale)  echo "cron-cleanup-stale" ;;
     *)                        echo "$service" ;;  # fallback: same name
   esac
@@ -384,7 +389,7 @@ deploy_railway() {
 
 deploy_railway_all() {
   # Use the real Railway service names here
-  local services=(web cron-scrape-sources cron-db-maintenance cron-tag-queue cron-cleanup-stale cron-enrich-events)
+  local services=(web cron-scrape-sources cron-db-maintenance cron-tag-queue cron-review-events cron-cleanup-stale cron-enrich-events)
   step "Railway — all apps"
   for service in "${services[@]}"; do
     deploy_railway "$service" || { warn "Railway deploy failed: $service"; ERRORS=$((ERRORS + 1)); }

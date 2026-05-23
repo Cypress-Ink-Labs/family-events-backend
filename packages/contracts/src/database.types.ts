@@ -220,6 +220,7 @@ export type Database = {
           last_status: string | null
           name: string
           notes: string | null
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours: number
           source_type: string
           updated_at: string
@@ -238,6 +239,7 @@ export type Database = {
           last_status?: string | null
           name: string
           notes?: string | null
+          processing_mode?: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours?: number
           source_type?: string
           updated_at?: string
@@ -256,6 +258,7 @@ export type Database = {
           last_status?: string | null
           name?: string
           notes?: string | null
+          processing_mode?: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours?: number
           source_type?: string
           updated_at?: string
@@ -1313,6 +1316,10 @@ export type Database = {
         Args: { enable: boolean }
         Returns: undefined
       }
+      admin_batch_set_event_status: {
+        Args: { p_event_ids: string[]; p_status: string }
+        Returns: number
+      }
       admin_create_event: {
         Args: { p_patch: Json; p_tag_ids?: string[] }
         Returns: {
@@ -1358,6 +1365,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_create_source: {
+        Args: { p_source: Json }
+        Returns: Database["public"]["Tables"]["event_sources"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "event_sources"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_create_invite_code: {
         Args: { p_expires_at?: string; p_max_uses?: number; p_notes?: string }
         Returns: {
@@ -1382,6 +1399,10 @@ export type Database = {
         }[]
       }
       admin_db_health_snapshot: { Args: never; Returns: Json }
+      admin_delete_events: {
+        Args: { p_event_ids: string[] }
+        Returns: number
+      }
       admin_delete_rating: { Args: { p_id: string }; Returns: boolean }
       admin_event_facets: {
         Args: { p_keyword?: string }
@@ -1488,6 +1509,10 @@ export type Database = {
         Args: { p_queue_id: number }
         Returns: boolean
       }
+      admin_bulk_set_processing_mode: {
+        Args: { p_mode: Database["public"]["Enums"]["event_processing_mode"] }
+        Returns: number
+      }
       admin_retry_source_scrape_queue: {
         Args: { p_queue_id: number }
         Returns: boolean
@@ -1495,6 +1520,36 @@ export type Database = {
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
+      admin_update_event_status: {
+        Args: { p_event_id: string; p_reason?: string | null; p_status: string }
+        Returns: Database["public"]["Tables"]["events"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_event_status: {
+        Args: { p_event_id: string; p_status: string }
+        Returns: Database["public"]["Tables"]["events"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_user_access: {
+        Args: { p_disabled_reason?: string | null; p_is_enabled: boolean; p_user_id: string }
+        Returns: Database["public"]["Tables"]["user_access"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "user_access"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_set_cron_enabled: {
         Args: { p_enabled: boolean; p_label: string }
         Returns: undefined
@@ -1557,6 +1612,16 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_update_source: {
+        Args: { p_patch: Json; p_source_id: string }
+        Returns: Database["public"]["Tables"]["event_sources"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "event_sources"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1987,6 +2052,7 @@ export type Database = {
       }
     }
     Enums: {
+      event_processing_mode: "manual_review" | "auto_approve" | "llm_review"
       event_tag_queue_status: "pending" | "processing" | "failed" | "dead" | "succeeded"
       invite_request_status: "pending" | "approved" | "rejected"
       source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
@@ -2116,6 +2182,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      event_processing_mode: ["manual_review", "auto_approve", "llm_review"],
       event_tag_queue_status: ["pending", "processing", "failed", "dead", "succeeded"],
       invite_request_status: ["pending", "approved", "rejected"],
       source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],

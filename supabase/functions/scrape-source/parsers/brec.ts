@@ -6,6 +6,7 @@ import {
   stripHtml,
 } from "../../_shared/parsing.ts";
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
+import { wallClockToIso } from "../lib/date.ts";
 import type { ParsedEvent } from "../lib/types.ts";
 import type { SourceParser } from "./_lib/types.ts";
 
@@ -24,7 +25,9 @@ const MONTHS: Record<string, number> = {
   december: 11,
 };
 
-function parseDayHeading(text: string): { y: number; m: number; d: number } | null {
+function parseDayHeading(
+  text: string,
+): { y: number; m: number; d: number } | null {
   // Example: "Friday, May 1, 2026"
   const match = text.match(/(?:^|,\s*)([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/);
   if (!match) return null;
@@ -37,7 +40,9 @@ function parseDayHeading(text: string): { y: number; m: number; d: number } | nu
 }
 
 function parseClock(value: string): { hour: number; minute: number } | null {
-  const match = value.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i);
+  const match = value.trim().match(
+    /^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i,
+  );
   if (!match) return null;
   let hour = Number(match[1]);
   const minute = match[2] ? Number(match[2]) : 0;
@@ -48,32 +53,7 @@ function parseClock(value: string): { hour: number; minute: number } | null {
   return { hour, minute };
 }
 
-function getTimeZoneOffset(date: Date, timeZone: string): number {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hour12: false,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-  const parts = formatter.formatToParts(date);
-  const pick = (t: string) =>
-    Number(parts.find((p) => p.type === t)?.value);
-  const asUtc = Date.UTC(
-    pick("year"),
-    pick("month") - 1,
-    pick("day"),
-    pick("hour"),
-    pick("minute"),
-    pick("second"),
-  );
-  return asUtc - date.getTime();
-}
-
-function localToIso(
+function brecWallClockToIso(
   y: number,
   m: number,
   d: number,
@@ -81,18 +61,10 @@ function localToIso(
   minute: number,
   timeZone: string,
 ): string {
-  const utcGuess = Date.UTC(y, m, d, hour, minute, 0);
-  try {
-    const initialOffset = getTimeZoneOffset(new Date(utcGuess), timeZone);
-    let adjusted = utcGuess - initialOffset;
-    const followupOffset = getTimeZoneOffset(new Date(adjusted), timeZone);
-    if (followupOffset !== initialOffset) {
-      adjusted = utcGuess - followupOffset;
-    }
-    return new Date(adjusted).toISOString();
-  } catch {
-    return new Date(utcGuess).toISOString();
-  }
+  return wallClockToIso(
+    { year: y, month: m + 1, day: d, hour, minute },
+    timeZone,
+  );
 }
 
 function parseTimeRange(
@@ -107,19 +79,19 @@ function parseTimeRange(
   const normalized = normalizeExtractedText(raw).replace(/\s+/g, " ").trim();
   if (!normalized || /^all\s*day$/i.test(normalized)) {
     return {
-      startDatetime: localToIso(date.y, date.m, date.d, 0, 0, timeZone),
-      endDatetime: localToIso(date.y, date.m, date.d, 23, 59, timeZone),
+      startDatetime: brecWallClockToIso(date.y, date.m, date.d, 0, 0, timeZone),
+      endDatetime: brecWallClockToIso(date.y, date.m, date.d, 23, 59, timeZone),
     };
   }
   const [rawStart, rawEnd] = normalized.split(/\s*(?:-|–|—|to)\s*/i);
   const startClock = parseClock(rawStart ?? "");
   if (!startClock) {
     return {
-      startDatetime: localToIso(date.y, date.m, date.d, 0, 0, timeZone),
+      startDatetime: brecWallClockToIso(date.y, date.m, date.d, 0, 0, timeZone),
       endDatetime: null,
     };
   }
-  const startDatetime = localToIso(
+  const startDatetime = brecWallClockToIso(
     date.y,
     date.m,
     date.d,
@@ -129,7 +101,14 @@ function parseTimeRange(
   );
   const endClock = parseClock(rawEnd ?? "");
   let endDatetime = endClock
-    ? localToIso(date.y, date.m, date.d, endClock.hour, endClock.minute, timeZone)
+    ? brecWallClockToIso(
+      date.y,
+      date.m,
+      date.d,
+      endClock.hour,
+      endClock.minute,
+      timeZone,
+    )
     : null;
   if (
     endDatetime &&
@@ -247,11 +226,11 @@ export const brecParser: SourceParser<"brec"> = {
   },
   extractEvents(source, artifact, ctx) {
     return Promise.resolve(
-      parseBrecCalendar(artifact.body, artifact.url || source.url, ctx.timezone),
+      parseBrecCalendar(
+        artifact.body,
+        artifact.url || source.url,
+        ctx.timezone,
+      ),
     );
-  },
-  async fetchAndParse(source, ctx) {
-    const artifact = await this.fetchArtifact(source, ctx);
-    return this.extractEvents(source, artifact, ctx);
   },
 };

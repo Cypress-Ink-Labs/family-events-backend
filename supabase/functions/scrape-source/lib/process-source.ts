@@ -5,13 +5,8 @@ import {
   errorMessage as formatError,
   logEdgeEvent,
 } from "../../_shared/logger.ts";
-import {
-  buildGeocodeQuery,
-  geocodeViaNominatim,
-} from "../../_shared/geocode.ts";
-import { validateExternalUrl } from "../../_shared/url-validation.ts";
 import { resolveAndCheckPublicIp } from "../../_shared/url-resolve.ts";
-import type { ParserContext } from "../parsers/_lib/context.ts";
+import type { ParserContext } from "./parser-context.ts";
 import { resolveCityTimezone } from "./schedule.ts";
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
 // scrape-source now just enqueues, returning immediately.
@@ -21,16 +16,10 @@ import type {
   RunStatus,
   SourceResult,
 } from "./types.ts";
+export { sanitizeImagesForIngest } from "./enrichment.ts";
 
 const SOURCE_FETCH_TIMEOUT_MS = 10_000;
 const SOURCE_MAX_BYTES = 5 * 1024 * 1024; // 5 MB cap on feed body to prevent OOM
-const IMAGE_HEAD_TIMEOUT_MS = 5_000;
-const IMAGE_MAX_BYTES = 2 * 1024 * 1024;
-const MAX_IMAGES_PER_EVENT = 5;
-const IMAGE_VALIDATION_CONCURRENCY = 2;
-const IMAGE_VALIDATION_TIMEOUT_MS = 6_000;
-const IMAGE_HOST_ALLOWLIST_ENV = "SCRAPER_IMAGE_HOST_ALLOWLIST";
-const LEGACY_IMAGE_HOST_ALLOWLIST_ENV = "SCRAPE_IMAGE_HOST_ALLOWLIST";
 
 const OUTDOOR_TAG_HINTS = [
   "park",
@@ -41,94 +30,6 @@ const OUTDOOR_TAG_HINTS = [
   "playground",
 ];
 const INDOOR_TAG_HINTS = ["museum", "indoor", "library", "theater", "theatre"];
-const DEFAULT_IMAGE_HOST_ALLOWLIST = [
-  "images.squarespace-cdn.com",
-  "cdn.prod.website-files.com",
-  "static.wixstatic.com",
-  "images.unsplash.com",
-];
-
-type SourceCityContext = {
-  name: string | null;
-  state: string | null;
-  latitude: number | null;
-  longitude: number | null;
-};
-
-function applyAdminFieldLocks<T extends Record<string, unknown>>(
-  payload: T,
-  lockedFields: string[] | null | undefined,
-): Partial<T> {
-  const locked = new Set(lockedFields ?? []);
-  return Object.fromEntries(
-    Object.entries(payload).filter(([key]) => !locked.has(key)),
-  ) as Partial<T>;
-}
-
-async function fetchAdminLockedFields(
-  supabase: SupabaseClient,
-  eventId: string,
-): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("events")
-    .select("admin_locked_fields")
-    .eq("id", eventId)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-  return Array.isArray(data?.admin_locked_fields)
-    ? data.admin_locked_fields
-    : [];
-}
-
-function normalizeHost(value: string | null | undefined): string | null {
-  if (!value) {
-    return null;
-  }
-  return value.trim().toLowerCase().replace(/^\.+|\.+$/g, "") || null;
-}
-
-function uniqueHosts(hosts: Array<string | null | undefined>): string[] {
-  const normalized = hosts
-    .map((host) => normalizeHost(host))
-    .filter((host): host is string => Boolean(host));
-  return [...new Set(normalized)];
-}
-
-function hostFromUrl(url: string | null | undefined): string | null {
-  if (!url) {
-    return null;
-  }
-  try {
-    return normalizeHost(new URL(url).hostname);
-  } catch {
-    return null;
-  }
-}
-
-function hostAllowed(host: string, allowlist: string[]): boolean {
-  const normalizedHost = normalizeHost(host);
-  if (!normalizedHost) {
-    return false;
-  }
-  return allowlist.some(
-    (allowedHost) =>
-      normalizedHost === allowedHost ||
-      normalizedHost.endsWith(`.${allowedHost}`),
-  );
-}
-
-function configuredImageHostAllowlist(): string[] {
-  const envValue = Deno.env.get(IMAGE_HOST_ALLOWLIST_ENV) ??
-    Deno.env.get(LEGACY_IMAGE_HOST_ALLOWLIST_ENV) ?? "";
-  const configuredHosts = envValue
-    .split(",")
-    .map((entry) => normalizeHost(entry))
-    .filter((entry): entry is string => Boolean(entry));
-  return uniqueHosts([...DEFAULT_IMAGE_HOST_ALLOWLIST, ...configuredHosts]);
-}
 
 export function deriveIsOutdoorFromParsedEvent(
   parsed: ParsedEvent,
@@ -157,280 +58,6 @@ export function deriveIsOutdoorFromParsedEvent(
     return false;
   }
   return null;
-}
-
-async function measureImageByteLength(
-  imageUrl: string,
-): Promise<number | null> {
-  // SSRF threat model: image URLs are already filtered by the static host
-  // allowlist + protocol === "https:" + content-type check upstream. Adding a
-  // DNS pre-check here would be belt-and-suspenders but breaks test isolation
-  // (no way to mock Deno.resolveDns without a runtime hook). For sources fetched
-  // via fetchSourceEvents — which have NO allowlist and accept arbitrary admin
-  // URLs — the DNS check is mandatory.
-  let response: Response;
-  try {
-    response = await fetch(imageUrl, {
-      method: "GET",
-      headers: {
-        "User-Agent":
-          "family-events-ingester/1.0 (+https://family-events.local)",
-        Accept: "image/*",
-      },
-      // redirect: "error" — by this point the URL has already cleared the
-      // HEAD allowlist re-check. Following a fresh GET-time redirect would
-      // bypass that guard and re-open the SSRF surface (a server can serve a
-      // benign HEAD and a redirect-to-internal-IP GET).
-      redirect: "error",
-      signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
-    });
-  } catch {
-    return null;
-  }
-
-  if (!response.ok || !response.body) {
-    return null;
-  }
-
-  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-  if (!contentType.startsWith("image/")) {
-    return null;
-  }
-
-  const reader = response.body.getReader();
-  let total = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      total += value.byteLength;
-      if (total > IMAGE_MAX_BYTES) {
-        await reader.cancel();
-        return total;
-      }
-    }
-  } catch {
-    try {
-      await reader.cancel();
-    } catch {
-      // Ignore cancel errors
-    }
-    return null;
-  } finally {
-    reader.releaseLock();
-  }
-
-  return total;
-}
-
-async function validateImageAtIngest(
-  imageUrl: string,
-  allowedHosts: string[],
-): Promise<string | null> {
-  const externalUrlValidation = validateExternalUrl(imageUrl);
-  if (!externalUrlValidation.ok) {
-    return null;
-  }
-
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(imageUrl);
-  } catch {
-    return null;
-  }
-
-  if (parsedUrl.protocol !== "https:") {
-    return null;
-  }
-  if (!hostAllowed(parsedUrl.hostname, allowedHosts)) {
-    return null;
-  }
-
-  // See note in measureImageByteLength: allowlist + protocol + HEAD content-type
-  // is the primary defense for images. Source feeds (no allowlist) use the DNS
-  // pre-check.
-  let response: Response;
-  try {
-    response = await fetch(parsedUrl.toString(), {
-      method: "HEAD",
-      headers: {
-        "User-Agent":
-          "family-events-ingester/1.0 (+https://family-events.local)",
-        Accept: "image/*",
-      },
-      signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
-    });
-  } catch {
-    return null;
-  }
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const responseUrl = response.url || parsedUrl.toString();
-  const finalHost = hostFromUrl(responseUrl);
-  if (!finalHost || !hostAllowed(finalHost, allowedHosts)) {
-    return null;
-  }
-
-  let finalUrl: URL;
-  try {
-    finalUrl = new URL(responseUrl);
-  } catch {
-    return null;
-  }
-  if (finalUrl.protocol !== "https:") {
-    return null;
-  }
-
-  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-  if (!contentType.startsWith("image/")) {
-    return null;
-  }
-
-  const contentLengthHeader = response.headers.get("content-length");
-  const contentLength = contentLengthHeader
-    ? Number(contentLengthHeader)
-    : null;
-  const measuredLength = contentLengthHeader
-    ? null
-    : await measureImageByteLength(finalUrl.toString());
-  const effectiveLength = contentLength ?? measuredLength;
-  if (effectiveLength === null) {
-    return null;
-  }
-
-  if (
-    !Number.isFinite(effectiveLength) || effectiveLength <= 0 ||
-    effectiveLength > IMAGE_MAX_BYTES
-  ) {
-    return null;
-  }
-
-  return finalUrl.toString();
-}
-
-function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-): Promise<T | null> {
-  return new Promise((resolve) => {
-    const timeoutId = setTimeout(() => resolve(null), timeoutMs);
-    promise
-      .then((value) => resolve(value))
-      .catch(() => resolve(null))
-      .finally(() => clearTimeout(timeoutId));
-  });
-}
-
-export async function sanitizeImagesForIngest(
-  parsed: ParsedEvent,
-  sourceUrl: string,
-): Promise<string[]> {
-  const sourceHost = hostFromUrl(sourceUrl);
-  const allowedHosts = uniqueHosts([
-    sourceHost,
-    ...configuredImageHostAllowlist(),
-  ]);
-  if (allowedHosts.length === 0) {
-    return [];
-  }
-
-  // Cap the accepted images, not the raw candidates. If the first three
-  // candidates fail validation but candidates 4-5 succeed, we want them.
-  const imageCandidates = [
-    ...new Set([
-      ...parsed.images,
-      ...(parsed.imageUrl ? [parsed.imageUrl] : []),
-    ]),
-  ];
-
-  const validImages: string[] = [];
-  let cursor = 0;
-
-  while (
-    cursor < imageCandidates.length && validImages.length < MAX_IMAGES_PER_EVENT
-  ) {
-    const batch = imageCandidates.slice(
-      cursor,
-      cursor + IMAGE_VALIDATION_CONCURRENCY,
-    );
-    cursor += batch.length;
-
-    const results = await Promise.all(
-      batch.map((imageCandidate) =>
-        withTimeout(
-          validateImageAtIngest(imageCandidate, allowedHosts),
-          IMAGE_VALIDATION_TIMEOUT_MS,
-        )
-      ),
-    );
-
-    for (const validatedImage of results) {
-      if (!validatedImage || validImages.includes(validatedImage)) {
-        continue;
-      }
-      validImages.push(validatedImage);
-      if (validImages.length >= MAX_IMAGES_PER_EVENT) {
-        break;
-      }
-    }
-  }
-
-  return validImages;
-}
-
-async function fetchSourceCityContext(
-  supabase: SupabaseClient,
-  cityId: string | null,
-): Promise<SourceCityContext | null> {
-  if (!cityId) {
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from("cities")
-    .select("name, state, latitude, longitude")
-    .eq("id", cityId)
-    .maybeSingle();
-  if (error || !data) {
-    return null;
-  }
-
-  return {
-    name: data.name,
-    state: data.state,
-    latitude: data.latitude,
-    longitude: data.longitude,
-  };
-}
-
-async function resolveCoordinatesForParsedEvent(
-  parsed: ParsedEvent,
-  cityContext: SourceCityContext | null,
-): Promise<{ latitude: number | null; longitude: number | null }> {
-  const geocodeQuery = buildGeocodeQuery({
-    address: parsed.address,
-    venueName: parsed.venueName,
-    cityName: cityContext?.name ?? null,
-    cityState: cityContext?.state ?? null,
-  });
-
-  if (geocodeQuery) {
-    const geocoded = await geocodeViaNominatim(geocodeQuery);
-    if (geocoded) {
-      return { latitude: geocoded.latitude, longitude: geocoded.longitude };
-    }
-  }
-
-  if (cityContext?.latitude != null && cityContext?.longitude != null) {
-    return { latitude: cityContext.latitude, longitude: cityContext.longitude };
-  }
-
-  return { latitude: null, longitude: null };
 }
 
 async function readResponseBodyCapped(
@@ -517,7 +144,7 @@ export function buildParserContext(timezone: string): ParserContext {
   };
 }
 
-export async function processSource(
+export async function importParsedSourceEvents(
   supabase: SupabaseClient,
   source: EventSourceRow,
   runId: string,
@@ -554,11 +181,6 @@ export async function processSource(
     // Write total found immediately so the UI shows "X found" while import runs.
     await flushProgress();
 
-    const sourceCityContext = await fetchSourceCityContext(
-      supabase,
-      source.city_id,
-    );
-
     const validEvents = parsedEvents.filter((p) => {
       if (!p.title || !p.startDatetime) {
         eventsSkipped += 1;
@@ -570,39 +192,6 @@ export async function processSource(
     if (validEvents.length === 0) {
       await flushProgress();
     } else {
-      // Pre-flight: which source_urls in this batch already exist for this
-      // source? Lets us skip per-event geocode/image HTTP work for updates,
-      // which is the long pole of the per-tick wall clock budget.
-      const candidateUrls = validEvents
-        .map((p) => p.sourceUrl)
-        .filter((u): u is string => Boolean(u));
-      const existingSet = new Set<string>();
-      // PostgREST encodes each URL into the query string for `.in()`. Past
-      // ~100 URLs the request line exceeds the proxy's 8K limit and we get
-      // "Bad Request" before the query reaches Postgres. Chunk to stay safe.
-      const PREFLIGHT_CHUNK = 100;
-      for (let i = 0; i < candidateUrls.length; i += PREFLIGHT_CHUNK) {
-        const chunk = candidateUrls.slice(i, i + PREFLIGHT_CHUNK);
-        const { data: existingRows, error: existingErr } = await supabase
-          .from("events")
-          .select("source_url")
-          .eq("source_id", source.id)
-          .in("source_url", chunk);
-        if (existingErr) throw existingErr;
-        for (
-          const row of (existingRows ?? []) as Array<{ source_url: string }>
-        ) {
-          existingSet.add(row.source_url);
-        }
-      }
-
-      // Geocode + image-validation HTTP work was per-event in the JS loop —
-      // ~2 HTTP fetches × 460 new events × ~500ms = ~460s, well past the
-      // 150s edge wall. Move that work to a separate backfill job (TODO:
-      // wire enrich-events.ts or new backfill RPC) so the hot scrape path
-      // runs in pure SQL with no per-event HTTP. Coords stored NULL, images
-      // empty — the SQL bulk RPC's admin_locked_fields handling preserves
-      // any prior coords/images on UPDATE so we never overwrite admin work.
       function prepEventPayload(
         parsed: ParsedEvent,
       ): Record<string, unknown> {
@@ -763,8 +352,10 @@ export async function processSource(
           MAX_KICKS,
         );
         const results = await Promise.allSettled(
-          Array.from({ length: kicks }, () =>
-            supabase.rpc("invoke_process_tag_queue")),
+          Array.from(
+            { length: kicks },
+            () => supabase.rpc("invoke_process_tag_queue"),
+          ),
         );
         const failed = results.filter((r) => r.status === "rejected").length;
         if (failed > 0) {

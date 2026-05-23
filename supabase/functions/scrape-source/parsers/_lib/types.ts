@@ -3,7 +3,7 @@ import type {
   FetchedArtifact,
   ParsedEvent,
 } from "../../lib/types.ts";
-import type { ParserContext } from "./context.ts";
+import type { ParserContext } from "../../lib/parser-context.ts";
 
 export interface SourceParser<T extends string = string> {
   readonly type: T;
@@ -14,10 +14,6 @@ export interface SourceParser<T extends string = string> {
   extractEvents(
     source: EventSourceRow,
     artifact: FetchedArtifact,
-    ctx: ParserContext,
-  ): Promise<ParsedEvent[]>;
-  fetchAndParse(
-    source: EventSourceRow,
     ctx: ParserContext,
   ): Promise<ParsedEvent[]>;
 }

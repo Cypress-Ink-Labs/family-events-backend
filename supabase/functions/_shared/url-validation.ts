@@ -1,11 +1,3 @@
-// Pure URL validation helpers for SSRF hardening. No Deno imports — safe to
-// import from Vitest (Node) tests, the edge function (Deno runtime), and the
-// browser bundle (Vite).
-//
-// Rejects non-http(s) schemes and IP literals in private / loopback / link-local
-// / unique-local ranges. Hostnames that resolve to these ranges via DNS are NOT
-// covered here — that is a separate DNS-rebinding concern.
-
 export interface UrlValidationResult {
   ok: boolean
   reason?: string
@@ -37,9 +29,7 @@ export function validateExternalUrl(input: unknown): UrlValidationResult {
   const ipv4 = parseIPv4(hostname)
   if (ipv4) {
     const blocked = blockedIPv4Reason(ipv4)
-    if (blocked) {
-      return { ok: false, reason: blocked }
-    }
+    if (blocked) return { ok: false, reason: blocked }
     return { ok: true }
   }
 
@@ -47,9 +37,7 @@ export function validateExternalUrl(input: unknown): UrlValidationResult {
   const ipv6 = parseIPv6(ipv6Host)
   if (ipv6) {
     const blocked = blockedIPv6Reason(ipv6)
-    if (blocked) {
-      return { ok: false, reason: blocked }
-    }
+    if (blocked) return { ok: false, reason: blocked }
     return { ok: true }
   }
 
@@ -120,18 +108,15 @@ function toGroups(parts: string[]): number[] | null {
 }
 
 function blockedIPv6Reason(groups: number[]): string | null {
-  // ::1 loopback
   if (groups.slice(0, 7).every((g) => g === 0) && groups[7] === 1) {
     return "Blocked IPv6 address ::1 (loopback)"
   }
   const first = groups[0]
   const firstByte = first >> 8
-  // fc00::/7 — first 7 bits = 1111110x, i.e. first byte 0xfc or 0xfd (ULA)
   if (firstByte === 0xfc || firstByte === 0xfd) {
     if (firstByte === 0xfd) return "Blocked IPv6 range fd00::/8 (unique-local)"
     return "Blocked IPv6 range fc00::/7 (unique-local)"
   }
-  // fe80::/10 — first 10 bits = 1111111010
   if ((first & 0xffc0) === 0xfe80) {
     return "Blocked IPv6 range fe80::/10 (link-local)"
   }

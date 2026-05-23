@@ -12,7 +12,14 @@ if [ ! -f "$SRC" ]; then
   exit 1
 fi
 
-CRON_APPS=(cron-tag-queue cron-scrape-sources cron-db-maintenance)
+CRON_APPS=(
+  cron-cleanup-stale
+  cron-db-maintenance
+  cron-enrich-events
+  cron-review-events
+  cron-scrape-sources
+  cron-tag-queue
+)
 for app in "${CRON_APPS[@]}"; do
   dst="$ROOT/apps/$app/cron-runner.sh"
   cp "$SRC" "$dst"

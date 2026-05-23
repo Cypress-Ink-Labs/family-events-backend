@@ -3,7 +3,7 @@ import { errorMessage, logEdgeEvent } from "../../_shared/logger.ts";
 import { parsers } from "../../scrape-source/parsers/index.ts";
 import {
   buildParserContext,
-  processSource,
+  importParsedSourceEvents,
 } from "../../scrape-source/lib/process-source.ts";
 import {
   normalizeArtifactForLlm,
@@ -15,7 +15,9 @@ import type {
   ExtractionMode,
   FetchedArtifact,
   ParsedEvent,
+  SourceType,
 } from "../../scrape-source/lib/types.ts";
+import type { SourceParser } from "../../scrape-source/parsers/index.ts";
 
 export interface SourceQueueRow {
   id: number;
@@ -35,6 +37,12 @@ interface LlmConfig {
   baseUrl: string;
   apiKey: string;
   configured: boolean;
+}
+
+interface SourceQueueWorkerDependencies {
+  parsers: Record<SourceType, SourceParser>;
+  importParsedSourceEvents: typeof importParsedSourceEvents;
+  extractWithLlm: typeof extractWithLlm;
 }
 
 export function shouldReleaseBeforeSourceStart(
@@ -276,6 +284,12 @@ async function extractWithLlm(
   };
 }
 
+const defaultWorkerDependencies: SourceQueueWorkerDependencies = {
+  parsers,
+  importParsedSourceEvents,
+  extractWithLlm,
+};
+
 async function handleExtractionFailure(
   supabase: SupabaseClient,
   row: SourceQueueRow,
@@ -302,13 +316,33 @@ async function handleExtractionFailure(
   return { outcome: "retry", imported: 0 };
 }
 
-export async function processQueueRow(
+type RunnableSourceRun =
+  | {
+    status: "loaded";
+    source: EventSourceRow;
+    startedRow: SourceQueueRow;
+    runId: string;
+  }
+  | { status: "skipped"; result: ProcessSourceQueueResult };
+
+type SourceExtractionResult =
+  | { status: "extracted"; parsedEvents: ParsedEvent[] }
+  | { status: "retry"; result: ProcessSourceQueueResult };
+
+interface DeterministicExtractionPhase {
+  events: ParsedEvent[];
+  error: unknown;
+  shouldUseLlm: boolean;
+  fallbackReason: string | null;
+}
+
+async function loadRunnableSourceAndRun(
   supabase: SupabaseClient,
   row: SourceQueueRow,
-): Promise<ProcessSourceQueueResult> {
+): Promise<RunnableSourceRun> {
   if (!row.source_id) {
     await markSkipped(supabase, row.id, "source missing from queue row");
-    return { outcome: "skipped", imported: 0 };
+    return { status: "skipped", result: { outcome: "skipped", imported: 0 } };
   }
 
   const { data: sourceRaw, error: sourceError } = await supabase
@@ -321,18 +355,97 @@ export async function processQueueRow(
   const source = sourceRaw as EventSourceRow | null;
   if (!source) {
     await markSkipped(supabase, row.id, "source deleted before processing");
-    return { outcome: "skipped", imported: 0 };
+    return { status: "skipped", result: { outcome: "skipped", imported: 0 } };
   }
   if (!source.is_active) {
     await markSkipped(supabase, row.id, "source disabled before processing");
-    return { outcome: "skipped", imported: 0 };
+    return { status: "skipped", result: { outcome: "skipped", imported: 0 } };
   }
 
   const startedRow = await markStarted(supabase, row.id);
   const runId = await createAndLinkSourceRun(supabase, row.id, source.id);
-  const parser = parsers[source.source_type];
+  return { status: "loaded", source, startedRow, runId };
+}
+
+async function runDeterministicExtractionPhase(
+  supabase: SupabaseClient,
+  row: SourceQueueRow,
+  source: EventSourceRow,
+  runId: string,
+  parser: SourceParser,
+  artifact: FetchedArtifact,
+  ctx: ReturnType<typeof buildParserContext>,
+): Promise<DeterministicExtractionPhase> {
+  if (source.extraction_mode === "llm") {
+    return {
+      events: [],
+      error: null,
+      shouldUseLlm: true,
+      fallbackReason: null,
+    };
+  }
+
+  try {
+    const events = validateParsedEvents(
+      await parser.extractEvents(source, artifact, ctx),
+    );
+    const fallbackReason = events.length === 0
+      ? "deterministic extractor returned no events"
+      : null;
+    await persistExtractionTrace(supabase, {
+      source_queue_id: row.id,
+      source_run_id: runId,
+      source_id: source.id,
+      extraction_mode: source.extraction_mode,
+      extractor: "deterministic",
+      status: events.length > 0 ? "success" : "fallback",
+      input_bytes: artifact.body.length,
+      parsed_event_count: events.length,
+      fallback_reason: fallbackReason,
+    });
+    return {
+      events,
+      error: null,
+      shouldUseLlm: shouldFallbackToLlm(
+        source.extraction_mode,
+        events.length,
+        null,
+      ),
+      fallbackReason,
+    };
+  } catch (err) {
+    const message = errorMessage(err);
+    await persistExtractionTrace(
+      supabase,
+      buildExtractionErrorTrace({
+        queueId: row.id,
+        runId,
+        sourceId: source.id,
+        extractionMode: source.extraction_mode,
+        extractor: "deterministic",
+        error: message,
+      }),
+    );
+    return {
+      events: [],
+      error: err,
+      shouldUseLlm: shouldFallbackToLlm(source.extraction_mode, 0, err),
+      fallbackReason: message,
+    };
+  }
+}
+
+async function extractParsedEventsForSource(
+  supabase: SupabaseClient,
+  row: SourceQueueRow,
+  source: EventSourceRow,
+  startedRow: SourceQueueRow,
+  runId: string,
+  dependencies: SourceQueueWorkerDependencies,
+): Promise<SourceExtractionResult> {
+  const parser = dependencies.parsers[source.source_type];
   if (!parser) {
-    return handleExtractionFailure(
+    const result = await handleExtractionFailure(
       supabase,
       row,
       runId,
@@ -341,6 +454,7 @@ export async function processQueueRow(
       "deterministic",
       new Error(`No parser registered for source_type=${source.source_type}`),
     );
+    return { status: "retry", result };
   }
 
   const ctx = buildParserContext(
@@ -352,7 +466,7 @@ export async function processQueueRow(
   try {
     artifact = await parser.fetchArtifact(source, ctx);
   } catch (err) {
-    return handleExtractionFailure(
+    const result = await handleExtractionFailure(
       supabase,
       row,
       runId,
@@ -361,89 +475,49 @@ export async function processQueueRow(
       "deterministic",
       err,
     );
+    return { status: "retry", result };
   }
 
-  let parsedEvents: ParsedEvent[] = [];
-  let deterministicError: unknown = null;
-  let fallbackReason: string | null = null;
-
-  if (source.extraction_mode !== "llm") {
-    try {
-      const deterministicEvents = validateParsedEvents(
-        await parser.extractEvents(source, artifact, ctx),
-      );
-      await persistExtractionTrace(supabase, {
-        source_queue_id: row.id,
-        source_run_id: runId,
-        source_id: source.id,
-        extraction_mode: source.extraction_mode,
-        extractor: "deterministic",
-        status: deterministicEvents.length > 0 ? "success" : "fallback",
-        input_bytes: artifact.body.length,
-        parsed_event_count: deterministicEvents.length,
-        fallback_reason: deterministicEvents.length === 0
-          ? "deterministic extractor returned no events"
-          : null,
-      });
-      parsedEvents = deterministicEvents;
-    } catch (err) {
-      deterministicError = err;
-      await persistExtractionTrace(
-        supabase,
-        buildExtractionErrorTrace({
-          queueId: row.id,
-          runId,
-          sourceId: source.id,
-          extractionMode: source.extraction_mode,
-          extractor: "deterministic",
-          error: errorMessage(err),
-        }),
-      );
-    }
-  }
+  const deterministic = await runDeterministicExtractionPhase(
+    supabase,
+    row,
+    source,
+    runId,
+    parser,
+    artifact,
+    ctx,
+  );
 
   if (
     source.extraction_mode === "deterministic" &&
-    (deterministicError || parsedEvents.length === 0)
+    (deterministic.error || deterministic.events.length === 0)
   ) {
-    const message = deterministicError instanceof Error
-      ? deterministicError.message
+    const message = deterministic.error instanceof Error
+      ? deterministic.error.message
       : "Deterministic extraction returned no valid events";
     await markRunError(supabase, runId, message);
     await scheduleRetry(supabase, row.id, startedRow.attempt_count, message);
-    return { outcome: "retry", imported: 0 };
+    return {
+      status: "retry",
+      result: { outcome: "retry", imported: 0 },
+    };
   }
 
-  if (
-    shouldFallbackToLlm(
-      source.extraction_mode,
-      parsedEvents.length,
-      deterministicError,
-    )
-  ) {
-    fallbackReason = deterministicError instanceof Error
-      ? deterministicError.message
-      : "deterministic extractor returned no events";
+  if (source.extraction_mode !== "llm" && deterministic.shouldUseLlm) {
     logEdgeEvent("warn", "deterministic extraction falling back to llm", {
       function: "process-source-queue",
       source_id: source.id,
       queue_row_id: row.id,
-      deterministic_error: deterministicError instanceof Error
-        ? deterministicError.message
+      deterministic_error: deterministic.error instanceof Error
+        ? deterministic.error.message
         : null,
     });
   }
 
-  if (
-    source.extraction_mode === "llm" ||
-    shouldFallbackToLlm(
-      source.extraction_mode,
-      parsedEvents.length,
-      deterministicError,
-    )
-  ) {
+  let parsedEvents = deterministic.events;
+  if (deterministic.shouldUseLlm) {
     try {
-      const llm = await extractWithLlm(source, artifact);
+      const llm = await dependencies.extractWithLlm(source, artifact);
       const valid = validateParsedEvents(llm.events);
       if (valid.length !== llm.events.length) {
         throw new Error("LLM returned invalid ParsedEvent rows");
@@ -459,13 +533,13 @@ export async function processQueueRow(
         status: "success",
         input_bytes: artifact.body.length,
         parsed_event_count: valid.length,
-        fallback_reason: fallbackReason,
+        fallback_reason: deterministic.fallbackReason,
         latency_ms: llm.latencyMs,
         reasoning_summary: `LLM extraction completed in ${llm.latencyMs}ms`,
       });
       parsedEvents = valid;
     } catch (err) {
-      return handleExtractionFailure(
+      const result = await handleExtractionFailure(
         supabase,
         row,
         runId,
@@ -474,11 +548,53 @@ export async function processQueueRow(
         "llm",
         err,
       );
+      return { status: "retry", result };
     }
   }
 
-  const result = await processSource(supabase, source, runId, parsedEvents);
-  await supabase
+  return { status: "extracted", parsedEvents };
+}
+
+export async function processSourceQueueRow(
+  supabase: SupabaseClient,
+  row: SourceQueueRow,
+  dependencies: SourceQueueWorkerDependencies = defaultWorkerDependencies,
+): Promise<ProcessSourceQueueResult> {
+  const runnable = await loadRunnableSourceAndRun(supabase, row);
+  if (runnable.status === "skipped") {
+    return runnable.result;
+  }
+
+  const extraction = await extractParsedEventsForSource(
+    supabase,
+    row,
+    runnable.source,
+    runnable.startedRow,
+    runnable.runId,
+    dependencies,
+  );
+  if (extraction.status === "retry") {
+    return extraction.result;
+  }
+
+  const result = await dependencies.importParsedSourceEvents(
+    supabase,
+    runnable.source,
+    runnable.runId,
+    extraction.parsedEvents,
+  );
+
+  if (result.status !== "success" && result.status !== "partial") {
+    await scheduleRetry(
+      supabase,
+      row.id,
+      runnable.startedRow.attempt_count,
+      result.error ?? "Source processing failed",
+    );
+    return { outcome: "retry", imported: result.eventsImported };
+  }
+
+  const { error: successUpdateError } = await supabase
     .from("source_scrape_queue")
     .update({
       status: "succeeded",
@@ -486,6 +602,8 @@ export async function processQueueRow(
       last_error: null,
     })
     .eq("id", row.id);
+  if (successUpdateError) throw successUpdateError;
+
   return { outcome: "succeeded", imported: result.eventsImported };
 }
 

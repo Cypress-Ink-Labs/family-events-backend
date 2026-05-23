@@ -1,29 +1,20 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "@supabase/supabase-js";
-import { requireServiceRole } from "../_shared/auth.ts";
-import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
+import { type SupabaseClient } from "@supabase/supabase-js";
+import { logEdgeEvent } from "../_shared/logger.ts";
+import { serveServiceRoleJson } from "../_shared/service-role-handler.ts";
 import {
   planSourceQueueClaimHandling,
-  processQueueRow,
+  processSourceQueueRow,
   reapStuckSourceQueueRows,
   type SourceQueueRow,
 } from "./lib/worker.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
-};
 
 function sourceClaimLimit(): number {
   return 1;
 }
 
 export async function processSourceQueueBatch(
-  supabaseUrl: string,
-  serviceRoleKey: string,
+  supabase: SupabaseClient,
 ): Promise<{
   claimed: number;
   started: number;
@@ -31,7 +22,6 @@ export async function processSourceQueueBatch(
   reaped: number;
   outcome: string | null;
 }> {
-  const supabase = createClient(supabaseUrl, serviceRoleKey);
   const workerStartedAt = Date.now();
   const reaped = await reapStuckSourceQueueRows(supabase);
 
@@ -74,7 +64,7 @@ export async function processSourceQueueBatch(
     };
   }
 
-  const result = await processQueueRow(supabase, row);
+  const result = await processSourceQueueRow(supabase, row);
   return {
     claimed: rows.length,
     started: 1,
@@ -85,59 +75,15 @@ export async function processSourceQueueBatch(
 }
 
 if (import.meta.main) {
-  Deno.serve(async (req: Request) => {
-    if (req.method === "OPTIONS") {
-      return new Response(null, { status: 200, headers: corsHeaders });
-    }
-
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-
-    const auth = requireServiceRole(req, serviceRoleKey);
-    if (!auth.ok) {
-      return new Response(JSON.stringify({ error: auth.message }), {
-        status: auth.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (!supabaseUrl) {
-      return new Response(
-        JSON.stringify({ error: "SUPABASE_URL not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    try {
-      const summary = await processSourceQueueBatch(
-        supabaseUrl,
-        serviceRoleKey,
-      );
+  serveServiceRoleJson(
+    { functionName: "process-source-queue", errorStage: "outer" },
+    async ({ supabase }) => {
+      const summary = await processSourceQueueBatch(supabase);
       logEdgeEvent("log", "source-queue batch done", {
         function: "process-source-queue",
         ...summary,
       });
-      return new Response(JSON.stringify(summary), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } catch (err) {
-      await captureEdgeException(
-        err,
-        errorContext(err, { function: "process-source-queue", stage: "outer" }),
-      );
-      logEdgeEvent(
-        "error",
-        "process-source-queue outer failure",
-        errorContext(err, { function: "process-source-queue" }),
-      );
-      return new Response(JSON.stringify({ error: errorMessage(err) }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-  });
+      return summary;
+    },
+  );
 }

@@ -48,10 +48,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
 }
 
+type ReadStringOptions = { required?: boolean; maxLength?: number }
+
 function readString(
   value: Record<string, unknown>,
   key: string,
-  options: { required?: boolean; maxLength?: number } = {}
+  options: ReadStringOptions & { required: true }
+): string
+function readString(
+  value: Record<string, unknown>,
+  key: string,
+  options?: ReadStringOptions
+): string | null
+function readString(
+  value: Record<string, unknown>,
+  key: string,
+  options: ReadStringOptions = {}
 ): string | null {
   const raw = value[key]
   if (raw == null) {
@@ -103,8 +115,8 @@ function parsePayload(value: unknown): Payload {
   if (kind === "admin_request") {
     return {
       kind,
-      request_id: readString(value, "request_id", { required: true, maxLength: 128 }) ?? "",
-      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
+      request_id: readString(value, "request_id", { required: true, maxLength: 128 }),
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
       message: readNullableString(value, "message", 2000),
     }
   }
@@ -112,8 +124,8 @@ function parsePayload(value: unknown): Payload {
   if (kind === "request_approved") {
     return {
       kind,
-      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
-      code: readString(value, "code", { required: true, maxLength: 64 }) ?? "",
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
+      code: readString(value, "code", { required: true, maxLength: 64 }),
       app_url: readOptionalString(value, "app_url", 2048),
     }
   }
@@ -121,15 +133,15 @@ function parsePayload(value: unknown): Payload {
   if (kind === "request_rejected") {
     return {
       kind,
-      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
     }
   }
 
   if (kind === "welcome") {
     return {
       kind,
-      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 }) ?? ""),
-      username: readString(value, "username", { required: true, maxLength: 120 }) ?? "",
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
+      username: readString(value, "username", { required: true, maxLength: 120 }),
     }
   }
 

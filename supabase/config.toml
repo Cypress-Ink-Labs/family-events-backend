@@ -108,6 +108,9 @@ verify_jwt = false
 [functions.process-source-queue]
 verify_jwt = false
 
+[functions.process-event-review-queue]
+verify_jwt = false
+
 [functions.backfill-event-enrichment]
 # Called by cron-enrich-events with sb_secret_* bearer. App-layer
 # requireServiceRole still enforces auth.

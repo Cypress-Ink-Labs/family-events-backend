@@ -11,11 +11,11 @@
     "format:check": "oxfmt --config ../config-quality/oxfmt.base.json --check src emails scripts"
   },
   "dependencies": {
-    "@react-email/render": "latest",
-    "react-email": "latest",
-    "resend": "latest",
-    "react": "latest",
-    "react-dom": "latest"
+    "@react-email/render": "^2.0.8",
+    "react-email": "^6.2.0",
+    "resend": "^6.12.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
     "@family-events/config-quality": "workspace:*",
