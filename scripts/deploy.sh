@@ -97,6 +97,7 @@ ALL_TARGETS=(
   "cron-scrape-sources                   |railway|cron-scrape-sources"
   "cron-db-maintenance                   |railway|cron-db-maintenance"
   "cron-tag-queue                        |railway|cron-tag-queue"
+  "cron-enrich-events                    |railway|cron-enrich-events"
   "cron-review-events                    |railway|cron-review-events"
   "cron-cleanup-stale                    |railway|cron-cleanup-stale"
 )
@@ -261,7 +262,7 @@ deploy_supabase_fn_all() {
     find "$ROOT_DIR/supabase/functions" -mindepth 1 -maxdepth 1 -type d \
       -not -name '_shared' \
       -not -name 'node_modules' \
-      -exec basename {} \; | sort
+      -exec sh -c '[ -f "$1/index.ts" ] && basename "$1"' sh {} \; | sort
   )
   local expected_sorted=()
   mapfile -t expected_sorted < <(printf '%s\n' "${functions[@]}" | sort)
@@ -273,9 +274,18 @@ deploy_supabase_fn_all() {
   fi
   local failed=()
   for fn_name in "${functions[@]}"; do
+    local extra_args=()
+    for skip_jwt_fn in "${NO_VERIFY_JWT_FUNCTIONS[@]}"; do
+      if [ "$skip_jwt_fn" = "$fn_name" ]; then
+        extra_args+=("--no-verify-jwt")
+        break
+      fi
+    done
+
     info "Deploying: $fn_name"
     if bash "$SUPABASE" functions deploy "$fn_name" \
-        --project-ref "$SUPABASE_PROJECT_REF"; then
+        --project-ref "$SUPABASE_PROJECT_REF" \
+        "${extra_args[@]}"; then
       ok "$fn_name deployed."
     else
       warn "$fn_name deploy FAILED."
@@ -286,6 +296,47 @@ deploy_supabase_fn_all() {
     warn "Failed functions: ${failed[*]}"
     return 1
   fi
+}
+
+railway_service_exists() {
+  local service="$1"
+  railway service list --json 2>/dev/null \
+    | jq -e --arg service "$service" '.[] | select(.name == $service)' >/dev/null 2>&1
+}
+
+bootstrap_created_railway_service() {
+  local service="$1"
+
+  case "$service" in
+    cron-review-events)
+      local source_vars process_url
+      source_vars="$(railway variable list --service cron-enrich-events --json 2>/dev/null || true)"
+      if [ -z "$source_vars" ]; then
+        warn "Could not read cron-enrich-events variables to bootstrap '$service'."
+        return 0
+      fi
+
+      for key in SUPABASE_SERVICE_ROLE_KEY IS_CRON_ENABLED_URL LOG_CRON_RUN_URL; do
+        local value
+        value="$(printf '%s' "$source_vars" | jq -r --arg key "$key" '.[$key] // empty' 2>/dev/null || true)"
+        if [ -n "$value" ]; then
+          railway variable set --service "$service" --skip-deploys --json "$key=$value" >/dev/null
+        fi
+      done
+
+      process_url="$(
+        printf '%s' "$source_vars" \
+          | jq -r '.BACKFILL_EVENT_ENRICHMENT_URL // empty' 2>/dev/null \
+          | sed 's#/functions/v1/backfill-event-enrichment$#/functions/v1/process-event-review-queue#'
+      )"
+      if [ -n "$process_url" ]; then
+        railway variable set --service "$service" --skip-deploys --json \
+          "PROCESS_EVENT_REVIEW_QUEUE_URL=$process_url" >/dev/null
+      else
+        warn "Could not derive PROCESS_EVENT_REVIEW_QUEUE_URL for '$service'."
+      fi
+      ;;
+  esac
 }
 
 # Maps Railway service name → local app subdirectory (relative to apps/).
@@ -377,11 +428,28 @@ deploy_railway() {
     return 1
   fi
 
-  info "Deploying from: $ROOT_DIR (Railway resolves rootDirectory from service config)"
-  info "Running: railway up --service $service --detach"
+  if ! railway_service_exists "$service"; then
+    if [ -z "$subdir" ]; then
+      warn "Railway service '$service' was not found and cannot be auto-created from the repo root."
+      return 1
+    fi
+    info "Railway service '$service' was not found; creating it."
+    (cd "$ROOT_DIR" && railway add --service="$service" --json >/dev/null) \
+      || { warn "railway add failed for '$service'"; return 1; }
+    bootstrap_created_railway_service "$service"
+  fi
 
-  (cd "$ROOT_DIR" && railway up --service "$service" --detach) \
-    || { warn "railway up failed for '$service'"; return 1; }
+  if [ -n "$subdir" ]; then
+    info "Deploying from: $ROOT_DIR/apps/$subdir"
+    info "Running: railway up $ROOT_DIR/apps/$subdir --path-as-root --service $service --detach"
+    (cd "$ROOT_DIR" && railway up "$ROOT_DIR/apps/$subdir" --path-as-root --service "$service" --detach) \
+      || { warn "railway up failed for '$service'"; return 1; }
+  else
+    info "Deploying from: $ROOT_DIR"
+    info "Running: railway up --service $service --detach"
+    (cd "$ROOT_DIR" && railway up --service "$service" --detach) \
+      || { warn "railway up failed for '$service'"; return 1; }
+  fi
 
   ok "Railway deploy triggered for '$service'."
   poll_railway_status "$service" || return 1
@@ -405,7 +473,8 @@ run_smoke_checks() {
 
   # 1. Supabase functions drift check
   local fn_dirs fn_list
-  fn_dirs="$(find "$ROOT_DIR/supabase/functions" -maxdepth 1 -mindepth 1 -type d -not -name '_shared' | sort | xargs -I{} basename {})"
+  fn_dirs="$(find "$ROOT_DIR/supabase/functions" -maxdepth 1 -mindepth 1 -type d -not -name '_shared' \
+    -exec sh -c '[ -f "$1/index.ts" ] && basename "$1"' sh {} \; | sort)"
   fn_list="$(supabase functions list --json 2>/dev/null | jq -r '.[].name' 2>/dev/null | sort || true)"
   if [ -n "$fn_list" ] && [ "$(printf '%s\n' "$fn_dirs")" != "$(printf '%s\n' "$fn_list")" ]; then
     warn "Supabase function drift detected between filesystem and deployed functions."
