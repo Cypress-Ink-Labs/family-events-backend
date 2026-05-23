@@ -30,6 +30,7 @@ const OUTDOOR_TAG_HINTS = [
   "playground",
 ];
 const INDOOR_TAG_HINTS = ["museum", "indoor", "library", "theater", "theatre"];
+const MAX_RAW_IMAGE_CANDIDATES = 20;
 
 export function deriveIsOutdoorFromParsedEvent(
   parsed: ParsedEvent,
@@ -58,6 +59,21 @@ export function deriveIsOutdoorFromParsedEvent(
     return false;
   }
   return null;
+}
+
+export function deriveRawImageCandidates(parsed: ParsedEvent): string[] {
+  const seen = new Set<string>();
+  const candidates = [...parsed.images, ...(parsed.imageUrl ? [parsed.imageUrl] : [])];
+
+  for (const candidate of candidates) {
+    const url = candidate.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    if (seen.size >= MAX_RAW_IMAGE_CANDIDATES) break;
+  }
+
+  return [...seen];
 }
 
 async function readResponseBodyCapped(
@@ -196,6 +212,7 @@ export async function importParsedSourceEvents(
         parsed: ParsedEvent,
       ): Record<string, unknown> {
         const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed);
+        const imageCandidates = deriveRawImageCandidates(parsed);
 
         return {
           title: parsed.title,
@@ -208,7 +225,7 @@ export async function importParsedSourceEvents(
           city_id: source.city_id,
           source_url: parsed.sourceUrl ?? null,
           source_name: source.name,
-          images: [] as string[],
+          images: imageCandidates,
           price: parsed.price ?? null,
           is_free: Boolean(parsed.isFree),
           is_outdoor: isOutdoor,

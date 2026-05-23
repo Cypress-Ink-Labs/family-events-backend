@@ -1,5 +1,9 @@
 import { assertEquals } from "jsr:@std/assert"
-import { deriveIsOutdoorFromParsedEvent, sanitizeImagesForIngest } from "./process-source.ts"
+import {
+  deriveIsOutdoorFromParsedEvent,
+  deriveRawImageCandidates,
+  sanitizeImagesForIngest,
+} from "./process-source.ts"
 import type { ParsedEvent } from "./types.ts"
 
 function buildParsedEvent(overrides: Partial<ParsedEvent> = {}): ParsedEvent {
@@ -40,6 +44,30 @@ if (typeof Deno !== "undefined") {
       description: "Start at the museum, then head outside to the park playground.",
     })
     assertEquals(deriveIsOutdoorFromParsedEvent(parsed), null)
+  })
+
+  Deno.test("deriveRawImageCandidates keeps parser-discovered URLs and imageUrl fallback", () => {
+    const parsed = buildParsedEvent({
+      imageUrl: "https://cdn.example.com/hero.jpg",
+      images: [
+        "https://cdn.example.com/a.jpg",
+        "https://cdn.example.com/a.jpg",
+        "javascript:alert(1)",
+      ],
+    })
+
+    assertEquals(deriveRawImageCandidates(parsed), [
+      "https://cdn.example.com/a.jpg",
+      "https://cdn.example.com/hero.jpg",
+    ])
+  })
+
+  Deno.test("deriveRawImageCandidates caps candidates at 20", () => {
+    const parsed = buildParsedEvent({
+      images: Array.from({ length: 25 }, (_, i) => `https://cdn.example.com/${i}.jpg`),
+    })
+
+    assertEquals(deriveRawImageCandidates(parsed).length, 20)
   })
 
   Deno.test("sanitizeImagesForIngest enforces 2MB size cap and image content-type", async () => {
