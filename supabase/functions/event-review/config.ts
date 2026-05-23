@@ -94,7 +94,10 @@ export function resolveLlmReviewConfig(
     } else if (!baseUrl) {
       valid = false;
       invalidReason = "missing_base_url";
-    } else if (!parsedThreshold.valid || !(confidenceThreshold >= 0 && confidenceThreshold <= 1)) {
+    } else if (
+      !parsedThreshold.valid ||
+      !(confidenceThreshold >= 0 && confidenceThreshold <= 1)
+    ) {
       valid = false;
       invalidReason = "invalid_confidence_threshold";
     } else if (!parsedTimeoutMs.valid || timeoutMs <= 0) {
