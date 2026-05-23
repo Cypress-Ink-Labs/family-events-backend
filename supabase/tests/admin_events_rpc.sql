@@ -325,12 +325,12 @@ DECLARE
 BEGIN
   SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
 
-  INSERT INTO public.cities (id, name, slug, state, country, timezone, is_active, created_at, updated_at)
+  INSERT INTO public.cities (id, name, slug, state, country, timezone, is_active, created_at)
   VALUES
-    (city_one, 'Admin City One', 'admin-city-one', 'IL', 'US', 'America/Chicago', true, now(), now()),
-    (city_two, 'Admin City Two', 'admin-city-two', 'IL', 'US', 'America/Chicago', true, now(), now())
+    (city_one, 'Admin City One', 'admin-city-one', 'IL', 'US', 'America/Chicago', true, now()),
+    (city_two, 'Admin City Two', 'admin-city-two', 'IL', 'US', 'America/Chicago', true, now())
   ON CONFLICT (id) DO UPDATE
-    SET name = EXCLUDED.name, updated_at = now();
+    SET name = EXCLUDED.name;
 
   INSERT INTO public.events (id, city_id, title, status, start_datetime, created_at, updated_at)
   VALUES
