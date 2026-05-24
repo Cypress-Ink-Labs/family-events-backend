@@ -379,10 +379,10 @@ poll_railway_status() {
       return 0  # fallback: non-fatal
     fi
 
-    status="$(printf '%s' "$raw" | jq -r '.latestDeployment.status // empty' 2>/dev/null || true)"
+    status="$(printf '%s' "$raw" | jq -r '.status // empty' 2>/dev/null || true)"
 
     if [ -z "$status" ]; then
-      warn "Could not parse latestDeployment.status from railway status output for '$service'"
+      warn "Could not parse status from railway status output for '$service'"
       return 0  # fallback: non-fatal
     fi
 
@@ -393,7 +393,7 @@ poll_railway_status() {
         ;;
       FAILED|CRASHED)
         local deploy_url
-        deploy_url="$(printf '%s' "$raw" | jq -r '.latestDeployment.url // empty' 2>/dev/null || true)"
+        deploy_url="$(printf '%s' "$raw" | jq -r '.url // empty' 2>/dev/null || true)"
         warn "Railway service '$service' deploy ${status}. URL: ${deploy_url:-unknown}"
         return 1
         ;;

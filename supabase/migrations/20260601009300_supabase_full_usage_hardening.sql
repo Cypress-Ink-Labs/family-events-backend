@@ -25,6 +25,7 @@ GRANT SELECT ON TABLE
   public.event_tags,
   public.events,
   public.public_events,
+  public.ratings,
   public.tags,
   public.timezone_names
 TO anon;
