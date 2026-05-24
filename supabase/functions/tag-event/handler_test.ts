@@ -435,3 +435,48 @@ Deno.test("handleTagEvent returns fallback output from classification failures",
   assertEquals(body.processed, true);
   assertEquals(db.traces.length, 0);
 });
+
+Deno.test("handleTagEvent includes prompt_version in trace insert", async () => {
+  const db = new FakeSupabase();
+  db.tags = [{ id: "tag-outdoor", slug: "outdoor", name: "Outdoor" }];
+  db.events.set("evt-pv", {
+    id: "evt-pv",
+    title: "Park day",
+    description: "Outdoor fun",
+    price: null,
+    is_free: true,
+    venue_name: null,
+    address: null,
+    latitude: 30,
+    longitude: -90,
+    city_id: null,
+  });
+
+  const handler = createTagEventHandler({
+    createSupabaseClient: () => db as never,
+    requireServiceRole: authOk,
+    classify: async () => ({
+      classification: {
+        tags: [{ slug: "outdoor", confidence: 0.9, reason: "park" }],
+        ageMin: null,
+        ageMax: null,
+        price: null,
+        isFree: true,
+        venueName: null,
+        provider: "openai" as const,
+        reasoningSummary: null,
+        status: "success" as const,
+        fallbackReason: null,
+        model: "gpt-4.1-nano",
+      },
+      llmUsage: null,
+    }),
+    geocode: () => Promise.resolve(null),
+  });
+
+  await handler(makeRequest({ event_id: "evt-pv", title: "Park day" }));
+
+  assertEquals(db.traces.length, 1);
+  assertEquals(typeof db.traces[0].prompt_version, "string");
+  assert((db.traces[0].prompt_version as string).length > 0);
+});
