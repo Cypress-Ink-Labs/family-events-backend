@@ -22,12 +22,18 @@ GRANT SELECT ON TABLE
   public.cities,
   public.comments,
   public.event_rating_stats,
+  public.event_tag_queue,
+  public.event_tag_queue_summary,
   public.event_tags,
   public.events,
+  public.favorites,
   public.public_events,
   public.ratings,
+  public.source_scrape_queue,
+  public.source_scrape_queue_summary,
   public.tags,
-  public.timezone_names
+  public.timezone_names,
+  public.user_calendar_events
 TO anon;
 
 -- Signed-in users need normal app reads, plus admin reads guarded by RLS.
@@ -38,10 +44,19 @@ GRANT INSERT, UPDATE, DELETE ON TABLE public.comments TO authenticated;
 GRANT INSERT, DELETE ON TABLE public.favorites TO authenticated;
 GRANT INSERT, UPDATE, DELETE ON TABLE public.ratings TO authenticated;
 GRANT INSERT, DELETE ON TABLE public.user_calendar_events TO authenticated;
-GRANT UPDATE ON TABLE public.user_profiles TO authenticated;
+GRANT UPDATE (
+  email,
+  display_name,
+  avatar_url,
+  city_preference_id,
+  child_name,
+  child_age,
+  updated_at
+) ON TABLE public.user_profiles TO authenticated;
 
 -- Direct browser writes still used by admin screens; RLS keeps these admin-only.
 GRANT INSERT, UPDATE ON TABLE public.cities TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.events TO authenticated;
 GRANT DELETE ON TABLE public.invite_codes TO authenticated;
 
 -- Keep sequence access available for direct inserts without restoring broad
