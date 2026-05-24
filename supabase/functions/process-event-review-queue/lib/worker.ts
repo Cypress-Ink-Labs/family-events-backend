@@ -7,7 +7,7 @@ import {
 } from "../../event-review/mod.ts";
 import { errorMessage, logEdgeEvent } from "../../_shared/logger.ts";
 
-const DEFAULT_BATCH_SIZE = 20;
+const DEFAULT_BATCH_SIZE = 60;
 const MAX_BATCH_SIZE = 100;
 const BUDGET_MS = 110_000;
 
