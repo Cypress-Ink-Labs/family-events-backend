@@ -78,6 +78,7 @@ ALL_TARGETS=(
   "── Supabase ──────────────────────────|separator|"
   "DB Migrations                         |supabase_migrate|"
   "fn: all functions                     |supabase_fn_all|"
+  "fn: admin-run-cron                    |supabase_fn|admin-run-cron"
   "fn: backfill-event-enrichment         |supabase_fn|backfill-event-enrichment"
   "fn: cleanup-stale-runs                |supabase_fn|cleanup-stale-runs"
   "fn: db-maintenance                    |supabase_fn|db-maintenance"
@@ -195,8 +196,8 @@ deploy_supabase_migrate() {
 # anything that isn't a parseable JWT BEFORE the function body runs. Each
 # function still authenticates via `requireServiceRole` in its body. Listed
 # explicitly so a new function gets the safe default (verify_jwt=true) unless
-# we opt in here. Only share-og — the public OG image endpoint — is intentionally
-# left with verify_jwt=true.
+# we opt in here. admin-run-cron and share-og are intentionally left with
+# verify_jwt=true.
 NO_VERIFY_JWT_FUNCTIONS=(
   backfill-event-enrichment
   cleanup-stale-runs
@@ -239,6 +240,7 @@ deploy_supabase_fn() {
 
 deploy_supabase_fn_all() {
   local functions=(
+    admin-run-cron
     backfill-event-enrichment
     cleanup-stale-runs
     db-maintenance

@@ -123,13 +123,13 @@ async function enrichOne(
         longitude = geo.longitude;
       }
     }
-    if (
-      (latitude === null || longitude === null) && cityCtx?.latitude != null &&
-      cityCtx?.longitude != null
-    ) {
-      latitude = cityCtx.latitude;
-      longitude = cityCtx.longitude;
-    }
+    // Intentionally no city-centroid fallback here. Writing the centroid back
+    // re-flags the row as needs_coords (centroid match) and the claim queue
+    // re-served the same rows every tick, starving the rest of the backlog.
+    // Scrape already seeds the centroid on insert; if the geocode misses we
+    // leave the row at its existing coords and the attempt-timestamp bump
+    // (mark_event_enrichment_attempt below) rotates it to the back of the
+    // queue so other rows get a turn.
   }
 
   if (row.needs_images && row.source_id) {
@@ -179,13 +179,20 @@ async function enrichOne(
   const gotCoords = latitude !== null && longitude !== null;
   const gotImages = images.length > 0;
 
-  // Skip the UPDATE entirely if we have nothing to write — saves a round trip
-  // and keeps `updated_at` stable so the SQL row stays in the "needs" list
-  // for the next backfill tick (where the geocode might succeed on retry).
+  // Nothing to write: bump the attempt timestamp so the row rotates to the
+  // back of the claim queue. Without this the same unfillable rows would
+  // sit at the top of the ORDER BY tiebreaker forever, starving the rest
+  // of the backlog.
   if (!gotCoords && !gotImages) {
+    const { error: markErr } = await supabase.rpc(
+      "mark_event_enrichment_attempt",
+      { p_event_id: row.event_id },
+    );
+    if (markErr) throw markErr;
     return { updated: false, gotCoords: false, gotImages: false, imageSource: "none" };
   }
 
+  // update_event_enrichment also bumps last_enrichment_attempt_at server-side.
   const { error } = await supabase.rpc("update_event_enrichment", {
     p_event_id: row.event_id,
     p_latitude: latitude,

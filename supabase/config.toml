@@ -127,6 +127,11 @@ verify_jwt = false
 # requireServiceRole still enforces auth.
 verify_jwt = false
 
+[functions.admin-run-cron]
+# Called from the admin UI with a user JWT. App-layer requireAdminOrService
+# mirrors private.is_admin and invokes the cron target with service role.
+verify_jwt = true
+
 [functions.scrape-due-sources]
 verify_jwt = false
 
