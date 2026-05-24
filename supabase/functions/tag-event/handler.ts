@@ -137,8 +137,17 @@ function resolveAiProvider(value: string | undefined): LlmTagProvider {
 }
 
 function resolveAiConfig(
-  dbConfig?: { modelId: string; provider: string } | null,
+  dbConfig?: { modelId: string; provider: string; enabled: boolean } | null,
 ): LlmConfig {
+  if (dbConfig != null && !dbConfig.enabled) {
+    return {
+      provider: resolveAiProvider(dbConfig.provider),
+      baseUrl: "",
+      apiKey: "",
+      model: dbConfig.modelId,
+      configured: false,
+    };
+  }
   const provider = dbConfig
     ? resolveAiProvider(dbConfig.provider)
     : resolveAiProvider(Deno.env.get("AI_PROVIDER"));
@@ -170,21 +179,23 @@ function resolveAiConfig(
 
 async function loadTagFeatureConfig(
   supabase: TagEventSupabaseClient,
-): Promise<{ modelId: string; provider: string } | null> {
+): Promise<{ modelId: string; provider: string; enabled: boolean } | null> {
   try {
     const { data, error } = await supabase
       .from("ai_feature_config")
-      .select("model_id, approved_ai_models(provider)")
+      .select("model_id, enabled, approved_ai_models(provider)")
       .eq("feature", "tagging")
       .maybeSingle();
     if (error || !data) return null;
     const row = data as unknown as {
       model_id: string;
+      enabled: boolean;
       approved_ai_models: { provider: string } | null;
     };
     return {
       modelId: row.model_id,
       provider: row.approved_ai_models?.provider ?? "openai",
+      enabled: row.enabled,
     };
   } catch {
     return null;
@@ -519,7 +530,7 @@ function classifyWithKeywords(input: {
 export async function resolveClassification(
   input: TagEventInput,
   availableTags: AvailableTag[],
-  dbConfig?: { modelId: string; provider: string } | null,
+  dbConfig?: { modelId: string; provider: string; enabled: boolean } | null,
 ): Promise<ClassificationOutput> {
   const aiConfig = normalizeAiConfigForUse(resolveAiConfig(dbConfig));
 
@@ -906,7 +917,7 @@ interface TagEventHandlerDeps {
   geocode: GeocodeLookup;
   loadFeatureConfig: (
     supabase: TagEventSupabaseClient,
-  ) => Promise<{ modelId: string; provider: string } | null>;
+  ) => Promise<{ modelId: string; provider: string; enabled: boolean } | null>;
 }
 
 const defaultHandlerDeps: TagEventHandlerDeps = {

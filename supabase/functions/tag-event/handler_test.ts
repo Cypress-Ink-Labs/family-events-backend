@@ -43,6 +43,7 @@ class FakeSupabase {
   aiFeatureConfig: {
     feature: string;
     model_id: string;
+    enabled: boolean;
     approved_ai_models: { provider: string } | null;
   } | null = null;
 
@@ -519,7 +520,7 @@ Deno.test("resolveClassification uses model from DB config when provided", async
         currentEvent: null,
       },
       [{ id: "tag-outdoor", slug: "outdoor", name: "Outdoor" }],
-      { modelId: "gpt-4.1-nano", provider: "openai" },
+      { modelId: "gpt-4.1-nano", provider: "openai", enabled: true },
     );
 
     // No API key configured so falls back to keyword classification,

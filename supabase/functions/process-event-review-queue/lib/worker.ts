@@ -582,16 +582,24 @@ export async function processReviewQueueBatch(
 
 async function loadEventReviewFeatureConfig(
   supabase: SupabaseClient,
-): Promise<{ model: string; enabled: boolean } | null> {
+): Promise<{ model: string; enabled: boolean; provider: string | null } | null> {
   try {
     const { data, error } = await supabase
       .from("ai_feature_config")
-      .select("model_id, enabled")
+      .select("model_id, enabled, approved_ai_models(provider)")
       .eq("feature", "event-review")
       .maybeSingle();
     if (error || !data) return null;
-    const row = data as { model_id: string; enabled: boolean };
-    return { model: row.model_id, enabled: row.enabled };
+    const row = data as unknown as {
+      model_id: string;
+      enabled: boolean;
+      approved_ai_models: { provider: string } | null;
+    };
+    return {
+      model: row.model_id,
+      enabled: row.enabled,
+      provider: row.approved_ai_models?.provider ?? null,
+    };
   } catch {
     return null;
   }

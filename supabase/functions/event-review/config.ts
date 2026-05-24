@@ -42,12 +42,13 @@ function normalizeBaseUrl(value: string | undefined): string {
 
 export function resolveLlmReviewConfig(
   env: Pick<typeof Deno.env, "get"> = Deno.env,
-  dbOverrides?: { model: string; enabled: boolean } | null,
+  dbOverrides?: { model: string; enabled: boolean; provider?: string | null } | null,
 ): LlmReviewConfig {
   const enabled = dbOverrides != null
     ? dbOverrides.enabled
     : parseBoolean(env.get("LLM_REVIEW_ENABLED"), false);
-  const provider = env.get("LLM_REVIEW_PROVIDER") ?? env.get("AI_PROVIDER") ??
+  const provider = dbOverrides?.provider ??
+    env.get("LLM_REVIEW_PROVIDER") ?? env.get("AI_PROVIDER") ??
     "openai-compatible";
   const baseUrl = normalizeBaseUrl(
     env.get("LLM_REVIEW_BASE_URL") ?? env.get("AI_BASE_URL"),
