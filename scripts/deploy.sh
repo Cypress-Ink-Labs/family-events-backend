@@ -375,7 +375,7 @@ railway_service_dir() {
 
 poll_railway_status() {
   local service="$1"
-  local max_wait="${RAILWAY_POLL_TIMEOUT:-120}"
+  local max_wait="${RAILWAY_POLL_TIMEOUT:-300}"
   local interval=10
   local elapsed=0
   local status=""
@@ -425,6 +425,19 @@ poll_railway_status() {
     warn "Railway poll timeout for '$service' — continuing (--no-poll mode)."
     return 0
   fi
+  local raw
+  raw="$(cd "$ROOT_DIR" && railway service status --service "$service" --json 2>/dev/null || true)"
+  status="$(printf '%s' "$raw" | jq -r '.status // empty' 2>/dev/null || true)"
+  case "$status" in
+    SUCCESS)
+      ok "Railway service '$service' deployed successfully (status: $status)."
+      return 0
+      ;;
+    FAILED|CRASHED)
+      warn "Railway service '$service' deploy ${status} after timeout."
+      return 1
+      ;;
+  esac
   warn "Railway poll timed out after ${max_wait}s for '$service' (last status: $status)."
   return 1
 }
