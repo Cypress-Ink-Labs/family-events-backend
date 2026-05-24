@@ -20,7 +20,6 @@
     "resend": "^6.12.3"
   },
   "devDependencies": {
-    "@family-events/config-quality": "workspace:*",
     "@family-events/config-typescript": "workspace:*",
     "@types/node": "latest",
     "@types/react": "latest",
