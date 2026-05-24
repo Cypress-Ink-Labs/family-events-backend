@@ -16,6 +16,9 @@ const cronApps = [
 
 test("Railway cron services use the shared runner contract", () => {
   const sharedRunner = readFileSync(sharedRunnerPath, "utf8")
+  for (const required of ["X-Cron-Run-Key", "X-Cron-Label", "run_key", "runner_log"]) {
+    assert.match(sharedRunner, new RegExp(required))
+  }
   for (const app of cronApps) {
     const runnerPath = path.join(repoRoot, "apps", app, "cron-runner.sh")
     assert.equal(readFileSync(runnerPath, "utf8"), sharedRunner, `${app} runner drifted`)

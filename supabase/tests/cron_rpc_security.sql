@@ -78,9 +78,21 @@ BEGIN
       RAISE NOTICE 'NON_ADMIN_HISTORY_OK';
   END;
 
+  BEGIN
+    SET LOCAL role authenticated;
+    PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+    PERFORM public.admin_railway_cron_run_detail(1);
+    RESET role;
+    RAISE EXCEPTION 'NON_ADMIN_DETAIL_FAIL: non-admin read cron run detail';
+  EXCEPTION
+    WHEN insufficient_privilege THEN
+      RESET role;
+      RAISE NOTICE 'NON_ADMIN_DETAIL_OK';
+  END;
+
   IF has_function_privilege(
     'authenticated',
-    'public.log_railway_cron_run(text,text,integer,integer,text)',
+    'public.log_railway_cron_run(text,text,integer,integer,text,uuid,text)',
     'EXECUTE'
   ) THEN
     RAISE EXCEPTION 'NON_ADMIN_LOG_FAIL: authenticated user can execute cron log RPC';
@@ -88,10 +100,26 @@ BEGIN
 
   IF has_function_privilege(
     'anon',
-    'public.log_railway_cron_run(text,text,integer,integer,text)',
+    'public.log_railway_cron_run(text,text,integer,integer,text,uuid,text)',
     'EXECUTE'
   ) THEN
     RAISE EXCEPTION 'ANON_LOG_FAIL: anon user can execute cron log RPC';
+  END IF;
+
+  IF has_function_privilege(
+    'authenticated',
+    'public.log_cron_run_event(uuid,text,text,text,text,jsonb,integer)',
+    'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'AUTH_LOG_EVENT_FAIL: authenticated user can execute cron event log RPC';
+  END IF;
+
+  IF has_function_privilege(
+    'anon',
+    'public.admin_railway_cron_run_detail(bigint)',
+    'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'ANON_DETAIL_FAIL: anon can execute cron detail RPC';
   END IF;
 
   -- The EXECUTE grant on private.list_railway_cron_jobs() to authenticated exists (needed by
@@ -118,10 +146,18 @@ BEGIN
 
   IF has_function_privilege(
     'authenticated',
-    'private.log_railway_cron_run(text,text,integer,integer,text)',
+    'private.log_railway_cron_run(text,text,integer,integer,text,uuid,text)',
     'EXECUTE'
   ) THEN
     RAISE EXCEPTION 'PRIVATE_LOG_FAIL: authenticated user can execute private cron log RPC';
+  END IF;
+
+  IF has_function_privilege(
+    'authenticated',
+    'private.log_cron_run_event(uuid,text,text,text,text,jsonb,integer)',
+    'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'PRIVATE_EVENT_LOG_FAIL: authenticated user can execute private cron event log RPC';
   END IF;
 
   RAISE NOTICE 'NON_ADMIN_LOG_OK';
@@ -155,6 +191,18 @@ END $$;
 DO $$
 BEGIN
   SET LOCAL role service_role;
+  PERFORM public.log_cron_run_event(
+    gen_random_uuid(),
+    'cron-security-test',
+    'supabase',
+    'log',
+    'service event ok',
+    '{}'::jsonb,
+    NULL
+  );
+  RESET role;
+
+  SET LOCAL role service_role;
   PERFORM public.log_railway_cron_run('cron-security-test', 'succeeded', 200, 1, 'ok');
   RESET role;
 
@@ -168,6 +216,39 @@ BEGIN
   END IF;
 
   RAISE NOTICE 'SERVICE_LOG_OK';
+END $$;
+
+DO $$
+DECLARE
+  uid uuid;
+  run_id bigint;
+  log_count integer;
+BEGIN
+  SELECT v::uuid INTO uid FROM _fx WHERE k = 'admin_uid';
+
+  SET LOCAL role service_role;
+  SELECT public.log_railway_cron_run(
+    'cron-security-detail',
+    'succeeded',
+    200,
+    1,
+    'ok',
+    gen_random_uuid(),
+    'runner line'
+  ) INTO run_id;
+  RESET role;
+
+  SET LOCAL role authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+  SELECT jsonb_array_length(d.logs) INTO log_count
+  FROM public.admin_railway_cron_run_detail(run_id) d;
+  RESET role;
+
+  IF log_count < 1 THEN
+    RAISE EXCEPTION 'ADMIN_DETAIL_FAIL: expected at least one persisted log entry, got %', log_count;
+  END IF;
+
+  RAISE NOTICE 'ADMIN_DETAIL_OK';
 END $$;
 
 ROLLBACK;

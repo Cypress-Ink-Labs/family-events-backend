@@ -75,6 +75,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "unknown cron label" }, 400);
     }
 
+    const runKey = crypto.randomUUID();
     const startedAt = Date.now();
     const response = await fetch(
       `${supabaseUrl}/functions/v1/${functionName}`,
@@ -83,8 +84,10 @@ Deno.serve(async (req: Request) => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${serviceRoleKey}`,
+          "X-Cron-Run-Key": runKey,
+          "X-Cron-Label": label,
         },
-        body: "{}",
+        body: JSON.stringify({ cron_run_key: runKey, cron_label: label }),
       },
     );
     const durationSeconds = Math.max(
@@ -94,13 +97,17 @@ Deno.serve(async (req: Request) => {
     const responseBody = truncateBody(await response.text());
     const status = response.ok ? "succeeded" : "failed";
 
-    const { error: logError } = await supabase.rpc("log_railway_cron_run", {
-      p_label: label,
-      p_status: status,
-      p_http_status: response.status,
-      p_duration_s: durationSeconds,
-      p_body: responseBody,
-    });
+    const { data: runId, error: logError } = await supabase.rpc(
+      "log_railway_cron_run",
+      {
+        p_label: label,
+        p_status: status,
+        p_http_status: response.status,
+        p_duration_s: durationSeconds,
+        p_body: responseBody,
+        p_run_key: runKey,
+      },
+    );
     if (logError) throw logError;
 
     logEdgeEvent(response.ok ? "log" : "error", "admin cron run completed", {
@@ -115,6 +122,8 @@ Deno.serve(async (req: Request) => {
       return jsonResponse(
         {
           error: "cron run failed",
+          id: runId,
+          run_key: runKey,
           label,
           http_status: response.status,
           body: responseBody,
@@ -125,6 +134,8 @@ Deno.serve(async (req: Request) => {
 
     return jsonResponse({
       ok: true,
+      id: runId,
+      run_key: runKey,
       label,
       http_status: response.status,
       duration_s: durationSeconds,

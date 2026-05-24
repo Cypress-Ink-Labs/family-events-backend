@@ -1,8 +1,12 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "../_shared/auth.ts";
+import {
+  cronRunContextFromRequest,
+  logCronRunEvent,
+} from "../_shared/cron-run-log.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
+import { errorContext, errorMessage } from "../_shared/logger.ts";
 import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts";
 import { findFallbackImage } from "../_shared/unsplash.ts";
 import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts";
@@ -189,7 +193,12 @@ async function enrichOne(
       { p_event_id: row.event_id },
     );
     if (markErr) throw markErr;
-    return { updated: false, gotCoords: false, gotImages: false, imageSource: "none" };
+    return {
+      updated: false,
+      gotCoords: false,
+      gotImages: false,
+      imageSource: "none",
+    };
   }
 
   // update_event_enrichment also bumps last_enrichment_attempt_at server-side.
@@ -205,6 +214,8 @@ async function enrichOne(
 }
 
 Deno.serve(async (req: Request) => {
+  const cronContext = cronRunContextFromRequest(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
@@ -241,7 +252,9 @@ Deno.serve(async (req: Request) => {
     const halfBatch = Math.max(1, Math.floor(DEFAULT_BATCH / 2));
     const [legacyResp, scopedResp] = await Promise.all([
       supabase.rpc("list_events_needing_enrichment", { p_limit: halfBatch }),
-      supabase.rpc("backfill_image_enrichment_in_scope", { p_limit: halfBatch }),
+      supabase.rpc("backfill_image_enrichment_in_scope", {
+        p_limit: halfBatch,
+      }),
     ]);
     if (legacyResp.error) throw legacyResp.error;
     if (scopedResp.error) throw scopedResp.error;
@@ -286,26 +299,53 @@ Deno.serve(async (req: Request) => {
         if (result.gotCoords) summary.coords += 1;
         if (result.gotImages) summary.images += 1;
         if (result.imageSource === "scraper") summary.images_from_scraper += 1;
-        if (result.imageSource === "unsplash") summary.images_from_unsplash += 1;
+        if (result.imageSource === "unsplash") {
+          summary.images_from_unsplash += 1;
+        }
       } catch (rowErr) {
         summary.errors += 1;
-        logEdgeEvent("warn", "enrich row failed", {
-          function: "backfill-event-enrichment",
-          event_id: row.event_id,
-          error: errorMessage(rowErr),
-        });
+        await logCronRunEvent(
+          supabase,
+          cronContext,
+          "warn",
+          "enrich row failed",
+          {
+            function: "backfill-event-enrichment",
+            event_id: row.event_id,
+            error: errorMessage(rowErr),
+          },
+        );
       }
     }
 
-    logEdgeEvent("log", "backfill-event-enrichment done", {
-      function: "backfill-event-enrichment",
-      ...summary,
-    });
+    await logCronRunEvent(
+      supabase,
+      cronContext,
+      "log",
+      "backfill-event-enrichment done",
+      {
+        function: "backfill-event-enrichment",
+        ...summary,
+      },
+    );
     return new Response(JSON.stringify({ ok: true, ...summary }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
+    if (serviceRoleKey && supabaseUrl) {
+      const supabase = createClient(supabaseUrl, serviceRoleKey);
+      await logCronRunEvent(
+        supabase,
+        cronContext,
+        "error",
+        "backfill-event-enrichment failed",
+        errorContext(err, {
+          function: "backfill-event-enrichment",
+          stage: "outer",
+        }),
+      );
+    }
     await captureEdgeException(
       err,
       errorContext(err, {

@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
   public: {
@@ -30,6 +36,65 @@ export type Database = {
           metadata?: Json | null
           target_id?: string | null
           target_type?: string | null
+        }
+        Relationships: []
+      }
+      ai_feature_config: {
+        Row: {
+          enabled: boolean
+          feature: string
+          model_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          feature: string
+          model_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          feature?: string
+          model_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_feature_config_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "approved_ai_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approved_ai_models: {
+        Row: {
+          cost_tier: string
+          description: string
+          display_name: string
+          id: string
+          is_enabled: boolean
+          provider: string
+        }
+        Insert: {
+          cost_tier?: string
+          description?: string
+          display_name: string
+          id: string
+          is_enabled?: boolean
+          provider: string
+        }
+        Update: {
+          cost_tier?: string
+          description?: string
+          display_name?: string
+          id?: string
+          is_enabled?: boolean
+          provider?: string
         }
         Relationships: []
       }
@@ -140,6 +205,7 @@ export type Database = {
           predicted_fields: Json | null
           predicted_tags: Json
           processing_ms: number | null
+          prompt_version: string | null
           provider: string | null
           reasoning_summary: string | null
           source_run_id: string | null
@@ -158,6 +224,7 @@ export type Database = {
           predicted_fields?: Json | null
           predicted_tags?: Json
           processing_ms?: number | null
+          prompt_version?: string | null
           provider?: string | null
           reasoning_summary?: string | null
           source_run_id?: string | null
@@ -176,6 +243,7 @@ export type Database = {
           predicted_fields?: Json | null
           predicted_tags?: Json
           processing_ms?: number | null
+          prompt_version?: string | null
           provider?: string | null
           reasoning_summary?: string | null
           source_run_id?: string | null
@@ -199,6 +267,212 @@ export type Database = {
           },
           {
             foreignKeyName: "event_ai_traces_source_run_id_fkey"
+            columns: ["source_run_id"]
+            isOneToOne: false
+            referencedRelation: "source_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_llm_review_queue: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          enqueued_at: string
+          event_id: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          source_id: string | null
+          source_run_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"]
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          enqueued_at?: string
+          event_id: string
+          finished_at?: string | null
+          id?: number
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          source_id?: string | null
+          source_run_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["llm_event_review_queue_status"]
+          trigger_type?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          enqueued_at?: string
+          event_id?: string
+          finished_at?: string | null
+          id?: number
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          source_id?: string | null
+          source_run_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["llm_event_review_queue_status"]
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_llm_review_queue_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_llm_review_queue_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_llm_review_queue_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "event_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_llm_review_queue_source_run_id_fkey"
+            columns: ["source_run_id"]
+            isOneToOne: false
+            referencedRelation: "source_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_llm_review_traces: {
+        Row: {
+          applied_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          confidence: number | null
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          event_id: string
+          flags: string[]
+          id: number
+          input_snapshot: Json | null
+          model: string | null
+          model_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          normalized_title: string | null
+          processing_ms: number | null
+          prompt_version: string
+          provider: string | null
+          queue_id: number | null
+          raw_response: Json | null
+          reason: string | null
+          source_id: string | null
+          source_run_id: string | null
+          status: Database["public"]["Enums"]["llm_event_review_status"]
+          suggested_category: string | null
+        }
+        Insert: {
+          applied_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          confidence?: number | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          event_id: string
+          flags?: string[]
+          id?: number
+          input_snapshot?: Json | null
+          model?: string | null
+          model_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          normalized_title?: string | null
+          processing_ms?: number | null
+          prompt_version: string
+          provider?: string | null
+          queue_id?: number | null
+          raw_response?: Json | null
+          reason?: string | null
+          source_id?: string | null
+          source_run_id?: string | null
+          status: Database["public"]["Enums"]["llm_event_review_status"]
+          suggested_category?: string | null
+        }
+        Update: {
+          applied_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          confidence?: number | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          event_id?: string
+          flags?: string[]
+          id?: number
+          input_snapshot?: Json | null
+          model?: string | null
+          model_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          normalized_title?: string | null
+          processing_ms?: number | null
+          prompt_version?: string
+          provider?: string | null
+          queue_id?: number | null
+          raw_response?: Json | null
+          reason?: string | null
+          source_id?: string | null
+          source_run_id?: string | null
+          status?: Database["public"]["Enums"]["llm_event_review_status"]
+          suggested_category?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_llm_review_traces_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_llm_review_traces_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_llm_review_traces_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "event_llm_review_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_llm_review_traces_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "event_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_llm_review_traces_source_run_id_fkey"
             columns: ["source_run_id"]
             isOneToOne: false
             referencedRelation: "source_runs"
@@ -404,7 +678,21 @@ export type Database = {
           images: Json
           is_featured: boolean
           is_free: boolean
+          is_outdoor: boolean | null
+          last_enrichment_attempt_at: string | null
           latitude: number | null
+          llm_review_confidence: number | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error: string | null
+          llm_review_flags: string[]
+          llm_review_model: string | null
+          llm_review_prompt_version: string | null
+          llm_review_provider: string | null
+          llm_review_reason: string | null
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string | null
           longitude: number | null
           price: number | null
           recurrence_info: Json | null
@@ -440,7 +728,20 @@ export type Database = {
           is_featured?: boolean
           is_free?: boolean
           is_outdoor?: boolean | null
+          last_enrichment_attempt_at?: string | null
           latitude?: number | null
+          llm_review_confidence?: number | null
+          llm_review_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error?: string | null
+          llm_review_flags?: string[]
+          llm_review_model?: string | null
+          llm_review_prompt_version?: string | null
+          llm_review_provider?: string | null
+          llm_review_reason?: string | null
+          llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at?: string | null
           longitude?: number | null
           price?: number | null
           recurrence_info?: Json | null
@@ -476,7 +777,20 @@ export type Database = {
           is_featured?: boolean
           is_free?: boolean
           is_outdoor?: boolean | null
+          last_enrichment_attempt_at?: string | null
           latitude?: number | null
+          llm_review_confidence?: number | null
+          llm_review_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error?: string | null
+          llm_review_flags?: string[]
+          llm_review_model?: string | null
+          llm_review_prompt_version?: string | null
+          llm_review_provider?: string | null
+          llm_review_reason?: string | null
+          llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at?: string | null
           longitude?: number | null
           price?: number | null
           recurrence_info?: Json | null
@@ -1171,6 +1485,19 @@ export type Database = {
       }
     }
     Views: {
+      event_llm_review_queue_summary: {
+        Row: {
+          avg_attempts: number | null
+          last_dead_letter_at: string | null
+          oldest_pending_enqueued_at: string | null
+          oldest_processing_started_at: string | null
+          row_count: number | null
+          status:
+            | Database["public"]["Enums"]["llm_event_review_queue_status"]
+            | null
+        }
+        Relationships: []
+      }
       event_rating_stats: {
         Row: {
           avg_score: number | null
@@ -1290,7 +1617,9 @@ export type Database = {
           oldest_enqueued_at: string | null
           oldest_processing_started_at: string | null
           row_count: number | null
-          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null
+          status:
+            | Database["public"]["Enums"]["source_scrape_queue_status"]
+            | null
         }
         Relationships: []
       }
@@ -1312,13 +1641,17 @@ export type Database = {
           request_id: string
         }[]
       }
+      admin_batch_set_event_status: {
+        Args: { p_event_ids: string[]; p_status: string }
+        Returns: number
+      }
       admin_bulk_set_auto_approve: {
         Args: { enable: boolean }
         Returns: undefined
       }
-      admin_batch_set_event_status: {
-        Args: { p_event_ids: string[]; p_status: string }
-        Returns: number
+      admin_bulk_set_processing_mode: {
+        Args: { p_mode: Database["public"]["Enums"]["event_processing_mode"] }
+        Returns: undefined
       }
       admin_create_event: {
         Args: { p_patch: Json; p_tag_ids?: string[] }
@@ -1342,7 +1675,20 @@ export type Database = {
           is_featured: boolean
           is_free: boolean
           is_outdoor: boolean | null
+          last_enrichment_attempt_at: string | null
           latitude: number | null
+          llm_review_confidence: number | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error: string | null
+          llm_review_flags: string[]
+          llm_review_model: string | null
+          llm_review_prompt_version: string | null
+          llm_review_provider: string | null
+          llm_review_reason: string | null
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string | null
           longitude: number | null
           price: number | null
           recurrence_info: Json | null
@@ -1365,16 +1711,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      admin_create_source: {
-        Args: { p_source: Json }
-        Returns: Database["public"]["Tables"]["event_sources"]["Row"]
-        SetofOptions: {
-          from: "*"
-          to: "event_sources"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       admin_create_invite_code: {
         Args: { p_expires_at?: string; p_max_uses?: number; p_notes?: string }
         Returns: {
@@ -1385,6 +1721,34 @@ export type Database = {
           max_uses: number
           notes: string
         }[]
+      }
+      admin_create_source: {
+        Args: { p_source: Json }
+        Returns: {
+          auto_approve: boolean
+          city_id: string | null
+          created_at: string
+          date_window_days: number | null
+          error_count: number
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
+          id: string
+          is_active: boolean
+          last_scraped_at: string | null
+          last_status: string | null
+          name: string
+          notes: string | null
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
+          scrape_interval_hours: number
+          source_type: string
+          updated_at: string
+          url: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "event_sources"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_cron_run_history: {
         Args: { p_job_name?: string; p_limit?: number }
@@ -1399,15 +1763,20 @@ export type Database = {
         }[]
       }
       admin_db_health_snapshot: { Args: never; Returns: Json }
-      admin_delete_events: {
-        Args: { p_event_ids: string[] }
-        Returns: number
+      admin_delete_dead_source_queue: {
+        Args: { p_queue_id: number }
+        Returns: boolean
       }
+      admin_delete_dead_tag_queue: {
+        Args: { p_queue_id: number }
+        Returns: boolean
+      }
+      admin_delete_events: { Args: { p_event_ids: string[] }; Returns: number }
       admin_delete_rating: { Args: { p_id: string }; Returns: boolean }
       admin_event_facets: {
         Args: { p_keyword?: string }
         Returns: {
-          city_id: string | null
+          city_id: string
           count: number
           status: string
         }[]
@@ -1420,43 +1789,54 @@ export type Database = {
           p_city_is_null?: boolean
           p_keyword?: string
           p_limit?: number
+          p_llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"]
+          p_llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"]
           p_status?: string
         }
         Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
+          address: string
+          admin_last_edited_at: string
+          admin_last_edited_by: string
           admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
+          age_max: number
+          age_min: number
+          ai_confidence: number
+          ai_tag_model: string
+          ai_tag_provider: string
+          ai_tag_status: string
+          city_id: string
           created_at: string
-          description: string | null
-          end_datetime: string | null
+          description: string
+          end_datetime: string
           id: string
           images: Json
           is_featured: boolean
           is_free: boolean
-          is_outdoor: boolean | null
-          latitude: number | null
-          longitude: number | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: string | null
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
+          latitude: number
+          llm_review_confidence: number
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"]
+          llm_review_error: string
+          llm_review_flags: string[]
+          llm_review_model: string
+          llm_review_prompt_version: string
+          llm_review_provider: string
+          llm_review_reason: string
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string
+          longitude: number
+          price: number
+          recurrence_info: Json
+          search_vector: unknown
+          source_id: string
+          source_name: string
+          source_url: string
           start_datetime: string
           status: string
           timezone: string
           title: string
           total_count: number
           updated_at: string
-          venue_name: string | null
+          venue_name: string
           view_count: number
         }[]
       }
@@ -1485,6 +1865,20 @@ export type Database = {
           last_run_status: string
         }[]
       }
+      admin_railway_cron_run_detail: {
+        Args: { p_run_id: number }
+        Returns: {
+          body: string
+          duration_s: number
+          http_status: number
+          id: number
+          label: string
+          logs: Json
+          ran_at: string
+          run_key: string
+          status: string
+        }[]
+      }
       admin_railway_cron_run_history: {
         Args: { p_label?: string; p_limit?: number }
         Returns: {
@@ -1501,18 +1895,6 @@ export type Database = {
         Args: { p_notes?: string; p_request_id: string }
         Returns: boolean
       }
-      admin_delete_dead_source_queue: {
-        Args: { p_queue_id: number }
-        Returns: boolean
-      }
-      admin_delete_dead_tag_queue: {
-        Args: { p_queue_id: number }
-        Returns: boolean
-      }
-      admin_bulk_set_processing_mode: {
-        Args: { p_mode: Database["public"]["Enums"]["event_processing_mode"] }
-        Returns: number
-      }
       admin_retry_source_scrape_queue: {
         Args: { p_queue_id: number }
         Returns: boolean
@@ -1520,19 +1902,96 @@ export type Database = {
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
-      admin_update_event_status: {
-        Args: { p_event_id: string; p_reason?: string | null; p_status: string }
-        Returns: Database["public"]["Tables"]["events"]["Row"]
+      admin_set_cron_enabled: {
+        Args: { p_enabled: boolean; p_label: string }
+        Returns: undefined
+      }
+      admin_set_cron_schedule: {
+        Args: { p_job_name: string; p_schedule: string }
+        Returns: undefined
+      }
+      admin_set_event_source_processing_mode: {
+        Args: {
+          p_mode: Database["public"]["Enums"]["event_processing_mode"]
+          p_source_id: string
+        }
+        Returns: {
+          auto_approve: boolean
+          city_id: string | null
+          created_at: string
+          date_window_days: number | null
+          error_count: number
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
+          id: string
+          is_active: boolean
+          last_scraped_at: string | null
+          last_status: string | null
+          name: string
+          notes: string | null
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
+          scrape_interval_hours: number
+          source_type: string
+          updated_at: string
+          url: string
+        }
         SetofOptions: {
           from: "*"
-          to: "events"
+          to: "event_sources"
           isOneToOne: true
           isSetofReturn: false
         }
       }
       admin_set_event_status: {
         Args: { p_event_id: string; p_status: string }
-        Returns: Database["public"]["Tables"]["events"]["Row"]
+        Returns: {
+          address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
+          age_max: number | null
+          age_min: number | null
+          ai_confidence: number | null
+          ai_tag_model: string | null
+          ai_tag_provider: string | null
+          ai_tag_status: string | null
+          city_id: string | null
+          created_at: string
+          description: string | null
+          end_datetime: string | null
+          id: string
+          images: Json
+          is_featured: boolean
+          is_free: boolean
+          is_outdoor: boolean | null
+          last_enrichment_attempt_at: string | null
+          latitude: number | null
+          llm_review_confidence: number | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error: string | null
+          llm_review_flags: string[]
+          llm_review_model: string | null
+          llm_review_prompt_version: string | null
+          llm_review_provider: string | null
+          llm_review_reason: string | null
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string | null
+          longitude: number | null
+          price: number | null
+          recurrence_info: Json | null
+          search_vector: unknown
+          source_id: string | null
+          source_name: string | null
+          source_url: string | null
+          start_datetime: string
+          status: string
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string | null
+          view_count: number
+        }
         SetofOptions: {
           from: "*"
           to: "events"
@@ -1541,22 +2000,27 @@ export type Database = {
         }
       }
       admin_set_user_access: {
-        Args: { p_disabled_reason?: string | null; p_is_enabled: boolean; p_user_id: string }
-        Returns: Database["public"]["Tables"]["user_access"]["Row"]
+        Args: {
+          p_disabled_reason?: string
+          p_is_enabled: boolean
+          p_user_id: string
+        }
+        Returns: {
+          access_expires_at: string | null
+          created_at: string
+          disabled_at: string | null
+          disabled_reason: string | null
+          enabled_at: string | null
+          is_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
         SetofOptions: {
           from: "*"
           to: "user_access"
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      admin_set_cron_enabled: {
-        Args: { p_enabled: boolean; p_label: string }
-        Returns: undefined
-      }
-      admin_set_cron_schedule: {
-        Args: { p_job_name: string; p_schedule: string }
-        Returns: undefined
       }
       admin_toggle_cron_job: {
         Args: { p_active: boolean; p_job_name: string }
@@ -1593,7 +2057,78 @@ export type Database = {
           is_featured: boolean
           is_free: boolean
           is_outdoor: boolean | null
+          last_enrichment_attempt_at: string | null
           latitude: number | null
+          llm_review_confidence: number | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error: string | null
+          llm_review_flags: string[]
+          llm_review_model: string | null
+          llm_review_prompt_version: string | null
+          llm_review_provider: string | null
+          llm_review_reason: string | null
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string | null
+          longitude: number | null
+          price: number | null
+          recurrence_info: Json | null
+          search_vector: unknown
+          source_id: string | null
+          source_name: string | null
+          source_url: string | null
+          start_datetime: string
+          status: string
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string | null
+          view_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_update_event_status: {
+        Args: { p_event_id: string; p_reason?: string; p_status: string }
+        Returns: {
+          address: string | null
+          admin_last_edited_at: string | null
+          admin_last_edited_by: string | null
+          admin_locked_fields: string[]
+          age_max: number | null
+          age_min: number | null
+          ai_confidence: number | null
+          ai_tag_model: string | null
+          ai_tag_provider: string | null
+          ai_tag_status: string | null
+          city_id: string | null
+          created_at: string
+          description: string | null
+          end_datetime: string | null
+          id: string
+          images: Json
+          is_featured: boolean
+          is_free: boolean
+          is_outdoor: boolean | null
+          last_enrichment_attempt_at: string | null
+          latitude: number | null
+          llm_review_confidence: number | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error: string | null
+          llm_review_flags: string[]
+          llm_review_model: string | null
+          llm_review_prompt_version: string | null
+          llm_review_provider: string | null
+          llm_review_reason: string | null
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string | null
           longitude: number | null
           price: number | null
           recurrence_info: Json | null
@@ -1618,12 +2153,102 @@ export type Database = {
       }
       admin_update_source: {
         Args: { p_patch: Json; p_source_id: string }
-        Returns: Database["public"]["Tables"]["event_sources"]["Row"]
+        Returns: {
+          auto_approve: boolean
+          city_id: string | null
+          created_at: string
+          date_window_days: number | null
+          error_count: number
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
+          id: string
+          is_active: boolean
+          last_scraped_at: string | null
+          last_status: string | null
+          name: string
+          notes: string | null
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
+          scrape_interval_hours: number
+          source_type: string
+          updated_at: string
+          url: string
+        }
         SetofOptions: {
           from: "*"
           to: "event_sources"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      apply_event_llm_review_decision: {
+        Args: {
+          p_applied_decision: Database["public"]["Enums"]["llm_event_review_decision"]
+          p_confidence: number
+          p_error_code: string
+          p_error_message: string
+          p_event_id: string
+          p_flags: string[]
+          p_input_snapshot: Json
+          p_model: string
+          p_model_decision: Database["public"]["Enums"]["llm_event_review_decision"]
+          p_normalized_title: string
+          p_processing_ms: number
+          p_prompt_version: string
+          p_provider: string
+          p_queue_id: number
+          p_raw_response: Json
+          p_reason: string
+          p_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          p_source_id: string
+          p_source_run_id: string
+          p_suggested_category: string
+        }
+        Returns: boolean
+      }
+      backfill_image_enrichment_in_scope: {
+        Args: { p_limit?: number }
+        Returns: {
+          address: string
+          admin_locked_fields: string[]
+          city_id: string
+          description: string
+          event_id: string
+          needs_coords: boolean
+          needs_images: boolean
+          source_id: string
+          source_url: string
+          tags: string[]
+          title: string
+          venue_name: string
+        }[]
+      }
+      bulk_import_scrape_events: {
+        Args: { p_events: Json; p_run_id: string; p_source_id: string }
+        Returns: Json
+      }
+      claim_event_llm_review_queue_batch: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempt_count: number
+          created_at: string
+          enqueued_at: string
+          event_id: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          source_id: string | null
+          source_run_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"]
+          trigger_type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "event_llm_review_queue"
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       claim_pending_invite_access: { Args: never; Returns: boolean }
@@ -1688,6 +2313,7 @@ export type Database = {
           last_status: string | null
           name: string
           notes: string | null
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours: number
           source_type: string
           updated_at: string
@@ -1795,7 +2421,18 @@ export type Database = {
           view_count: number
         }[]
       }
+      get_approved_ai_models: {
+        Args: never
+        Returns: {
+          cost_tier: string
+          description: string
+          display_name: string
+          id: string
+          provider: string
+        }[]
+      }
       invites_required: { Args: never; Returns: boolean }
+      invoke_process_event_review_queue: { Args: never; Returns: undefined }
       invoke_process_tag_queue: { Args: never; Returns: undefined }
       invoke_scrape_source: {
         Args: { source_uuid: string }
@@ -1803,15 +2440,76 @@ export type Database = {
       }
       is_cron_enabled: { Args: { p_label: string }; Returns: boolean }
       is_enabled_user: { Args: never; Returns: boolean }
+      list_events_needing_enrichment: {
+        Args: { p_limit?: number }
+        Returns: {
+          address: string
+          admin_locked_fields: string[]
+          city_id: string
+          description: string
+          event_id: string
+          needs_coords: boolean
+          needs_images: boolean
+          source_id: string
+          source_url: string
+          tags: string[]
+          title: string
+          venue_name: string
+        }[]
+      }
+      log_cron_run_event: {
+        Args: {
+          p_label: string
+          p_level: string
+          p_message: string
+          p_metadata?: Json
+          p_provider: string
+          p_run_key: string
+          p_sequence?: number
+        }
+        Returns: undefined
+      }
       log_railway_cron_run: {
         Args: {
           p_body?: string
           p_duration_s?: number
           p_http_status?: number
           p_label: string
+          p_run_key?: string
+          p_runner_log?: string
           p_status: string
         }
+        Returns: number
+      }
+      mark_event_enrichment_attempt: {
+        Args: { p_event_id: string }
         Returns: undefined
+      }
+      mark_event_llm_review_queue_row_started: {
+        Args: { p_queue_id: number }
+        Returns: {
+          attempt_count: number
+          created_at: string
+          enqueued_at: string
+          event_id: string
+          finished_at: string | null
+          id: number
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          source_id: string | null
+          source_run_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"]
+          trigger_type: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "event_llm_review_queue"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       mark_source_scrape_queue_skipped: {
         Args: { p_queue_id: number; p_skip_reason: string }
@@ -1906,12 +2604,17 @@ export type Database = {
           weather_score: number
         }[]
       }
+      reap_stuck_event_llm_review_rows: { Args: never; Returns: number }
       reap_stuck_source_scrape_queue_rows: { Args: never; Returns: number }
       reap_stuck_tag_queue_rows: { Args: never; Returns: number }
       redeem_invite: { Args: { p_code: string }; Returns: boolean }
       redeem_invite_for_email: {
         Args: { p_code: string; p_email: string }
         Returns: boolean
+      }
+      release_unstarted_event_llm_review_rows: {
+        Args: { p_claimed_ids: number[] }
+        Returns: number
       }
       release_unstarted_source_scrape_queue_rows: {
         Args: { p_claimed_ids: number[] }
@@ -1963,7 +2666,20 @@ export type Database = {
           is_featured: boolean
           is_free: boolean
           is_outdoor: boolean | null
+          last_enrichment_attempt_at: string | null
           latitude: number | null
+          llm_review_confidence: number | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error: string | null
+          llm_review_flags: string[]
+          llm_review_model: string | null
+          llm_review_prompt_version: string | null
+          llm_review_provider: string | null
+          llm_review_reason: string | null
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string | null
           longitude: number | null
           price: number | null
           recurrence_info: Json | null
@@ -2023,7 +2739,20 @@ export type Database = {
           is_featured: boolean
           is_free: boolean
           is_outdoor: boolean | null
+          last_enrichment_attempt_at: string | null
           latitude: number | null
+          llm_review_confidence: number | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
+          llm_review_error: string | null
+          llm_review_flags: string[]
+          llm_review_model: string | null
+          llm_review_prompt_version: string | null
+          llm_review_provider: string | null
+          llm_review_reason: string | null
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+          llm_reviewed_at: string | null
           longitude: number | null
           price: number | null
           recurrence_info: Json | null
@@ -2050,13 +2779,49 @@ export type Database = {
         Args: { p_attempt_count: number; p_error: string; p_queue_id: number }
         Returns: undefined
       }
+      update_event_enrichment: {
+        Args: {
+          p_event_id: string
+          p_images: Json
+          p_latitude: number
+          p_longitude: number
+        }
+        Returns: undefined
+      }
+      upsert_ai_feature_config: {
+        Args: { p_enabled?: boolean; p_feature: string; p_model_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       event_processing_mode: "manual_review" | "auto_approve" | "llm_review"
-      event_tag_queue_status: "pending" | "processing" | "failed" | "dead" | "succeeded"
+      event_tag_queue_status:
+        | "pending"
+        | "processing"
+        | "failed"
+        | "dead"
+        | "succeeded"
       invite_request_status: "pending" | "approved" | "rejected"
+      llm_event_review_decision: "approve" | "reject" | "needs_admin_review"
+      llm_event_review_queue_status:
+        | "pending"
+        | "processing"
+        | "retrying"
+        | "succeeded"
+        | "dead"
+      llm_event_review_status:
+        | "not_required"
+        | "pending"
+        | "succeeded"
+        | "failed"
+        | "skipped"
       source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
-      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
+      source_scrape_queue_status:
+        | "pending"
+        | "processing"
+        | "retrying"
+        | "succeeded"
+        | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2087,8 +2852,10 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -2183,10 +2950,41 @@ export const Constants = {
   public: {
     Enums: {
       event_processing_mode: ["manual_review", "auto_approve", "llm_review"],
-      event_tag_queue_status: ["pending", "processing", "failed", "dead", "succeeded"],
+      event_tag_queue_status: [
+        "pending",
+        "processing",
+        "failed",
+        "dead",
+        "succeeded",
+      ],
       invite_request_status: ["pending", "approved", "rejected"],
-      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
-      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
+      llm_event_review_decision: ["approve", "reject", "needs_admin_review"],
+      llm_event_review_queue_status: [
+        "pending",
+        "processing",
+        "retrying",
+        "succeeded",
+        "dead",
+      ],
+      llm_event_review_status: [
+        "not_required",
+        "pending",
+        "succeeded",
+        "failed",
+        "skipped",
+      ],
+      source_extraction_mode: [
+        "deterministic",
+        "llm",
+        "deterministic_then_llm",
+      ],
+      source_scrape_queue_status: [
+        "pending",
+        "processing",
+        "retrying",
+        "succeeded",
+        "dead",
+      ],
     },
   },
 } as const

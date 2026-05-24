@@ -1,5 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  type CronRunContext,
+  logCronRunEvent,
+} from "../../_shared/cron-run-log.ts";
+import {
   type AppliedLlmEventReviewDecision,
   type LlmReviewConfig,
   resolveLlmReviewConfig,
@@ -42,6 +46,7 @@ interface EventReviewRow {
 export interface ReviewQueueDeps {
   supabase: SupabaseClient;
   config: LlmReviewConfig;
+  cronContext?: CronRunContext;
   now?: () => number;
   reviewEvent?: typeof reviewEventWithLlm;
 }
@@ -312,6 +317,26 @@ function isReviewable(event: EventReviewRow): boolean {
       event.llm_review_status === "not_required");
 }
 
+async function logReviewEvent(
+  deps: ReviewQueueDeps,
+  level: "log" | "warn" | "error",
+  message: string,
+  metadata: Record<string, unknown>,
+): Promise<void> {
+  if (deps.cronContext) {
+    await logCronRunEvent(
+      deps.supabase,
+      deps.cronContext,
+      level,
+      message,
+      metadata,
+    );
+    return;
+  }
+
+  logEdgeEvent(level, message, metadata);
+}
+
 async function handleMissingEvent(
   deps: ReviewQueueDeps,
   startedRow: EventLlmReviewQueueRow,
@@ -321,7 +346,7 @@ async function handleMissingEvent(
     startedRow.id,
     "event missing before review",
   );
-  logEdgeEvent("error", "event_review_dead_lettered", {
+  await logReviewEvent(deps, "error", "event_review_dead_lettered", {
     function: "process-event-review-queue",
     queue_id: startedRow.id,
     event_id: startedRow.event_id,
@@ -375,14 +400,14 @@ function buildReviewInput(event: EventReviewRow) {
   };
 }
 
-function logReviewSignals(
+async function logReviewSignals(
   deps: ReviewQueueDeps,
   startedRow: EventLlmReviewQueueRow,
   event: EventReviewRow,
   review: AppliedLlmEventReviewDecision,
-): void {
+): Promise<void> {
   if (review.status === "failed") {
-    logEdgeEvent("warn", "event_review_provider_failed", {
+    await logReviewEvent(deps, "warn", "event_review_provider_failed", {
       function: "process-event-review-queue",
       queue_id: startedRow.id,
       event_id: event.id,
@@ -393,7 +418,7 @@ function logReviewSignals(
       review.errorCode === "malformed_json" ||
       review.errorCode === "schema_validation_error"
     ) {
-      logEdgeEvent("warn", "event_review_malformed_response", {
+      await logReviewEvent(deps, "warn", "event_review_malformed_response", {
         function: "process-event-review-queue",
         queue_id: startedRow.id,
         event_id: event.id,
@@ -402,7 +427,7 @@ function logReviewSignals(
     }
   }
   if (review.flags.includes("low_confidence")) {
-    logEdgeEvent("warn", "event_review_low_confidence", {
+    await logReviewEvent(deps, "warn", "event_review_low_confidence", {
       function: "process-event-review-queue",
       queue_id: startedRow.id,
       event_id: event.id,
@@ -431,7 +456,7 @@ async function reviewAndApplyEvent(
     review,
   );
 
-  logReviewSignals(deps, startedRow, event, review);
+  await logReviewSignals(deps, startedRow, event, review);
 
   if (!applied) {
     return await handleNonReviewableEvent(
@@ -442,7 +467,7 @@ async function reviewAndApplyEvent(
     );
   }
 
-  logEdgeEvent("log", "event_review_applied", {
+  await logReviewEvent(deps, "log", "event_review_applied", {
     function: "process-event-review-queue",
     queue_id: startedRow.id,
     event_id: event.id,
@@ -464,7 +489,7 @@ export async function processReviewQueueRow(
   row: EventLlmReviewQueueRow,
 ): Promise<EventReviewQueueRowResult> {
   const startedRow = await markRowStarted(deps.supabase, row.id);
-  logEdgeEvent("log", "event_review_started", {
+  await logReviewEvent(deps, "log", "event_review_started", {
     function: "process-event-review-queue",
     queue_id: startedRow.id,
     event_id: startedRow.event_id,
@@ -487,7 +512,7 @@ export async function processReviewQueueRow(
     const message = errorMessage(error);
     if (startedRow.attempt_count >= startedRow.max_attempts) {
       await markQueueDead(deps.supabase, startedRow.id, message);
-      logEdgeEvent("error", "event_review_dead_lettered", {
+      await logReviewEvent(deps, "error", "event_review_dead_lettered", {
         function: "process-event-review-queue",
         queue_id: startedRow.id,
         event_id: startedRow.event_id,
@@ -534,7 +559,7 @@ export async function processReviewQueueBatch(
 
   const claimed = await claimRows(deps.supabase, resolveBatchSize());
   summary.claimed = claimed.length;
-  logEdgeEvent("log", "event_review_queue_claimed", {
+  await logReviewEvent(deps, "log", "event_review_queue_claimed", {
     function: "process-event-review-queue",
     claimed: summary.claimed,
     reaped: summary.reaped,
@@ -572,7 +597,7 @@ export async function processReviewQueueBatch(
     summary.failed += 1;
   }
 
-  logEdgeEvent("log", "event review queue batch done", {
+  await logReviewEvent(deps, "log", "event review queue batch done", {
     function: "process-event-review-queue",
     ...summary,
   });
@@ -582,7 +607,9 @@ export async function processReviewQueueBatch(
 
 async function loadEventReviewFeatureConfig(
   supabase: SupabaseClient,
-): Promise<{ model: string; enabled: boolean; provider: string | null } | null> {
+): Promise<
+  { model: string; enabled: boolean; provider: string | null } | null
+> {
   try {
     const { data, error } = await supabase
       .from("ai_feature_config")

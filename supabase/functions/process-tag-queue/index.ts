@@ -1,6 +1,11 @@
 import { type SupabaseClient } from "@supabase/supabase-js";
+import {
+  type CronRunContext,
+  cronRunContextFromRequest,
+  logCronRunEvent,
+} from "../_shared/cron-run-log.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
+import { errorContext, errorMessage } from "../_shared/logger.ts";
 import { serveServiceRoleJson } from "../_shared/service-role-handler.ts";
 import {
   resolveCompletedTagQueueStatus,
@@ -149,6 +154,7 @@ export async function processTagQueueBatch(
   supabase: SupabaseClient,
   supabaseUrl: string,
   serviceRoleKey: string,
+  cronContext: CronRunContext = { runKey: null, label: null },
 ): Promise<ProcessSummary> {
   const batchStart = Date.now();
   const summary: ProcessSummary = {
@@ -179,10 +185,16 @@ export async function processTagQueueBatch(
   summary.claimed = rows.length;
   if (rows.length === 0) {
     summary.duration_ms = Date.now() - batchStart;
-    logEdgeEvent("log", "tag-queue batch done", {
-      function: "process-tag-queue",
-      ...summary,
-    });
+    await logCronRunEvent(
+      supabase,
+      cronContext,
+      "log",
+      "tag-queue batch done",
+      {
+        function: "process-tag-queue",
+        ...summary,
+      },
+    );
     return summary;
   }
 
@@ -211,30 +223,42 @@ export async function processTagQueueBatch(
         // Don't retry — mark as a soft completion.
         await markSuccess(supabase, activeRow.id);
         summary.succeeded += 1;
-        logEdgeEvent("log", "tag-queue row skipped (event missing)", {
-          function: "process-tag-queue",
-          queue_row_id: activeRow.id,
-          event_id: activeRow.event_id,
-          attempt: activeRow.attempt_count,
-          duration_ms: Date.now() - rowStart,
-          outcome: "skipped-missing-event",
-        });
+        await logCronRunEvent(
+          supabase,
+          cronContext,
+          "log",
+          "tag-queue row skipped (event missing)",
+          {
+            function: "process-tag-queue",
+            queue_row_id: activeRow.id,
+            event_id: activeRow.event_id,
+            attempt: activeRow.attempt_count,
+            duration_ms: Date.now() - rowStart,
+            outcome: "skipped-missing-event",
+          },
+        );
         return;
       }
 
       await callTagEvent(supabaseUrl, serviceRoleKey, activeRow, inputs);
       await markSuccess(supabase, activeRow.id);
       summary.succeeded += 1;
-      logEdgeEvent("log", "tag-queue row processed", {
-        function: "process-tag-queue",
-        queue_row_id: activeRow.id,
-        event_id: activeRow.event_id,
-        attempt: activeRow.attempt_count,
-        duration_ms: Date.now() - rowStart,
-        title_chars: inputs.title.length,
-        description_chars: inputs.description.length,
-        outcome: "succeeded",
-      });
+      await logCronRunEvent(
+        supabase,
+        cronContext,
+        "log",
+        "tag-queue row processed",
+        {
+          function: "process-tag-queue",
+          queue_row_id: activeRow.id,
+          event_id: activeRow.event_id,
+          attempt: activeRow.attempt_count,
+          duration_ms: Date.now() - rowStart,
+          title_chars: inputs.title.length,
+          description_chars: inputs.description.length,
+          outcome: "succeeded",
+        },
+      );
     } catch (err) {
       const { dead } = await markFailureOrDead(supabase, activeRow, err).catch(
         (markErr) => {
@@ -264,7 +288,9 @@ export async function processTagQueueBatch(
             status: "dead",
           }),
         );
-        logEdgeEvent(
+        await logCronRunEvent(
+          supabase,
+          cronContext,
           "error",
           "tag-queue row dead-lettered",
           errorContext(err, {
@@ -281,15 +307,21 @@ export async function processTagQueueBatch(
         // Transient failures intentionally NOT captured to Sentry to avoid
         // noise during OpenAI/edge outages. The queue_row itself preserves
         // last_error for inspection.
-        logEdgeEvent("warn", "tag-queue row retry scheduled", {
-          function: "process-tag-queue",
-          queue_row_id: activeRow.id,
-          event_id: activeRow.event_id,
-          attempt: activeRow.attempt_count,
-          duration_ms: Date.now() - rowStart,
-          error: errorMessage(err).slice(0, 300),
-          outcome: "retry",
-        });
+        await logCronRunEvent(
+          supabase,
+          cronContext,
+          "warn",
+          "tag-queue row retry scheduled",
+          {
+            function: "process-tag-queue",
+            queue_row_id: activeRow.id,
+            event_id: activeRow.event_id,
+            attempt: activeRow.attempt_count,
+            duration_ms: Date.now() - rowStart,
+            error: errorMessage(err).slice(0, 300),
+            outcome: "retry",
+          },
+        );
       }
     }
   }
@@ -322,7 +354,7 @@ export async function processTagQueueBatch(
   summary.pending_after = depth ?? null;
   summary.duration_ms = Date.now() - batchStart;
 
-  logEdgeEvent("log", "tag-queue batch done", {
+  await logCronRunEvent(supabase, cronContext, "log", "tag-queue batch done", {
     function: "process-tag-queue",
     ...summary,
   });
@@ -345,11 +377,17 @@ export async function processTagQueueBatch(
       "invoke_process_tag_queue",
     );
     if (chainError) {
-      logEdgeEvent("warn", "tag-queue self-chain kick failed", {
-        function: "process-tag-queue",
-        pending_after: summary.pending_after,
-        error: chainError.message,
-      });
+      await logCronRunEvent(
+        supabase,
+        cronContext,
+        "warn",
+        "tag-queue self-chain kick failed",
+        {
+          function: "process-tag-queue",
+          pending_after: summary.pending_after,
+          error: chainError.message,
+        },
+      );
     }
   }
 
@@ -359,7 +397,12 @@ export async function processTagQueueBatch(
 if (import.meta.main) {
   serveServiceRoleJson(
     { functionName: "process-tag-queue", errorStage: "outer" },
-    ({ serviceRoleKey, supabase, supabaseUrl }) =>
-      processTagQueueBatch(supabase, supabaseUrl, serviceRoleKey),
+    ({ request, serviceRoleKey, supabase, supabaseUrl }) =>
+      processTagQueueBatch(
+        supabase,
+        supabaseUrl,
+        serviceRoleKey,
+        cronRunContextFromRequest(request),
+      ),
   );
 }

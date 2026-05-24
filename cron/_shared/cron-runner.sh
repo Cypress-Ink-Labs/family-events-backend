@@ -23,6 +23,17 @@ set -u
 URL="${1:-}"
 LABEL="${2:-cron}"
 TS=$(date -u +%FT%TZ)
+RUN_KEY="$(cat /proc/sys/kernel/random/uuid 2>/dev/null || uuidgen 2>/dev/null || printf '00000000-0000-4000-8000-%012d\n' "$$")"
+RUN_KEY="$(printf '%s' "$RUN_KEY" | tr '[:upper:]' '[:lower:]' | head -c 36)"
+RUNNER_LOG_FILE="$(mktemp)"
+
+json_escape() {
+  printf '%s' "$1" \
+    | tr '\n\r' '  ' \
+    | tr '\011' ' ' \
+    | tr -d '\000-\010\013\014\016-\037' \
+    | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
 
 emit() {
   level="$1"
@@ -30,9 +41,11 @@ emit() {
   http="$3"
   dur="$4"
   body="$5"
-  ebody=$(printf '%s' "$body" | tr -d '\n\r' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | cut -c1-2000)
-  printf '{"ts":"%s","label":"%s","level":"%s","msg":"%s","url":"%s","http":%s,"duration_s":%s,"body":"%s"}\n' \
-    "$TS" "$LABEL" "$level" "$msg" "$URL" "$http" "$dur" "$ebody"
+  ebody=$(json_escape "$body" | cut -c1-2000)
+  line=$(printf '{"ts":"%s","run_key":"%s","label":"%s","level":"%s","msg":"%s","url":"%s","http":%s,"duration_s":%s,"body":"%s"}' \
+    "$TS" "$RUN_KEY" "$LABEL" "$level" "$msg" "$URL" "$http" "$dur" "$ebody")
+  printf '%s\n' "$line"
+  printf '%s\n' "$line" >> "$RUNNER_LOG_FILE"
 }
 
 # POST run result to log-cron-run edge fn. Best-effort. private.railway_cron_runs.status
@@ -50,9 +63,10 @@ log_run() {
     return 0
   fi
 
-  ebody=$(printf '%s' "$body" | tr -d '\n\r' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | cut -c1-2000)
-  payload=$(printf '{"label":"%s","status":"%s","http_status":%s,"duration_s":%s,"body":"%s"}' \
-    "$LABEL" "$status" "$http" "$dur" "$ebody")
+  ebody=$(json_escape "$body" | cut -c1-2000)
+  erunner=$(json_escape "$(cat "$RUNNER_LOG_FILE" 2>/dev/null || true)" | cut -c1-8000)
+  payload=$(printf '{"run_key":"%s","label":"%s","status":"%s","http_status":%s,"duration_s":%s,"body":"%s","runner_log":"%s"}' \
+    "$RUN_KEY" "$LABEL" "$status" "$http" "$dur" "$ebody" "$erunner")
 
   curl --silent --show-error --max-time 10 \
     -o /dev/null \
@@ -103,7 +117,7 @@ if ! is_enabled; then
   exit 0
 fi
 
-printf '{"ts":"%s","label":"%s","level":"info","msg":"starting"}\n' "$TS" "$LABEL"
+emit info "starting" 0 0 ""
 
 START=$(date +%s)
 BODY_FILE=$(mktemp)
@@ -112,7 +126,9 @@ HTTP_RAW=$(curl --silent --show-error --max-time 170 \
   -X POST \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  "$URL" -d '{}' 2>/dev/null || echo "0")
+  -H "X-Cron-Run-Key: $RUN_KEY" \
+  -H "X-Cron-Label: $LABEL" \
+  "$URL" -d "$(printf '{"cron_run_key":"%s","cron_label":"%s"}' "$RUN_KEY" "$LABEL")" 2>/dev/null || echo "0")
 END=$(date +%s)
 DUR=$((END - START))
 BODY=$(cat "$BODY_FILE" 2>/dev/null || true)
@@ -126,5 +142,7 @@ case "$HTTP" in
   0)  emit error "curl failed (network/timeout)" 0 "$DUR" "$BODY"; log_run "failed" 0 "$DUR" "$BODY" ;;
   *)  emit error "non-2xx response" "$HTTP" "$DUR" "$BODY"; log_run "failed" "$HTTP" "$DUR" "$BODY" ;;
 esac
+
+rm -f "$RUNNER_LOG_FILE"
 
 exit 0
