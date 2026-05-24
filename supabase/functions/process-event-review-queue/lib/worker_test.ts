@@ -465,7 +465,7 @@ Deno.test("disabled feature flag routes to admin review", async () => {
 
   assertEquals(result.outcome, "succeeded");
   assertEquals(supabase.events.get(event.id)?.status, "draft");
-  assertEquals(supabase.events.get(event.id)?.llm_review_status, "failed");
+  assertEquals(supabase.events.get(event.id)?.llm_review_status, "not_required");
 });
 
 Deno.test("low confidence routes to admin review", async () => {

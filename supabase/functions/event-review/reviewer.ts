@@ -1,16 +1,13 @@
 import { resolveLlmReviewConfig } from "./config.ts";
 import { normalizeReviewEventInput } from "./normalizer.ts";
 import { buildReviewPrompt } from "./prompt.ts";
-import {
-  applyConfidenceThreshold,
-  parseLlmDecisionJson,
-} from "./schema.ts";
+import { applyConfidenceThreshold, parseLlmDecisionJson } from "./schema.ts";
 import { buildLlmReviewProvider } from "./provider.ts";
 import type {
   AppliedLlmEventReviewDecision,
+  LlmReviewConfig,
   ReviewEventDeps,
   ReviewEventInput,
-  LlmReviewConfig,
 } from "./types.ts";
 
 function failedDecision(
@@ -48,12 +45,23 @@ export async function reviewEventWithLlm(
 
   if (!config.enabled) {
     const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
-    return failedDecision(
-      config,
-      "LLM review is disabled; routing to admin review.",
-      "disabled",
-      elapsed,
-    );
+    return {
+      status: "not_required",
+      modelDecision: null,
+      appliedDecision: "needs_admin_review",
+      confidence: null,
+      reason: "LLM review is disabled; routing to admin review.",
+      flags: ["disabled"],
+      suggestedCategory: null,
+      normalizedTitle: null,
+      provider: config.provider,
+      model: config.model,
+      promptVersion: config.promptVersion,
+      rawResponse: null,
+      errorCode: "disabled",
+      errorMessage: null,
+      processingMs: elapsed,
+    } satisfies AppliedLlmEventReviewDecision;
   }
 
   if (!config.valid) {
@@ -93,7 +101,10 @@ export async function reviewEventWithLlm(
     );
 
     const parsed = parseLlmDecisionJson(providerOutput.rawText);
-    const applied = applyConfidenceThreshold(parsed, config.confidenceThreshold);
+    const applied = applyConfidenceThreshold(
+      parsed,
+      config.confidenceThreshold,
+    );
     const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
 
     return {
@@ -110,7 +121,9 @@ export async function reviewEventWithLlm(
       provider: providerOutput.provider,
       model: providerOutput.model,
       promptVersion: config.promptVersion,
-      rawResponse: config.persistRawResponse ? providerOutput.rawResponse : null,
+      rawResponse: config.persistRawResponse
+        ? providerOutput.rawResponse
+        : null,
       errorCode: null,
       errorMessage: null,
       processingMs: elapsed,

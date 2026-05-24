@@ -3,7 +3,7 @@ export type LlmEventReviewDecision =
   | "reject"
   | "needs_admin_review";
 
-export type LlmEventReviewStatus = "succeeded" | "failed";
+export type LlmEventReviewStatus = "succeeded" | "failed" | "not_required";
 
 export interface LlmEventReviewDecisionPayload {
   decision: LlmEventReviewDecision;
