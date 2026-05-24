@@ -580,11 +580,29 @@ export async function processReviewQueueBatch(
   return summary;
 }
 
-export function buildReviewQueueDeps(
+async function loadEventReviewFeatureConfig(
   supabase: SupabaseClient,
-): ReviewQueueDeps {
+): Promise<{ model: string; enabled: boolean } | null> {
+  try {
+    const { data, error } = await supabase
+      .from("ai_feature_config")
+      .select("model_id, enabled")
+      .eq("feature", "event-review")
+      .maybeSingle();
+    if (error || !data) return null;
+    const row = data as { model_id: string; enabled: boolean };
+    return { model: row.model_id, enabled: row.enabled };
+  } catch {
+    return null;
+  }
+}
+
+export async function buildReviewQueueDeps(
+  supabase: SupabaseClient,
+): Promise<ReviewQueueDeps> {
+  const dbOverrides = await loadEventReviewFeatureConfig(supabase);
   return {
     supabase,
-    config: resolveLlmReviewConfig(),
+    config: resolveLlmReviewConfig(Deno.env, dbOverrides),
   };
 }

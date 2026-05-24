@@ -101,3 +101,41 @@ Deno.test("resolveLlmReviewConfig reads AI_* fallbacks", () => {
   assertEquals(config.apiKey, "ai-key");
   assertEquals(config.valid, true);
 });
+
+Deno.test("resolveLlmReviewConfig uses dbOverrides when provided", () => {
+  const env = {
+    get: (key: string): string | undefined => {
+      const values: Record<string, string> = {
+        LLM_REVIEW_ENABLED: "false",
+        LLM_REVIEW_BASE_URL: "https://api.openai.com/v1",
+        LLM_REVIEW_API_KEY: "sk-test",
+        LLM_REVIEW_MODEL: "gpt-4o-mini",
+      };
+      return values[key];
+    },
+  };
+
+  const config = resolveLlmReviewConfig(env, { model: "gpt-4.1", enabled: true });
+
+  assertEquals(config.model, "gpt-4.1");
+  assertEquals(config.enabled, true);
+});
+
+Deno.test("resolveLlmReviewConfig uses env when dbOverrides is null", () => {
+  const env = {
+    get: (key: string): string | undefined => {
+      const values: Record<string, string> = {
+        LLM_REVIEW_ENABLED: "true",
+        LLM_REVIEW_BASE_URL: "https://api.openai.com/v1",
+        LLM_REVIEW_API_KEY: "sk-test",
+        LLM_REVIEW_MODEL: "gpt-4o-mini",
+      };
+      return values[key];
+    },
+  };
+
+  const config = resolveLlmReviewConfig(env, null);
+
+  assertEquals(config.model, "gpt-4o-mini");
+  assertEquals(config.enabled, true);
+});

@@ -6,9 +6,8 @@ if (import.meta.main) {
   serveServiceRoleJson(
     { functionName: "process-event-review-queue", errorStage: "outer" },
     async ({ supabase }) => {
-      const summary = await processReviewQueueBatch(
-        buildReviewQueueDeps(supabase),
-      );
+      const deps = await buildReviewQueueDeps(supabase);
+      const summary = await processReviewQueueBatch(deps);
 
       return {
         processed: summary.succeeded + summary.retrying + summary.dead,
