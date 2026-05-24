@@ -184,7 +184,17 @@ deploy_supabase_migrate() {
   info "Preflight: supabase db push --linked --dry-run"
   bash "$SUPABASE" db push --linked --dry-run || warn "Supabase db push dry-run failed or is unavailable; continuing with explicit db push."
   info "Running: supabase db push --linked"
-  bash "$SUPABASE" db push --linked
+  local push_log push_status
+  push_log="$(mktemp)"
+  set +e
+  bash "$SUPABASE" db push --linked 2>&1 | tee "$push_log"
+  push_status=${PIPESTATUS[0]}
+  set -e
+  if [ "$push_status" -ne 0 ] || grep -Eq '(^|[[:space:]])ERROR:|Try rerunning the command' "$push_log"; then
+    rm -f "$push_log"
+    return 1
+  fi
+  rm -f "$push_log"
   ok "Migrations applied."
 }
 

@@ -61,7 +61,7 @@ ON CONFLICT (feature) DO UPDATE SET
 ALTER TABLE public.approved_ai_models ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_feature_config   ENABLE ROW LEVEL SECURITY;
 
-GRANT SELECT ON public.approved_ai_models TO authenticated, service_role;
+GRANT SELECT ON public.approved_ai_models TO anon, authenticated, service_role;
 GRANT SELECT ON public.ai_feature_config TO authenticated, service_role;
 
 DROP POLICY IF EXISTS "anon read approved_ai_models" ON public.approved_ai_models;
@@ -70,6 +70,9 @@ DROP POLICY IF EXISTS "authenticated read ai_feature_config" ON public.ai_featur
 
 CREATE POLICY "authenticated read approved_ai_models"
   ON public.approved_ai_models FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "anon read approved_ai_models"
+  ON public.approved_ai_models FOR SELECT TO anon USING (true);
 
 CREATE POLICY "authenticated read ai_feature_config"
   ON public.ai_feature_config FOR SELECT TO authenticated USING (true);
@@ -158,10 +161,16 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_approved_ai_models()
   TO authenticated, service_role, anon;
 
--- ─── Verify (per AGENTS.md pattern) ─────────────────────────────────────────
+-- ─── Verify ─────────────────────────────────────────────────────────────────
 DO $$
 BEGIN
-  SET LOCAL ROLE authenticated;
+  IF NOT has_table_privilege('authenticated', 'public.approved_ai_models', 'SELECT') THEN
+    RAISE EXCEPTION 'authenticated missing SELECT on approved_ai_models';
+  END IF;
+
+  IF NOT has_table_privilege('anon', 'public.approved_ai_models', 'SELECT') THEN
+    RAISE EXCEPTION 'anon missing SELECT on approved_ai_models';
+  END IF;
+
   PERFORM public.get_approved_ai_models();
-  RESET ROLE;
 END $$;
