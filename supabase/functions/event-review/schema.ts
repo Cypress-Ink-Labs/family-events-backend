@@ -2,6 +2,10 @@ import type {
   LlmEventReviewDecision,
   LlmEventReviewDecisionPayload,
 } from "./types.ts";
+import {
+  LLM_EVENT_REVIEW_DECISION,
+  LLM_EVENT_REVIEW_DECISIONS,
+} from "./types.ts";
 
 const ALLOWED_KEYS = new Set([
   "decision",
@@ -11,12 +15,6 @@ const ALLOWED_KEYS = new Set([
   "suggestedCategory",
   "normalizedTitle",
 ]);
-
-const DECISIONS: LlmEventReviewDecision[] = [
-  "approve",
-  "reject",
-  "needs_admin_review",
-];
 
 const MAX_REASON_CHARS = 1_000;
 const MAX_FLAGS = 10;
@@ -61,7 +59,12 @@ export function parseLlmDecisionJson(rawJson: string): LlmEventReviewDecisionPay
   }
 
   const decisionRaw = object.decision;
-  if (typeof decisionRaw !== "string" || !DECISIONS.includes(decisionRaw as LlmEventReviewDecision)) {
+  if (
+    typeof decisionRaw !== "string" ||
+    !LLM_EVENT_REVIEW_DECISIONS.includes(
+      decisionRaw as LlmEventReviewDecision,
+    )
+  ) {
     throw new Error("invalid_decision");
   }
 
@@ -106,7 +109,9 @@ export function applyConfidenceThreshold(
   const lowConfidence = payload.confidence < confidenceThreshold;
   return {
     modelDecision: payload.decision,
-    appliedDecision: lowConfidence ? "needs_admin_review" : payload.decision,
+    appliedDecision: lowConfidence
+      ? LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW
+      : payload.decision,
     confidence: payload.confidence,
     reason: payload.reason,
     flags: payload.flags ?? [],

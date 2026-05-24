@@ -9,6 +9,10 @@ import type {
   ReviewEventDeps,
   ReviewEventInput,
 } from "./types.ts";
+import {
+  LLM_EVENT_REVIEW_DECISION,
+  LLM_EVENT_REVIEW_STATUS,
+} from "./types.ts";
 
 function failedDecision(
   config: LlmReviewConfig,
@@ -18,9 +22,9 @@ function failedDecision(
   errorMessage: string | null = null,
 ): AppliedLlmEventReviewDecision {
   return {
-    status: "failed",
+    status: LLM_EVENT_REVIEW_STATUS.FAILED,
     modelDecision: null,
-    appliedDecision: "needs_admin_review",
+    appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
     confidence: null,
     reason,
     flags: [errorCode],
@@ -46,9 +50,9 @@ export async function reviewEventWithLlm(
   if (!config.enabled) {
     const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
     return {
-      status: "not_required",
+      status: LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED,
       modelDecision: null,
-      appliedDecision: "needs_admin_review",
+      appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
       confidence: null,
       reason: "LLM review is disabled; routing to admin review.",
       flags: ["disabled"],
@@ -108,7 +112,7 @@ export async function reviewEventWithLlm(
     const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
 
     return {
-      status: "succeeded",
+      status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
       modelDecision: applied.modelDecision,
       appliedDecision: applied.appliedDecision,
       confidence: applied.confidence,

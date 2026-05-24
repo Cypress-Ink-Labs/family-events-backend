@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -364,9 +358,7 @@ export type Database = {
       }
       event_llm_review_traces: {
         Row: {
-          applied_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          applied_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           confidence: number | null
           created_at: string
           error_code: string | null
@@ -376,9 +368,7 @@ export type Database = {
           id: number
           input_snapshot: Json | null
           model: string | null
-          model_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          model_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           normalized_title: string | null
           processing_ms: number | null
           prompt_version: string
@@ -392,9 +382,7 @@ export type Database = {
           suggested_category: string | null
         }
         Insert: {
-          applied_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          applied_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
           confidence?: number | null
           created_at?: string
           error_code?: string | null
@@ -404,9 +392,7 @@ export type Database = {
           id?: number
           input_snapshot?: Json | null
           model?: string | null
-          model_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          model_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
           normalized_title?: string | null
           processing_ms?: number | null
           prompt_version: string
@@ -420,9 +406,7 @@ export type Database = {
           suggested_category?: string | null
         }
         Update: {
-          applied_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          applied_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
           confidence?: number | null
           created_at?: string
           error_code?: string | null
@@ -432,9 +416,7 @@ export type Database = {
           id?: number
           input_snapshot?: Json | null
           model?: string | null
-          model_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          model_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
           normalized_title?: string | null
           processing_ms?: number | null
           prompt_version?: string
@@ -687,9 +669,7 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -741,9 +721,7 @@ export type Database = {
           last_enrichment_attempt_at?: string | null
           latitude?: number | null
           llm_review_confidence?: number | null
-          llm_review_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error?: string | null
           llm_review_flags?: string[]
           llm_review_model?: string | null
@@ -795,9 +773,7 @@ export type Database = {
           last_enrichment_attempt_at?: string | null
           latitude?: number | null
           llm_review_confidence?: number | null
-          llm_review_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error?: string | null
           llm_review_flags?: string[]
           llm_review_model?: string | null
@@ -1512,9 +1488,7 @@ export type Database = {
           oldest_pending_enqueued_at: string | null
           oldest_processing_started_at: string | null
           row_count: number | null
-          status:
-            | Database["public"]["Enums"]["llm_event_review_queue_status"]
-            | null
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"] | null
         }
         Relationships: []
       }
@@ -1637,9 +1611,7 @@ export type Database = {
           oldest_enqueued_at: string | null
           oldest_processing_started_at: string | null
           row_count: number | null
-          status:
-            | Database["public"]["Enums"]["source_scrape_queue_status"]
-            | null
+          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null
         }
         Relationships: []
       }
@@ -1698,9 +1670,7 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -1991,9 +1961,7 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2090,9 +2058,7 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2153,9 +2119,7 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2726,9 +2690,7 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2804,9 +2766,7 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2872,33 +2832,13 @@ export type Database = {
     }
     Enums: {
       event_processing_mode: "manual_review" | "auto_approve" | "llm_review"
-      event_tag_queue_status:
-        | "pending"
-        | "processing"
-        | "failed"
-        | "dead"
-        | "succeeded"
+      event_tag_queue_status: "pending" | "processing" | "failed" | "dead" | "succeeded"
       invite_request_status: "pending" | "approved" | "rejected"
       llm_event_review_decision: "approve" | "reject" | "needs_admin_review"
-      llm_event_review_queue_status:
-        | "pending"
-        | "processing"
-        | "retrying"
-        | "succeeded"
-        | "dead"
-      llm_event_review_status:
-        | "not_required"
-        | "pending"
-        | "succeeded"
-        | "failed"
-        | "skipped"
+      llm_event_review_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
+      llm_event_review_status: "not_required" | "pending" | "succeeded" | "failed" | "skipped"
       source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
-      source_scrape_queue_status:
-        | "pending"
-        | "processing"
-        | "retrying"
-        | "succeeded"
-        | "dead"
+      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2929,10 +2869,8 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -3027,41 +2965,13 @@ export const Constants = {
   public: {
     Enums: {
       event_processing_mode: ["manual_review", "auto_approve", "llm_review"],
-      event_tag_queue_status: [
-        "pending",
-        "processing",
-        "failed",
-        "dead",
-        "succeeded",
-      ],
+      event_tag_queue_status: ["pending", "processing", "failed", "dead", "succeeded"],
       invite_request_status: ["pending", "approved", "rejected"],
       llm_event_review_decision: ["approve", "reject", "needs_admin_review"],
-      llm_event_review_queue_status: [
-        "pending",
-        "processing",
-        "retrying",
-        "succeeded",
-        "dead",
-      ],
-      llm_event_review_status: [
-        "not_required",
-        "pending",
-        "succeeded",
-        "failed",
-        "skipped",
-      ],
-      source_extraction_mode: [
-        "deterministic",
-        "llm",
-        "deterministic_then_llm",
-      ],
-      source_scrape_queue_status: [
-        "pending",
-        "processing",
-        "retrying",
-        "succeeded",
-        "dead",
-      ],
+      llm_event_review_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
+      llm_event_review_status: ["not_required", "pending", "succeeded", "failed", "skipped"],
+      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
+      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
     },
   },
 } as const

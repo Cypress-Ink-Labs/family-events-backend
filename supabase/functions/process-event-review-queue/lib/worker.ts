@@ -5,7 +5,10 @@ import {
 } from "../../_shared/cron-run-log.ts";
 import {
   type AppliedLlmEventReviewDecision,
+  LLM_EVENT_REVIEW_DECISION,
+  LLM_EVENT_REVIEW_STATUS,
   type LlmReviewConfig,
+  type LlmEventReviewDecision,
   resolveLlmReviewConfig,
   reviewEventWithLlm,
 } from "../../event-review/mod.ts";
@@ -65,7 +68,7 @@ export interface ReviewQueueBatchResult {
 
 export interface EventReviewQueueRowResult {
   outcome: "succeeded" | "retrying" | "dead" | "skipped";
-  appliedDecision: "approve" | "reject" | "needs_admin_review" | null;
+  appliedDecision: LlmEventReviewDecision | null;
   failed: boolean;
 }
 
@@ -216,7 +219,7 @@ async function insertTrace(
     queueRow: EventLlmReviewQueueRow;
     eventId: string;
     review: AppliedLlmEventReviewDecision;
-    modelDecision: "approve" | "reject" | "needs_admin_review" | null;
+    modelDecision: LlmEventReviewDecision | null;
     inputSnapshot: Record<string, unknown>;
     status: "succeeded" | "failed" | "skipped";
   },
@@ -284,9 +287,9 @@ async function applyEventDecision(
 
 function buildSkippedReview(reason: string): AppliedLlmEventReviewDecision {
   return {
-    status: "failed",
-    modelDecision: null,
-    appliedDecision: "needs_admin_review",
+      status: LLM_EVENT_REVIEW_STATUS.FAILED,
+      modelDecision: null,
+      appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
     confidence: null,
     reason,
     flags: ["skipped"],
@@ -314,7 +317,7 @@ function traceInputSnapshot(event: EventReviewRow): Record<string, unknown> {
 function isReviewable(event: EventReviewRow): boolean {
   return event.status === "draft" &&
     (event.llm_review_status === "pending" ||
-      event.llm_review_status === "not_required");
+      event.llm_review_status === LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED);
 }
 
 async function logReviewEvent(
@@ -406,7 +409,7 @@ async function logReviewSignals(
   event: EventReviewRow,
   review: AppliedLlmEventReviewDecision,
 ): Promise<void> {
-  if (review.status === "failed") {
+  if (review.status === LLM_EVENT_REVIEW_STATUS.FAILED) {
     await logReviewEvent(deps, "warn", "event_review_provider_failed", {
       function: "process-event-review-queue",
       queue_id: startedRow.id,
@@ -480,7 +483,7 @@ async function reviewAndApplyEvent(
   return {
     outcome: "succeeded",
     appliedDecision: review.appliedDecision,
-    failed: review.status === "failed",
+    failed: review.status === LLM_EVENT_REVIEW_STATUS.FAILED,
   };
 }
 
@@ -578,9 +581,9 @@ export async function processReviewQueueBatch(
     const result = await processReviewQueueRow(deps, row);
     if (result.outcome === "succeeded" || result.outcome === "skipped") {
       summary.succeeded += 1;
-      if (result.appliedDecision === "approve") summary.approved += 1;
-      if (result.appliedDecision === "reject") summary.rejected += 1;
-      if (result.appliedDecision === "needs_admin_review") {
+      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE) summary.approved += 1;
+      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT) summary.rejected += 1;
+      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW) {
         summary.needsAdminReview += 1;
       }
       if (result.failed) summary.failed += 1;

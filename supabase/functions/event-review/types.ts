@@ -1,9 +1,26 @@
-export type LlmEventReviewDecision =
-  | "approve"
-  | "reject"
-  | "needs_admin_review";
+export const LLM_EVENT_REVIEW_DECISION = {
+  APPROVE: "approve",
+  REJECT: "reject",
+  NEEDS_ADMIN_REVIEW: "needs_admin_review",
+} as const;
 
-export type LlmEventReviewStatus = "succeeded" | "failed" | "not_required";
+export const LLM_EVENT_REVIEW_DECISIONS = [
+  LLM_EVENT_REVIEW_DECISION.APPROVE,
+  LLM_EVENT_REVIEW_DECISION.REJECT,
+  LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
+] as const;
+
+export const LLM_EVENT_REVIEW_STATUS = {
+  SUCCEEDED: "succeeded",
+  FAILED: "failed",
+  NOT_REQUIRED: "not_required",
+} as const;
+
+export type LlmEventReviewDecision =
+  (typeof LLM_EVENT_REVIEW_DECISIONS)[number];
+
+export type LlmEventReviewStatus =
+  (typeof LLM_EVENT_REVIEW_STATUS)[keyof typeof LLM_EVENT_REVIEW_STATUS];
 
 export interface LlmEventReviewDecisionPayload {
   decision: LlmEventReviewDecision;
