@@ -34,6 +34,7 @@ const ALLOWED_OPENAI_MODELS = new Set([
   "gpt-4o-mini",
   "gpt-4o",
   "gpt-4-turbo",
+  "gpt-4.1-nano",
   "gpt-4.1-mini",
   "gpt-4.1",
   "gpt-5-mini",
@@ -135,14 +136,20 @@ function resolveAiProvider(value: string | undefined): LlmTagProvider {
   return "openai";
 }
 
-function resolveAiConfig(): LlmConfig {
-  const provider = resolveAiProvider(Deno.env.get("AI_PROVIDER"));
+function resolveAiConfig(
+  dbConfig?: { modelId: string; provider: string } | null,
+): LlmConfig {
+  const provider = dbConfig
+    ? resolveAiProvider(dbConfig.provider)
+    : resolveAiProvider(Deno.env.get("AI_PROVIDER"));
 
   const rawBaseUrl = Deno.env.get("AI_BASE_URL") ??
     (provider === "openai" ? DEFAULT_AI_BASE_URL : "");
   const baseUrl = normalizeAiBaseUrl(rawBaseUrl);
 
-  const rawModel = Deno.env.get("AI_MODEL") ?? Deno.env.get("OPENAI_MODEL");
+  const rawModel = dbConfig?.modelId ??
+    Deno.env.get("AI_MODEL") ??
+    Deno.env.get("OPENAI_MODEL");
   const model = provider === "openai"
     ? (rawModel ?? DEFAULT_OPENAI_MODEL)
     : (rawModel ?? DEFAULT_OLLAMA_MODEL);
@@ -159,6 +166,29 @@ function resolveAiConfig(): LlmConfig {
     model,
     configured: Boolean(baseUrl && (apiKey || provider === "ollama")),
   };
+}
+
+async function loadTagFeatureConfig(
+  supabase: TagEventSupabaseClient,
+): Promise<{ modelId: string; provider: string } | null> {
+  try {
+    const { data, error } = await supabase
+      .from("ai_feature_config")
+      .select("model_id, approved_ai_models(provider)")
+      .eq("feature", "tagging")
+      .maybeSingle();
+    if (error || !data) return null;
+    const row = data as unknown as {
+      model_id: string;
+      approved_ai_models: { provider: string } | null;
+    };
+    return {
+      modelId: row.model_id,
+      provider: row.approved_ai_models?.provider ?? "openai",
+    };
+  } catch {
+    return null;
+  }
 }
 
 function resolveOpenAiModel(configuredModel: string): string {
@@ -489,8 +519,9 @@ function classifyWithKeywords(input: {
 export async function resolveClassification(
   input: TagEventInput,
   availableTags: AvailableTag[],
+  dbConfig?: { modelId: string; provider: string } | null,
 ): Promise<ClassificationOutput> {
-  const aiConfig = normalizeAiConfigForUse(resolveAiConfig());
+  const aiConfig = normalizeAiConfigForUse(resolveAiConfig(dbConfig));
 
   if (!aiConfig.configured) {
     return {
@@ -873,6 +904,9 @@ interface TagEventHandlerDeps {
   getEnv: (name: string) => string | undefined;
   classify: typeof resolveClassification;
   geocode: GeocodeLookup;
+  loadFeatureConfig: (
+    supabase: TagEventSupabaseClient,
+  ) => Promise<{ modelId: string; provider: string } | null>;
 }
 
 const defaultHandlerDeps: TagEventHandlerDeps = {
@@ -882,6 +916,7 @@ const defaultHandlerDeps: TagEventHandlerDeps = {
   getEnv: (name) => Deno.env.get(name),
   classify: resolveClassification,
   geocode: geocodeViaNominatim,
+  loadFeatureConfig: loadTagFeatureConfig,
 };
 
 export function createTagEventHandler(
@@ -905,11 +940,13 @@ export function createTagEventHandler(
         deps.getEnv("SUPABASE_URL") ?? "",
         serviceRoleKey,
       );
+      const featureConfig = await deps.loadFeatureConfig(supabase);
       const input = await loadTagEventInput(supabase, await req.json());
       const availableTags = await loadAvailableTags(supabase);
       const { classification, llmUsage } = await deps.classify(
         input,
         availableTags,
+        featureConfig,
       );
 
       const normalizedTags = normalizeClassificationTags(

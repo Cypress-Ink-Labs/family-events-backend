@@ -40,6 +40,11 @@ class FakeSupabase {
   eventTags: FakeEventTag[] = [];
   traces: Record<string, unknown>[] = [];
   cities = new Map<string, FakeCity>();
+  aiFeatureConfig: {
+    feature: string;
+    model_id: string;
+    approved_ai_models: { provider: string } | null;
+  } | null = null;
 
   from(table: string) {
     return new FakeQuery(this, table);
@@ -178,6 +183,14 @@ class FakeQuery {
       });
     }
 
+    if (this.operation === "select" && this.table === "ai_feature_config") {
+      const feature = this.filters.get("feature");
+      if (this.db.aiFeatureConfig?.feature === feature) {
+        return Promise.resolve({ data: this.db.aiFeatureConfig, error: null });
+      }
+      return Promise.resolve({ data: null, error: null });
+    }
+
     throw new Error(`Unhandled fake query: ${this.operation} ${this.table}`);
   }
 }
@@ -221,6 +234,7 @@ Deno.test("handleTagEvent rejects requests without a title", async () => {
   const handler = createTagEventHandler({
     createSupabaseClient: () => db as never,
     requireServiceRole: authOk,
+    loadFeatureConfig: () => Promise.resolve(null),
   });
 
   const response = await handler(makeRequest({}));
@@ -354,6 +368,7 @@ Deno.test("handleTagEvent preserves manual tags and only fills missing event fie
       geocodeQueries.push(query);
       return Promise.resolve(null);
     },
+    loadFeatureConfig: () => Promise.resolve(null),
   });
 
   const response = await handler(makeRequest({
@@ -421,6 +436,7 @@ Deno.test("handleTagEvent returns fallback output from classification failures",
       },
       llmUsage: null,
     }),
+    loadFeatureConfig: () => Promise.resolve(null),
   });
 
   const response = await handler(makeRequest({
@@ -472,6 +488,7 @@ Deno.test("handleTagEvent includes prompt_version in trace insert", async () => 
       llmUsage: null,
     }),
     geocode: () => Promise.resolve(null),
+    loadFeatureConfig: () => Promise.resolve(null),
   });
 
   await handler(makeRequest({ event_id: "evt-pv", title: "Park day" }));
@@ -479,4 +496,40 @@ Deno.test("handleTagEvent includes prompt_version in trace insert", async () => 
   assertEquals(db.traces.length, 1);
   assertEquals(typeof db.traces[0].prompt_version, "string");
   assert((db.traces[0].prompt_version as string).length > 0);
+});
+
+Deno.test("resolveClassification uses model from DB config when provided", async () => {
+  const previous = {
+    AI_PROVIDER: Deno.env.get("AI_PROVIDER"),
+    AI_MODEL: Deno.env.get("AI_MODEL"),
+    AI_BASE_URL: Deno.env.get("AI_BASE_URL"),
+    AI_API_KEY: Deno.env.get("AI_API_KEY"),
+  };
+  for (const key of Object.keys(previous)) Deno.env.delete(key);
+
+  try {
+    const result = await resolveClassification(
+      {
+        eventId: null,
+        sourceRunId: null,
+        triggerType: "import",
+        traceStartedAt: Date.now(),
+        title: "Story time at the park",
+        description: "Free outdoor reading for kids.",
+        currentEvent: null,
+      },
+      [{ id: "tag-outdoor", slug: "outdoor", name: "Outdoor" }],
+      { modelId: "gpt-4.1-nano", provider: "openai" },
+    );
+
+    // No API key configured so falls back to keyword classification,
+    // but the model name from DB config flows through to the result.
+    assertEquals(result.classification.model, "gpt-4.1-nano");
+    assertEquals(result.classification.status, "fallback");
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) Deno.env.delete(key);
+      else Deno.env.set(key, value);
+    }
+  }
 });
