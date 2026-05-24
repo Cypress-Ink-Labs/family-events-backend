@@ -7,8 +7,8 @@ import {
   type AppliedLlmEventReviewDecision,
   LLM_EVENT_REVIEW_DECISION,
   LLM_EVENT_REVIEW_STATUS,
-  type LlmReviewConfig,
   type LlmEventReviewDecision,
+  type LlmReviewConfig,
   resolveLlmReviewConfig,
   reviewEventWithLlm,
 } from "../../event-review/mod.ts";
@@ -17,6 +17,7 @@ import { errorMessage, logEdgeEvent } from "../../_shared/logger.ts";
 const DEFAULT_BATCH_SIZE = 60;
 const MAX_BATCH_SIZE = 100;
 const BUDGET_MS = 110_000;
+const REVIEWABLE_LLM_REVIEW_STATUS_PENDING = "pending";
 
 export interface EventLlmReviewQueueRow {
   id: number;
@@ -287,9 +288,9 @@ async function applyEventDecision(
 
 function buildSkippedReview(reason: string): AppliedLlmEventReviewDecision {
   return {
-      status: LLM_EVENT_REVIEW_STATUS.FAILED,
-      modelDecision: null,
-      appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
+    status: LLM_EVENT_REVIEW_STATUS.FAILED,
+    modelDecision: null,
+    appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
     confidence: null,
     reason,
     flags: ["skipped"],
@@ -316,7 +317,7 @@ function traceInputSnapshot(event: EventReviewRow): Record<string, unknown> {
 
 function isReviewable(event: EventReviewRow): boolean {
   return event.status === "draft" &&
-    (event.llm_review_status === "pending" ||
+    (event.llm_review_status === REVIEWABLE_LLM_REVIEW_STATUS_PENDING ||
       event.llm_review_status === LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED);
 }
 
@@ -581,9 +582,15 @@ export async function processReviewQueueBatch(
     const result = await processReviewQueueRow(deps, row);
     if (result.outcome === "succeeded" || result.outcome === "skipped") {
       summary.succeeded += 1;
-      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE) summary.approved += 1;
-      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT) summary.rejected += 1;
-      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW) {
+      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE) {
+        summary.approved += 1;
+      }
+      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT) {
+        summary.rejected += 1;
+      }
+      if (
+        result.appliedDecision === LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW
+      ) {
         summary.needsAdminReview += 1;
       }
       if (result.failed) summary.failed += 1;

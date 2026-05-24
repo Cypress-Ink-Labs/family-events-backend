@@ -82,6 +82,7 @@ ALL_TARGETS=(
   "fn: backfill-event-enrichment         |supabase_fn|backfill-event-enrichment"
   "fn: cleanup-stale-runs                |supabase_fn|cleanup-stale-runs"
   "fn: db-maintenance                    |supabase_fn|db-maintenance"
+  "fn: generate-parent-tips              |supabase_fn|generate-parent-tips"
   "fn: log-cron-run                      |supabase_fn|log-cron-run"
   "fn: notify-email                      |supabase_fn|notify-email"
   "fn: process-source-queue              |supabase_fn|process-source-queue"
@@ -212,6 +213,7 @@ NO_VERIFY_JWT_FUNCTIONS=(
   backfill-event-enrichment
   cleanup-stale-runs
   db-maintenance
+  generate-parent-tips
   log-cron-run
   notify-email
   process-source-queue
@@ -254,6 +256,7 @@ deploy_supabase_fn_all() {
     backfill-event-enrichment
     cleanup-stale-runs
     db-maintenance
+    generate-parent-tips
     log-cron-run
     notify-email
     process-source-queue

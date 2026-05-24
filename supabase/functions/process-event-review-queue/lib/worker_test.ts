@@ -4,7 +4,14 @@ import {
   processReviewQueueRow,
   type ReviewQueueDeps,
 } from "./worker.ts";
-import type { AppliedLlmEventReviewDecision } from "../../event-review/types.ts";
+import {
+  type AppliedLlmEventReviewDecision,
+  LLM_EVENT_REVIEW_DECISION,
+  LLM_EVENT_REVIEW_STATUS,
+  type LlmEventReviewDecision,
+} from "../../event-review/types.ts";
+
+const REVIEWABLE_LLM_REVIEW_STATUS_PENDING = "pending";
 
 interface FakeEvent {
   id: string;
@@ -69,14 +76,11 @@ class FakeSupabase {
         return Promise.resolve({ data: false, error: null });
       }
 
-      const appliedDecision = args.p_applied_decision as
-        | "approve"
-        | "reject"
-        | "needs_admin_review";
+      const appliedDecision = args.p_applied_decision as LlmEventReviewDecision;
       Object.assign(event, {
-        status: appliedDecision === "approve"
+        status: appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE
           ? "published"
-          : appliedDecision === "reject"
+          : appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT
           ? "rejected"
           : "draft",
         llm_review_status: args.p_review_status,
@@ -115,7 +119,7 @@ class FakeSupabase {
         processing_ms: args.p_processing_ms,
       });
 
-      if (appliedDecision !== "reject") {
+      if (appliedDecision !== LLM_EVENT_REVIEW_DECISION.REJECT) {
         const duplicate = this.tagQueue.some(
           (existing) =>
             String((existing as { event_id?: string }).event_id ?? "") ===
@@ -278,7 +282,7 @@ function buildEvent(overrides: Partial<FakeEvent> = {}): FakeEvent {
     address: "10 Main St",
     source_name: "Library Feed",
     source_url: "https://example.com/event/1",
-    llm_review_status: "pending",
+    llm_review_status: REVIEWABLE_LLM_REVIEW_STATUS_PENDING,
     llm_review_decision: null,
     llm_review_confidence: null,
     llm_review_reason: null,
@@ -330,9 +334,9 @@ function decision(
   overrides: Partial<AppliedLlmEventReviewDecision> = {},
 ): AppliedLlmEventReviewDecision {
   return {
-    status: "succeeded",
-    modelDecision: "approve",
-    appliedDecision: "approve",
+    status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
+    modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
+    appliedDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
     confidence: 0.91,
     reason: "Clear family event",
     flags: [],
@@ -373,7 +377,10 @@ async function runRowTest(options: {
 Deno.test("approve publishes event and enqueues tag queue", async () => {
   const { supabase, eventId, result } = await runRowTest({
     reviewEvent: async () =>
-      decision({ appliedDecision: "approve", modelDecision: "approve" }),
+      decision({
+        appliedDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
+        modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
+      }),
   });
 
   assertEquals(result.outcome, "succeeded");
@@ -388,7 +395,10 @@ Deno.test("approve publishes event and enqueues tag queue", async () => {
 Deno.test("reject rejects event and does not enqueue tag queue", async () => {
   const { supabase, eventId } = await runRowTest({
     reviewEvent: async () =>
-      decision({ appliedDecision: "reject", modelDecision: "reject" }),
+      decision({
+        appliedDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
+        modelDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
+      }),
   });
 
   assertEquals(supabase.events.get(eventId)?.status, "rejected");
@@ -399,8 +409,8 @@ Deno.test("needs_admin_review keeps draft and enqueues tag queue", async () => {
   const { supabase, eventId } = await runRowTest({
     reviewEvent: async () =>
       decision({
-        appliedDecision: "needs_admin_review",
-        modelDecision: "approve",
+        appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
+        modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
         confidence: 0.62,
       }),
   });
@@ -413,8 +423,8 @@ Deno.test("provider timeout routes to admin review", async () => {
   const { supabase, eventId, result } = await runRowTest({
     reviewEvent: async () =>
       decision({
-        status: "failed",
-        appliedDecision: "needs_admin_review",
+        status: LLM_EVENT_REVIEW_STATUS.FAILED,
+        appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
         modelDecision: null,
         errorCode: "provider_timeout",
         errorMessage: "timed out",
@@ -424,15 +434,18 @@ Deno.test("provider timeout routes to admin review", async () => {
   assertEquals(result.outcome, "succeeded");
   assertEquals(result.failed, true);
   assertEquals(supabase.events.get(eventId)?.status, "draft");
-  assertEquals(supabase.events.get(eventId)?.llm_review_status, "failed");
+  assertEquals(
+    supabase.events.get(eventId)?.llm_review_status,
+    LLM_EVENT_REVIEW_STATUS.FAILED,
+  );
 });
 
 Deno.test("malformed provider output routes to admin review", async () => {
   const { supabase, eventId } = await runRowTest({
     reviewEvent: async () =>
       decision({
-        status: "failed",
-        appliedDecision: "needs_admin_review",
+        status: LLM_EVENT_REVIEW_STATUS.FAILED,
+        appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
         modelDecision: null,
         errorCode: "malformed_json",
       }),
@@ -441,7 +454,7 @@ Deno.test("malformed provider output routes to admin review", async () => {
   assertEquals(supabase.events.get(eventId)?.status, "draft");
   assertEquals(
     supabase.events.get(eventId)?.llm_review_decision,
-    "needs_admin_review",
+    LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
   );
 });
 
@@ -465,25 +478,31 @@ Deno.test("disabled feature flag routes to admin review", async () => {
 
   assertEquals(result.outcome, "succeeded");
   assertEquals(supabase.events.get(event.id)?.status, "draft");
-  assertEquals(supabase.events.get(event.id)?.llm_review_status, "not_required");
+  assertEquals(
+    supabase.events.get(event.id)?.llm_review_status,
+    LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED,
+  );
 });
 
 Deno.test("low confidence routes to admin review", async () => {
   const { supabase, eventId } = await runRowTest({
     reviewEvent: async () =>
       decision({
-        status: "succeeded",
-        appliedDecision: "needs_admin_review",
-        modelDecision: "approve",
+        status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
+        appliedDecision: LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
+        modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
         confidence: 0.5,
       }),
   });
 
   assertEquals(supabase.events.get(eventId)?.status, "draft");
-  assertEquals(supabase.events.get(eventId)?.llm_review_status, "succeeded");
+  assertEquals(
+    supabase.events.get(eventId)?.llm_review_status,
+    LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
+  );
   assertEquals(
     supabase.events.get(eventId)?.llm_review_decision,
-    "needs_admin_review",
+    LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
   );
 });
 
@@ -520,7 +539,7 @@ Deno.test("already processed event is skipped", async () => {
   const { supabase, result } = await runRowTest({
     event: {
       status: "published",
-      llm_review_status: "succeeded",
+      llm_review_status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
     },
     reviewEvent: async () => decision(),
   });
@@ -544,7 +563,10 @@ Deno.test("duplicate queue rows do not cause duplicate state transitions", async
     supabase: supabase as unknown as ReviewQueueDeps["supabase"],
     config: baseConfig(),
     reviewEvent: async () =>
-      decision({ appliedDecision: "approve", modelDecision: "approve" }),
+      decision({
+        appliedDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
+        modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
+      }),
   };
 
   const first = await processReviewQueueRow(deps, row1);
