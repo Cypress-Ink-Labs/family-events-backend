@@ -81,7 +81,13 @@ export async function geocodeViaNominatim(query: string): Promise<GeocodeResult 
 
 /**
  * Build a geocoding query string from event metadata. Prefers address, then venue
- * name, always scoped by city to avoid matching a same-named place elsewhere.
+ * name, scoped by city to avoid matching a same-named place elsewhere.
+ *
+ * If the base string already mentions the city or state (e.g. scraper wrote
+ * "444 Cajundome Blvd, Lafayette, LA, ..." into the address field), we don't
+ * append the locality again — duplicate "Lafayette, LA, Lafayette, LA" tails
+ * cause Nominatim to return zero hits for what would otherwise be a precise
+ * match.
  */
 export function buildGeocodeQuery(parts: {
   address: string | null
@@ -92,6 +98,19 @@ export function buildGeocodeQuery(parts: {
   const base = parts.address?.trim() || parts.venueName?.trim()
   if (!base) return null
 
-  const locality = [parts.cityName, parts.cityState].filter(Boolean).join(", ")
+  const baseLower = base.toLowerCase()
+  const cityMentioned = parts.cityName != null &&
+    baseLower.includes(parts.cityName.toLowerCase())
+  const stateMentioned = parts.cityState != null &&
+    baseLower.includes(parts.cityState.toLowerCase())
+
+  if (cityMentioned && stateMentioned) {
+    return base
+  }
+
+  const localityParts: string[] = []
+  if (parts.cityName && !cityMentioned) localityParts.push(parts.cityName)
+  if (parts.cityState && !stateMentioned) localityParts.push(parts.cityState)
+  const locality = localityParts.join(", ")
   return locality ? `${base}, ${locality}` : base
 }
