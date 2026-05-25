@@ -8,7 +8,7 @@ import {
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage } from "../_shared/logger.ts";
 import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts";
-import { findFallbackImage } from "../_shared/unsplash.ts";
+import { findFallbackImage, trackUnsplashDownload } from "../_shared/unsplash.ts";
 import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts";
 import type { ParsedEvent } from "../scrape-source/lib/types.ts";
 
@@ -56,6 +56,20 @@ interface SourceCityContext {
   state: string | null;
   latitude: number | null;
   longitude: number | null;
+}
+
+interface PendingUnsplashTrackingRow {
+  attribution_id: string;
+  event_id: string;
+  image_url: string;
+  download_location: string;
+  attempts: number;
+}
+
+interface UnsplashTrackingSummary {
+  pending_claimed: number;
+  tracked: number;
+  failed: number;
 }
 
 async function fetchCityContext(
@@ -106,6 +120,7 @@ async function enrichOne(
   let longitude: number | null = null;
   let images: string[] = [];
   let imageSource: "scraper" | "unsplash" | "none" = "none";
+  let unsplashResult: Awaited<ReturnType<typeof findFallbackImage>> = null;
 
   if (row.needs_coords) {
     let cityCtx: SourceCityContext | null = null;
@@ -178,9 +193,9 @@ async function enrichOne(
   // the event, and (d) we have an API key. Failure leaves images empty
   // and the row stays on the queue for the next tick.
   if (row.needs_images && images.length === 0 && row.tags.length > 0) {
-    const result = await findFallbackImage(row.tags, unsplashAccessKey);
-    if (result) {
-      images = [result.url];
+    unsplashResult = await findFallbackImage(row.tags, unsplashAccessKey);
+    if (unsplashResult) {
+      images = [unsplashResult.url];
       imageSource = "unsplash";
     }
   }
@@ -207,15 +222,83 @@ async function enrichOne(
   }
 
   // update_event_enrichment also bumps last_enrichment_attempt_at server-side.
-  const { error } = await supabase.rpc("update_event_enrichment", {
-    p_event_id: row.event_id,
-    p_latitude: latitude,
-    p_longitude: longitude,
-    p_images: images.length > 0 ? images : null,
+  if (imageSource === "unsplash" && unsplashResult) {
+    const { data: attributionId, error } = await supabase.rpc(
+      "upsert_event_image_attribution_with_enrichment",
+      {
+        p_event_id: row.event_id,
+        p_latitude: latitude,
+        p_longitude: longitude,
+        p_images: images,
+        p_image_url: unsplashResult.url,
+        p_unsplash_photo_id: unsplashResult.attribution.photoId,
+        p_unsplash_photographer_name: unsplashResult.attribution.photographerName,
+        p_unsplash_photographer_username: unsplashResult.attribution.photographerUsername,
+        p_unsplash_photographer_profile_url: unsplashResult.attribution.photographerProfileUrl,
+        p_unsplash_photo_url: unsplashResult.attribution.photoUrl,
+        p_unsplash_download_location: unsplashResult.attribution.downloadLocation,
+        p_matched_tag: unsplashResult.matchedTag,
+      },
+    );
+    if (error) throw error;
+
+    if (typeof attributionId === "string" && attributionId.length > 0) {
+      const tracking = await trackUnsplashDownload(
+        unsplashResult.attribution.downloadLocation,
+        unsplashAccessKey,
+      );
+      await supabase.rpc("mark_unsplash_download_tracking_result", {
+        p_attribution_id: attributionId,
+        p_success: tracking.ok,
+        p_error: tracking.error,
+      });
+    }
+  } else {
+    const { error } = await supabase.rpc("update_event_enrichment", {
+      p_event_id: row.event_id,
+      p_latitude: latitude,
+      p_longitude: longitude,
+      p_images: images.length > 0 ? images : null,
+    });
+    if (error) throw error;
+  }
+
+  return { updated: true, gotCoords, gotImages, imageSource };
+}
+
+async function runPendingUnsplashTrackingPass(
+  supabase: SupabaseClient,
+  unsplashAccessKey: string,
+): Promise<UnsplashTrackingSummary> {
+  const summary: UnsplashTrackingSummary = {
+    pending_claimed: 0,
+    tracked: 0,
+    failed: 0,
+  };
+
+  if (!unsplashAccessKey) return summary;
+
+  const { data, error } = await supabase.rpc("list_pending_unsplash_download_tracking", {
+    p_limit: 25,
   });
   if (error) throw error;
 
-  return { updated: true, gotCoords, gotImages, imageSource };
+  const rows = (data ?? []) as PendingUnsplashTrackingRow[];
+  summary.pending_claimed = rows.length;
+
+  for (const row of rows) {
+    const result = await trackUnsplashDownload(row.download_location, unsplashAccessKey);
+    const { error: markError } = await supabase.rpc("mark_unsplash_download_tracking_result", {
+      p_attribution_id: row.attribution_id,
+      p_success: result.ok,
+      p_error: result.error,
+    });
+    if (markError) throw markError;
+    if (result.ok) summary.tracked += 1;
+    else summary.failed += 1;
+  }
+
+  return summary;
 }
 
 interface ParentTipsPassSummary {
@@ -430,6 +513,11 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    const unsplashTrackingSummary = await runPendingUnsplashTrackingPass(
+      supabase,
+      unsplashAccessKey,
+    );
+
     const parentTipsSummary = await runParentTipsPass({
       supabase,
       supabaseUrl,
@@ -445,11 +533,17 @@ Deno.serve(async (req: Request) => {
       {
         function: "backfill-event-enrichment",
         ...summary,
+        unsplash_tracking: unsplashTrackingSummary,
         parent_tips: parentTipsSummary,
       },
     );
     return new Response(
-      JSON.stringify({ ok: true, ...summary, parent_tips: parentTipsSummary }),
+      JSON.stringify({
+        ok: true,
+        ...summary,
+        unsplash_tracking: unsplashTrackingSummary,
+        parent_tips: parentTipsSummary,
+      }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

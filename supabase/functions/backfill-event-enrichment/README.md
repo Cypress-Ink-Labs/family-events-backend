@@ -7,7 +7,7 @@ Invoked every 15 min by the `cron-enrich-events` Railway service.
 
 | Var | Required | Purpose |
 |---|---|---|
-| `SUPABASE_SERVICE_ROLE_KEY` | yes | RPC access for `list_events_needing_enrichment`, `backfill_image_enrichment_in_scope`, `update_event_enrichment`. |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | RPC access for `list_events_needing_enrichment`, `backfill_image_enrichment_in_scope`, `update_event_enrichment`, Unsplash attribution, and download-tracking RPCs. |
 | `SUPABASE_URL` | yes | Edge-fn → DB. |
 | `UNSPLASH_ACCESS_KEY` | optional | Enables the tag-keyed Unsplash image fallback. Get one at <https://unsplash.com/oauth/applications>. Demo tier (5000 req/hr) is sufficient at our cadence. **Blank → fallback skipped; clients render picsum placeholders.** |
 
@@ -20,8 +20,10 @@ Two-pass row claim (so old-row coord backfill never starves featured-event image
 
 Per row:
 
-- **Coords** — Nominatim geocode → city centroid fallback.
+- **Coords** — Nominatim geocode. Rows that miss are attempt-marked so they rotate to the back of the queue.
 - **Images** — first the scraper re-fetch path (currently returns `[]` because parse-time images are dropped on insert; left in place for future preservation), then Unsplash search keyed by the event's top-confidence tag.
+- **Unsplash attribution** — when an Unsplash fallback is written, the same RPC persists per-photo attribution metadata and a durable pending download-tracking row.
+- **Unsplash tracking retry** — after a successful DB write, the function awaits the `links.download_location` ping and marks the row succeeded/failed. Each tick also claims pending/failed tracking rows and retries them with DB-backed status.
 
 Skips the DB update entirely when nothing changed so `updated_at` doesn't tick.
 
@@ -38,16 +40,17 @@ https://api.unsplash.com/search/photos
 ```
 
 `content_filter=high` enables Unsplash safe-search. Walks `row.tags` in
-confidence order until one returns a hit. Triggers the required
-`links.download_location` ping per Unsplash API guidelines. Failure on
-any one tag falls through to the next; failure on all leaves the row's
-`images = []` and the next 15-minute tick will retry.
+confidence order until one returns a hit with complete photo/photographer
+metadata. The search helper does **not** fire-and-forget tracking; tracking
+happens only after the DB write succeeds and is retried via
+`event_image_attributions` if the HTTP call fails.
 
 ## Required attribution
 
-Per Unsplash API guidelines, the app must surface a credit line. Already
-present on web at `/profile` (`apps/web/src/features/profile/pages/profile.tsx`).
-iOS + Android attribution follows in a separate small commit.
+Per Unsplash API guidelines, clients render persisted per-photo attribution as
+"Photo by <photographer> on Unsplash" next to images sourced from Unsplash. The
+public `events_enriched_v2.image_attributions` JSON excludes tracking internals
+(`download_location`, status, attempts, errors).
 
 ## Local development
 
@@ -63,4 +66,5 @@ curl -X POST \
 ```
 
 Response body summarises `claimed / updated / coords / images /
-images_from_scraper / images_from_unsplash / errors`.
+images_from_scraper / images_from_unsplash / errors` plus
+`unsplash_tracking.pending_claimed / tracked / failed`.
