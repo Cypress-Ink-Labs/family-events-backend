@@ -96,7 +96,7 @@ DO $$
 BEGIN
   IF has_function_privilege(
     'anon',
-    'public.admin_events_enriched(text,uuid,boolean,text,timestamptz,uuid,int,public.llm_event_review_status,public.llm_event_review_decision)',
+    'public.admin_events_enriched(text,uuid,boolean,text,timestamptz,uuid,int,public.llm_event_review_status,public.llm_event_review_decision,boolean)',
     'EXECUTE'
   ) THEN
     RAISE EXCEPTION 'ANON_ALLOWED_EVENTS';
