@@ -145,6 +145,32 @@ async function enrichOne(
       if (geo) {
         latitude = geo.latitude;
         longitude = geo.longitude;
+      } else {
+        // When venue_name follows "Room Name, Branch Name" pattern (e.g.
+        // "WRL Storytime Room, West Regional Library"), Nominatim can't resolve
+        // the room prefix. Strip it and retry with just the branch name.
+        const raw = row.venue_name ?? row.address;
+        if (raw) {
+          const lastComma = raw.lastIndexOf(",");
+          if (lastComma !== -1) {
+            const branchName = raw.substring(lastComma + 1).trim();
+            if (branchName) {
+              const fallbackQuery = buildGeocodeQuery({
+                address: null,
+                venueName: branchName,
+                cityName: cityCtx?.name ?? null,
+                cityState: cityCtx?.state ?? null,
+              });
+              if (fallbackQuery) {
+                const fallbackGeo = await geocodeViaNominatim(fallbackQuery);
+                if (fallbackGeo) {
+                  latitude = fallbackGeo.latitude;
+                  longitude = fallbackGeo.longitude;
+                }
+              }
+            }
+          }
+        }
       }
     }
     // Intentionally no city-centroid fallback here. Writing the centroid back
