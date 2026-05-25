@@ -63,6 +63,18 @@ export interface UnsplashTrackingResult {
 }
 
 const SEARCH_ENDPOINT = "https://api.unsplash.com/search/photos"
+const PHOTOS_ENDPOINT = "https://api.unsplash.com/photos"
+
+function unsplashPhotoIdFromCdnUrl(imageUrl: string): string | null {
+  try {
+    const { hostname, pathname } = new URL(imageUrl)
+    if (!hostname.includes("unsplash.com")) return null
+    const match = pathname.match(/\/(photo-[\w-]+)/)
+    return match?.[1] ?? null
+  } catch {
+    return null
+  }
+}
 
 function firstString(...values: Array<string | undefined>): string | null {
   for (const value of values) {
@@ -135,6 +147,37 @@ export async function trackUnsplashDownload(
  * misses, or on any network / parse error — the caller treats this as "leave
  * images empty, next tick will retry."
  */
+/**
+ * Fetch attribution metadata for an existing Unsplash CDN image URL.
+ * Extracts the CDN path slug (e.g. "photo-abc123") and calls GET /photos/:id.
+ * Returns null on any failure — callers skip and retry next tick.
+ */
+export async function lookupUnsplashPhotoFromUrl(
+  imageUrl: string,
+  accessKey: string,
+  options: { fetchImpl?: typeof fetch } = {},
+): Promise<UnsplashAttributionMetadata | null> {
+  if (!accessKey) return null
+  const photoId = unsplashPhotoIdFromCdnUrl(imageUrl)
+  if (!photoId) return null
+
+  const fetcher = options.fetchImpl ?? fetch
+  try {
+    const res = await fetcher(`${PHOTOS_ENDPOINT}/${photoId}`, {
+      headers: {
+        Authorization: `Client-ID ${accessKey}`,
+        "Accept-Version": "v1",
+      },
+      signal: AbortSignal.timeout(5_000),
+    })
+    if (!res.ok) return null
+    const hit = (await res.json()) as UnsplashSearchHit
+    return attributionFromHit(hit)
+  } catch {
+    return null
+  }
+}
+
 export async function findFallbackImage(
   tags: string[],
   accessKey: string,

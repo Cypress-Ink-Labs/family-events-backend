@@ -8,7 +8,7 @@ import {
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage } from "../_shared/logger.ts";
 import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts";
-import { findFallbackImage, trackUnsplashDownload } from "../_shared/unsplash.ts";
+import { findFallbackImage, lookupUnsplashPhotoFromUrl, trackUnsplashDownload } from "../_shared/unsplash.ts";
 import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts";
 import type { ParsedEvent } from "../scrape-source/lib/types.ts";
 
@@ -305,6 +305,88 @@ async function runPendingUnsplashTrackingPass(
   return summary;
 }
 
+interface AttributionBackfillRow {
+  event_id: string;
+  image_url: string;
+}
+
+interface AttributionBackfillSummary {
+  claimed: number;
+  backfilled: number;
+  skipped: number;
+  errors: number;
+}
+
+const ATTRIBUTION_BACKFILL_BATCH = 10;
+
+async function runUnsplashAttributionBackfillPass(
+  supabase: SupabaseClient,
+  unsplashAccessKey: string,
+): Promise<AttributionBackfillSummary> {
+  const summary: AttributionBackfillSummary = {
+    claimed: 0,
+    backfilled: 0,
+    skipped: 0,
+    errors: 0,
+  };
+
+  if (!unsplashAccessKey) return summary;
+
+  const { data, error } = await supabase.rpc(
+    "list_events_needing_attribution_backfill",
+    { p_limit: ATTRIBUTION_BACKFILL_BATCH },
+  );
+  if (error) throw error;
+
+  const rows = (data ?? []) as AttributionBackfillRow[];
+  summary.claimed = rows.length;
+
+  for (const row of rows) {
+    try {
+      const attribution = await lookupUnsplashPhotoFromUrl(
+        row.image_url,
+        unsplashAccessKey,
+      );
+
+      if (!attribution) {
+        summary.skipped += 1;
+        continue;
+      }
+
+      const { error: upsertErr } = await supabase
+        .from("event_image_attributions")
+        .upsert(
+          {
+            event_id: row.event_id,
+            image_url: row.image_url,
+            provider: "unsplash",
+            matched_tag: null,
+            unsplash_photo_id: attribution.photoId,
+            unsplash_photographer_name: attribution.photographerName,
+            unsplash_photographer_username: attribution.photographerUsername,
+            unsplash_photographer_profile_url: attribution.photographerProfileUrl,
+            unsplash_photo_url: attribution.photoUrl,
+            unsplash_download_location: attribution.downloadLocation,
+            download_tracking_status: "pending",
+            download_tracking_next_attempt_at: new Date().toISOString(),
+          },
+          { onConflict: "event_id,image_url" },
+        );
+
+      if (upsertErr) {
+        summary.errors += 1;
+        continue;
+      }
+
+      summary.backfilled += 1;
+    } catch (rowErr) {
+      summary.errors += 1;
+    }
+  }
+
+  return summary;
+}
+
 interface ParentTipsPassSummary {
   enabled: boolean;
   claimed: number;
@@ -522,6 +604,11 @@ Deno.serve(async (req: Request) => {
       unsplashAccessKey,
     );
 
+    const attributionBackfillSummary = await runUnsplashAttributionBackfillPass(
+      supabase,
+      unsplashAccessKey,
+    );
+
     const parentTipsSummary = await runParentTipsPass({
       supabase,
       supabaseUrl,
@@ -538,6 +625,7 @@ Deno.serve(async (req: Request) => {
         function: "backfill-event-enrichment",
         ...summary,
         unsplash_tracking: unsplashTrackingSummary,
+        attribution_backfill: attributionBackfillSummary,
         parent_tips: parentTipsSummary,
       },
     );
@@ -546,6 +634,7 @@ Deno.serve(async (req: Request) => {
         ok: true,
         ...summary,
         unsplash_tracking: unsplashTrackingSummary,
+        attribution_backfill: attributionBackfillSummary,
         parent_tips: parentTipsSummary,
       }),
       {
