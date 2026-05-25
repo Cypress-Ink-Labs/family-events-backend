@@ -1786,6 +1786,7 @@ export type Database = {
           p_limit?: number
           p_llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"]
           p_llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"]
+          p_llm_reviewed?: boolean
           p_status?: string
         }
         Returns: {
