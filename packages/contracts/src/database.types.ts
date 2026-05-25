@@ -1,11 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -269,6 +264,84 @@ export type Database = {
             columns: ["source_run_id"]
             isOneToOne: false
             referencedRelation: "source_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_image_attributions: {
+        Row: {
+          created_at: string
+          download_tracked_at: string | null
+          download_tracking_attempts: number
+          download_tracking_last_error: string | null
+          download_tracking_next_attempt_at: string
+          download_tracking_status: string
+          event_id: string
+          id: string
+          image_url: string
+          matched_tag: string | null
+          provider: string
+          unsplash_download_location: string
+          unsplash_photo_id: string
+          unsplash_photo_url: string
+          unsplash_photographer_name: string
+          unsplash_photographer_profile_url: string
+          unsplash_photographer_username: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          download_tracked_at?: string | null
+          download_tracking_attempts?: number
+          download_tracking_last_error?: string | null
+          download_tracking_next_attempt_at?: string
+          download_tracking_status?: string
+          event_id: string
+          id?: string
+          image_url: string
+          matched_tag?: string | null
+          provider?: string
+          unsplash_download_location: string
+          unsplash_photo_id: string
+          unsplash_photo_url: string
+          unsplash_photographer_name: string
+          unsplash_photographer_profile_url: string
+          unsplash_photographer_username: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          download_tracked_at?: string | null
+          download_tracking_attempts?: number
+          download_tracking_last_error?: string | null
+          download_tracking_next_attempt_at?: string
+          download_tracking_status?: string
+          event_id?: string
+          id?: string
+          image_url?: string
+          matched_tag?: string | null
+          provider?: string
+          unsplash_download_location?: string
+          unsplash_photo_id?: string
+          unsplash_photo_url?: string
+          unsplash_photographer_name?: string
+          unsplash_photographer_profile_url?: string
+          unsplash_photographer_username?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_image_attributions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_image_attributions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
             referencedColumns: ["id"]
           },
         ]
@@ -2402,6 +2475,7 @@ export type Database = {
           description: string
           end_datetime: string
           id: string
+          image_attributions: Json
           images: Json
           is_favorited: boolean
           is_featured: boolean
@@ -2477,6 +2551,16 @@ export type Database = {
           tags: string[]
           title: string
           venue_name: string
+        }[]
+      }
+      list_pending_unsplash_download_tracking: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          attribution_id: string
+          download_location: string
+          event_id: string
+          image_url: string
         }[]
       }
       log_cron_run_event: {
@@ -2581,6 +2665,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      mark_unsplash_download_tracking_result: {
+        Args: { p_attribution_id: string; p_error?: string; p_success: boolean }
+        Returns: undefined
       }
       plan_events_first_nonempty_window: {
         Args: {
@@ -2829,6 +2917,23 @@ export type Database = {
       upsert_ai_feature_config: {
         Args: { p_enabled?: boolean; p_feature: string; p_model_id: string }
         Returns: undefined
+      }
+      upsert_event_image_attribution_with_enrichment: {
+        Args: {
+          p_event_id: string
+          p_image_url: string
+          p_images: Json
+          p_latitude: number
+          p_longitude: number
+          p_matched_tag?: string
+          p_unsplash_download_location: string
+          p_unsplash_photo_id: string
+          p_unsplash_photo_url: string
+          p_unsplash_photographer_name: string
+          p_unsplash_photographer_profile_url: string
+          p_unsplash_photographer_username: string
+        }
+        Returns: string
       }
     }
     Enums: {

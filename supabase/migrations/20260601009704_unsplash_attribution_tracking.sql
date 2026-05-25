@@ -300,6 +300,36 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.mark_unsplash_download_tracking_result(uuid, boolean, text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.mark_unsplash_download_tracking_result(uuid, boolean, text) TO service_role;
 
+CREATE OR REPLACE FUNCTION private.public_event_image_attributions(p_event_id uuid)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'provider', a.provider,
+        'image_url', a.image_url,
+        'matched_tag', a.matched_tag,
+        'photo_id', a.unsplash_photo_id,
+        'photographer_name', a.unsplash_photographer_name,
+        'photographer_username', a.unsplash_photographer_username,
+        'photographer_profile_url', a.unsplash_photographer_profile_url,
+        'photo_url', a.unsplash_photo_url
+      )
+      ORDER BY a.created_at ASC
+    ),
+    '[]'::jsonb
+  )
+  FROM public.event_image_attributions a
+  WHERE a.event_id = p_event_id;
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.public_event_image_attributions(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION private.public_event_image_attributions(uuid) TO anon, authenticated, service_role;
+
 DROP FUNCTION IF EXISTS public.events_enriched_v2(
   uuid, text, uuid, uuid[], timestamptz, timestamptz, timestamptz, uuid, int
 );
@@ -370,7 +400,7 @@ AS $$
     COALESCE(rs.avg_score, 0)::numeric    AS avg_rating,
     COALESCE(rs.rating_count, 0)::int     AS rating_count,
     COALESCE(ts.tags, '[]'::jsonb)        AS tags,
-    COALESCE(ias.image_attributions, '[]'::jsonb) AS image_attributions,
+    private.public_event_image_attributions(e.id) AS image_attributions,
     (p_user_id IS NOT NULL AND f.event_id IS NOT NULL)  AS is_favorited,
     (p_user_id IS NOT NULL AND c.event_id IS NOT NULL)  AS is_in_calendar
   FROM public.events e
@@ -389,23 +419,6 @@ AS $$
     JOIN public.tags t ON t.id = et.tag_id
     WHERE et.event_id = e.id
   ) ts ON TRUE
-  LEFT JOIN LATERAL (
-    SELECT jsonb_agg(
-             jsonb_build_object(
-               'provider', a.provider,
-               'image_url', a.image_url,
-               'matched_tag', a.matched_tag,
-               'photo_id', a.unsplash_photo_id,
-               'photographer_name', a.unsplash_photographer_name,
-               'photographer_username', a.unsplash_photographer_username,
-               'photographer_profile_url', a.unsplash_photographer_profile_url,
-               'photo_url', a.unsplash_photo_url
-             )
-             ORDER BY a.created_at ASC
-           ) AS image_attributions
-    FROM public.event_image_attributions a
-    WHERE a.event_id = e.id
-  ) ias ON TRUE
   LEFT JOIN public.favorites f
     ON p_user_id IS NOT NULL AND f.event_id = e.id AND f.user_id = p_user_id
   LEFT JOIN public.user_calendar_events c

@@ -247,11 +247,15 @@ async function enrichOne(
         unsplashResult.attribution.downloadLocation,
         unsplashAccessKey,
       );
-      await supabase.rpc("mark_unsplash_download_tracking_result", {
-        p_attribution_id: attributionId,
-        p_success: tracking.ok,
-        p_error: tracking.error,
-      });
+      const { error: markTrackingError } = await supabase.rpc(
+        "mark_unsplash_download_tracking_result",
+        {
+          p_attribution_id: attributionId,
+          p_success: tracking.ok,
+          p_error: tracking.error,
+        },
+      );
+      if (markTrackingError) throw markTrackingError;
     }
   } else {
     const { error } = await supabase.rpc("update_event_enrichment", {
