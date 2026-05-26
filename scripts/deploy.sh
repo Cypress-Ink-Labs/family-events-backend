@@ -378,7 +378,14 @@ railway_service_dir() {
 
 poll_railway_status() {
   local service="$1"
-  local max_wait="${RAILWAY_POLL_TIMEOUT:-300}"
+  # Per-service timeout overrides (seconds). The web app does a full Vite
+  # production build which routinely takes 5-8 minutes; 300s is not enough.
+  # Override the default with RAILWAY_POLL_TIMEOUT env var if needed.
+  local default_timeout=300
+  case "$service" in
+    web) default_timeout=600 ;;
+  esac
+  local max_wait="${RAILWAY_POLL_TIMEOUT:-$default_timeout}"
   local interval=10
   local elapsed=0
   local status=""
