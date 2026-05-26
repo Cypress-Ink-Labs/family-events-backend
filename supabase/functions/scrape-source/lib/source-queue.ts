@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { invokeFunction } from "../../_shared/function-invoke.ts";
 
 export interface EnqueueSourceScrapeResult {
   queue_id: number | null;
@@ -57,22 +58,16 @@ export async function kickProcessSourceQueue(
   supabaseUrl: string,
   serviceRoleKey: string,
 ): Promise<void> {
-  const response = await fetch(
-    `${supabaseUrl}/functions/v1/process-source-queue`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${serviceRoleKey}`,
-      },
-      body: "{}",
-    },
-  );
+  const response = await invokeFunction("process-source-queue", {}, {
+    serviceRoleKey,
+    supabaseUrl,
+    timeoutMs: 5_000,
+    truncateBodyAt: 200,
+  });
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
     throw new Error(
-      `process-source-queue ${response.status}: ${body.slice(0, 200)}`,
+      `process-source-queue ${response.status}: ${response.truncatedBodyText}`,
     );
   }
 }

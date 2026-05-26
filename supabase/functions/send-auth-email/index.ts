@@ -1,6 +1,7 @@
-import "@supabase/functions-js/edge-runtime.d.ts"
-import { captureEdgeException } from "../_shared/sentry.ts"
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
+import "@supabase/functions-js/edge-runtime.d.ts";
+import { escapeHtml } from "../_shared/html.ts";
+import { captureEdgeException } from "../_shared/sentry.ts";
+import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
 
 // send-auth-email
 // ----------------------------------------------------------------
@@ -21,71 +22,71 @@ import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
 // dashboard with this function's URL and an HMAC secret for signature
 // verification.
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
-const RESEND_TIMEOUT_MS = 10_000
+const RESEND_API_ENDPOINT = "https://api.resend.com/emails";
+const RESEND_TIMEOUT_MS = 10_000;
 
 interface AuthEmailHookPayload {
   user: {
-    id: string
-    email: string
+    id: string;
+    email: string;
     user_metadata?: {
-      display_name?: string
-      name?: string
-      full_name?: string
-    }
-  }
+      display_name?: string;
+      name?: string;
+      full_name?: string;
+    };
+  };
   email_data: {
-    token: string
-    token_hash: string
-    redirect_to: string
+    token: string;
+    token_hash: string;
+    redirect_to: string;
     email_action_type:
       | "signup"
       | "magiclink"
       | "recovery"
       | "email_change_new"
       | "email_change_current"
-      | "reauthentication"
-    site_url: string
-    token_new?: string
-    token_hash_new?: string
-  }
+      | "reauthentication";
+    site_url: string;
+    token_new?: string;
+    token_hash_new?: string;
+  };
 }
 
 function usernameFromUser(user: AuthEmailHookPayload["user"]): string {
   return (
     user.user_metadata?.display_name ??
-    user.user_metadata?.name ??
-    user.user_metadata?.full_name ??
-    user.email.split("@")[0]
-  )
+      user.user_metadata?.name ??
+      user.user_metadata?.full_name ??
+      user.email.split("@")[0]
+  );
 }
 
-function buildVerifyLink(emailData: AuthEmailHookPayload["email_data"]): string {
+function buildVerifyLink(
+  emailData: AuthEmailHookPayload["email_data"],
+): string {
   const params = new URLSearchParams({
     token: emailData.token_hash,
     type: emailData.email_action_type,
     redirect_to: emailData.redirect_to,
-  })
-  return `${emailData.site_url}/auth/v1/verify?${params.toString()}`
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
+  });
+  return `${emailData.site_url}/auth/v1/verify?${params.toString()}`;
 }
 
 type ResendBody =
-  | { from: string; to: string[]; template_alias: string; variables: Record<string, string> }
-  | { from: string; to: string[]; subject: string; html: string }
+  | {
+    from: string;
+    to: string[];
+    template_alias: string;
+    variables: Record<string, string>;
+  }
+  | { from: string; to: string[]; subject: string; html: string };
 
 async function sendEmail(
   apiKey: string,
-  body: ResendBody
-): Promise<{ ok: true; id: string } | { ok: false; status: number; body: string }> {
+  body: ResendBody,
+): Promise<
+  { ok: true; id: string } | { ok: false; status: number; body: string }
+> {
   const response = await fetch(RESEND_API_ENDPOINT, {
     method: "POST",
     headers: {
@@ -94,44 +95,47 @@ async function sendEmail(
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-  })
+  });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "")
-    return { ok: false, status: response.status, body: text.slice(0, 500) }
+    const text = await response.text().catch(() => "");
+    return { ok: false, status: response.status, body: text.slice(0, 500) };
   }
 
-  const data = (await response.json().catch(() => ({}))) as { id?: string }
-  return { ok: true, id: data.id ?? "" }
+  const data = (await response.json().catch(() => ({}))) as { id?: string };
+  return { ok: true, id: data.id ?? "" };
 }
 
 Deno.serve(async (req: Request) => {
-  let payload: AuthEmailHookPayload
+  let payload: AuthEmailHookPayload;
   try {
-    payload = (await req.json()) as AuthEmailHookPayload
+    payload = (await req.json()) as AuthEmailHookPayload;
   } catch {
-    return new Response(JSON.stringify({ error: "invalid JSON body" }), { status: 400 })
+    return new Response(JSON.stringify({ error: "invalid JSON body" }), {
+      status: 400,
+    });
   }
 
-  const { user, email_data } = payload
-  const { email_action_type } = email_data
+  const { user, email_data } = payload;
+  const { email_action_type } = email_data;
 
-  const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
-  const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
-  const username = usernameFromUser(user)
+  const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
+  const resendFrom = Deno.env.get("RESEND_FROM") ??
+    "Family Events <onboarding@resend.dev>";
+  const username = usernameFromUser(user);
 
   if (!resendApiKey) {
     logEdgeEvent("warn", "send-auth-email: RESEND_API_KEY not set; skipping", {
       function: "send-auth-email",
       email_action_type,
-    })
+    });
     // Return success so Supabase Auth does not block the flow in local/dev
-    return new Response(JSON.stringify({}), { status: 200 })
+    return new Response(JSON.stringify({}), { status: 200 });
   }
 
   try {
-    const verifyLink = buildVerifyLink(email_data)
-    let body: ResendBody
+    const verifyLink = buildVerifyLink(email_data);
+    let body: ResendBody;
 
     if (email_action_type === "magiclink" || email_action_type === "signup") {
       // Use the deployed family-events-magic-link template for both magic link
@@ -145,7 +149,7 @@ Deno.serve(async (req: Request) => {
           MAGIC_LINK: verifyLink,
           EXPIRES_IN: "24 hours",
         },
-      }
+      };
     } else if (email_action_type === "recovery") {
       body = {
         from: resendFrom,
@@ -167,7 +171,7 @@ Deno.serve(async (req: Request) => {
             </p>
           </div>
         `.trim(),
-      }
+      };
     } else {
       // email_change_new, email_change_current, reauthentication
       body = {
@@ -190,10 +194,10 @@ Deno.serve(async (req: Request) => {
             </p>
           </div>
         `.trim(),
-      }
+      };
     }
 
-    const result = await sendEmail(resendApiKey, body)
+    const result = await sendEmail(resendApiKey, body);
 
     if (!result.ok) {
       logEdgeEvent("error", "send-auth-email: Resend rejected request", {
@@ -201,26 +205,38 @@ Deno.serve(async (req: Request) => {
         email_action_type,
         status: result.status,
         body: result.body,
-      })
+      });
       await captureEdgeException(
         new Error(`Resend ${result.status}: ${result.body}`),
-        { function: "send-auth-email", email_action_type }
-      )
+        { function: "send-auth-email", email_action_type },
+      );
       // Non-200 tells Supabase Auth the email failed (it will surface an error
       // to the user). This is intentional — a failed delivery is better than
       // silently dropping authentication emails.
-      return new Response(JSON.stringify({ error: `resend_${result.status}` }), { status: 502 })
+      return new Response(
+        JSON.stringify({ error: `resend_${result.status}` }),
+        { status: 502 },
+      );
     }
 
     logEdgeEvent("log", "send-auth-email: sent", {
       function: "send-auth-email",
       email_action_type,
       resend_id: result.id,
-    })
-    return new Response(JSON.stringify({}), { status: 200 })
+    });
+    return new Response(JSON.stringify({}), { status: 200 });
   } catch (err) {
-    await captureEdgeException(err, errorContext(err, { function: "send-auth-email" }))
-    logEdgeEvent("error", "send-auth-email outer failure", errorContext(err, { function: "send-auth-email" }))
-    return new Response(JSON.stringify({ error: errorMessage(err) }), { status: 500 })
+    await captureEdgeException(
+      err,
+      errorContext(err, { function: "send-auth-email" }),
+    );
+    logEdgeEvent(
+      "error",
+      "send-auth-email outer failure",
+      errorContext(err, { function: "send-auth-email" }),
+    );
+    return new Response(JSON.stringify({ error: errorMessage(err) }), {
+      status: 500,
+    });
   }
-})
+});

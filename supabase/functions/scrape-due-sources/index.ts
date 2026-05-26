@@ -1,20 +1,11 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "@supabase/supabase-js";
-import { requireServiceRole } from "../_shared/auth.ts";
 import {
   cronRunContextFromRequest,
   logCronRunEvent,
 } from "../_shared/cron-run-log.ts";
-import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage } from "../_shared/logger.ts";
+import { errorContext } from "../_shared/logger.ts";
+import { serveServiceRoleJson } from "../_shared/service-role-handler.ts";
 import { kickProcessSourceQueue } from "../scrape-source/lib/source-queue.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
-};
 
 declare const EdgeRuntime:
   | { waitUntil<T>(promise: Promise<T>): Promise<T> }
@@ -29,73 +20,45 @@ export function normalizeDueScrapePayload(
   return { enqueued: 0 };
 }
 
-Deno.serve(async (req: Request) => {
-  const cronContext = cronRunContextFromRequest(req);
+serveServiceRoleJson(
+  { errorStage: "rpc", functionName: "scrape-due-sources" },
+  async ({ request, serviceRoleKey, supabase, supabaseUrl }) => {
+    const cronContext = cronRunContextFromRequest(request);
 
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
-  }
+    try {
+      const { data, error } = await supabase.rpc("run_due_source_scrapes");
+      if (error) throw error;
 
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+      const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch(
+        async (kickError) => {
+          await logCronRunEvent(
+            supabase,
+            cronContext,
+            "warn",
+            "source-queue safety kick failed",
+            errorContext(kickError, {
+              function: "scrape-due-sources",
+              stage: "kick-source",
+            }),
+          );
+        },
+      );
+      if (typeof EdgeRuntime !== "undefined") {
+        EdgeRuntime.waitUntil(kick);
+      } else {
+        await kick;
+      }
 
-  const auth = requireServiceRole(req, serviceRoleKey);
-  if (!auth.ok) {
-    return new Response(JSON.stringify({ error: auth.message }), {
-      status: auth.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+      await logCronRunEvent(
+        supabase,
+        cronContext,
+        "log",
+        "scrape-due-sources dispatched",
+        { function: "scrape-due-sources" },
+      );
 
-  if (!supabaseUrl) {
-    return new Response(
-      JSON.stringify({ error: "SUPABASE_URL not configured" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
-  }
-
-  try {
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const { data, error } = await supabase.rpc("run_due_source_scrapes");
-    if (error) throw error;
-    const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch(
-      async (kickError) => {
-        await logCronRunEvent(
-          supabase,
-          cronContext,
-          "warn",
-          "source-queue safety kick failed",
-          errorContext(kickError, {
-            function: "scrape-due-sources",
-            stage: "kick-source",
-          }),
-        );
-      },
-    );
-    if (typeof EdgeRuntime !== "undefined") {
-      EdgeRuntime.waitUntil(kick);
-    } else {
-      await kick;
-    }
-    await logCronRunEvent(
-      supabase,
-      cronContext,
-      "log",
-      "scrape-due-sources dispatched",
-      {
-        function: "scrape-due-sources",
-      },
-    );
-    return new Response(JSON.stringify(normalizeDueScrapePayload(data)), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    if (serviceRoleKey && supabaseUrl) {
-      const supabase = createClient(supabaseUrl, serviceRoleKey);
+      return normalizeDueScrapePayload(data);
+    } catch (err) {
       await logCronRunEvent(
         supabase,
         cronContext,
@@ -103,14 +66,7 @@ Deno.serve(async (req: Request) => {
         "scrape-due-sources failed",
         errorContext(err, { function: "scrape-due-sources", stage: "rpc" }),
       );
+      throw err;
     }
-    await captureEdgeException(
-      err,
-      errorContext(err, { function: "scrape-due-sources", stage: "rpc" }),
-    );
-    return new Response(JSON.stringify({ error: errorMessage(err) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-});
+  },
+);

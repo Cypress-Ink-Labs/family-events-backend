@@ -2,6 +2,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
+import { resolveSharedLlmConfig } from "../_shared/llm-config.ts";
+import {
+  parseJsonContent,
+  postOpenAiChatCompletion,
+} from "../_shared/llm-openai.ts";
 import {
   ALLOWED_PARENT_TIP_CATEGORIES,
   buildSystemPrompt,
@@ -111,39 +116,32 @@ function resolveAiConfig(
 ): LlmConfig {
   if (!dbConfig) {
     return {
-      provider: "openai",
-      baseUrl: "",
       apiKey: "",
-      model: DEFAULT_OPENAI_MODEL,
+      baseUrl: "",
       configured: false,
       featureEnabled: false,
+      model: DEFAULT_OPENAI_MODEL,
+      provider: "openai",
     };
   }
-  const provider = resolveProvider(dbConfig.provider);
-
-  const rawBaseUrl = Deno.env.get("AI_BASE_URL") ??
-    (provider === "openai" ? DEFAULT_AI_BASE_URL : "");
-  const baseUrl = normalizeBaseUrl(rawBaseUrl);
-
-  const rawModel = dbConfig.modelId ??
-    Deno.env.get("AI_MODEL") ??
-    Deno.env.get("OPENAI_MODEL");
-  const model = provider === "openai"
-    ? (ALLOWED_OPENAI_MODELS.has(rawModel) ? rawModel : DEFAULT_OPENAI_MODEL)
-    : (rawModel ?? DEFAULT_OLLAMA_MODEL);
-
-  const apiKey = Deno.env.get("AI_API_KEY") ??
-    Deno.env.get("OPENAI_API_KEY") ??
-    (provider === "localai" ? Deno.env.get("LOCALAI_API_KEY") : undefined) ??
-    (provider === "ollama" ? DEFAULT_OLLAMA_API_KEY : "");
-
+  const config = resolveSharedLlmConfig({
+    allowedOpenAiModels: ALLOWED_OPENAI_MODELS,
+    dbOverride: {
+      enabled: dbConfig.enabled,
+      modelId: dbConfig.modelId,
+      provider: dbConfig.provider,
+    },
+    defaultOpenAiBaseUrl: DEFAULT_AI_BASE_URL,
+    defaultOpenAiModel: DEFAULT_OPENAI_MODEL,
+    selfHostedDefaultModel: DEFAULT_OLLAMA_MODEL,
+  });
   return {
-    provider,
-    baseUrl,
-    apiKey,
-    model,
-    configured: Boolean(baseUrl && (apiKey || provider === "ollama")),
+    apiKey: config.apiKey,
+    baseUrl: config.baseUrl,
+    configured: config.configured,
     featureEnabled: dbConfig.enabled,
+    model: config.model,
+    provider: config.provider,
   };
 }
 
@@ -226,52 +224,34 @@ async function generateWithLlm(
   const systemPrompt = buildSystemPrompt();
   const userPrompt = buildUserPrompt(ctx);
 
-  const start = Date.now();
-  const response = await fetch(`${config.baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const completion = await postOpenAiChatCompletion({
+    apiKey: config.apiKey,
+    baseUrl: config.baseUrl,
+    body: {
       model: config.model,
       temperature: 0.2,
       response_format: config.provider === "openai"
         ? {
-            type: "json_schema" as const,
-            json_schema: {
-              name: "parent_tips",
-              strict: true,
-              schema: PARENT_TIPS_JSON_SCHEMA,
-            },
-          }
+          type: "json_schema" as const,
+          json_schema: {
+            name: "parent_tips",
+            strict: true,
+            schema: PARENT_TIPS_JSON_SCHEMA,
+          },
+        }
         : { type: "json_object" as const },
       ...(config.provider === "ollama" ? { reasoning_effort: "none" } : {}),
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-    }),
-    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
+    },
+    failureMessagePrefix: `${config.provider} parent-tips call failed`,
+    providerName: config.provider,
+    timeoutMs: AI_TIMEOUT_MS,
   });
 
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => "");
-    throw new Error(
-      `${config.provider} parent-tips call failed (${response.status}): ${
-        errorBody.slice(0, 200)
-      }`,
-    );
-  }
-
-  const completion = await response.json();
-  const latencyMs = Date.now() - start;
-  const rawContent = completion?.choices?.[0]?.message?.content;
-  if (!rawContent) {
-    throw new Error(`${config.provider} returned an empty response`);
-  }
-
-  const parsed = JSON.parse(rawContent);
+  const parsed = parseJsonContent(completion.content);
   const rawTips = Array.isArray(parsed?.tips) ? parsed.tips : [];
 
   const allowed = new Set<string>(ALLOWED_PARENT_TIP_CATEGORIES);
@@ -293,22 +273,13 @@ async function generateWithLlm(
     throw new Error("model returned no valid parent tips");
   }
 
-  const usageRaw = completion?.usage ?? {};
   return {
     tips,
-    finishReason: typeof completion?.choices?.[0]?.finish_reason === "string"
-      ? completion.choices[0].finish_reason
-      : null,
-    latencyMs,
-    promptTokens: Number.isFinite(usageRaw.prompt_tokens)
-      ? Number(usageRaw.prompt_tokens)
-      : null,
-    completionTokens: Number.isFinite(usageRaw.completion_tokens)
-      ? Number(usageRaw.completion_tokens)
-      : null,
-    totalTokens: Number.isFinite(usageRaw.total_tokens)
-      ? Number(usageRaw.total_tokens)
-      : null,
+    completionTokens: completion.usage.completionTokens,
+    finishReason: completion.usage.finishReason,
+    latencyMs: completion.latencyMs,
+    promptTokens: completion.usage.promptTokens,
+    totalTokens: completion.usage.totalTokens,
   };
 }
 

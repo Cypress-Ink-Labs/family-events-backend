@@ -6,6 +6,7 @@ import {
 } from "../_shared/cron-run-log.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage } from "../_shared/logger.ts";
+import { invokeFunction } from "../_shared/function-invoke.ts";
 import { serveServiceRoleJson } from "../_shared/service-role-handler.ts";
 import {
   resolveCompletedTagQueueStatus,
@@ -75,25 +76,27 @@ async function callTagEvent(
   row: QueueRow,
   inputs: { title: string; description: string },
 ): Promise<void> {
-  const response = await fetch(`${supabaseUrl}/functions/v1/tag-event`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${serviceRoleKey}`,
-    },
-    body: JSON.stringify({
+  const response = await invokeFunction(
+    "tag-event",
+    {
       event_id: row.event_id,
       source_run_id: row.source_run_id,
       trigger_type: row.trigger_type,
       title: inputs.title,
       description: inputs.description,
-    }),
-    signal: AbortSignal.timeout(PER_ITEM_TIMEOUT_MS),
-  });
+    },
+    {
+      serviceRoleKey,
+      supabaseUrl,
+      timeoutMs: PER_ITEM_TIMEOUT_MS,
+      truncateBodyAt: 200,
+    },
+  );
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`tag-event ${response.status}: ${body.slice(0, 200)}`);
+    throw new Error(
+      `tag-event ${response.status}: ${response.truncatedBodyText}`,
+    );
   }
 }
 

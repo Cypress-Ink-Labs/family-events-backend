@@ -1,15 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "@supabase/supabase-js";
-import { requireAdminOrService } from "../_shared/auth.ts";
-import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { serveAdminJson } from "../_shared/admin-handler.ts";
+import { jsonResponse } from "../_shared/http.ts";
+import { logEdgeEvent } from "../_shared/logger.ts";
 
 const cronFunctionByLabel: Record<string, string> = {
   "cron-cleanup-stale": "cleanup-stale-runs",
@@ -20,132 +12,84 @@ const cronFunctionByLabel: Record<string, string> = {
   "cron-tag-queue": "process-tag-queue",
 };
 
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
 function truncateBody(body: string): string {
   return body.replaceAll(/\r?\n/g, " ").slice(0, 2000);
 }
 
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+serveAdminJson({ functionName: "admin-run-cron" }, async (
+  { request, serviceRoleKey, supabase, supabaseUrl },
+) => {
+  const body = await request.json().catch(() => ({}));
+  const label = typeof body?.label === "string" ? body.label : "";
+  const functionName = cronFunctionByLabel[label];
+  if (!functionName) {
+    return jsonResponse({ error: "unknown cron label" }, { status: 400 });
   }
 
-  if (req.method !== "POST") {
-    return jsonResponse({ error: "method not allowed" }, 405);
-  }
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-
-  if (!supabaseUrl) {
-    return jsonResponse({ error: "SUPABASE_URL not configured" }, 500);
-  }
-  if (!serviceRoleKey) {
-    return jsonResponse(
-      { error: "SUPABASE_SERVICE_ROLE_KEY not configured" },
-      500,
-    );
-  }
-  if (!anonKey) {
-    return jsonResponse({ error: "SUPABASE_ANON_KEY not configured" }, 500);
-  }
-
-  const supabase = createClient(supabaseUrl, serviceRoleKey);
-  const auth = await requireAdminOrService(
-    req,
-    supabase,
-    supabaseUrl,
-    serviceRoleKey,
-    anonKey,
+  const runKey = crypto.randomUUID();
+  const startedAt = Date.now();
+  const response = await fetch(
+    `${supabaseUrl}/functions/v1/${functionName}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "X-Cron-Run-Key": runKey,
+        "X-Cron-Label": label,
+      },
+      body: JSON.stringify({ cron_run_key: runKey, cron_label: label }),
+    },
   );
-  if (!auth.ok) return jsonResponse({ error: auth.message }, auth.status);
+  const durationSeconds = Math.max(
+    0,
+    Math.round((Date.now() - startedAt) / 1000),
+  );
+  const responseBody = truncateBody(await response.text());
+  const status = response.ok ? "succeeded" : "failed";
 
-  try {
-    const body = await req.json().catch(() => ({}));
-    const label = typeof body?.label === "string" ? body.label : "";
-    const functionName = cronFunctionByLabel[label];
-    if (!functionName) {
-      return jsonResponse({ error: "unknown cron label" }, 400);
-    }
+  const { data: runId, error: logError } = await supabase.rpc(
+    "log_railway_cron_run",
+    {
+      p_label: label,
+      p_status: status,
+      p_http_status: response.status,
+      p_duration_s: durationSeconds,
+      p_body: responseBody,
+      p_run_key: runKey,
+    },
+  );
+  if (logError) throw logError;
 
-    const runKey = crypto.randomUUID();
-    const startedAt = Date.now();
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/${functionName}`,
+  logEdgeEvent(response.ok ? "log" : "error", "admin cron run completed", {
+    function: "admin-run-cron",
+    label,
+    target_function: functionName,
+    http_status: response.status,
+    duration_s: durationSeconds,
+  });
+
+  if (!response.ok) {
+    return jsonResponse(
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${serviceRoleKey}`,
-          "X-Cron-Run-Key": runKey,
-          "X-Cron-Label": label,
-        },
-        body: JSON.stringify({ cron_run_key: runKey, cron_label: label }),
+        error: "cron run failed",
+        id: runId,
+        run_key: runKey,
+        label,
+        http_status: response.status,
+        body: responseBody,
       },
+      { status: 502 },
     );
-    const durationSeconds = Math.max(
-      0,
-      Math.round((Date.now() - startedAt) / 1000),
-    );
-    const responseBody = truncateBody(await response.text());
-    const status = response.ok ? "succeeded" : "failed";
-
-    const { data: runId, error: logError } = await supabase.rpc(
-      "log_railway_cron_run",
-      {
-        p_label: label,
-        p_status: status,
-        p_http_status: response.status,
-        p_duration_s: durationSeconds,
-        p_body: responseBody,
-        p_run_key: runKey,
-      },
-    );
-    if (logError) throw logError;
-
-    logEdgeEvent(response.ok ? "log" : "error", "admin cron run completed", {
-      function: "admin-run-cron",
-      label,
-      target_function: functionName,
-      http_status: response.status,
-      duration_s: durationSeconds,
-    });
-
-    if (!response.ok) {
-      return jsonResponse(
-        {
-          error: "cron run failed",
-          id: runId,
-          run_key: runKey,
-          label,
-          http_status: response.status,
-          body: responseBody,
-        },
-        502,
-      );
-    }
-
-    return jsonResponse({
-      ok: true,
-      id: runId,
-      run_key: runKey,
-      label,
-      http_status: response.status,
-      duration_s: durationSeconds,
-      body: responseBody,
-    });
-  } catch (err) {
-    await captureEdgeException(
-      err,
-      errorContext(err, { function: "admin-run-cron", stage: "handler" }),
-    );
-    return jsonResponse({ error: errorMessage(err) }, 500);
   }
+
+  return jsonResponse({
+    ok: true,
+    id: runId,
+    run_key: runKey,
+    label,
+    http_status: response.status,
+    duration_s: durationSeconds,
+    body: responseBody,
+  });
 });

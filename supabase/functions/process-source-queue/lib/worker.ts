@@ -6,8 +6,6 @@ import {
   importParsedSourceEvents,
 } from "../../scrape-source/lib/process-source.ts";
 import {
-  normalizeArtifactForLlm,
-  parseLlmParsedEvents,
   validateParsedEvents,
 } from "../../scrape-source/lib/extraction-pipeline.ts";
 import type {
@@ -18,6 +16,7 @@ import type {
   SourceType,
 } from "../../scrape-source/lib/types.ts";
 import type { SourceParser } from "../../scrape-source/parsers/index.ts";
+import { extractWithLlm, type LlmConfig } from "./llm-extraction.ts";
 
 export interface SourceQueueRow {
   id: number;
@@ -29,14 +28,6 @@ export interface SourceQueueRow {
 export interface ProcessSourceQueueResult {
   outcome: "succeeded" | "retry" | "skipped";
   imported: number;
-}
-
-interface LlmConfig {
-  provider: string;
-  model: string;
-  baseUrl: string;
-  apiKey: string;
-  configured: boolean;
 }
 
 interface SourceQueueWorkerDependencies {
@@ -202,86 +193,6 @@ async function markRunError(
       error_log: errorMessage.slice(0, 1000),
     })
     .eq("id", runId);
-}
-
-function resolveLlmConfig(): LlmConfig {
-  const provider = Deno.env.get("AI_PROVIDER") ?? "openai";
-  const baseUrl = (Deno.env.get("AI_BASE_URL") ??
-    (provider === "openai" ? "https://api.openai.com/v1" : "")).replace(
-      /\/+$/,
-      "",
-    );
-  const model = Deno.env.get("AI_MODEL") ?? Deno.env.get("OPENAI_MODEL") ??
-    (provider === "openai" ? "gpt-4o-mini" : "qwen3:1.7b");
-  const apiKey = Deno.env.get("AI_API_KEY") ?? Deno.env.get("OPENAI_API_KEY") ??
-    (provider === "ollama" ? "ollama" : "");
-  return {
-    provider,
-    baseUrl,
-    model,
-    apiKey,
-    configured: Boolean(baseUrl && (apiKey || provider === "ollama")),
-  };
-}
-
-async function extractWithLlm(
-  source: EventSourceRow,
-  artifact: FetchedArtifact,
-): Promise<{ events: ParsedEvent[]; config: LlmConfig; latencyMs: number }> {
-  const config = resolveLlmConfig();
-  if (!config.configured) {
-    throw new Error("LLM extraction provider is not configured");
-  }
-
-  const startedAt = Date.now();
-  const response = await fetch(`${config.baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: config.model,
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            'Extract family events from fetched source content. Respond with JSON only: {"events":[{"title":string,"description":string,"startDatetime":string,"endDatetime":string|null,"venueName":string|null,"address":string|null,"sourceUrl":string|null,"imageUrl":string|null,"images":string[],"price":number|null,"isFree":boolean}]}',
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            source_name: source.name,
-            source_url: source.url,
-            content_type: artifact.contentType,
-            content: normalizeArtifactForLlm(artifact),
-          }),
-        },
-      ],
-    }),
-    signal: AbortSignal.timeout(45_000),
-  });
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(
-      `LLM extraction failed (${response.status}): ${body.slice(0, 200)}`,
-    );
-  }
-
-  const payload = await response.json();
-  const content = payload?.choices?.[0]?.message?.content;
-  if (typeof content !== "string") {
-    throw new Error("LLM extraction returned an empty response");
-  }
-
-  return {
-    events: parseLlmParsedEvents(content),
-    config,
-    latencyMs: Date.now() - startedAt,
-  };
 }
 
 const defaultWorkerDependencies: SourceQueueWorkerDependencies = {

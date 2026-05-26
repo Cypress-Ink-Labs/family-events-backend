@@ -8,9 +8,14 @@ import {
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage } from "../_shared/logger.ts";
 import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts";
-import { findFallbackImage, lookupUnsplashPhotoFromUrl, trackUnsplashDownload } from "../_shared/unsplash.ts";
+import {
+  findFallbackImage,
+  lookupUnsplashPhotoFromUrl,
+  trackUnsplashDownload,
+} from "../_shared/unsplash.ts";
 import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts";
 import type { ParsedEvent } from "../scrape-source/lib/types.ts";
+import { runParentTipsPass } from "./parent-tips-pass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,8 +33,6 @@ const DEFAULT_BATCH = 25;
 // Parent-tips pass is gated by ai_feature_config and runs after the
 // coords/images loop. Smaller batch because each event = one LLM call
 // (~1-3s) on top of the work already done above.
-const PARENT_TIPS_BATCH = 8;
-
 interface EventNeedingEnrichment {
   event_id: string;
   title: string;
@@ -173,6 +176,29 @@ async function enrichOne(
         }
       }
     }
+
+    // Third-tier fallback: venue name without any city context. Some venues
+    // embed a different city in their name (e.g. "Broussard Sports Complex"
+    // when the event's city_id points to Lafayette). Nominatim rejects the
+    // query when the appended city contradicts the venue's actual location.
+    // Retrying with the raw venue_name alone lets Nominatim resolve the
+    // place using its own geographic context.
+    if (latitude === null && row.venue_name) {
+      const venueOnlyQuery = buildGeocodeQuery({
+        address: null,
+        venueName: row.venue_name,
+        cityName: null,
+        cityState: null,
+      });
+      if (venueOnlyQuery && venueOnlyQuery !== query) {
+        const venueGeo = await geocodeViaNominatim(venueOnlyQuery);
+        if (venueGeo) {
+          latitude = venueGeo.latitude;
+          longitude = venueGeo.longitude;
+        }
+      }
+    }
+
     // Intentionally no city-centroid fallback here. Writing the centroid back
     // re-flags the row as needs_coords (centroid match) and the claim queue
     // re-served the same rows every tick, starving the rest of the backlog.
@@ -258,11 +284,15 @@ async function enrichOne(
         p_images: images,
         p_image_url: unsplashResult.url,
         p_unsplash_photo_id: unsplashResult.attribution.photoId,
-        p_unsplash_photographer_name: unsplashResult.attribution.photographerName,
-        p_unsplash_photographer_username: unsplashResult.attribution.photographerUsername,
-        p_unsplash_photographer_profile_url: unsplashResult.attribution.photographerProfileUrl,
+        p_unsplash_photographer_name:
+          unsplashResult.attribution.photographerName,
+        p_unsplash_photographer_username:
+          unsplashResult.attribution.photographerUsername,
+        p_unsplash_photographer_profile_url:
+          unsplashResult.attribution.photographerProfileUrl,
         p_unsplash_photo_url: unsplashResult.attribution.photoUrl,
-        p_unsplash_download_location: unsplashResult.attribution.downloadLocation,
+        p_unsplash_download_location:
+          unsplashResult.attribution.downloadLocation,
         p_matched_tag: unsplashResult.matchedTag,
       },
     );
@@ -308,21 +338,30 @@ async function runPendingUnsplashTrackingPass(
 
   if (!unsplashAccessKey) return summary;
 
-  const { data, error } = await supabase.rpc("list_pending_unsplash_download_tracking", {
-    p_limit: 25,
-  });
+  const { data, error } = await supabase.rpc(
+    "list_pending_unsplash_download_tracking",
+    {
+      p_limit: 25,
+    },
+  );
   if (error) throw error;
 
   const rows = (data ?? []) as PendingUnsplashTrackingRow[];
   summary.pending_claimed = rows.length;
 
   for (const row of rows) {
-    const result = await trackUnsplashDownload(row.download_location, unsplashAccessKey);
-    const { error: markError } = await supabase.rpc("mark_unsplash_download_tracking_result", {
-      p_attribution_id: row.attribution_id,
-      p_success: result.ok,
-      p_error: result.error,
-    });
+    const result = await trackUnsplashDownload(
+      row.download_location,
+      unsplashAccessKey,
+    );
+    const { error: markError } = await supabase.rpc(
+      "mark_unsplash_download_tracking_result",
+      {
+        p_attribution_id: row.attribution_id,
+        p_success: result.ok,
+        p_error: result.error,
+      },
+    );
     if (markError) throw markError;
     if (result.ok) summary.tracked += 1;
     else summary.failed += 1;
@@ -390,7 +429,8 @@ async function runUnsplashAttributionBackfillPass(
             unsplash_photo_id: attribution.photoId,
             unsplash_photographer_name: attribution.photographerName,
             unsplash_photographer_username: attribution.photographerUsername,
-            unsplash_photographer_profile_url: attribution.photographerProfileUrl,
+            unsplash_photographer_profile_url:
+              attribution.photographerProfileUrl,
             unsplash_photo_url: attribution.photoUrl,
             unsplash_download_location: attribution.downloadLocation,
             download_tracking_status: "pending",
@@ -407,113 +447,6 @@ async function runUnsplashAttributionBackfillPass(
       summary.backfilled += 1;
     } catch (rowErr) {
       summary.errors += 1;
-    }
-  }
-
-  return summary;
-}
-
-interface ParentTipsPassSummary {
-  enabled: boolean;
-  claimed: number;
-  generated: number;
-  errors: number;
-}
-
-interface ParentTipsPassDeps {
-  supabase: SupabaseClient;
-  supabaseUrl: string;
-  serviceRoleKey: string;
-  cronContext: ReturnType<typeof cronRunContextFromRequest>;
-}
-
-async function runParentTipsPass(
-  deps: ParentTipsPassDeps,
-): Promise<ParentTipsPassSummary> {
-  const summary: ParentTipsPassSummary = {
-    enabled: false,
-    claimed: 0,
-    generated: 0,
-    errors: 0,
-  };
-
-  // Gate: parent-tips feature must be enabled. Single round-trip read.
-  const { data: cfg, error: cfgErr } = await deps.supabase
-    .from("ai_feature_config")
-    .select("enabled")
-    .eq("feature", "parent-tips")
-    .maybeSingle();
-
-  if (cfgErr || !cfg || cfg.enabled !== true) {
-    return summary;
-  }
-  summary.enabled = true;
-
-  const { data: claims, error: claimErr } = await deps.supabase.rpc(
-    "list_events_needing_parent_tips",
-    { p_limit: PARENT_TIPS_BATCH },
-  );
-  if (claimErr) {
-    await logCronRunEvent(
-      deps.supabase,
-      deps.cronContext,
-      "warn",
-      "parent-tips claim failed",
-      {
-        function: "backfill-event-enrichment",
-        stage: "parent-tips",
-        error: errorMessage(claimErr),
-      },
-    );
-    return summary;
-  }
-
-  const rows = (claims ?? []) as Array<{ event_id: string }>;
-  summary.claimed = rows.length;
-
-  for (const row of rows) {
-    try {
-      const response = await fetch(
-        `${deps.supabaseUrl}/functions/v1/generate-parent-tips`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${deps.serviceRoleKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ event_id: row.event_id }),
-        },
-      );
-
-      if (!response.ok) {
-        // 503 means feature disabled mid-tick or AI unconfigured. Stop
-        // looping so we don't burn the remaining queue on the same failure.
-        if (response.status === 503) {
-          summary.errors += 1;
-          break;
-        }
-        summary.errors += 1;
-        await deps.supabase.rpc("mark_event_enrichment_attempt", {
-          p_event_id: row.event_id,
-        });
-        continue;
-      }
-
-      summary.generated += 1;
-    } catch (rowErr) {
-      summary.errors += 1;
-      await logCronRunEvent(
-        deps.supabase,
-        deps.cronContext,
-        "warn",
-        "parent-tips row failed",
-        {
-          function: "backfill-event-enrichment",
-          stage: "parent-tips",
-          event_id: row.event_id,
-          error: errorMessage(rowErr),
-        },
-      );
     }
   }
 
