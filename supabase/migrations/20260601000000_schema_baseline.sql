@@ -1,4 +1,1301 @@
 
+-- ============================================================================
+-- Source: 20260522034553_remote_schema.sql
+-- ============================================================================
+
+create extension if not exists "hypopg" with schema "extensions";
+
+create extension if not exists "index_advisor" with schema "extensions";
+
+create schema if not exists "pgmq";
+create schema if not exists "private";
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION private.bulk_import_scrape_events(p_run_id uuid, p_source_id uuid, p_events jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE
+  v_auto_approve boolean;
+  v_status       text;
+  v_imported     int := 0;
+  v_updated      int := 0;
+  v_enqueued     int := 0;
+BEGIN
+  SELECT auto_approve INTO v_auto_approve
+  FROM public.event_sources WHERE id = p_source_id;
+
+  IF v_auto_approve IS NULL THEN
+    RAISE EXCEPTION 'source not found: %', p_source_id USING ERRCODE = 'P0002';
+  END IF;
+
+  v_status := CASE WHEN v_auto_approve THEN 'published' ELSE 'draft' END;
+
+  -- Single chained data-modifying WITH so we don't rely on TEMP TABLEs.
+  -- TEMP TABLEs work at runtime but Postgres static analysis (db lint)
+  -- can't see forward-referenced TEMP TABLEs across separate statements,
+  -- producing noisy "relation does not exist" errors. CTE form is one
+  -- statement, lint-clean, and identical semantics.
+  --
+  -- Data-modifying-CTE isolation in Postgres: each CTE sees the snapshot
+  -- of target tables taken at statement start. `update_targets` therefore
+  -- cannot see rows that `inserted` writes inside the same statement —
+  -- which is exactly what we want, because every "update" row is a row
+  -- that already existed before this RPC ran. The only overlap case
+  -- (insert-that-fell-through ON CONFLICT) means a concurrent transaction
+  -- inserted before us; that row IS visible in the snapshot.
+  WITH inputs AS (
+    SELECT
+      (idx - 1)::int AS ord,
+      (elem->>'title')::text                         AS title,
+      (elem->>'description')::text                   AS description,
+      (elem->>'start_datetime')::timestamptz         AS start_datetime,
+      NULLIF(elem->>'end_datetime', '')::timestamptz AS end_datetime,
+      (elem->>'timezone')::text                      AS timezone,
+      (elem->>'venue_name')::text                    AS venue_name,
+      (elem->>'address')::text                       AS address,
+      NULLIF(elem->>'city_id', '')::uuid             AS city_id,
+      NULLIF(elem->>'source_url', '')::text          AS source_url,
+      (elem->>'source_name')::text                   AS source_name,
+      COALESCE(elem->'images', '[]'::jsonb)          AS images,
+      NULLIF(elem->>'price', '')::numeric            AS price,
+      COALESCE((elem->>'is_free')::boolean, false)   AS is_free,
+      NULLIF(elem->>'is_outdoor', '')::boolean       AS is_outdoor,
+      NULLIF(elem->>'latitude', '')::numeric         AS latitude,
+      NULLIF(elem->>'longitude', '')::numeric        AS longitude
+    FROM jsonb_array_elements(p_events) WITH ORDINALITY AS j(elem, idx)
+  ),
+  classified AS (
+    SELECT
+      i.*,
+      su.id AS source_url_match,
+      CASE WHEN su.id IS NOT NULL THEN 'update' ELSE 'insert' END AS decision
+    FROM inputs i
+    LEFT JOIN LATERAL (
+      SELECT e.id FROM public.events e
+      WHERE e.source_id = p_source_id
+        AND e.source_url IS NOT NULL
+        AND e.source_url = i.source_url
+      LIMIT 1
+    ) su ON i.source_url IS NOT NULL
+  ),
+  inserted AS (
+    INSERT INTO public.events (
+      title, description, start_datetime, end_datetime, timezone,
+      venue_name, address, city_id, latitude, longitude,
+      price, is_free, is_outdoor,
+      source_url, source_name, source_id,
+      images, status
+    )
+    SELECT
+      c.title, c.description, c.start_datetime, c.end_datetime, c.timezone,
+      c.venue_name, c.address, c.city_id, c.latitude, c.longitude,
+      c.price, c.is_free, c.is_outdoor,
+      c.source_url, c.source_name, p_source_id,
+      c.images, v_status
+    FROM classified c
+    WHERE c.decision = 'insert'
+    ON CONFLICT (source_id, source_url)
+      WHERE source_url IS NOT NULL
+      DO NOTHING
+    RETURNING id, source_url
+  ),
+  update_targets AS (
+    SELECT c.*, e.id AS event_id, e.admin_locked_fields
+    FROM classified c
+    JOIN public.events e
+      ON e.source_id = p_source_id
+     AND e.source_url IS NOT NULL
+     AND e.source_url = c.source_url
+    WHERE c.decision = 'update'
+       OR (
+         c.decision = 'insert'
+         AND c.source_url IS NOT NULL
+         AND NOT EXISTS (SELECT 1 FROM inserted i WHERE i.source_url = c.source_url)
+       )
+  ),
+  updated AS (
+    UPDATE public.events e SET
+      title          = CASE WHEN 'title'          = ANY(e.admin_locked_fields) THEN e.title          ELSE t.title          END,
+      description    = CASE WHEN 'description'    = ANY(e.admin_locked_fields) THEN e.description    ELSE t.description    END,
+      start_datetime = CASE WHEN 'start_datetime' = ANY(e.admin_locked_fields) THEN e.start_datetime ELSE t.start_datetime END,
+      end_datetime   = CASE WHEN 'end_datetime'   = ANY(e.admin_locked_fields) THEN e.end_datetime   ELSE t.end_datetime   END,
+      timezone       = CASE WHEN 'timezone'       = ANY(e.admin_locked_fields) THEN e.timezone       ELSE t.timezone       END,
+      venue_name     = CASE WHEN 'venue_name'     = ANY(e.admin_locked_fields) THEN e.venue_name     ELSE t.venue_name     END,
+      address        = CASE WHEN 'address'        = ANY(e.admin_locked_fields) THEN e.address        ELSE t.address        END,
+      city_id        = CASE WHEN 'city_id'        = ANY(e.admin_locked_fields) THEN e.city_id        ELSE t.city_id        END,
+      source_url     = CASE WHEN 'source_url'     = ANY(e.admin_locked_fields) THEN e.source_url     ELSE t.source_url     END,
+      source_name    = CASE WHEN 'source_name'    = ANY(e.admin_locked_fields) THEN e.source_name    ELSE t.source_name    END,
+      source_id      = CASE WHEN 'source_id'      = ANY(e.admin_locked_fields) THEN e.source_id      ELSE p_source_id      END,
+      images         = CASE WHEN 'images'         = ANY(e.admin_locked_fields) THEN e.images         ELSE t.images         END,
+      price          = CASE WHEN 'price'          = ANY(e.admin_locked_fields) THEN e.price          ELSE t.price          END,
+      is_free        = CASE WHEN 'is_free'        = ANY(e.admin_locked_fields) THEN e.is_free        ELSE t.is_free        END,
+      is_outdoor     = CASE WHEN 'is_outdoor'     = ANY(e.admin_locked_fields) THEN e.is_outdoor     ELSE t.is_outdoor     END,
+      updated_at     = now()
+    FROM update_targets t
+    WHERE e.id = t.event_id
+    RETURNING e.id
+  ),
+  all_imported AS (
+    SELECT id FROM inserted
+    UNION ALL
+    SELECT event_id AS id FROM update_targets
+  ),
+  enqueued AS (
+    INSERT INTO public.event_tag_queue (event_id, source_run_id, trigger_type)
+    SELECT id, p_run_id, 'import' FROM all_imported
+    ON CONFLICT (event_id) WHERE status IN ('pending', 'processing')
+      DO NOTHING
+    RETURNING id
+  )
+  SELECT
+    (SELECT COUNT(*) FROM inserted),
+    (SELECT COUNT(*) FROM updated),
+    (SELECT COUNT(*) FROM enqueued)
+  INTO v_imported, v_updated, v_enqueued;
+
+  RETURN jsonb_build_object(
+    'imported', v_imported,
+    'updated',  v_updated,
+    'skipped',  0,
+    'enqueued', v_enqueued
+  );
+END;
+$function$
+;
+
+
+
+
+-- ============================================================================
+-- Source: 20260523021748_schema_optimization_phase1.sql
+-- ============================================================================
+
+-- Guarded schema optimization migration.
+-- Some environments may not yet include all LLM review or cron objects.
+
+DO $$
+BEGIN
+  -- LLM review FK coverage indexes.
+  IF to_regclass('public.event_llm_review_queue') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_id_idx
+             ON public.event_llm_review_queue USING btree (source_id)
+             WHERE source_id IS NOT NULL';
+    EXECUTE 'CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_run_id_idx
+             ON public.event_llm_review_queue USING btree (source_run_id)
+             WHERE source_run_id IS NOT NULL';
+  END IF;
+
+  IF to_regclass('public.event_llm_review_traces') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS event_llm_review_traces_queue_id_idx
+             ON public.event_llm_review_traces USING btree (queue_id)
+             WHERE queue_id IS NOT NULL';
+    EXECUTE 'CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_id_idx
+             ON public.event_llm_review_traces USING btree (source_id)
+             WHERE source_id IS NOT NULL';
+    EXECUTE 'CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_run_id_idx
+             ON public.event_llm_review_traces USING btree (source_run_id)
+             WHERE source_run_id IS NOT NULL';
+  END IF;
+
+  -- Retention and maintenance indexes.
+  IF to_regclass('public.invite_request_attempts') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS invite_request_attempts_attempted_at_idx
+             ON public.invite_request_attempts USING btree (attempted_at)';
+  END IF;
+
+  IF to_regclass('public.invite_redemption_attempts') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS invite_redemption_attempts_attempted_at_idx
+             ON public.invite_redemption_attempts USING btree (attempted_at)';
+  END IF;
+
+  IF to_regclass('public.recommendation_signals') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS recommendation_signals_created_at_idx
+             ON public.recommendation_signals USING btree (created_at)';
+  END IF;
+
+  IF to_regclass('public.event_ai_traces') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS event_ai_traces_created_at_idx
+             ON public.event_ai_traces USING btree (created_at)';
+  END IF;
+
+  IF to_regclass('public.source_extraction_traces') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS source_extraction_traces_created_at_idx
+             ON public.source_extraction_traces USING btree (created_at)';
+  END IF;
+
+  IF to_regclass('public.source_runs') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS source_runs_running_started_idx
+             ON public.source_runs USING btree (started_at)
+             WHERE status = ''running''';
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS events_needing_enrichment_created_idx
+             ON public.events USING btree (created_at DESC, id)
+             WHERE (
+               latitude IS NULL
+               OR longitude IS NULL
+               OR images = ''[]''::jsonb
+               OR jsonb_array_length(images) = 0
+             )';
+  END IF;
+END;
+$$;
+
+DO $$
+BEGIN
+  -- Cache fixed helper calls in RLS predicates.
+  IF EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'event_llm_review_queue'
+      AND policyname = 'Admins can read event llm review queue'
+  ) THEN
+    EXECUTE $sql$
+      ALTER POLICY "Admins can read event llm review queue"
+      ON public.event_llm_review_queue
+      USING ((SELECT private.is_admin()));
+    $sql$;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'event_llm_review_traces'
+      AND policyname = 'Admins can read event llm review traces'
+  ) THEN
+    EXECUTE $sql$
+      ALTER POLICY "Admins can read event llm review traces"
+      ON public.event_llm_review_traces
+      USING ((SELECT private.is_admin()));
+    $sql$;
+  END IF;
+
+  -- Restrict trigger-only or service-only public function execution.
+  IF to_regprocedure('public.handle_new_user()') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.handle_new_user()
+             FROM PUBLIC, anon, authenticated';
+  END IF;
+
+  IF to_regprocedure('public.prevent_role_change()') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.prevent_role_change()
+             FROM PUBLIC, anon, authenticated';
+  END IF;
+
+  IF to_regprocedure('public.reset_comment_approval_for_non_admin()') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.reset_comment_approval_for_non_admin()
+             FROM PUBLIC, anon, authenticated';
+  END IF;
+
+  IF to_regprocedure('public.invoke_process_tag_queue()') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.invoke_process_tag_queue()
+             FROM PUBLIC, anon, authenticated';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.invoke_process_tag_queue() TO service_role';
+  END IF;
+
+  IF to_regprocedure('public.invoke_scrape_source(uuid)') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.invoke_scrape_source(uuid)
+             FROM PUBLIC, anon, authenticated';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.invoke_scrape_source(uuid) TO service_role';
+  END IF;
+
+  IF to_regprocedure('public.run_due_source_scrapes()') IS NOT NULL THEN
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.run_due_source_scrapes()
+             FROM PUBLIC, anon, authenticated';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.run_due_source_scrapes() TO service_role';
+  END IF;
+
+  -- Convert public is_enabled_user RPC to invoker wrapper.
+  IF to_regprocedure('private.has_enabled_access()') IS NOT NULL THEN
+    EXECUTE $sql$
+      CREATE OR REPLACE FUNCTION public.is_enabled_user()
+      RETURNS boolean
+      LANGUAGE sql
+      STABLE
+      SECURITY INVOKER
+      SET search_path TO ''
+      AS $fn$
+        SELECT private.has_enabled_access();
+      $fn$;
+    $sql$;
+
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.is_enabled_user() FROM PUBLIC';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.is_enabled_user()
+             TO anon, authenticated, service_role';
+  END IF;
+
+  -- Convert public admin_railway_cron_run_history to invoker wrapper.
+  IF to_regprocedure('private.railway_cron_run_history(text,integer)') IS NOT NULL
+     AND to_regprocedure('private.is_admin()') IS NOT NULL THEN
+    EXECUTE $sql$
+      CREATE OR REPLACE FUNCTION private.admin_railway_cron_run_history(
+        p_label text DEFAULT NULL,
+        p_limit integer DEFAULT 50
+      )
+      RETURNS TABLE(
+        id bigint,
+        label text,
+        status text,
+        http_status integer,
+        duration_s integer,
+        body text,
+        ran_at timestamptz
+      )
+      LANGUAGE plpgsql
+      STABLE
+      SECURITY DEFINER
+      SET search_path TO ''
+      AS $fn$
+      BEGIN
+        IF NOT private.is_admin() THEN
+          RAISE EXCEPTION 'admin access required' USING ERRCODE = '42501';
+        END IF;
+
+        RETURN QUERY
+        SELECT *
+        FROM private.railway_cron_run_history(p_label, p_limit);
+      END;
+      $fn$;
+    $sql$;
+
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION private.admin_railway_cron_run_history(text, integer)
+             FROM PUBLIC, anon';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION private.admin_railway_cron_run_history(text, integer)
+             TO authenticated, service_role';
+
+    EXECUTE $sql$
+      CREATE OR REPLACE FUNCTION public.admin_railway_cron_run_history(
+        p_label text DEFAULT NULL,
+        p_limit integer DEFAULT 50
+      )
+      RETURNS TABLE(
+        id bigint,
+        label text,
+        status text,
+        http_status integer,
+        duration_s integer,
+        body text,
+        ran_at timestamptz
+      )
+      LANGUAGE sql
+      STABLE
+      SECURITY INVOKER
+      SET search_path TO ''
+      AS $fn$
+        SELECT *
+        FROM private.admin_railway_cron_run_history(p_label, p_limit);
+      $fn$;
+    $sql$;
+
+    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.admin_railway_cron_run_history(text, integer)
+             FROM PUBLIC, anon';
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.admin_railway_cron_run_history(text, integer)
+             TO authenticated, service_role';
+  END IF;
+END;
+$$;
+
+DO $$
+BEGIN
+  -- Validate existing NOT VALID constraints when present.
+  IF to_regclass('public.event_sources') IS NOT NULL AND EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'event_sources_scrape_interval_chk'
+      AND conrelid = to_regclass('public.event_sources')
+  ) THEN
+    EXECUTE 'ALTER TABLE public.event_sources
+             VALIDATE CONSTRAINT event_sources_scrape_interval_chk';
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL AND EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'events_age_range_chk'
+      AND conrelid = to_regclass('public.events')
+  ) THEN
+    EXECUTE 'ALTER TABLE public.events
+             VALIDATE CONSTRAINT events_age_range_chk';
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL AND EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'events_lat_lng_chk'
+      AND conrelid = to_regclass('public.events')
+  ) THEN
+    EXECUTE 'ALTER TABLE public.events
+             VALIDATE CONSTRAINT events_lat_lng_chk';
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL AND EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'events_price_chk'
+      AND conrelid = to_regclass('public.events')
+  ) THEN
+    EXECUTE 'ALTER TABLE public.events
+             VALIDATE CONSTRAINT events_price_chk';
+  END IF;
+
+  IF to_regclass('public.invite_codes') IS NOT NULL AND EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'invite_codes_used_count_max_chk'
+      AND conrelid = to_regclass('public.invite_codes')
+  ) THEN
+    EXECUTE 'ALTER TABLE public.invite_codes
+             VALIDATE CONSTRAINT invite_codes_used_count_max_chk';
+  END IF;
+
+  IF to_regclass('public.user_profiles') IS NOT NULL AND EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'user_profiles_child_age_chk'
+      AND conrelid = to_regclass('public.user_profiles')
+  ) THEN
+    EXECUTE 'ALTER TABLE public.user_profiles
+             VALIDATE CONSTRAINT user_profiles_child_age_chk';
+  END IF;
+
+  -- Add and validate LLM queue trigger type check when table exists.
+  IF to_regclass('public.event_llm_review_queue') IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_constraint
+      WHERE conname = 'event_llm_review_queue_trigger_type_check'
+        AND conrelid = to_regclass('public.event_llm_review_queue')
+    ) THEN
+      EXECUTE $sql$
+        ALTER TABLE public.event_llm_review_queue
+        ADD CONSTRAINT event_llm_review_queue_trigger_type_check
+        CHECK (
+          trigger_type = ANY (ARRAY['import'::text, 'reclassify'::text, 'manual-review'::text])
+        ) NOT VALID
+      $sql$;
+    END IF;
+
+    IF EXISTS (
+      SELECT 1
+      FROM pg_constraint
+      WHERE conname = 'event_llm_review_queue_trigger_type_check'
+        AND conrelid = to_regclass('public.event_llm_review_queue')
+    ) THEN
+      EXECUTE 'ALTER TABLE public.event_llm_review_queue
+               VALIDATE CONSTRAINT event_llm_review_queue_trigger_type_check';
+    END IF;
+  END IF;
+END;
+$$;
+
+DO $$
+BEGIN
+  -- Enable RLS on private cron state tables when present.
+  IF to_regclass('private.railway_cron_runs') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE private.railway_cron_runs ENABLE ROW LEVEL SECURITY';
+  END IF;
+
+  IF to_regclass('private.cron_enabled') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE private.cron_enabled ENABLE ROW LEVEL SECURITY';
+  END IF;
+END;
+$$;
+
+
+-- ============================================================================
+-- Source: 20260523022249_schema_optimization_index_cleanup.sql
+-- ============================================================================
+
+-- Safe redundant index cleanup from docs/database/schema-optimization-tasks.md.
+-- This environment is not live, so immediate cleanup is acceptable.
+DROP INDEX IF EXISTS public.events_published_city_start_datetime_idx;
+DROP INDEX IF EXISTS public.recommendation_signals_user_id_idx;
+DROP INDEX IF EXISTS public.user_calendar_events_user_id_idx;
+
+
+-- ============================================================================
+-- Source: 20260524033653_remote_schema.sql
+-- ============================================================================
+
+-- Guarded remote-schema cleanup.
+--
+-- This migration exists in hosted history, but local resets can replay it before
+-- the later consolidated LLM-review tables are created. Keep every object touch
+-- conditional so CI reset works from an empty local database.
+
+CREATE EXTENSION IF NOT EXISTS "pgmq" WITH SCHEMA "pgmq";
+
+DO $$
+BEGIN
+  IF to_regclass('public.event_llm_review_queue') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Admins can read event llm review queue" ON public.event_llm_review_queue;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_id_idx
+      ON public.event_llm_review_queue USING btree (source_id)
+      WHERE source_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_run_id_idx
+      ON public.event_llm_review_queue USING btree (source_run_id)
+      WHERE source_run_id IS NOT NULL;
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_constraint
+      WHERE conname = 'event_llm_review_queue_trigger_type_check'
+        AND conrelid = to_regclass('public.event_llm_review_queue')
+    ) THEN
+      ALTER TABLE public.event_llm_review_queue
+        ADD CONSTRAINT event_llm_review_queue_trigger_type_check
+        CHECK (trigger_type = ANY (ARRAY['import'::text, 'reclassify'::text, 'manual-review'::text]))
+        NOT VALID;
+    END IF;
+
+    ALTER TABLE public.event_llm_review_queue
+      VALIDATE CONSTRAINT event_llm_review_queue_trigger_type_check;
+
+    CREATE POLICY "Admins can read event llm review queue"
+      ON public.event_llm_review_queue
+      AS PERMISSIVE
+      FOR SELECT
+      TO authenticated
+      USING ((SELECT private.is_admin()));
+  END IF;
+
+  IF to_regclass('public.event_llm_review_traces') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Admins can read event llm review traces" ON public.event_llm_review_traces;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_queue_id_idx
+      ON public.event_llm_review_traces USING btree (queue_id)
+      WHERE queue_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_id_idx
+      ON public.event_llm_review_traces USING btree (source_id)
+      WHERE source_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_run_id_idx
+      ON public.event_llm_review_traces USING btree (source_run_id)
+      WHERE source_run_id IS NOT NULL;
+
+    CREATE POLICY "Admins can read event llm review traces"
+      ON public.event_llm_review_traces
+      AS PERMISSIVE
+      FOR SELECT
+      TO authenticated
+      USING ((SELECT private.is_admin()));
+  END IF;
+END
+$$;
+
+ALTER TABLE IF EXISTS public.event_sources
+  DROP CONSTRAINT IF EXISTS event_sources_scrape_interval_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_age_range_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_lat_lng_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_price_chk;
+ALTER TABLE IF EXISTS public.invite_codes
+  DROP CONSTRAINT IF EXISTS invite_codes_used_count_max_chk;
+ALTER TABLE IF EXISTS public.user_profiles
+  DROP CONSTRAINT IF EXISTS user_profiles_child_age_chk;
+
+DROP INDEX IF EXISTS public.events_published_city_start_datetime_idx;
+DROP INDEX IF EXISTS public.recommendation_signals_user_id_idx;
+DROP INDEX IF EXISTS public.user_calendar_events_user_id_idx;
+
+ALTER TABLE IF EXISTS private.cron_enabled ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS private.railway_cron_runs ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF to_regclass('public.event_ai_traces') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS event_ai_traces_created_at_idx
+      ON public.event_ai_traces USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS events_needing_enrichment_created_idx
+      ON public.events USING btree (created_at DESC, id)
+      WHERE (
+        latitude IS NULL
+        OR longitude IS NULL
+        OR images = '[]'::jsonb
+        OR jsonb_array_length(images) = 0
+      );
+  END IF;
+
+  IF to_regclass('public.invite_redemption_attempts') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS invite_redemption_attempts_attempted_at_idx
+      ON public.invite_redemption_attempts USING btree (attempted_at);
+  END IF;
+
+  IF to_regclass('public.invite_request_attempts') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS invite_request_attempts_attempted_at_idx
+      ON public.invite_request_attempts USING btree (attempted_at);
+  END IF;
+
+  IF to_regclass('public.recommendation_signals') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS recommendation_signals_created_at_idx
+      ON public.recommendation_signals USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.source_extraction_traces') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_extraction_traces_created_at_idx
+      ON public.source_extraction_traces USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.source_runs') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_runs_running_started_idx
+      ON public.source_runs USING btree (started_at)
+      WHERE status = 'running'::text;
+
+    CREATE INDEX IF NOT EXISTS source_runs_started_at_idx1
+      ON public.source_runs USING btree (started_at);
+  END IF;
+
+  IF to_regclass('public.source_scrape_queue') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_scrape_queue_finished_at_idx
+      ON public.source_scrape_queue USING btree (finished_at);
+  END IF;
+END
+$$;
+
+ALTER TABLE IF EXISTS public.event_sources
+  ADD CONSTRAINT event_sources_scrape_interval_chk
+  CHECK (scrape_interval_hours >= 1 AND scrape_interval_hours <= 720)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.event_sources
+  VALIDATE CONSTRAINT event_sources_scrape_interval_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_age_range_chk
+  CHECK (
+    (age_min IS NULL OR age_min >= 0)
+    AND (age_max IS NULL OR age_max >= 0)
+    AND (age_min IS NULL OR age_max IS NULL OR age_min <= age_max)
+  )
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_age_range_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_lat_lng_chk
+  CHECK (
+    (latitude IS NULL OR (latitude >= -90 AND latitude <= 90))
+    AND (longitude IS NULL OR (longitude >= -180 AND longitude <= 180))
+  )
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_lat_lng_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_price_chk
+  CHECK (price IS NULL OR price >= 0)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_price_chk;
+
+ALTER TABLE IF EXISTS public.invite_codes
+  ADD CONSTRAINT invite_codes_used_count_max_chk
+  CHECK (used_count <= max_uses)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.invite_codes
+  VALIDATE CONSTRAINT invite_codes_used_count_max_chk;
+
+ALTER TABLE IF EXISTS public.user_profiles
+  ADD CONSTRAINT user_profiles_child_age_chk
+  CHECK (child_age IS NULL OR (child_age >= 0 AND child_age <= 18))
+  NOT VALID;
+ALTER TABLE IF EXISTS public.user_profiles
+  VALIDATE CONSTRAINT user_profiles_child_age_chk;
+
+SET check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION private.admin_railway_cron_run_history(
+  p_label text DEFAULT NULL::text,
+  p_limit integer DEFAULT 50
+)
+RETURNS TABLE(
+  id bigint,
+  label text,
+  status text,
+  http_status integer,
+  duration_s integer,
+  body text,
+  ran_at timestamp with time zone
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'admin access required' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  SELECT *
+  FROM private.railway_cron_run_history(p_label, p_limit);
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.admin_railway_cron_run_history(
+  p_label text DEFAULT NULL::text,
+  p_limit integer DEFAULT 50
+)
+RETURNS TABLE(
+  id bigint,
+  label text,
+  status text,
+  http_status integer,
+  duration_s integer,
+  body text,
+  ran_at timestamp with time zone
+)
+LANGUAGE sql
+STABLE
+SET search_path TO ''
+AS $function$
+  SELECT *
+  FROM private.admin_railway_cron_run_history(p_label, p_limit);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.is_enabled_user()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SET search_path TO ''
+AS $function$
+  SELECT private.has_enabled_access();
+$function$;
+
+
+-- ============================================================================
+-- Source: 20260525193510_remote_schema.sql
+-- ============================================================================
+
+-- Guarded remote-schema cleanup.
+--
+-- This migration exists in hosted history, but local resets replay it before
+-- the later consolidated schema creates several referenced tables. Keep object
+-- touches conditional so empty local databases can be rebuilt in CI.
+
+DO $$
+BEGIN
+  IF to_regclass('public.event_llm_review_queue') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Admins can read event llm review queue" ON public.event_llm_review_queue;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_id_idx
+      ON public.event_llm_review_queue USING btree (source_id)
+      WHERE source_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_run_id_idx
+      ON public.event_llm_review_queue USING btree (source_run_id)
+      WHERE source_run_id IS NOT NULL;
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_constraint
+      WHERE conname = 'event_llm_review_queue_trigger_type_check'
+        AND conrelid = to_regclass('public.event_llm_review_queue')
+    ) THEN
+      ALTER TABLE public.event_llm_review_queue
+        ADD CONSTRAINT event_llm_review_queue_trigger_type_check
+        CHECK (trigger_type = ANY (ARRAY['import'::text, 'reclassify'::text, 'manual-review'::text]))
+        NOT VALID;
+    END IF;
+
+    ALTER TABLE public.event_llm_review_queue
+      VALIDATE CONSTRAINT event_llm_review_queue_trigger_type_check;
+
+    CREATE POLICY "Admins can read event llm review queue"
+      ON public.event_llm_review_queue
+      AS PERMISSIVE
+      FOR SELECT
+      TO authenticated
+      USING ((SELECT private.is_admin()));
+  END IF;
+
+  IF to_regclass('public.event_llm_review_traces') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Admins can read event llm review traces" ON public.event_llm_review_traces;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_queue_id_idx
+      ON public.event_llm_review_traces USING btree (queue_id)
+      WHERE queue_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_id_idx
+      ON public.event_llm_review_traces USING btree (source_id)
+      WHERE source_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_run_id_idx
+      ON public.event_llm_review_traces USING btree (source_run_id)
+      WHERE source_run_id IS NOT NULL;
+
+    CREATE POLICY "Admins can read event llm review traces"
+      ON public.event_llm_review_traces
+      AS PERMISSIVE
+      FOR SELECT
+      TO authenticated
+      USING ((SELECT private.is_admin()));
+  END IF;
+
+  IF to_regclass('public.event_ai_traces') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS event_ai_traces_created_at_idx
+      ON public.event_ai_traces USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS events_needing_enrichment_created_idx
+      ON public.events USING btree (created_at DESC, id)
+      WHERE (
+        latitude IS NULL
+        OR longitude IS NULL
+        OR images = '[]'::jsonb
+        OR jsonb_array_length(images) = 0
+      );
+  END IF;
+
+  IF to_regclass('public.invite_redemption_attempts') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS invite_redemption_attempts_attempted_at_idx
+      ON public.invite_redemption_attempts USING btree (attempted_at);
+  END IF;
+
+  IF to_regclass('public.invite_request_attempts') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS invite_request_attempts_attempted_at_idx
+      ON public.invite_request_attempts USING btree (attempted_at);
+  END IF;
+
+  IF to_regclass('public.recommendation_signals') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS recommendation_signals_created_at_idx
+      ON public.recommendation_signals USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.source_extraction_traces') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_extraction_traces_created_at_idx
+      ON public.source_extraction_traces USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.source_runs') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_runs_running_started_idx
+      ON public.source_runs USING btree (started_at)
+      WHERE status = 'running'::text;
+
+    CREATE INDEX IF NOT EXISTS source_runs_started_at_idx1
+      ON public.source_runs USING btree (started_at);
+  END IF;
+
+  IF to_regclass('public.source_scrape_queue') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_scrape_queue_finished_at_idx
+      ON public.source_scrape_queue USING btree (finished_at);
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.event_tag_queue') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.event_tag_queue FROM anon;
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL THEN
+    REVOKE DELETE ON TABLE public.events FROM authenticated;
+    REVOKE INSERT ON TABLE public.events FROM authenticated;
+    REVOKE UPDATE ON TABLE public.events FROM authenticated;
+  END IF;
+
+  IF to_regclass('public.favorites') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.favorites FROM anon;
+  END IF;
+
+  IF to_regclass('public.ratings') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.ratings FROM anon;
+  END IF;
+
+  IF to_regclass('public.source_scrape_queue') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.source_scrape_queue FROM anon;
+  END IF;
+
+  IF to_regclass('public.user_calendar_events') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.user_calendar_events FROM anon;
+  END IF;
+END
+$$;
+
+ALTER TABLE IF EXISTS public.event_sources
+  DROP CONSTRAINT IF EXISTS event_sources_scrape_interval_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_age_range_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_lat_lng_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_price_chk;
+ALTER TABLE IF EXISTS public.invite_codes
+  DROP CONSTRAINT IF EXISTS invite_codes_used_count_max_chk;
+ALTER TABLE IF EXISTS public.user_profiles
+  DROP CONSTRAINT IF EXISTS user_profiles_child_age_chk;
+
+DROP FUNCTION IF EXISTS private.public_event_image_attributions(p_event_id uuid);
+
+DROP INDEX IF EXISTS public.events_published_city_start_datetime_idx;
+DROP INDEX IF EXISTS public.recommendation_signals_user_id_idx;
+DROP INDEX IF EXISTS public.user_calendar_events_user_id_idx;
+
+ALTER TABLE IF EXISTS public.event_sources
+  ADD CONSTRAINT event_sources_scrape_interval_chk
+  CHECK (scrape_interval_hours >= 1 AND scrape_interval_hours <= 720)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.event_sources
+  VALIDATE CONSTRAINT event_sources_scrape_interval_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_age_range_chk
+  CHECK (
+    (age_min IS NULL OR age_min >= 0)
+    AND (age_max IS NULL OR age_max >= 0)
+    AND (age_min IS NULL OR age_max IS NULL OR age_min <= age_max)
+  )
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_age_range_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_lat_lng_chk
+  CHECK (
+    (latitude IS NULL OR (latitude >= -90 AND latitude <= 90))
+    AND (longitude IS NULL OR (longitude >= -180 AND longitude <= 180))
+  )
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_lat_lng_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_price_chk
+  CHECK (price IS NULL OR price >= 0)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_price_chk;
+
+ALTER TABLE IF EXISTS public.invite_codes
+  ADD CONSTRAINT invite_codes_used_count_max_chk
+  CHECK (used_count <= max_uses)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.invite_codes
+  VALIDATE CONSTRAINT invite_codes_used_count_max_chk;
+
+ALTER TABLE IF EXISTS public.user_profiles
+  ADD CONSTRAINT user_profiles_child_age_chk
+  CHECK (child_age IS NULL OR (child_age >= 0 AND child_age <= 18))
+  NOT VALID;
+ALTER TABLE IF EXISTS public.user_profiles
+  VALIDATE CONSTRAINT user_profiles_child_age_chk;
+
+SET check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.admin_railway_cron_run_history(
+  p_label text DEFAULT NULL::text,
+  p_limit integer DEFAULT 50
+)
+RETURNS TABLE(
+  id bigint,
+  label text,
+  status text,
+  http_status integer,
+  duration_s integer,
+  body text,
+  ran_at timestamp with time zone
+)
+LANGUAGE sql
+STABLE
+SET search_path TO ''
+AS $function$
+  SELECT *
+  FROM private.admin_railway_cron_run_history(p_label, p_limit);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.is_enabled_user()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SET search_path TO ''
+AS $function$
+  SELECT private.has_enabled_access();
+$function$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.user_profiles') IS NOT NULL THEN
+    GRANT UPDATE ON TABLE public.user_profiles TO authenticated;
+  END IF;
+END
+$$;
+
+
+-- ============================================================================
+-- Source: 20260526024240_remote_schema.sql
+-- ============================================================================
+
+-- Guarded remote-schema cleanup.
+--
+-- This migration exists in hosted history, but local resets replay it before
+-- the later consolidated schema creates several referenced tables. Keep object
+-- touches conditional so empty local databases can be rebuilt in CI.
+
+DO $$
+BEGIN
+  IF to_regclass('public.event_llm_review_queue') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Admins can read event llm review queue" ON public.event_llm_review_queue;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_id_idx
+      ON public.event_llm_review_queue USING btree (source_id)
+      WHERE source_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_queue_source_run_id_idx
+      ON public.event_llm_review_queue USING btree (source_run_id)
+      WHERE source_run_id IS NOT NULL;
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_constraint
+      WHERE conname = 'event_llm_review_queue_trigger_type_check'
+        AND conrelid = to_regclass('public.event_llm_review_queue')
+    ) THEN
+      ALTER TABLE public.event_llm_review_queue
+        ADD CONSTRAINT event_llm_review_queue_trigger_type_check
+        CHECK (trigger_type = ANY (ARRAY['import'::text, 'reclassify'::text, 'manual-review'::text]))
+        NOT VALID;
+    END IF;
+
+    ALTER TABLE public.event_llm_review_queue
+      VALIDATE CONSTRAINT event_llm_review_queue_trigger_type_check;
+
+    CREATE POLICY "Admins can read event llm review queue"
+      ON public.event_llm_review_queue
+      AS PERMISSIVE
+      FOR SELECT
+      TO authenticated
+      USING ((SELECT private.is_admin()));
+  END IF;
+
+  IF to_regclass('public.event_llm_review_traces') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Admins can read event llm review traces" ON public.event_llm_review_traces;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_queue_id_idx
+      ON public.event_llm_review_traces USING btree (queue_id)
+      WHERE queue_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_id_idx
+      ON public.event_llm_review_traces USING btree (source_id)
+      WHERE source_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS event_llm_review_traces_source_run_id_idx
+      ON public.event_llm_review_traces USING btree (source_run_id)
+      WHERE source_run_id IS NOT NULL;
+
+    CREATE POLICY "Admins can read event llm review traces"
+      ON public.event_llm_review_traces
+      AS PERMISSIVE
+      FOR SELECT
+      TO authenticated
+      USING ((SELECT private.is_admin()));
+  END IF;
+
+  IF to_regclass('public.event_ai_traces') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS event_ai_traces_created_at_idx
+      ON public.event_ai_traces USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS events_needing_enrichment_created_idx
+      ON public.events USING btree (created_at DESC, id)
+      WHERE (
+        latitude IS NULL
+        OR longitude IS NULL
+        OR images = '[]'::jsonb
+        OR jsonb_array_length(images) = 0
+      );
+  END IF;
+
+  IF to_regclass('public.invite_redemption_attempts') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS invite_redemption_attempts_attempted_at_idx
+      ON public.invite_redemption_attempts USING btree (attempted_at);
+  END IF;
+
+  IF to_regclass('public.invite_request_attempts') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS invite_request_attempts_attempted_at_idx
+      ON public.invite_request_attempts USING btree (attempted_at);
+  END IF;
+
+  IF to_regclass('public.recommendation_signals') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS recommendation_signals_created_at_idx
+      ON public.recommendation_signals USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.source_extraction_traces') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_extraction_traces_created_at_idx
+      ON public.source_extraction_traces USING btree (created_at);
+  END IF;
+
+  IF to_regclass('public.source_runs') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_runs_running_started_idx
+      ON public.source_runs USING btree (started_at)
+      WHERE status = 'running'::text;
+
+    CREATE INDEX IF NOT EXISTS source_runs_started_at_idx1
+      ON public.source_runs USING btree (started_at);
+  END IF;
+
+  IF to_regclass('public.source_scrape_queue') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS source_scrape_queue_finished_at_idx
+      ON public.source_scrape_queue USING btree (finished_at);
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.event_tag_queue') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.event_tag_queue FROM anon;
+  END IF;
+
+  IF to_regclass('public.events') IS NOT NULL THEN
+    REVOKE DELETE ON TABLE public.events FROM authenticated;
+    REVOKE INSERT ON TABLE public.events FROM authenticated;
+    REVOKE UPDATE ON TABLE public.events FROM authenticated;
+  END IF;
+
+  IF to_regclass('public.favorites') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.favorites FROM anon;
+  END IF;
+
+  IF to_regclass('public.ratings') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.ratings FROM anon;
+  END IF;
+
+  IF to_regclass('public.source_scrape_queue') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.source_scrape_queue FROM anon;
+  END IF;
+
+  IF to_regclass('public.user_calendar_events') IS NOT NULL THEN
+    REVOKE SELECT ON TABLE public.user_calendar_events FROM anon;
+  END IF;
+END
+$$;
+
+ALTER TABLE IF EXISTS public.event_sources
+  DROP CONSTRAINT IF EXISTS event_sources_scrape_interval_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_age_range_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_lat_lng_chk;
+ALTER TABLE IF EXISTS public.events
+  DROP CONSTRAINT IF EXISTS events_price_chk;
+ALTER TABLE IF EXISTS public.invite_codes
+  DROP CONSTRAINT IF EXISTS invite_codes_used_count_max_chk;
+ALTER TABLE IF EXISTS public.user_profiles
+  DROP CONSTRAINT IF EXISTS user_profiles_child_age_chk;
+
+DROP FUNCTION IF EXISTS private.public_event_image_attributions(p_event_id uuid);
+
+DROP INDEX IF EXISTS public.events_published_city_start_datetime_idx;
+DROP INDEX IF EXISTS public.recommendation_signals_user_id_idx;
+DROP INDEX IF EXISTS public.user_calendar_events_user_id_idx;
+
+ALTER TABLE IF EXISTS public.event_sources
+  ADD CONSTRAINT event_sources_scrape_interval_chk
+  CHECK (scrape_interval_hours >= 1 AND scrape_interval_hours <= 720)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.event_sources
+  VALIDATE CONSTRAINT event_sources_scrape_interval_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_age_range_chk
+  CHECK (
+    (age_min IS NULL OR age_min >= 0)
+    AND (age_max IS NULL OR age_max >= 0)
+    AND (age_min IS NULL OR age_max IS NULL OR age_min <= age_max)
+  )
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_age_range_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_lat_lng_chk
+  CHECK (
+    (latitude IS NULL OR (latitude >= -90 AND latitude <= 90))
+    AND (longitude IS NULL OR (longitude >= -180 AND longitude <= 180))
+  )
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_lat_lng_chk;
+
+ALTER TABLE IF EXISTS public.events
+  ADD CONSTRAINT events_price_chk
+  CHECK (price IS NULL OR price >= 0)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.events
+  VALIDATE CONSTRAINT events_price_chk;
+
+ALTER TABLE IF EXISTS public.invite_codes
+  ADD CONSTRAINT invite_codes_used_count_max_chk
+  CHECK (used_count <= max_uses)
+  NOT VALID;
+ALTER TABLE IF EXISTS public.invite_codes
+  VALIDATE CONSTRAINT invite_codes_used_count_max_chk;
+
+ALTER TABLE IF EXISTS public.user_profiles
+  ADD CONSTRAINT user_profiles_child_age_chk
+  CHECK (child_age IS NULL OR (child_age >= 0 AND child_age <= 18))
+  NOT VALID;
+ALTER TABLE IF EXISTS public.user_profiles
+  VALIDATE CONSTRAINT user_profiles_child_age_chk;
+
+SET check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.admin_railway_cron_run_history(
+  p_label text DEFAULT NULL::text,
+  p_limit integer DEFAULT 50
+)
+RETURNS TABLE(
+  id bigint,
+  label text,
+  status text,
+  http_status integer,
+  duration_s integer,
+  body text,
+  ran_at timestamp with time zone
+)
+LANGUAGE sql
+STABLE
+SET search_path TO ''
+AS $function$
+  SELECT *
+  FROM private.admin_railway_cron_run_history(p_label, p_limit);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.is_enabled_user()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SET search_path TO ''
+AS $function$
+  SELECT private.has_enabled_access();
+$function$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.user_profiles') IS NOT NULL THEN
+    GRANT UPDATE ON TABLE public.user_profiles TO authenticated;
+  END IF;
+END
+$$;
+
+
+-- ============================================================================
+-- Source: 20260601000000_consolidated_schema.sql
+-- ============================================================================
+
+
 
 
 SET statement_timeout = 0;
@@ -5622,3 +6919,4 @@ CREATE OR REPLACE TRIGGER "enforce_invited_oauth_signup" BEFORE INSERT ON "auth"
 
 
 CREATE OR REPLACE TRIGGER "on_auth_user_created" AFTER INSERT ON "auth"."users" FOR EACH ROW EXECUTE FUNCTION "public"."handle_new_user"();
+

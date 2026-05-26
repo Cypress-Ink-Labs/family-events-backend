@@ -46,7 +46,7 @@ interface EventNeedingEnrichment {
   needs_images: boolean;
   admin_locked_fields: string[];
   /**
-   * Tag slugs ordered by confidence DESC. Migration 20260601009100
+   * Tag slugs ordered by confidence DESC. Migration 20260601004000
    * extends list_events_needing_enrichment + adds
    * backfill_image_enrichment_in_scope so both return this column.
    * Empty array when the tag-queue hasn't processed the event yet.

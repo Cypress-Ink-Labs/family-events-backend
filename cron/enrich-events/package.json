@@ -2,5 +2,5 @@
   "name": "@family-events/cron-enrich-events",
   "private": true,
   "version": "0.0.1",
-  "description": "Railway cron service that hits backfill-event-enrichment every 15 minutes. Fills coords + images for events the scrape bulk path skipped (HTTP work moved off the hot path in migration 20260601007000)."
+  "description": "Railway cron service that hits backfill-event-enrichment every 15 minutes. Fills coords + images for events the scrape bulk path skipped (HTTP work moved off the hot path in migration 20260601002000)."
 }

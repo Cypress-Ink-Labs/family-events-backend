@@ -16,8 +16,8 @@
     "@react-email/render": "^2.0.8",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-email": "^6.3.2",
-    "resend": "^6.12.3"
+    "react-email": "^6.3.3",
+    "resend": "^6.12.4"
   },
   "devDependencies": {
     "@family-events/config-typescript": "workspace:*",

@@ -1,3 +1,8 @@
+
+-- ============================================================================
+-- Source: 20260601008500_llm_event_review_processing.sql
+-- ============================================================================
+
 BEGIN;
 
 -- ---------------------------------------------------------------------------
@@ -1424,3 +1429,1041 @@ GRANT  EXECUTE ON FUNCTION public.admin_events_enriched(text, uuid, boolean, tex
   TO authenticated;
 
 COMMIT;
+
+
+-- ============================================================================
+-- Source: 20260601008600_admin_update_source_processing_mode.sql
+-- ============================================================================
+
+-- Fix: admin_update_source silently dropped processing_mode patches.
+-- The admin UI sends { processing_mode, auto_approve } when a user flips
+-- a source's processing mode in the Sources page; only auto_approve was
+-- being applied. The dropdown then reverted on refetch because
+-- processing_mode never changed. Adds the missing CASE branch so
+-- processing_mode is persisted (including a cast to the enum so invalid
+-- values fail loud instead of silently no-opping).
+
+BEGIN;
+
+CREATE OR REPLACE FUNCTION private.admin_update_source(
+  p_source_id uuid,
+  p_patch jsonb
+) RETURNS public.event_sources
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $$
+DECLARE
+  patch jsonb := COALESCE(p_patch, '{}'::jsonb);
+  before_row public.event_sources%ROWTYPE;
+  updated_row public.event_sources%ROWTYPE;
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'ADMIN_SOURCE_ADMIN_REQUIRED';
+  END IF;
+
+  IF patch ? 'name' AND NULLIF(btrim(patch->>'name'), '') IS NULL THEN
+    RAISE EXCEPTION 'ADMIN_SOURCE_NAME_REQUIRED';
+  END IF;
+
+  IF patch ? 'url' AND NULLIF(btrim(patch->>'url'), '') IS NULL THEN
+    RAISE EXCEPTION 'ADMIN_SOURCE_URL_REQUIRED';
+  END IF;
+
+  SELECT *
+    INTO before_row
+    FROM public.event_sources
+   WHERE id = p_source_id
+   FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ADMIN_SOURCE_NOT_FOUND';
+  END IF;
+
+  UPDATE public.event_sources
+     SET name = CASE WHEN patch ? 'name' THEN btrim(patch->>'name') ELSE name END,
+         url = CASE WHEN patch ? 'url' THEN btrim(patch->>'url') ELSE url END,
+         source_type = CASE WHEN patch ? 'source_type' THEN patch->>'source_type' ELSE source_type END,
+         extraction_mode = CASE WHEN patch ? 'extraction_mode' THEN (patch->>'extraction_mode')::public.source_extraction_mode ELSE extraction_mode END,
+         processing_mode = CASE WHEN patch ? 'processing_mode' THEN (patch->>'processing_mode')::public.event_processing_mode ELSE processing_mode END,
+         city_id = CASE
+           WHEN patch ? 'city_id' AND jsonb_typeof(patch->'city_id') = 'null' THEN NULL
+           WHEN patch ? 'city_id' AND NULLIF(btrim(patch->>'city_id'), '') IS NULL THEN NULL
+           WHEN patch ? 'city_id' THEN (patch->>'city_id')::uuid
+           ELSE city_id
+         END,
+         is_active = CASE WHEN patch ? 'is_active' THEN (patch->>'is_active')::boolean ELSE is_active END,
+         auto_approve = CASE WHEN patch ? 'auto_approve' THEN (patch->>'auto_approve')::boolean ELSE auto_approve END,
+         scrape_interval_hours = CASE WHEN patch ? 'scrape_interval_hours' THEN (patch->>'scrape_interval_hours')::integer ELSE scrape_interval_hours END,
+         last_scraped_at = CASE
+           WHEN patch ? 'last_scraped_at' AND jsonb_typeof(patch->'last_scraped_at') = 'null' THEN NULL
+           WHEN patch ? 'last_scraped_at' THEN (patch->>'last_scraped_at')::timestamptz
+           ELSE last_scraped_at
+         END,
+         last_status = CASE
+           WHEN patch ? 'last_status' AND jsonb_typeof(patch->'last_status') = 'null' THEN NULL
+           WHEN patch ? 'last_status' THEN patch->>'last_status'
+           ELSE last_status
+         END,
+         error_count = CASE WHEN patch ? 'error_count' THEN (patch->>'error_count')::integer ELSE error_count END,
+         notes = CASE
+           WHEN patch ? 'notes' AND jsonb_typeof(patch->'notes') = 'null' THEN NULL
+           WHEN patch ? 'notes' THEN patch->>'notes'
+           ELSE notes
+         END,
+         date_window_days = CASE
+           WHEN patch ? 'date_window_days' AND jsonb_typeof(patch->'date_window_days') = 'null' THEN NULL
+           WHEN patch ? 'date_window_days' THEN (patch->>'date_window_days')::integer
+           ELSE date_window_days
+         END,
+         updated_at = now()
+   WHERE id = p_source_id
+   RETURNING * INTO updated_row;
+
+  INSERT INTO public.admin_audit_log (admin_user_id, action, target_type, target_id, metadata)
+  VALUES (
+    auth.uid(),
+    'source.update',
+    'event_source',
+    p_source_id,
+    jsonb_build_object('previous', to_jsonb(before_row), 'patch', patch)
+  );
+
+  RETURN updated_row;
+END;
+$$;
+
+COMMIT;
+
+
+-- ============================================================================
+-- Source: 20260601008700_fix_bulk_source_updates_safe_where.sql
+-- ============================================================================
+
+BEGIN;
+
+/*
+  Supabase safe-update guard rejects table-wide UPDATEs without a WHERE clause.
+  The admin bulk processing-mode RPCs intentionally target all sources, so we
+  keep semantics while satisfying the guard with an explicit predicate.
+*/
+
+CREATE OR REPLACE FUNCTION private.admin_bulk_set_processing_mode(
+  p_mode public.event_processing_mode
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $$
+DECLARE
+  affected integer;
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  UPDATE public.event_sources
+  SET processing_mode = p_mode,
+      auto_approve = (p_mode = 'auto_approve'::public.event_processing_mode),
+      updated_at = now()
+  WHERE id IS NOT NULL;
+  GET DIAGNOSTICS affected = ROW_COUNT;
+
+  INSERT INTO public.admin_audit_log (admin_user_id, action, target_type, metadata)
+  VALUES (
+    auth.uid(),
+    'bulk_set_processing_mode',
+    'event_sources',
+    jsonb_build_object('processing_mode', p_mode::text, 'affected_count', affected)
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION private.admin_bulk_set_auto_approve(enable boolean)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $$
+DECLARE
+  affected integer;
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  UPDATE public.event_sources
+  SET auto_approve = enable,
+      processing_mode = CASE
+        WHEN enable THEN 'auto_approve'::public.event_processing_mode
+        ELSE 'manual_review'::public.event_processing_mode
+      END,
+      updated_at = now()
+  WHERE id IS NOT NULL;
+  GET DIAGNOSTICS affected = ROW_COUNT;
+
+  INSERT INTO public.admin_audit_log (admin_user_id, action, target_type, metadata)
+  VALUES (
+    auth.uid(),
+    'bulk_set_auto_approve',
+    'event_sources',
+    jsonb_build_object('enable', enable, 'affected_count', affected)
+  );
+END;
+$$;
+
+COMMIT;
+
+
+-- ============================================================================
+-- Source: 20260601008800_enrichment_claim_city_centroid_coords.sql
+-- ============================================================================
+
+BEGIN;
+
+/*
+  Scrape now seeds event coordinates immediately (best effort geocode with city
+  centroid fallback). Rows that still hold exact city-centroid coordinates are
+  placeholders and should stay eligible for enrichment so precise geocodes can
+  overwrite them.
+*/
+
+CREATE OR REPLACE FUNCTION private.list_events_needing_enrichment(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  WITH enrichment_flags AS (
+    SELECT
+      e.*,
+      -- ~0.11 m at the equator — close enough to be a centroid placeholder
+      (
+        (
+          e.latitude IS NULL
+          OR e.longitude IS NULL
+          OR (
+            c.latitude IS NOT NULL
+            AND c.longitude IS NOT NULL
+            AND e.latitude IS NOT NULL
+            AND e.longitude IS NOT NULL
+            AND abs(e.latitude  - c.latitude)  < 0.000001
+            AND abs(e.longitude - c.longitude) < 0.000001
+          )
+        )
+        AND NOT 'latitude'  = ANY(e.admin_locked_fields)
+        AND NOT 'longitude' = ANY(e.admin_locked_fields)
+      ) AS _needs_coords,
+      (
+        (e.images = '[]'::jsonb OR jsonb_array_length(e.images) = 0)
+        AND NOT 'images' = ANY(e.admin_locked_fields)
+      ) AS _needs_images
+    FROM public.events e
+    LEFT JOIN public.cities c ON c.id = e.city_id
+  )
+  SELECT
+    ef.id,
+    ef.title,
+    ef.description,
+    ef.venue_name,
+    ef.address,
+    ef.city_id,
+    ef.source_id,
+    ef.source_url,
+    ef._needs_coords  AS needs_coords,
+    ef._needs_images   AS needs_images,
+    ef.admin_locked_fields
+  FROM enrichment_flags ef
+  WHERE ef._needs_coords OR ef._needs_images
+  ORDER BY ef.created_at DESC
+  LIMIT GREATEST(1, LEAST(p_limit, 100));
+$$;
+
+COMMIT;
+
+
+-- ============================================================================
+-- Source: 20260601008900_clear_llm_review_on_admin_decision.sql
+-- ============================================================================
+
+-- When an admin publishes or rejects an event the LLM review state becomes
+-- stale. Clear it so the UI no longer shows a confusing "Needs review" or
+-- "LLM approved" badge next to a manually-decided event.
+
+CREATE OR REPLACE FUNCTION private.clear_llm_review_on_status_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $$
+BEGIN
+  IF NEW.status IS DISTINCT FROM OLD.status
+     AND NEW.status IN ('published', 'rejected')
+     AND OLD.status = 'draft'
+  THEN
+    NEW.llm_review_status        := 'not_required';
+    NEW.llm_review_decision      := NULL;
+    NEW.llm_review_confidence    := NULL;
+    NEW.llm_review_reason        := NULL;
+    NEW.llm_review_flags         := '{}'::text[];
+    NEW.llm_review_error         := NULL;
+    NEW.llm_review_model         := NULL;
+    NEW.llm_review_provider      := NULL;
+    NEW.llm_review_prompt_version := NULL;
+    NEW.llm_reviewed_at          := NULL;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_clear_llm_review_on_status_change ON public.events;
+
+CREATE TRIGGER trg_clear_llm_review_on_status_change
+  BEFORE UPDATE OF status ON public.events
+  FOR EACH ROW
+  EXECUTE FUNCTION private.clear_llm_review_on_status_change();
+
+-- Fix existing published/rejected events that still carry stale LLM review data
+UPDATE public.events
+SET llm_review_status         = 'not_required',
+    llm_review_decision       = NULL,
+    llm_review_confidence     = NULL,
+    llm_review_reason         = NULL,
+    llm_review_flags          = '{}'::text[],
+    llm_review_error          = NULL,
+    llm_review_model          = NULL,
+    llm_review_provider       = NULL,
+    llm_review_prompt_version = NULL,
+    llm_reviewed_at           = NULL,
+    updated_at                = now()
+WHERE status IN ('published', 'rejected')
+  AND llm_review_status IS DISTINCT FROM 'not_required';
+
+
+-- ============================================================================
+-- Source: 20260601009000_preserve_llm_review_on_admin_decision.sql
+-- ============================================================================
+
+-- Preserve LLM review data after admin publishes/rejects so the audit trail
+-- remains visible.  Only flip the status to 'not_required'; keep all other
+-- fields (decision, confidence, reason, flags, provider, model, etc.) intact.
+
+CREATE OR REPLACE FUNCTION private.clear_llm_review_on_status_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $$
+BEGIN
+  IF NEW.status IS DISTINCT FROM OLD.status
+     AND NEW.status IN ('published', 'rejected')
+     AND OLD.status = 'draft'
+  THEN
+    NEW.llm_review_status := 'not_required';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+-- ============================================================================
+-- Source: 20260601009100_event_enrichment_tags_and_scope.sql
+-- ============================================================================
+
+/*
+  Image-fallback enrichment groundwork
+  ------------------------------------
+
+  Two related changes that the Unsplash image-fallback work in the
+  backfill-event-enrichment edge fn needs:
+
+    1. `private.list_events_needing_enrichment` now returns a
+       `tags text[]` column carrying the event's tag slugs ordered by
+       confidence DESC. The edge fn uses tags[0] as the Unsplash query
+       term. Adding it to the existing RPC is backwards compatible at
+       the call site (every existing caller does
+       `select * from list_events_needing_enrichment(...)` so the
+       extra column is automatically picked up).
+
+    2. New `private.backfill_image_enrichment_in_scope(p_limit)` RPC
+       returns the same row shape but narrows to rows where:
+         (a) images is empty,
+         (b) the row isn't admin-locked on `images`,
+         (c) status = 'published',
+         (d) either is_featured = true OR start_datetime is within
+             [now, now + 30 days].
+       This bounds Unsplash API spend to events users will actually see
+       in the next month. The existing coords-only flow keeps using
+       `list_events_needing_enrichment` so it can still fill geocodes
+       on stale rows.
+
+  Both the existing tags column extension and the new scoped RPC are
+  invocable only by `service_role`; the `public.*` SECURITY INVOKER
+  wrappers exist for PostgREST clients (edge fns) that talk through
+  the public schema.
+*/
+
+BEGIN;
+
+-- 1) Extend list_events_needing_enrichment with tags text[].
+--
+-- PG won't allow CREATE OR REPLACE to change a function's RETURNS TABLE
+-- shape. Drop both the public wrapper and the private implementation
+-- before re-creating with the new column. No views or indexes depend
+-- on these RPCs — they're called only from edge functions over
+-- PostgREST — so no CASCADE concerns.
+
+DROP FUNCTION IF EXISTS public.list_events_needing_enrichment(int);
+DROP FUNCTION IF EXISTS private.list_events_needing_enrichment(int);
+
+CREATE OR REPLACE FUNCTION private.list_events_needing_enrichment(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  WITH enrichment_flags AS (
+    SELECT
+      e.*,
+      (
+        (
+          e.latitude IS NULL
+          OR e.longitude IS NULL
+          OR (
+            c.latitude IS NOT NULL
+            AND c.longitude IS NOT NULL
+            AND e.latitude IS NOT NULL
+            AND e.longitude IS NOT NULL
+            AND abs(e.latitude  - c.latitude)  < 0.000001
+            AND abs(e.longitude - c.longitude) < 0.000001
+          )
+        )
+        AND NOT 'latitude'  = ANY(e.admin_locked_fields)
+        AND NOT 'longitude' = ANY(e.admin_locked_fields)
+      ) AS _needs_coords,
+      (
+        (e.images = '[]'::jsonb OR jsonb_array_length(e.images) = 0)
+        AND NOT 'images' = ANY(e.admin_locked_fields)
+      ) AS _needs_images
+    FROM public.events e
+    LEFT JOIN public.cities c ON c.id = e.city_id
+  ),
+  event_tag_slugs AS (
+    SELECT
+      et.event_id,
+      array_agg(t.slug ORDER BY et.confidence DESC NULLS LAST, t.slug ASC) AS slugs
+    FROM public.event_tags et
+    JOIN public.tags t ON t.id = et.tag_id
+    GROUP BY et.event_id
+  )
+  SELECT
+    ef.id,
+    ef.title,
+    ef.description,
+    ef.venue_name,
+    ef.address,
+    ef.city_id,
+    ef.source_id,
+    ef.source_url,
+    ef._needs_coords  AS needs_coords,
+    ef._needs_images  AS needs_images,
+    ef.admin_locked_fields,
+    COALESCE(ets.slugs, ARRAY[]::text[]) AS tags
+  FROM enrichment_flags ef
+  LEFT JOIN event_tag_slugs ets ON ets.event_id = ef.id
+  WHERE ef._needs_coords OR ef._needs_images
+  ORDER BY ef.created_at DESC
+  LIMIT GREATEST(1, LEAST(p_limit, 100));
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.list_events_needing_enrichment(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.list_events_needing_enrichment(int) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.list_events_needing_enrichment(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT * FROM private.list_events_needing_enrichment(p_limit);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.list_events_needing_enrichment(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.list_events_needing_enrichment(int) TO service_role;
+
+-- 2) backfill_image_enrichment_in_scope — featured OR next 30 days, images-only.
+
+CREATE OR REPLACE FUNCTION private.backfill_image_enrichment_in_scope(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  WITH scoped AS (
+    SELECT e.*
+    FROM public.events e
+    WHERE e.status = 'published'
+      AND (e.images = '[]'::jsonb OR jsonb_array_length(e.images) = 0)
+      AND NOT 'images' = ANY(e.admin_locked_fields)
+      AND (
+        e.is_featured = true
+        OR (e.start_datetime BETWEEN now() AND now() + interval '30 days')
+      )
+  ),
+  event_tag_slugs AS (
+    SELECT
+      et.event_id,
+      array_agg(t.slug ORDER BY et.confidence DESC NULLS LAST, t.slug ASC) AS slugs
+    FROM public.event_tags et
+    JOIN public.tags t ON t.id = et.tag_id
+    GROUP BY et.event_id
+  )
+  SELECT
+    s.id,
+    s.title,
+    s.description,
+    s.venue_name,
+    s.address,
+    s.city_id,
+    s.source_id,
+    s.source_url,
+    false                                                    AS needs_coords,
+    true                                                     AS needs_images,
+    s.admin_locked_fields,
+    COALESCE(ets.slugs, ARRAY[]::text[])                     AS tags
+  FROM scoped s
+  LEFT JOIN event_tag_slugs ets ON ets.event_id = s.id
+  ORDER BY s.is_featured DESC, s.start_datetime ASC
+  LIMIT GREATEST(1, LEAST(p_limit, 100));
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.backfill_image_enrichment_in_scope(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.backfill_image_enrichment_in_scope(int) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.backfill_image_enrichment_in_scope(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT * FROM private.backfill_image_enrichment_in_scope(p_limit);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.backfill_image_enrichment_in_scope(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.backfill_image_enrichment_in_scope(int) TO service_role;
+
+COMMIT;
+
+
+-- ============================================================================
+-- Source: 20260601009200_drop_admin_queue_tables_from_realtime_publication.sql
+-- ============================================================================
+
+-- Drop high-churn admin queue tables from supabase_realtime publication.
+-- event_tag_queue alone produced ~28k WAL rows over the prior sampling
+-- window with zero realtime subscribers, dominating realtime.list_changes
+-- cost (63.9% of total DB time). Admin UI now polls these tables every
+-- 10s instead of subscribing via postgres_changes.
+ALTER PUBLICATION supabase_realtime DROP TABLE public.event_tag_queue;
+ALTER PUBLICATION supabase_realtime DROP TABLE public.source_scrape_queue;
+ALTER PUBLICATION supabase_realtime DROP TABLE public.source_runs;
+
+
+-- ============================================================================
+-- Source: 20260601009300_supabase_full_usage_hardening.sql
+-- ============================================================================
+
+-- Tighten Supabase API exposure and remove unused GraphQL surface.
+--
+-- This migration keeps the app's REST/PostgREST paths working while removing
+-- old broad table grants that made every public object GraphQL-discoverable.
+
+DROP EXTENSION IF EXISTS pg_graphql;
+
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  REVOKE ALL ON TABLES FROM anon;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  REVOKE ALL ON TABLES FROM authenticated;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  REVOKE ALL ON SEQUENCES FROM anon;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  REVOKE ALL ON SEQUENCES FROM authenticated;
+
+-- Anonymous users only need public read paths plus invite request RPCs.
+GRANT SELECT ON TABLE
+  public.cities,
+  public.comments,
+  public.event_rating_stats,
+  public.event_tag_queue,
+  public.event_tag_queue_summary,
+  public.event_tags,
+  public.events,
+  public.favorites,
+  public.public_events,
+  public.ratings,
+  public.source_scrape_queue,
+  public.source_scrape_queue_summary,
+  public.tags,
+  public.timezone_names,
+  public.user_calendar_events
+TO anon;
+
+-- Signed-in users need normal app reads, plus admin reads guarded by RLS.
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated;
+
+-- Direct browser writes still used by non-admin product flows.
+GRANT INSERT, UPDATE, DELETE ON TABLE public.comments TO authenticated;
+GRANT INSERT, DELETE ON TABLE public.favorites TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.ratings TO authenticated;
+GRANT INSERT, DELETE ON TABLE public.user_calendar_events TO authenticated;
+GRANT UPDATE (
+  email,
+  display_name,
+  avatar_url,
+  city_preference_id,
+  child_name,
+  child_age,
+  updated_at
+) ON TABLE public.user_profiles TO authenticated;
+
+-- Direct browser writes still used by admin screens; RLS keeps these admin-only.
+GRANT INSERT, UPDATE ON TABLE public.cities TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.events TO authenticated;
+GRANT DELETE ON TABLE public.invite_codes TO authenticated;
+
+-- Keep sequence access available for direct inserts without restoring broad
+-- table mutation grants.
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+
+-- Private tables are intentionally accessed through SECURITY DEFINER RPCs.
+ALTER TABLE private.cron_enabled ENABLE ROW LEVEL SECURITY;
+ALTER TABLE private.railway_cron_runs ENABLE ROW LEVEL SECURITY;
+
+-- Advisor proof: the project should not expose pg_graphql after this migration.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_graphql') THEN
+    RAISE EXCEPTION 'pg_graphql extension is still installed';
+  END IF;
+
+END
+$$;
+
+
+-- ============================================================================
+-- Source: 20260601009400_enrichment_attempt_tracking.sql
+-- ============================================================================
+
+/*
+  Enrichment attempt tracking — break the centroid livelock
+  ---------------------------------------------------------
+
+  The backfill-event-enrichment cron was stuck reprocessing the same top-12
+  rows every tick. Two interacting bugs:
+
+    1. private.list_events_needing_enrichment orders by created_at DESC,
+       which never changes, so the newest 12 unfillable rows (libcal events
+       whose `address` is a room label like "Meeting Room (2nd), Main
+       Library") permanently occupy the top of the queue.
+
+    2. backfill-event-enrichment/index.ts had a city-centroid fallback that
+       wrote the city's lat/lng back when Nominatim returned no hit. The
+       updated row still matched centroid → still flagged needs_coords →
+       claimed again next tick. The other ~1080 rows in the backlog never
+       got a turn.
+
+  Fix:
+
+    - Add events.last_enrichment_attempt_at. Bumped on every enrichment
+      attempt (success OR no-op).
+    - Order both claim RPCs by last_enrichment_attempt_at ASC NULLS FIRST,
+      then existing tiebreaker. First pass walks the NULL backlog; from
+      then on the oldest-attempted rows surface first.
+    - Add private.mark_event_enrichment_attempt(p_event_id) for the
+      no-op path (geocode failed, no images written) so the row still
+      moves to the back of the queue.
+    - update_event_enrichment now also bumps last_enrichment_attempt_at.
+
+  The city-centroid fallback in the edge function is removed in the
+  accompanying TS change (backfill-event-enrichment/index.ts).
+*/
+
+BEGIN;
+
+ALTER TABLE public.events
+  ADD COLUMN IF NOT EXISTS last_enrichment_attempt_at timestamptz;
+
+CREATE INDEX IF NOT EXISTS events_enrichment_attempt_idx
+  ON public.events (last_enrichment_attempt_at NULLS FIRST, created_at DESC);
+
+-- Drop wrappers + impl so we can change ORDER BY (PG allows CREATE OR REPLACE
+-- for body changes but RETURNS TABLE shape is unchanged here so a plain
+-- CREATE OR REPLACE would also work; the explicit DROP keeps the migration
+-- symmetric with 20260601009100 which did need the drop).
+DROP FUNCTION IF EXISTS public.list_events_needing_enrichment(int);
+DROP FUNCTION IF EXISTS private.list_events_needing_enrichment(int);
+
+CREATE OR REPLACE FUNCTION private.list_events_needing_enrichment(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  WITH enrichment_flags AS (
+    SELECT
+      e.*,
+      (
+        (
+          e.latitude IS NULL
+          OR e.longitude IS NULL
+          OR (
+            c.latitude IS NOT NULL
+            AND c.longitude IS NOT NULL
+            AND e.latitude IS NOT NULL
+            AND e.longitude IS NOT NULL
+            AND abs(e.latitude  - c.latitude)  < 0.000001
+            AND abs(e.longitude - c.longitude) < 0.000001
+          )
+        )
+        AND NOT 'latitude'  = ANY(e.admin_locked_fields)
+        AND NOT 'longitude' = ANY(e.admin_locked_fields)
+      ) AS _needs_coords,
+      (
+        (e.images = '[]'::jsonb OR jsonb_array_length(e.images) = 0)
+        AND NOT 'images' = ANY(e.admin_locked_fields)
+      ) AS _needs_images
+    FROM public.events e
+    LEFT JOIN public.cities c ON c.id = e.city_id
+  ),
+  event_tag_slugs AS (
+    SELECT
+      et.event_id,
+      array_agg(t.slug ORDER BY et.confidence DESC NULLS LAST, t.slug ASC) AS slugs
+    FROM public.event_tags et
+    JOIN public.tags t ON t.id = et.tag_id
+    GROUP BY et.event_id
+  )
+  SELECT
+    ef.id,
+    ef.title,
+    ef.description,
+    ef.venue_name,
+    ef.address,
+    ef.city_id,
+    ef.source_id,
+    ef.source_url,
+    ef._needs_coords  AS needs_coords,
+    ef._needs_images  AS needs_images,
+    ef.admin_locked_fields,
+    COALESCE(ets.slugs, ARRAY[]::text[]) AS tags
+  FROM enrichment_flags ef
+  LEFT JOIN event_tag_slugs ets ON ets.event_id = ef.id
+  WHERE ef._needs_coords OR ef._needs_images
+  ORDER BY ef.last_enrichment_attempt_at ASC NULLS FIRST, ef.created_at DESC
+  LIMIT GREATEST(1, LEAST(p_limit, 100));
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.list_events_needing_enrichment(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.list_events_needing_enrichment(int) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.list_events_needing_enrichment(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT * FROM private.list_events_needing_enrichment(p_limit);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.list_events_needing_enrichment(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.list_events_needing_enrichment(int) TO service_role;
+
+-- backfill_image_enrichment_in_scope has the same livelock risk: featured
+-- rows or upcoming rows whose Unsplash tag lookup keeps returning nothing
+-- would otherwise re-claim every tick.
+DROP FUNCTION IF EXISTS public.backfill_image_enrichment_in_scope(int);
+DROP FUNCTION IF EXISTS private.backfill_image_enrichment_in_scope(int);
+
+CREATE OR REPLACE FUNCTION private.backfill_image_enrichment_in_scope(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  WITH scoped AS (
+    SELECT e.*
+    FROM public.events e
+    WHERE e.status = 'published'
+      AND (e.images = '[]'::jsonb OR jsonb_array_length(e.images) = 0)
+      AND NOT 'images' = ANY(e.admin_locked_fields)
+      AND (
+        e.is_featured = true
+        OR (e.start_datetime BETWEEN now() AND now() + interval '30 days')
+      )
+  ),
+  event_tag_slugs AS (
+    SELECT
+      et.event_id,
+      array_agg(t.slug ORDER BY et.confidence DESC NULLS LAST, t.slug ASC) AS slugs
+    FROM public.event_tags et
+    JOIN public.tags t ON t.id = et.tag_id
+    GROUP BY et.event_id
+  )
+  SELECT
+    s.id,
+    s.title,
+    s.description,
+    s.venue_name,
+    s.address,
+    s.city_id,
+    s.source_id,
+    s.source_url,
+    false                                                    AS needs_coords,
+    true                                                     AS needs_images,
+    s.admin_locked_fields,
+    COALESCE(ets.slugs, ARRAY[]::text[])                     AS tags
+  FROM scoped s
+  LEFT JOIN event_tag_slugs ets ON ets.event_id = s.id
+  ORDER BY s.last_enrichment_attempt_at ASC NULLS FIRST,
+           s.is_featured DESC,
+           s.start_datetime ASC
+  LIMIT GREATEST(1, LEAST(p_limit, 100));
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.backfill_image_enrichment_in_scope(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.backfill_image_enrichment_in_scope(int) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.backfill_image_enrichment_in_scope(p_limit int DEFAULT 25)
+RETURNS TABLE (
+  event_id      uuid,
+  title         text,
+  description   text,
+  venue_name    text,
+  address       text,
+  city_id       uuid,
+  source_id     uuid,
+  source_url    text,
+  needs_coords  boolean,
+  needs_images  boolean,
+  admin_locked_fields text[],
+  tags          text[]
+)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT * FROM private.backfill_image_enrichment_in_scope(p_limit);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.backfill_image_enrichment_in_scope(int) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.backfill_image_enrichment_in_scope(int) TO service_role;
+
+-- update_event_enrichment now also bumps last_enrichment_attempt_at so
+-- successful writes count as an attempt and roll to the back of the queue.
+CREATE OR REPLACE FUNCTION private.update_event_enrichment(
+  p_event_id   uuid,
+  p_latitude   numeric,
+  p_longitude  numeric,
+  p_images     jsonb
+)
+RETURNS void
+LANGUAGE sql
+VOLATILE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  UPDATE public.events e SET
+    latitude = CASE
+      WHEN 'latitude' = ANY(e.admin_locked_fields) THEN e.latitude
+      WHEN p_latitude IS NULL THEN e.latitude
+      ELSE p_latitude
+    END,
+    longitude = CASE
+      WHEN 'longitude' = ANY(e.admin_locked_fields) THEN e.longitude
+      WHEN p_longitude IS NULL THEN e.longitude
+      ELSE p_longitude
+    END,
+    images = CASE
+      WHEN 'images' = ANY(e.admin_locked_fields) THEN e.images
+      WHEN p_images IS NULL OR jsonb_array_length(p_images) = 0 THEN e.images
+      ELSE p_images
+    END,
+    last_enrichment_attempt_at = now(),
+    updated_at = now()
+  WHERE e.id = p_event_id;
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.update_event_enrichment(uuid, numeric, numeric, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.update_event_enrichment(uuid, numeric, numeric, jsonb) TO service_role;
+
+-- Public wrapper unchanged in shape; recreate the body so the comment
+-- about the attempt-timestamp side effect stays in one place.
+CREATE OR REPLACE FUNCTION public.update_event_enrichment(
+  p_event_id   uuid,
+  p_latitude   numeric,
+  p_longitude  numeric,
+  p_images     jsonb
+)
+RETURNS void
+LANGUAGE sql
+VOLATILE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT private.update_event_enrichment(p_event_id, p_latitude, p_longitude, p_images);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.update_event_enrichment(uuid, numeric, numeric, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.update_event_enrichment(uuid, numeric, numeric, jsonb) TO service_role;
+
+-- No-op attempt marker. Edge function calls this when an enrichment pass
+-- produced neither coords nor images so the row still rotates out of the
+-- front of the claim queue.
+CREATE OR REPLACE FUNCTION private.mark_event_enrichment_attempt(p_event_id uuid)
+RETURNS void
+LANGUAGE sql
+VOLATILE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  UPDATE public.events
+  SET last_enrichment_attempt_at = now()
+  WHERE id = p_event_id;
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.mark_event_enrichment_attempt(uuid) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.mark_event_enrichment_attempt(uuid) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.mark_event_enrichment_attempt(p_event_id uuid)
+RETURNS void
+LANGUAGE sql
+VOLATILE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT private.mark_event_enrichment_attempt(p_event_id);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.mark_event_enrichment_attempt(uuid) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.mark_event_enrichment_attempt(uuid) TO service_role;
+
+COMMIT;
+

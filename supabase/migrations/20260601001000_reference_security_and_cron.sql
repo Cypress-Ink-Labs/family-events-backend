@@ -1,3 +1,164 @@
+
+-- ============================================================================
+-- Source: 20260601006700_reference_data.sql
+-- ============================================================================
+
+/*
+  # Family Events reference data
+
+  Production reset baseline data. This is intentionally separate from
+  supabase/seed.sql, which creates a local-only auth/admin account.
+
+  Current source decisions baked in:
+  - BREC uses the dedicated `brec` parser from the start.
+  - Lafayette Macaroni Kid is included with its API date window.
+  - East Baton Rouge Parish Library is omitted because the old LibCal RSS feed
+    was empty and the real source requires a separate LocalHop integration.
+*/
+
+-- =============================================
+-- Cities
+-- =============================================
+INSERT INTO public.cities (name, state, country, slug, latitude, longitude, timezone)
+VALUES
+  ('Baton Rouge', 'LA', 'US', 'baton-rouge', 30.4515, -91.1871, 'America/Chicago'),
+  ('Lafayette', 'LA', 'US', 'lafayette', 30.2241, -92.0198, 'America/Chicago')
+ON CONFLICT (slug) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  state = EXCLUDED.state,
+  country = EXCLUDED.country,
+  latitude = EXCLUDED.latitude,
+  longitude = EXCLUDED.longitude,
+  timezone = EXCLUDED.timezone;
+
+-- =============================================
+-- Tags
+-- =============================================
+INSERT INTO public.tags (name, slug, color, category, is_system)
+VALUES
+  ('Free', 'free', '#16a34a', 'cost', true),
+  ('Outdoor', 'outdoor', '#15803d', 'location', true),
+  ('Indoor', 'indoor', '#0369a1', 'location', true),
+  ('Toddler-Friendly', 'toddler-friendly', '#d97706', 'age', true),
+  ('Baby-Friendly', 'baby-friendly', '#f59e0b', 'age', true),
+  ('Teen-Friendly', 'teen-friendly', '#7c3aed', 'age', true),
+  ('Weekend', 'weekend', '#db2777', 'time', true),
+  ('Educational', 'educational', '#0284c7', 'theme', true),
+  ('Arts & Crafts', 'arts-crafts', '#c026d3', 'activity', true),
+  ('Music', 'music', '#ea580c', 'activity', true),
+  ('Sensory-Friendly', 'sensory-friendly', '#0891b2', 'theme', true),
+  ('Family Festival', 'family-festival', '#dc2626', 'theme', true),
+  ('Storytime', 'storytime', '#65a30d', 'activity', true),
+  ('STEM', 'stem', '#2563eb', 'theme', true),
+  ('Sports', 'sports', '#16a34a', 'activity', true),
+  ('Cooking', 'cooking', '#d97706', 'activity', true),
+  ('Nature', 'nature', '#15803d', 'theme', true),
+  ('Community', 'community', '#6d28d9', 'theme', true),
+  ('Holiday', 'holiday', '#dc2626', 'theme', true),
+  ('Playgroup', 'playgroup', '#0891b2', 'activity', true)
+ON CONFLICT (slug) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  color = EXCLUDED.color,
+  category = EXCLUDED.category,
+  is_system = EXCLUDED.is_system;
+
+-- =============================================
+-- Event Sources
+-- =============================================
+WITH source_data AS (
+  SELECT
+    'BREC Parks'::text AS name,
+    'https://www.brec.org/calendar'::text AS url,
+    'brec'::text AS source_type,
+    'baton-rouge'::text AS city_slug,
+    12::integer AS scrape_interval_hours,
+    NULL::integer AS date_window_days,
+    'Baton Rouge parks and recreation calendar'::text AS notes
+  UNION ALL SELECT
+    'Eventbrite Baton Rouge Family',
+    'https://www.eventbrite.com/d/la--baton-rouge/family-events/',
+    'website', 'baton-rouge', 12, NULL,
+    'Family-friendly Eventbrite listings for Baton Rouge'
+  UNION ALL SELECT
+    'AllEvents Baton Rouge Family',
+    'https://allevents.in/baton-rouge/family',
+    'website', 'baton-rouge', 12, NULL,
+    'AllEvents family listings for Baton Rouge'
+  UNION ALL SELECT
+    'Moncus Park',
+    'https://moncuspark.org/events/',
+    'website', 'lafayette', 12, NULL,
+    'Outdoor family events at Moncus Park'
+  UNION ALL SELECT
+    'Acadiana Center for the Arts',
+    'https://acadianacenterforthearts.org/events/',
+    'website', 'lafayette', 12, NULL,
+    'Arts and culture events in Lafayette'
+  UNION ALL SELECT
+    'Lafayette Science Museum',
+    'https://lafayettesciencemuseum.org/events',
+    'website', 'lafayette', 12, NULL,
+    'Science museum family events'
+  UNION ALL SELECT
+    'Lafayette Public Library',
+    'https://lafayettela.libcal.com/ical_subscribe.php?src=p&cid=11334',
+    'ical', 'lafayette', 6, NULL,
+    'Library story times and kids programming via LibCal iCal feed'
+  UNION ALL SELECT
+    'Eventbrite Lafayette Family',
+    'https://www.eventbrite.com/d/la--lafayette/family-events/',
+    'website', 'lafayette', 12, NULL,
+    'Family-friendly Eventbrite listings for Lafayette'
+  UNION ALL SELECT
+    'AllEvents Lafayette Family',
+    'https://allevents.in/lafayette/family',
+    'website', 'lafayette', 12, NULL,
+    'AllEvents family listings for Lafayette'
+  UNION ALL SELECT
+    'Macaroni Kid Lafayette',
+    'https://lafayettela.macaronikid.com/events',
+    'macaronikid', 'lafayette', 12, 90,
+    'JSON API; two-hop fetch (page -> townId -> api.macaronikid.com).'
+)
+INSERT INTO public.event_sources (
+  name,
+  url,
+  source_type,
+  city_id,
+  is_active,
+  scrape_interval_hours,
+  date_window_days,
+  notes
+)
+SELECT
+  s.name,
+  s.url,
+  s.source_type,
+  c.id,
+  true,
+  s.scrape_interval_hours,
+  s.date_window_days,
+  s.notes
+FROM source_data s
+JOIN public.cities c ON c.slug = s.city_slug
+ON CONFLICT (url) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  source_type = EXCLUDED.source_type,
+  city_id = EXCLUDED.city_id,
+  is_active = EXCLUDED.is_active,
+  scrape_interval_hours = EXCLUDED.scrape_interval_hours,
+  date_window_days = EXCLUDED.date_window_days,
+  notes = EXCLUDED.notes,
+  updated_at = now();
+
+
+-- ============================================================================
+-- Source: 20260601006800_security_performance_hardening.sql
+-- ============================================================================
+
 -- Security and performance hardening from the Supabase/backend architecture audit.
 -- Keep this additive so production rollout order stays reviewable.
 
@@ -353,3 +514,200 @@ CREATE INDEX IF NOT EXISTS event_sources_active_last_scraped_idx
 CREATE INDEX IF NOT EXISTS admin_audit_log_target_idx
   ON public.admin_audit_log (target_type, target_id, created_at DESC)
   WHERE target_id IS NOT NULL;
+
+
+-- ============================================================================
+-- Source: 20260601006900_railway_cron_toggle.sql
+-- ============================================================================
+
+/*
+  # Toggleable Railway crons
+
+  Railway cron services have no native pause API, so toggling them from the
+  admin UI requires a DB-side kill switch the runner consults each tick.
+
+  Adds:
+    - private.cron_enabled (label PK, enabled BOOLEAN, updated_at)
+    - public.is_cron_enabled(label) — anon/service callable boolean check
+    - public.admin_set_cron_enabled(label, enabled) — admin-only toggle wrapper
+    - admin_list_railway_cron_jobs now returns the `enabled` flag so the UI
+      card knows the current state.
+
+  Default state: enabled=true for every known cron label. Toggling to false
+  makes cron-runner.sh skip the main curl (next tick logs status='skipped').
+*/
+
+BEGIN;
+
+-- =============================================
+-- 1. cron_enabled table + seed
+-- =============================================
+CREATE TABLE IF NOT EXISTS private.cron_enabled (
+  label      text        PRIMARY KEY,
+  enabled    boolean     NOT NULL DEFAULT true,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE private.cron_enabled IS
+  'Per-label on/off switch for Railway cron services. Read by cron-runner.sh
+   on every tick via public.is_cron_enabled. Toggled by admin UI via
+   public.admin_set_cron_enabled. Decoupled from Railway cronSchedule so
+   the schedule stays in railway.toml but the kill switch lives in the DB.';
+
+INSERT INTO private.cron_enabled (label) VALUES
+  ('cron-tag-queue'),
+  ('cron-scrape-sources'),
+  ('cron-db-maintenance'),
+  ('cron-cleanup-stale')
+ON CONFLICT (label) DO NOTHING;
+
+-- =============================================
+-- 2. private.is_cron_enabled body
+-- =============================================
+CREATE OR REPLACE FUNCTION private.is_cron_enabled(p_label text)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT COALESCE(
+    (SELECT enabled FROM private.cron_enabled WHERE label = p_label),
+    true
+  );
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.is_cron_enabled(text) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.is_cron_enabled(text) TO service_role;
+
+-- Public SECURITY INVOKER wrapper for PostgREST. service_role only — the
+-- runner curls /rest/v1/rpc/is_cron_enabled with a Bearer sb_secret_* key.
+CREATE OR REPLACE FUNCTION public.is_cron_enabled(p_label text)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT private.is_cron_enabled(p_label);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.is_cron_enabled(text) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.is_cron_enabled(text) TO service_role;
+
+-- =============================================
+-- 3. admin_set_cron_enabled — admin-only toggle
+-- =============================================
+CREATE OR REPLACE FUNCTION private.admin_set_cron_enabled(p_label text, p_enabled boolean)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  INSERT INTO private.cron_enabled (label, enabled, updated_at)
+  VALUES (p_label, p_enabled, now())
+  ON CONFLICT (label) DO UPDATE
+    SET enabled = EXCLUDED.enabled,
+        updated_at = now();
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.admin_set_cron_enabled(text, boolean) FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.admin_set_cron_enabled(text, boolean) TO authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.admin_set_cron_enabled(p_label text, p_enabled boolean)
+RETURNS void
+LANGUAGE sql
+VOLATILE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT private.admin_set_cron_enabled(p_label, p_enabled);
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.admin_set_cron_enabled(text, boolean) FROM PUBLIC, anon;
+GRANT  EXECUTE ON FUNCTION public.admin_set_cron_enabled(text, boolean) TO authenticated;
+
+-- =============================================
+-- 4. Extend list_railway_cron_jobs with enabled
+--    RETURNS TABLE shape grows — Postgres rejects ALTER to OUT param
+--    shape, so DROP both wrapper + body before recreating.
+-- =============================================
+DROP FUNCTION IF EXISTS public.admin_list_railway_cron_jobs();
+DROP FUNCTION IF EXISTS private.list_railway_cron_jobs();
+
+CREATE FUNCTION private.list_railway_cron_jobs()
+RETURNS TABLE (
+  label               text,
+  enabled             boolean,
+  last_run_status     text,
+  last_run_at         timestamptz,
+  last_run_duration_s int,
+  last_http_status    int
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  WITH known AS (
+    SELECT unnest(ARRAY[
+      'cron-db-maintenance',
+      'cron-tag-queue',
+      'cron-scrape-sources',
+      'cron-cleanup-stale'
+    ]::text[]) AS label
+  ),
+  last_runs AS (
+    SELECT DISTINCT ON (r.label)
+      r.label, r.status, r.ran_at, r.duration_s, r.http_status
+    FROM private.railway_cron_runs r
+    ORDER BY r.label, r.ran_at DESC
+  )
+  SELECT
+    k.label,
+    COALESCE((SELECT ce.enabled FROM private.cron_enabled ce WHERE ce.label = k.label), true) AS enabled,
+    lr.status,
+    lr.ran_at,
+    lr.duration_s,
+    lr.http_status
+  FROM known k
+  LEFT JOIN last_runs lr ON lr.label = k.label
+  ORDER BY k.label;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION private.list_railway_cron_jobs() FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION private.list_railway_cron_jobs() TO authenticated, service_role;
+
+CREATE FUNCTION public.admin_list_railway_cron_jobs()
+RETURNS TABLE (
+  label               text,
+  enabled             boolean,
+  last_run_status     text,
+  last_run_at         timestamptz,
+  last_run_duration_s int,
+  last_http_status    int
+)
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT * FROM private.list_railway_cron_jobs();
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.admin_list_railway_cron_jobs() FROM PUBLIC, anon;
+GRANT  EXECUTE ON FUNCTION public.admin_list_railway_cron_jobs() TO authenticated;
+
+COMMIT;
+

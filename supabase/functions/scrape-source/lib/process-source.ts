@@ -286,9 +286,9 @@ export async function importParsedSourceEvents(
       );
       if (bulkError) {
         if (bulkError.code === "42883" || bulkError.code === "42P01") {
-          // RPC missing → phase-7 migration not applied yet. Surface loudly.
+          // RPC missing -> grouped event ingestion migration not applied yet.
           pipelineSetupError =
-            "bulk_import_scrape_events RPC missing. Run `supabase db push --linked` to apply migration 20260601007000.";
+            "bulk_import_scrape_events RPC missing. Run `supabase db push --linked` to apply migration 20260601002000.";
         } else {
           throw bulkError;
         }
