@@ -1599,6 +1599,12 @@ export type Database = {
         }
         Relationships: []
       }
+      pg_timezone_names: {
+        Row: {
+          name: string | null
+        }
+        Relationships: []
+      }
       public_events: {
         Row: {
           address: string | null
