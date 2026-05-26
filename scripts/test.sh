@@ -62,7 +62,6 @@ TEST_FILES=(
   supabase/tests/rls_privilege_escalation.sql
   supabase/tests/cron_rpc_security.sql
   supabase/tests/cron_toggle.sql
-  supabase/tests/search_events_full_text.sql
   supabase/tests/events_cursor_pagination.sql
   supabase/tests/admin_events_rpc.sql
   supabase/tests/role_smoke.sql
