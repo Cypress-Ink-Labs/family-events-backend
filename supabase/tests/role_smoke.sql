@@ -9,7 +9,7 @@
     5.  anon can SELECT from source_scrape_queue_summary
     6.  anon gets 0 rows (not an error) from favorites (RLS filters, no exception)
     7.  anon can call public.events_enriched()
-    8.  anon can call public.search_events_v2()
+    8.  anon can call public.search_events()
     9.  anon CANNOT call public.is_cron_enabled (expect 42501)
     10. authenticated can SELECT from events
     11. authenticated can SELECT from favorites (own rows via RLS, 0 rows fine)
@@ -117,13 +117,13 @@ BEGIN
   RAISE NOTICE 'ANON_EVENTS_ENRICHED_OK';
 END $$;
 
--- 8. anon can call public.search_events_v2()
+-- 8. anon can call public.search_events()
 DO $$
 BEGIN
   SET LOCAL ROLE anon;
-  PERFORM public.search_events_v2();
+  PERFORM public.search_events();
   RESET ROLE;
-  RAISE NOTICE 'ANON_SEARCH_EVENTS_V2_OK';
+  RAISE NOTICE 'ANON_SEARCH_EVENTS_OK';
 END $$;
 
 -- 9. anon CANNOT call public.is_cron_enabled

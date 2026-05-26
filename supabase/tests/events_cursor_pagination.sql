@@ -1,5 +1,5 @@
 /*
-  # §2 — events_enriched_v2 / search_events_v2 cursor pagination tests
+  # §2 — events_enriched / search_events cursor pagination tests
 
   Seeds 6 published events (2 city_a same-datetime, 2 city_a diff-datetime,
   2 city_b) inside a transaction and asserts:
@@ -10,7 +10,7 @@
   - Test 4: p_date_from narrows to events on/after that date.
   - Test 5: Tie-breaking — same-datetime events appear in id ASC order, never duplicated.
   - Test 6: Anon path (p_user_id=NULL) returns is_favorited=false / is_in_calendar=false.
-  - Test 7: search_events_v2 keyword search returns matching events.
+  - Test 7: search_events keyword search returns matching events.
 
   Run with:
 
@@ -96,7 +96,7 @@ DECLARE
   out_of_order int;
 BEGIN
   SELECT COUNT(*) INTO n
-  FROM public.events_enriched_v2(p_limit := 3)
+  FROM public.events_enriched(p_limit := 3)
   WHERE title LIKE 'CX %';
 
   IF n IS DISTINCT FROM 3 THEN
@@ -112,7 +112,7 @@ BEGIN
       id,
       LAG(start_datetime) OVER (ORDER BY start_datetime ASC, id ASC) AS prev_dt,
       LAG(id)             OVER (ORDER BY start_datetime ASC, id ASC) AS prev_id
-    FROM public.events_enriched_v2(p_limit := 3)
+    FROM public.events_enriched(p_limit := 3)
     WHERE title LIKE 'CX %'
   ) ranked
   WHERE prev_dt IS NOT NULL
@@ -141,12 +141,12 @@ BEGIN
          (array_agg(r.start_datetime ORDER BY r.start_datetime ASC, r.id ASC))[3],
          (array_agg(r.id            ORDER BY r.start_datetime ASC, r.id ASC))[3]
     INTO page1_ids, last_dt, last_id
-  FROM public.events_enriched_v2(p_limit := 3) r
+  FROM public.events_enriched(p_limit := 3) r
   WHERE r.title LIKE 'CX %';
 
   SELECT array_agg(r.id ORDER BY r.start_datetime ASC, r.id ASC)
     INTO page2_ids
-  FROM public.events_enriched_v2(
+  FROM public.events_enriched(
     p_limit                := 3,
     p_after_start_datetime := last_dt,
     p_after_id             := last_id
@@ -181,11 +181,11 @@ BEGIN
   SELECT (v)::uuid INTO city_a FROM _cx WHERE k='city_a';
 
   SELECT COUNT(*) INTO n
-  FROM public.events_enriched_v2(p_city_id := city_a)
+  FROM public.events_enriched(p_city_id := city_a)
   WHERE title LIKE 'CX %';
 
   SELECT COUNT(*) INTO wrong
-  FROM public.events_enriched_v2(p_city_id := city_a)
+  FROM public.events_enriched(p_city_id := city_a)
   WHERE title LIKE 'CX %' AND city_id <> city_a;
 
   IF wrong > 0 THEN
@@ -214,7 +214,7 @@ BEGIN
 
   -- Events at +1d should be excluded.
   SELECT COUNT(*) INTO n
-  FROM public.events_enriched_v2(p_date_from := now() + interval '1 day 12 hours')
+  FROM public.events_enriched(p_date_from := now() + interval '1 day 12 hours')
   WHERE id IN (tie1_id, tie2_id);
 
   IF n <> 0 THEN
@@ -223,7 +223,7 @@ BEGIN
 
   -- Events from +2d onward should still appear.
   SELECT COUNT(*) INTO n
-  FROM public.events_enriched_v2(p_date_from := now() + interval '1 day 12 hours')
+  FROM public.events_enriched(p_date_from := now() + interval '1 day 12 hours')
   WHERE title LIKE 'CX %';
 
   IF n = 0 THEN
@@ -263,7 +263,7 @@ BEGIN
     (array_agg(r.start_datetime ORDER BY r.start_datetime ASC, r.id ASC))[2],
     (array_agg(r.id            ORDER BY r.start_datetime ASC, r.id ASC))[2]
   INTO first_id, sec_id, last_dt, last_id
-  FROM public.events_enriched_v2(
+  FROM public.events_enriched(
     p_city_id := (SELECT (v)::uuid FROM _cx WHERE k='city_a'),
     p_limit   := 2
   ) r;
@@ -276,7 +276,7 @@ BEGIN
   -- Fetch page 2 cursor.
   SELECT array_agg(r.id)
     INTO p2_ids
-  FROM public.events_enriched_v2(
+  FROM public.events_enriched(
     p_city_id              := (SELECT (v)::uuid FROM _cx WHERE k='city_a'),
     p_limit                := 10,
     p_after_start_datetime := last_dt,
@@ -307,7 +307,7 @@ DECLARE
   wrong int;
 BEGIN
   SELECT COUNT(*) INTO wrong
-  FROM public.events_enriched_v2(p_user_id := NULL)
+  FROM public.events_enriched(p_user_id := NULL)
   WHERE title LIKE 'CX %'
     AND (is_favorited IS DISTINCT FROM false OR is_in_calendar IS DISTINCT FROM false);
 
@@ -319,7 +319,7 @@ BEGIN
 END $$;
 
 -- -----------------------------------------------------------------------------
--- Test 7: search_events_v2 keyword search returns matching event.
+-- Test 7: search_events keyword search returns matching event.
 -- -----------------------------------------------------------------------------
 DO $$
 DECLARE
@@ -329,14 +329,14 @@ BEGIN
   SELECT (v)::uuid INTO search_id FROM _cx WHERE k='ev_search';
 
   SELECT COUNT(*) INTO n
-  FROM public.search_events_v2(p_keyword := 'Xylophone')
+  FROM public.search_events(p_keyword := 'Xylophone')
   WHERE id = search_id;
 
   IF n <> 1 THEN
     RAISE EXCEPTION 'SEARCH_V2_FAIL: keyword ''Xylophone'' returned %, expected 1 match', n;
   END IF;
 
-  RAISE NOTICE 'TEST7_OK: search_events_v2 keyword search returns the correct event.';
+  RAISE NOTICE 'TEST7_OK: search_events keyword search returns the correct event.';
 END $$;
 
 ROLLBACK;

@@ -2412,53 +2412,6 @@ export type Database = {
       }
       events_enriched: {
         Args: {
-          p_city_id?: string
-          p_date_from?: string
-          p_date_to?: string
-          p_event_ids?: string[]
-          p_limit?: number
-          p_offset?: number
-          p_status?: string
-          p_user_id?: string
-        }
-        Returns: {
-          address: string
-          age_max: number
-          age_min: number
-          ai_confidence: number
-          ai_tag_provider: string
-          avg_rating: number
-          city_id: string
-          created_at: string
-          description: string
-          end_datetime: string
-          id: string
-          images: Json
-          is_favorited: boolean
-          is_featured: boolean
-          is_free: boolean
-          is_in_calendar: boolean
-          latitude: number
-          longitude: number
-          price: number
-          rating_count: number
-          recurrence_info: Json
-          search_vector: unknown
-          source_id: string
-          source_name: string
-          source_url: string
-          start_datetime: string
-          status: string
-          tags: Json
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string
-          view_count: number
-        }[]
-      }
-      events_enriched_v2: {
-        Args: {
           p_after_id?: string
           p_after_start_datetime?: string
           p_city_id?: string
@@ -2747,7 +2700,7 @@ export type Database = {
       run_cleanup_stale_runs: { Args: never; Returns: undefined }
       run_daily_maintenance: { Args: never; Returns: Json }
       run_due_source_scrapes: { Args: never; Returns: undefined }
-      search_events_v2: {
+      search_events: {
         Args: {
           p_after_id?: string
           p_after_start_datetime?: string
