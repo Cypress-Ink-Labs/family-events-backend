@@ -148,7 +148,30 @@ export function mapMacaroniKidEvent(
   const slug = asString(node.slug);
   const sourceUrl = buildSourceUrl(sourceBase, id, slug);
 
-  const { venue, address } = joinAddress(asJson(node.location));
+  // Macaroni Kid API v1 returns address data in two possible shapes:
+  //   (a) node.address: { street1, city, state, zipCode } — top-level (current API)
+  //   (b) node.location: { name, address, city, ... }     — legacy embedded object
+  // Venue name comes from node.where (plain string) or node.location.name.
+  const topLevelAddress = asJson(node.address);
+  const locationObj = asJson(node.location);
+  const { venue: locationVenue, address: locationAddress } = joinAddress(locationObj);
+  // Prefer structured location.name (e.g. "Moncus Park") over the free-text
+  // node.where field (which is often a general description like "Playground").
+  // Fall back to node.where only when location has no name.
+  const venue = locationVenue ?? asString(node.where);
+  const address = (() => {
+    if (topLevelAddress) {
+      const parts = [
+        asString(topLevelAddress.street1),
+        asString(topLevelAddress.street2) || null,
+        asString(topLevelAddress.city),
+        asString(topLevelAddress.state),
+        asString(topLevelAddress.zipCode) ?? asString(topLevelAddress.zip),
+      ].filter((p): p is string => Boolean(p));
+      return parts.length > 0 ? parts.join(", ") : null;
+    }
+    return locationAddress;
+  })();
 
   const descriptionParts = [
     asString(node.who),

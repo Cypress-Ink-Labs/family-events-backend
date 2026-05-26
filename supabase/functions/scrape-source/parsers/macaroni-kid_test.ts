@@ -179,3 +179,30 @@ if (typeof Deno !== "undefined") {
     }
   })
 }
+
+  Deno.test("mapMacaroniKidEvent reads top-level address object (real API v1 shape)", () => {
+    // Real Macaroni Kid API v1 returns address data as a top-level 'address' object
+    // (street1, city, state, zipCode) and venue name in the 'where' field.
+    // The 'location' object only carries GeoJSON coordinates and should not be
+    // used for geocoding eligibility.
+    const raw = {
+      _id: "69efca2a1944d7714560fffc",
+      title: "Splash Pad!",
+      startDateTime: "2026-05-26T15:00:00.000Z",
+      where: "Broussard Sports Complex - St. Julien Park",
+      address: {
+        street1: "701 St. Nazaire",
+        street2: "",
+        city: "Broussard",
+        state: "LA",
+        zipCode: "70518",
+      },
+      location: { coordinates: [0, 0], type: "Point" },
+      cost: "FREE",
+    }
+    const parsed = mapMacaroniKidEvent(raw, "https://lafayettela.macaronikid.com/events")
+    if (!parsed) throw new Error("expected parsed event")
+    assertEquals(parsed.venueName, "Broussard Sports Complex - St. Julien Park")
+    assertEquals(parsed.address, "701 St. Nazaire, Broussard, LA, 70518")
+    assertEquals(parsed.isFree, true)
+  })
