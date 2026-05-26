@@ -79,4 +79,24 @@ if (typeof Deno !== "undefined") {
     assertEquals(parseIcalFeed("").length, 0)
     assertEquals(parseIcalFeed("\n\n").length, 0)
   })
+
+  Deno.test("parseIcalFeed sets venueName and address to null when LOCATION is a URL", async () => {
+    const ical = await readFixture("ical/online-location-url.ics")
+    const events = parseIcalFeed(ical)
+
+    assertEquals(events.length, 1)
+    assertEquals(events[0].title, "Virtual Team Meeting")
+    assertEquals(events[0].venueName, null)
+    assertEquals(events[0].address, null)
+  })
+
+  Deno.test("parseIcalFeed preserves physical LOCATION as venueName and address", async () => {
+    const ical = await readFixture("ical/physical-location.ics")
+    const events = parseIcalFeed(ical)
+
+    assertEquals(events.length, 1)
+    assertEquals(events[0].title, "Gala Dinner")
+    assertEquals(events[0].venueName, "The Grand Ballroom")
+    assertEquals(events[0].address, "The Grand Ballroom")
+  })
 }

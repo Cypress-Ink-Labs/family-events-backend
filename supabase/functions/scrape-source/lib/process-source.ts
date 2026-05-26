@@ -183,6 +183,7 @@ export async function importParsedSourceEvents(
   let eventsFound = 0;
   let eventsImported = 0;
   let eventsSkipped = 0;
+  let addressNullCount = 0;
   let errorMessage: string | null = null;
   // Fatal pipeline-deploy errors (bulk RPC missing) short-circuit the run
   // because no further work can succeed. Non-fatal enqueue failures are
@@ -209,6 +210,26 @@ export async function importParsedSourceEvents(
       fetchCityCentroid(supabase, source.city_id),
     ]);
     eventsFound = parsedEvents.length;
+
+    // Observability: count events missing geocodable location data
+    addressNullCount = parsedEvents.filter(
+      (e) => e.address === null && e.venueName === null,
+    ).length;
+    const addressNullRate = eventsFound > 0
+      ? addressNullCount / eventsFound
+      : 0;
+    // Warn when >50% of a batch has no address data — possible parser regression
+    if (eventsFound > 0 && addressNullRate > 0.5) {
+      logEdgeEvent("warn", "high address null rate — possible parser regression", {
+        function: "process-source",
+        source_id: source.id,
+        source_name: source.name,
+        source_type: source.source_type,
+        events_found: eventsFound,
+        address_null: addressNullCount,
+        address_null_pct: Math.round(addressNullRate * 100),
+      });
+    }
 
     // Write total found immediately so the UI shows "X found" while import runs.
     await flushProgress();
@@ -300,6 +321,19 @@ export async function importParsedSourceEvents(
 
       await flushProgress();
     }
+
+    // Observability: log final run summary on success path
+    logEdgeEvent("log", "process-source run complete", {
+      function: "process-source",
+      source_id: source.id,
+      source_name: source.name,
+      source_type: source.source_type,
+      run_id: runId,
+      events_found: eventsFound,
+      events_imported: eventsImported,
+      events_skipped: eventsSkipped,
+      address_null: addressNullCount,
+    });
 
     // Status derivation precedence:
     //   1. pipelineSetupError (bulk RPC missing) → 'error' + actionable hint

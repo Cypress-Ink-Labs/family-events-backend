@@ -210,18 +210,20 @@ function parseStructuredEvents(
       title;
     const eventUrl = normalizeUrl(pickText(candidate.url), sourceUrl) ??
       sourceUrl;
-    const venueName = pickText(
-      (candidate.location as Record<string, unknown> | undefined)?.name,
-    ) ??
-      pickText(candidate.location);
-    const address = pickText(
-      (candidate.location as Record<string, unknown> | undefined)?.address,
-    ) ??
-      pickText(
-        (candidate.location as Record<string, unknown> | undefined)
-          ?.["streetAddress"],
-      ) ??
-      venueName;
+    const locationObj = candidate.location as Record<string, unknown> | undefined;
+    const venueName = pickText(locationObj?.name) ?? pickText(candidate.location);
+    const rawAddr = locationObj?.address;
+    const address = (
+      rawAddr && typeof rawAddr === "object" && !Array.isArray(rawAddr)
+        ? [
+            pickText((rawAddr as Record<string, unknown>).streetAddress),
+            pickText((rawAddr as Record<string, unknown>).addressLocality),
+            pickText((rawAddr as Record<string, unknown>).addressRegion),
+            pickText((rawAddr as Record<string, unknown>).postalCode),
+          ].filter(Boolean).join(", ") || null
+        : pickText(rawAddr) ??
+            pickText(locationObj?.["streetAddress"])
+    ) ?? venueName;
 
     const webImages: string[] = [];
     for (const image of extractImageUrls(candidate.image)) {

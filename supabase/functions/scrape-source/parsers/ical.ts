@@ -156,6 +156,9 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
 
     const rawLocation = byKey.get("LOCATION")?.[0]?.value.trim() ?? null;
     const location = rawLocation ? unescapeIcalText(rawLocation) : null;
+    // Filter out URLs stored as location (online/virtual events)
+    const isLocationUrl = location != null && /^https?:\/\//i.test(location);
+    const physicalLocation = isLocationUrl ? null : location;
     const url = byKey.get("URL")?.[0]?.value.trim() ?? null;
 
     const startDatetime = parseIcalDateWithTz(dtStartRaw, startTzid);
@@ -181,8 +184,8 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
       description,
       startDatetime,
       endDatetime: parseIcalDateWithTz(dtEndRaw, endTzid),
-      venueName: location,
-      address: location,
+      venueName: physicalLocation,
+      address: physicalLocation,
       sourceUrl: url,
       imageUrl: icalImages[0] ?? null,
       images: icalImages.slice(0, 5),

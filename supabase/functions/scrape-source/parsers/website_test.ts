@@ -121,4 +121,34 @@ if (typeof Deno !== "undefined") {
     assertEquals(events[0].sourceUrl, "https://www.eventbrite.com/e/family-meditation-tickets-1")
     assertEquals(events[1].title, "Kid Fest")
   })
+
+  Deno.test("parseSchemaOrgEvents reads structured PostalAddress sub-fields", () => {
+    const html = `
+      <html><body>
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Event",
+          "name": "Art Walk",
+          "startDate": "2026-09-15T18:00:00-05:00",
+          "location": {
+            "@type": "Place",
+            "name": "Acadiana Center for the Arts",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "101 W Vermilion St",
+              "addressLocality": "Lafayette",
+              "addressRegion": "LA",
+              "postalCode": "70501"
+            }
+          }
+        }
+        </script>
+      </body></html>
+    `
+    const events = parseWebsite(html, "https://example.com/events/")
+    assertEquals(events.length, 1)
+    assertEquals(events[0].venueName, "Acadiana Center for the Arts")
+    assertEquals(events[0].address, "101 W Vermilion St, Lafayette, LA, 70501")
+  })
 }

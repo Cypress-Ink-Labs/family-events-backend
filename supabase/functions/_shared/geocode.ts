@@ -88,6 +88,11 @@ export async function geocodeViaNominatim(query: string): Promise<GeocodeResult 
  * append the locality again — duplicate "Lafayette, LA, Lafayette, LA" tails
  * cause Nominatim to return zero hits for what would otherwise be a precise
  * match.
+ *
+ * Also returns the base string unchanged if the address already contains a
+ * two-letter state abbreviation pattern (e.g. ', LA' or ', TX,'), even when
+ * city_id refers to a different city — this prevents contradictory locality
+ * suffixes like '701 St. Nazaire, Broussard, LA, 70518, Lafayette, LA'.
  */
 export function buildGeocodeQuery(parts: {
   address: string | null
@@ -101,10 +106,16 @@ export function buildGeocodeQuery(parts: {
   const baseLower = base.toLowerCase()
   const cityMentioned = parts.cityName != null &&
     baseLower.includes(parts.cityName.toLowerCase())
+  // Use word-boundary matching so a 2-letter state abbreviation (e.g. "LA")
+  // is not falsely detected as a substring of a city name (e.g. "Lafayette").
   const stateMentioned = parts.cityState != null &&
-    baseLower.includes(parts.cityState.toLowerCase())
+    new RegExp(`(?<![a-zA-Z])${parts.cityState}(?![a-zA-Z])`, "i").test(base)
 
-  if (cityMentioned && stateMentioned) {
+  // Also skip when address already contains a state abbreviation (e.g. ", LA" or ", TX, ")
+  // even if city_id points to a different city — prevents contradictory locality queries.
+  const hasInlineState = /,\s*[A-Z]{2}(\s|,|$)/.test(base)
+
+  if ((cityMentioned && stateMentioned) || hasInlineState) {
     return base
   }
 
