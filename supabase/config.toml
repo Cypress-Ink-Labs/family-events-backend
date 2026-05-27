@@ -96,7 +96,15 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.share-og]
-verify_jwt = true
+# Public on purpose: social crawlers (Facebookbot, Twitterbot, LinkedInBot,
+# Slackbot, Discordbot, iMessage link unfurl) never carry a user JWT, so a
+# gateway-level JWT check returns 401 before the function body runs and breaks
+# every shared-event preview in chat apps. The function body is the security
+# boundary instead: extractEventIdFromRequest rejects anything that isn't a
+# UUID before it touches the DB, only GET/OPTIONS are accepted (see
+# corsHeaders in index.ts), and the query reads only the public_events view
+# with the anon key — RLS on that view is the real gate.
+verify_jwt = false
 
 [functions.notify-email]
 # Triggered by dispatch_email_notification / pg_net with sb_secret_* bearer.
