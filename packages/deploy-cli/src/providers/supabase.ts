@@ -57,10 +57,10 @@ export class SupabaseProvider {
     await this.runner.run(this.supabaseCommand(), ["db", "lint", "--linked"], {
       allowFailure: true,
     })
-    await this.runner.run(this.supabaseCommand(), ["db", "push", "--linked", "--dry-run"], {
+    await this.runner.run(this.supabaseCommand(), ["db", "push", "--linked", "--include-all", "--dry-run"], {
       allowFailure: true,
     })
-    const result = await this.runner.run(this.supabaseCommand(), ["db", "push", "--linked"], {
+    const result = await this.runner.run(this.supabaseCommand(), ["db", "push", "--linked", "--include-all"], {
       allowFailure: true,
     })
     if (
