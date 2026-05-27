@@ -14,6 +14,7 @@ describe("deploy runner", () => {
       yes: true,
       interactive: false,
       json: true,
+      showOutput: false,
       verbose: false,
       debug: false,
       color: false,

@@ -17,6 +17,7 @@ import { finishTarget } from "../core/result"
 import { messageFor, SmokeError, ValidationError } from "../core/errors"
 import { runSmokeChecks } from "./smoke-checks"
 import { rollbackGuidance } from "./rollback"
+import { createSpinner } from "../ui/progress"
 
 export async function runDeploy(
   rootDir: string,
@@ -27,7 +28,12 @@ export async function runDeploy(
   const startedAt = new Date()
   const runId = createRunId(startedAt)
   const controller = createAbortController()
-  const runner = new ExecaProcessRunner(rootDir, options.dryRun, controller.signal, !options.json)
+  const runner = new ExecaProcessRunner(
+    rootDir,
+    options.dryRun,
+    controller.signal,
+    options.showOutput && !options.json
+  )
   const supabase = new SupabaseProvider(rootDir, config, runner)
   const railway = new RailwayProvider(rootDir, config, runner)
   const selected = resolveTargets(config, options.targets, options.all)
@@ -52,28 +58,47 @@ export async function runDeploy(
   }
 
   if (expanded.some((target) => target.kind.startsWith("supabase"))) {
-    await supabase.preflight()
-    supabase.validateFunctionDrift()
-    supabase.resolveProjectRef(options.env)
+    const spinner = createSpinner("Checking Supabase deploy prerequisites", useSpinner(options))
+    try {
+      await supabase.preflight()
+      supabase.validateFunctionDrift()
+      supabase.resolveProjectRef(options.env)
+      spinner?.succeed("Supabase deploy prerequisites ready")
+    } catch (error) {
+      spinner?.fail("Supabase deploy prerequisites failed")
+      throw error
+    }
   }
   if (expanded.some((target) => target.kind.startsWith("railway"))) {
-    await railway.preflight()
+    const spinner = createSpinner("Checking Railway deploy prerequisites", useSpinner(options))
+    try {
+      await railway.preflight()
+      spinner?.succeed("Railway deploy prerequisites ready")
+    } catch (error) {
+      spinner?.fail("Railway deploy prerequisites failed")
+      throw error
+    }
   }
 
   for (const target of expanded) {
-    logger.info(`deploying ${target.id}`)
+    if (options.showOutput || options.verbose || options.debug) {
+      logger.info(`deploying ${target.id}`)
+    }
+    const spinner = createSpinner(`Deploying ${target.id}`, useSpinner(options))
     const result = baseResult(target.id)
     const commandStart = runner.records.length
     try {
       await deployTarget(target, options, supabase, railway)
+      spinner?.succeed(`${target.id} deployed`)
       results.push(
         finishTarget(result, "success", {
           commands: runner.records.slice(commandStart),
           rollback: rollbackGuidance(target),
         })
       )
-      logger.success(`${target.id} deployed`)
+      if (!spinner) logger.success(`${target.id} deployed`)
     } catch (error) {
+      spinner?.fail(`${target.id} failed`)
       results.push(
         finishTarget(result, "failed", {
           commands: runner.records.slice(commandStart),
@@ -161,4 +186,8 @@ function baseResult(targetId: string): TargetResult {
 function writeAndReturn(rootDir: string, result: DeployRunResult): DeployRunResult {
   const artifactPath = writeRunArtifact(rootDir, result)
   return { ...result, artifactPath }
+}
+
+function useSpinner(options: DeployOptions): boolean {
+  return !options.json && !options.showOutput && !options.dryRun
 }

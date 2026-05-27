@@ -11,8 +11,8 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "build": "tsc -p tsconfig.json --noEmit",
-    "format": "oxfmt --config ../config-quality/oxfmt.base.json --write src tests",
-    "format:check": "oxfmt --config ../config-quality/oxfmt.base.json --check src tests"
+    "format": "oxfmt --config ../../packages/config-quality/oxfmt.base.json --write src tests",
+    "format:check": "oxfmt --config ../../packages/config-quality/oxfmt.base.json --check src tests"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.5.0",
@@ -24,9 +24,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@family-events/config-quality": "workspace:*",
-    "@family-events/config-typescript": "workspace:*",
     "@types/node": "latest",
+    "oxfmt": "^0.52.0",
+    "typescript": "~6.0.3",
     "tsx": "latest",
     "vitest": "4.1.7"
   }

@@ -66,6 +66,7 @@ export interface DeployOptions {
   yes: boolean
   interactive: boolean
   json: boolean
+  showOutput: boolean
   verbose: boolean
   debug: boolean
   color: boolean

@@ -14,6 +14,7 @@ interface CommanderDeployOptions {
   yes?: boolean
   interactive?: boolean
   json?: boolean
+  showOutput?: boolean
   verbose?: boolean
   debug?: boolean
   color?: boolean
@@ -34,6 +35,7 @@ export function registerDeployCommand(program: Command): void {
     .option("--yes", "skip confirmation prompts")
     .option("--interactive", "force interactive picker")
     .option("--json", "emit JSON")
+    .option("--show-output", "show full provider command output instead of spinner-only progress")
     .option("--verbose", "verbose output")
     .option("--debug", "debug output")
     .option("--no-color", "disable color")
@@ -57,6 +59,7 @@ export function registerDeployCommand(program: Command): void {
         yes: raw.yes ?? false,
         interactive: raw.interactive ?? false,
         json: raw.json ?? false,
+        showOutput: (raw.showOutput ?? false) || (raw.verbose ?? false),
         verbose: raw.verbose ?? false,
         debug: raw.debug ?? false,
         color: raw.color ?? true,
