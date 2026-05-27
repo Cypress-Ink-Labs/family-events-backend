@@ -10,11 +10,9 @@ import { errorContext, errorMessage } from "../_shared/logger.ts";
 import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts";
 import {
   findFallbackImage,
+  lookupUnsplashPhotoFromUrl,
   trackUnsplashDownload,
-  type StockImageProviderKeys,
-  type StockProvider,
-} from "../_shared/stock-images.ts";
-import { lookupUnsplashPhotoFromUrl } from "../_shared/unsplash.ts";
+} from "../_shared/unsplash.ts";
 import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts";
 import type { ParsedEvent } from "../scrape-source/lib/types.ts";
 import { runParentTipsPass } from "./parent-tips-pass.ts";
@@ -28,7 +26,7 @@ const corsHeaders = {
 
 // Cap batch so per-tick wall stays under 90s with headroom under the 150s
 // edge wall. Each event = 1 geocode HTTP + N image HEAD HTTPs (capped at 5)
-// + optionally 1 stock image search + 1 download-track ping. At ~1-3s/event
+// + optionally 1 Unsplash search + 1 download-track ping. At ~1-3s/event
 // we fit ~25-30 events comfortably.
 const DEFAULT_BATCH = 25;
 
@@ -114,18 +112,18 @@ async function enrichOne(
   row: EventNeedingEnrichment,
   cityCache: Map<string, SourceCityContext | null>,
   sourceCache: Map<string, string | null>,
-  providerKeys: StockImageProviderKeys,
+  unsplashAccessKey: string,
 ): Promise<{
   updated: boolean;
   gotCoords: boolean;
   gotImages: boolean;
-  imageSource: "scraper" | "pexels" | "pixabay" | "unsplash" | "none";
+  imageSource: "scraper" | "unsplash" | "none";
 }> {
   let latitude: number | null = null;
   let longitude: number | null = null;
   let images: string[] = [];
-  let imageSource: "scraper" | "pexels" | "pixabay" | "unsplash" | "none" = "none";
-  let stockResult: Awaited<ReturnType<typeof findFallbackImage>> = null;
+  let imageSource: "scraper" | "unsplash" | "none" = "none";
+  let unsplashResult: Awaited<ReturnType<typeof findFallbackImage>> = null;
 
   if (row.needs_coords) {
     let cityCtx: SourceCityContext | null = null;
@@ -223,7 +221,7 @@ async function enrichOne(
       // RPC drops the parser's images on insert, so this currently returns
       // []. Left as the "real scraped images" path — any future change
       // that preserves parser output lands here without touching the
-      // stock image fallback below.
+      // Unsplash fallback below.
       const parsedShim: ParsedEvent = {
         title: row.title,
         description: row.description ?? "",
@@ -242,17 +240,15 @@ async function enrichOne(
     }
   }
 
-  // Tag-keyed stock image fallback with provider chain.
-  // Order: Pexels (200/hr → unlimited) → Pixabay (6K/hr) → Unsplash (50/hr).
-  // Only fires when (a) the row needs images, (b) the scraper path didn't
-  // produce any, (c) tag-queue has classified the event, and (d) we have
-  // at least one provider key. Failure leaves images empty and the row stays
-  // on the queue for the next tick.
+  // Tag-keyed Unsplash fallback. Only fires when (a) the row needs images,
+  // (b) the scraper path didn't produce any, (c) tag-queue has classified
+  // the event, and (d) we have an API key. Failure leaves images empty
+  // and the row stays on the queue for the next tick.
   if (row.needs_images && images.length === 0 && row.tags.length > 0) {
-    stockResult = await findFallbackImage(row.tags, providerKeys, { title: row.title });
-    if (stockResult) {
-      images = [stockResult.url];
-      imageSource = stockResult.attribution.provider;
+    unsplashResult = await findFallbackImage(row.tags, unsplashAccessKey, { title: row.title });
+    if (unsplashResult) {
+      images = [unsplashResult.url];
+      imageSource = "unsplash";
     }
   }
 
@@ -278,10 +274,7 @@ async function enrichOne(
   }
 
   // update_event_enrichment also bumps last_enrichment_attempt_at server-side.
-  // Provider-specific attribution handling: only Unsplash requires RPC call
-  // with full attribution + download tracking. Pexels/Pixabay use simpler
-  // direct table insert.
-  if (imageSource === "unsplash" && stockResult) {
+  if (imageSource === "unsplash" && unsplashResult) {
     const { data: attributionId, error } = await supabase.rpc(
       "upsert_event_image_attribution_with_enrichment",
       {
@@ -289,26 +282,26 @@ async function enrichOne(
         p_latitude: latitude,
         p_longitude: longitude,
         p_images: images,
-        p_image_url: stockResult.url,
-        p_unsplash_photo_id: stockResult.attribution.photoId,
+        p_image_url: unsplashResult.url,
+        p_unsplash_photo_id: unsplashResult.attribution.photoId,
         p_unsplash_photographer_name:
-          stockResult.attribution.photographerName,
+          unsplashResult.attribution.photographerName,
         p_unsplash_photographer_username:
-          stockResult.attribution.photographerUsername ?? "",
+          unsplashResult.attribution.photographerUsername,
         p_unsplash_photographer_profile_url:
-          stockResult.attribution.photographerProfileUrl,
-        p_unsplash_photo_url: stockResult.attribution.photoUrl,
+          unsplashResult.attribution.photographerProfileUrl,
+        p_unsplash_photo_url: unsplashResult.attribution.photoUrl,
         p_unsplash_download_location:
-          stockResult.attribution.downloadLocation ?? "",
-        p_matched_tag: stockResult.matchedTag,
+          unsplashResult.attribution.downloadLocation,
+        p_matched_tag: unsplashResult.matchedTag,
       },
     );
     if (error) throw error;
 
-    if (typeof attributionId === "string" && attributionId.length > 0 && stockResult.attribution.downloadLocation) {
+    if (typeof attributionId === "string" && attributionId.length > 0) {
       const tracking = await trackUnsplashDownload(
-        stockResult.attribution.downloadLocation,
-        providerKeys.unsplash ?? "",
+        unsplashResult.attribution.downloadLocation,
+        unsplashAccessKey,
       );
       const { error: markTrackingError } = await supabase.rpc(
         "mark_unsplash_download_tracking_result",
@@ -320,37 +313,6 @@ async function enrichOne(
       );
       if (markTrackingError) throw markTrackingError;
     }
-  } else if ((imageSource === "pexels" || imageSource === "pixabay") && stockResult) {
-    // Update event coords/images first
-    const { error: updateErr } = await supabase.rpc("update_event_enrichment", {
-      p_event_id: row.event_id,
-      p_latitude: latitude,
-      p_longitude: longitude,
-      p_images: images.length > 0 ? images : null,
-    });
-    if (updateErr) throw updateErr;
-
-    // Then insert attribution (Pexels/Pixabay don't need download tracking)
-    const { error: attrErr } = await supabase
-      .from("event_image_attributions")
-      .upsert(
-        {
-          event_id: row.event_id,
-          image_url: stockResult.url,
-          provider: stockResult.attribution.provider,
-          matched_tag: stockResult.matchedTag,
-          pexels_photo_id: imageSource === "pexels" ? stockResult.attribution.photoId : null,
-          pexels_photographer_name: imageSource === "pexels" ? stockResult.attribution.photographerName : null,
-          pexels_photographer_profile_url: imageSource === "pexels" ? stockResult.attribution.photographerProfileUrl : null,
-          pexels_photo_url: imageSource === "pexels" ? stockResult.attribution.photoUrl : null,
-          pixabay_photo_id: imageSource === "pixabay" ? stockResult.attribution.photoId : null,
-          pixabay_photographer_name: imageSource === "pixabay" ? stockResult.attribution.photographerName : null,
-          pixabay_photographer_username: imageSource === "pixabay" ? stockResult.attribution.photographerUsername : null,
-          pixabay_photo_url: imageSource === "pixabay" ? stockResult.attribution.photoUrl : null,
-        },
-        { onConflict: "event_id,image_url" },
-      );
-    if (attrErr) throw attrErr;
   } else {
     const { error } = await supabase.rpc("update_event_enrichment", {
       p_event_id: row.event_id,
@@ -521,14 +483,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    
-    // Load all three provider keys
-    const providerKeys: StockImageProviderKeys = {
-      pexels: Deno.env.get("PEXELS_API_KEY"),
-      pixabay: Deno.env.get("PIXABAY_API_KEY"),
-      unsplash: Deno.env.get("UNSPLASH_ACCESS_KEY"),
-    };
-    const unsplashAccessKey = providerKeys.unsplash ?? "";
+    const unsplashAccessKey = Deno.env.get("UNSPLASH_ACCESS_KEY") ?? "";
 
     // Two-pass row claim. The legacy RPC orders by created_at DESC so old
     // rows that already have coords but no images can starve when many
@@ -565,8 +520,6 @@ Deno.serve(async (req: Request) => {
       coords: 0,
       images: 0,
       images_from_scraper: 0,
-      images_from_pexels: 0,
-      images_from_pixabay: 0,
       images_from_unsplash: 0,
       errors: 0,
     };
@@ -580,14 +533,12 @@ Deno.serve(async (req: Request) => {
           row,
           cityCache,
           sourceCache,
-          providerKeys,
+          unsplashAccessKey,
         );
         if (result.updated) summary.updated += 1;
         if (result.gotCoords) summary.coords += 1;
         if (result.gotImages) summary.images += 1;
         if (result.imageSource === "scraper") summary.images_from_scraper += 1;
-        if (result.imageSource === "pexels") summary.images_from_pexels += 1;
-        if (result.imageSource === "pixabay") summary.images_from_pixabay += 1;
         if (result.imageSource === "unsplash") {
           summary.images_from_unsplash += 1;
         }
