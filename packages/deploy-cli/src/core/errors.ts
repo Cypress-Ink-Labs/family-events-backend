@@ -17,6 +17,13 @@ export class ValidationError extends CliError {
   }
 }
 
+export class DeployFailureError extends CliError {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, 1, options)
+    this.name = "DeployFailureError"
+  }
+}
+
 export class AuthError extends CliError {
   constructor(message: string, options?: { cause?: unknown }) {
     super(message, 4, options)

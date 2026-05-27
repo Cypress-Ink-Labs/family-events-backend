@@ -179,6 +179,8 @@ BEGIN
   IF NOT labels @> ARRAY[
     'cron-cleanup-stale',
     'cron-db-maintenance',
+    'cron-enrich-events',
+    'cron-review-events',
     'cron-scrape-sources',
     'cron-tag-queue'
   ]::text[] THEN

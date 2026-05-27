@@ -14,7 +14,7 @@ import type {
 import { SupabaseProvider } from "../providers/supabase"
 import { RailwayProvider } from "../providers/railway"
 import { finishTarget } from "../core/result"
-import { messageFor, SmokeError, ValidationError } from "../core/errors"
+import { DeployFailureError, messageFor, SmokeError, ValidationError } from "../core/errors"
 import { runSmokeChecks } from "./smoke-checks"
 import { rollbackGuidance } from "./rollback"
 import { createSpinner } from "../ui/progress"
@@ -134,7 +134,7 @@ export async function runDeploy(
   })
 
   if (results.some((target) => target.status === "failed")) {
-    throw new ValidationError(
+    throw new DeployFailureError(
       `Deploy finished with ${results.filter((target) => target.status === "failed").length} failure(s)`
     )
   }
