@@ -15,6 +15,8 @@ describe("deploy runner", () => {
       interactive: false,
       json: true,
       showOutput: false,
+      functionConcurrency: 4,
+      railwayConcurrency: 2,
       verbose: false,
       debug: false,
       color: false,
@@ -23,6 +25,7 @@ describe("deploy runner", () => {
       allowProdSmoke: false,
     })
     expect(result.targets.length).toBeGreaterThan(3)
+    expect(result.targets.filter(Boolean)).toHaveLength(result.targets.length)
     expect(result.targets.every((target) => target.status === "success")).toBe(true)
     expect(result.artifactPath ? existsSync(result.artifactPath) : false).toBe(true)
   })

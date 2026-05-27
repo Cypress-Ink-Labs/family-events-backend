@@ -67,6 +67,8 @@ export interface DeployOptions {
   interactive: boolean
   json: boolean
   showOutput: boolean
+  functionConcurrency: number
+  railwayConcurrency: number
   verbose: boolean
   debug: boolean
   color: boolean

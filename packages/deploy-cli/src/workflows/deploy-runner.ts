@@ -28,31 +28,29 @@ export async function runDeploy(
   const startedAt = new Date()
   const runId = createRunId(startedAt)
   const controller = createAbortController()
-  const runner = new ExecaProcessRunner(
+  const preflightRunner = new ExecaProcessRunner(
     rootDir,
     options.dryRun,
     controller.signal,
     options.showOutput && !options.json
   )
-  const supabase = new SupabaseProvider(rootDir, config, runner)
-  const railway = new RailwayProvider(rootDir, config, runner)
+  const supabase = new SupabaseProvider(rootDir, config, preflightRunner)
+  const railway = new RailwayProvider(rootDir, config, preflightRunner)
   const selected = resolveTargets(config, options.targets, options.all)
   const expanded = selected.flatMap((target) => expandTarget(config, target))
-  const results: TargetResult[] = []
+  const results = new Array<TargetResult>(expanded.length)
 
   if (options.dryRun) {
-    for (const target of expanded) {
-      results.push(
-        finishTarget(baseResult(target.id), "success", { rollback: rollbackGuidance(target) })
-      )
-    }
+    const dryRunResults = expanded.map((target) =>
+      finishTarget(baseResult(target.id), "success", { rollback: rollbackGuidance(target) })
+    )
     return writeAndReturn(rootDir, {
       runId,
       env: options.env,
       dryRun: true,
       startedAt: startedAt.toISOString(),
       finishedAt: new Date().toISOString(),
-      targets: results,
+      targets: dryRunResults,
       smoke: [],
     })
   }
@@ -80,35 +78,62 @@ export async function runDeploy(
     }
   }
 
-  for (const target of expanded) {
-    if (options.showOutput || options.verbose || options.debug) {
-      logger.info(`deploying ${target.id}`)
-    }
-    const spinner = createSpinner(`Deploying ${target.id}`, useSpinner(options))
-    const result = baseResult(target.id)
-    const commandStart = runner.records.length
-    try {
-      await deployTarget(target, options, supabase, railway)
-      spinner?.succeed(`${target.id} deployed`)
-      results.push(
-        finishTarget(result, "success", {
-          commands: runner.records.slice(commandStart),
-          rollback: rollbackGuidance(target),
-        })
-      )
-      if (!spinner) logger.success(`${target.id} deployed`)
-    } catch (error) {
-      spinner?.fail(`${target.id} failed`)
-      results.push(
-        finishTarget(result, "failed", {
-          commands: runner.records.slice(commandStart),
-          error: messageFor(error),
-          rollback: rollbackGuidance(target),
-        })
-      )
-      logger.warn(`${target.id} failed: ${messageFor(error)}`)
-    }
-  }
+  expanded.forEach((target, index) => {
+    results[index] = baseResult(target.id)
+  })
+
+  await deployStage(
+    "Supabase migrations",
+    indexedTargets(expanded, "supabase:migrations"),
+    1,
+    rootDir,
+    config,
+    options,
+    controller.signal,
+    results,
+    logger
+  )
+  await deployStage(
+    "Supabase functions",
+    indexedTargets(expanded, "supabase:function"),
+    options.functionConcurrency,
+    rootDir,
+    config,
+    options,
+    controller.signal,
+    results,
+    logger
+  )
+  const railwayTargets = indexedTargets(expanded, "railway:service")
+  const railwayIndependent = railwayTargets.filter(
+    ({ target }) => !hasSelectedBootstrapDependency(target, railwayTargets, config)
+  )
+  const railwayDependent = railwayTargets.filter(({ target }) =>
+    hasSelectedBootstrapDependency(target, railwayTargets, config)
+  )
+
+  await deployStage(
+    "Railway services",
+    railwayIndependent,
+    options.railwayConcurrency,
+    rootDir,
+    config,
+    options,
+    controller.signal,
+    results,
+    logger
+  )
+  await deployStage(
+    "Railway dependent services",
+    railwayDependent,
+    options.railwayConcurrency,
+    rootDir,
+    config,
+    options,
+    controller.signal,
+    results,
+    logger
+  )
 
   let smoke: SmokeResult[] = []
   if (options.smoke || process.env.DEPLOY_SMOKE === "1") {
@@ -129,7 +154,7 @@ export async function runDeploy(
     dryRun: false,
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
-    targets: results,
+    targets: compactResults(results),
     smoke,
   })
 
@@ -142,6 +167,106 @@ export async function runDeploy(
     throw new SmokeError("Deploy succeeded but smoke checks failed")
   }
   return result
+}
+
+async function deployStage(
+  label: string,
+  targets: IndexedTarget[],
+  concurrency: number,
+  rootDir: string,
+  config: DeployConfig,
+  options: DeployOptions,
+  signal: AbortSignal,
+  results: TargetResult[],
+  logger: ReturnType<typeof createLogger>
+): Promise<void> {
+  if (targets.length === 0) return
+
+  const parallel = concurrency > 1 && targets.length > 1
+  const spinner = createSpinner(
+    parallel ? `${label}: deploying ${targets.length} targets` : undefined,
+    parallel && useSpinner(options)
+  )
+
+  await mapLimit(targets, concurrency, async ({ target, index }) => {
+    if (options.showOutput || options.verbose || options.debug) {
+      logger.info(`deploying ${target.id}`)
+    }
+    const targetSpinner = createSpinner(`Deploying ${target.id}`, !parallel && useSpinner(options))
+    const runner = new ExecaProcessRunner(
+      rootDir,
+      options.dryRun,
+      signal,
+      options.showOutput && !options.json
+    )
+    const supabase = new SupabaseProvider(rootDir, config, runner)
+    const railway = new RailwayProvider(rootDir, config, runner)
+    const result = baseResult(target.id)
+
+    try {
+      await deployTarget(target, options, supabase, railway)
+      targetSpinner?.succeed(`${target.id} deployed`)
+      results[index] = finishTarget(result, "success", {
+        commands: runner.records,
+        rollback: rollbackGuidance(target),
+      })
+      if (!targetSpinner && !parallel) logger.success(`${target.id} deployed`)
+    } catch (error) {
+      targetSpinner?.fail(`${target.id} failed`)
+      results[index] = finishTarget(result, "failed", {
+        commands: runner.records,
+        error: messageFor(error),
+        rollback: rollbackGuidance(target),
+      })
+      logger.warn(`${target.id} failed: ${messageFor(error)}`)
+    }
+  })
+
+  const failed = targets.filter(({ index }) => results[index]?.status === "failed").length
+  if (failed > 0) {
+    spinner?.fail(`${label}: ${failed}/${targets.length} failed`)
+  } else {
+    spinner?.succeed(`${label}: ${targets.length}/${targets.length} deployed`)
+  }
+}
+
+type IndexedTarget = { target: DeployTarget; index: number }
+
+function indexedTargets(targets: DeployTarget[], kind: DeployTarget["kind"]): IndexedTarget[] {
+  return targets
+    .map((target, index) => ({ target, index }))
+    .filter(({ target }) => target.kind === kind)
+}
+
+function hasSelectedBootstrapDependency(
+  target: DeployTarget,
+  selected: IndexedTarget[],
+  config: DeployConfig
+): boolean {
+  if (target.kind !== "railway:service" || !target.name) return false
+  const service = config.railway.services.find((candidate) => candidate.name === target.name)
+  if (!service?.bootstrapFromService) return false
+  return selected.some(({ target: candidate }) => candidate.name === service.bootstrapFromService)
+}
+
+async function mapLimit<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<void>
+): Promise<void> {
+  let cursor = 0
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (cursor < items.length) {
+      const item = items[cursor]
+      cursor += 1
+      if (item) await worker(item)
+    }
+  })
+  await Promise.all(workers)
+}
+
+function compactResults(results: TargetResult[]): TargetResult[] {
+  return results.filter((result): result is TargetResult => Boolean(result))
 }
 
 async function deployTarget(
