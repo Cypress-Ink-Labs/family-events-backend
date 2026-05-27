@@ -8,11 +8,13 @@ export class ExecaProcessRunner implements ProcessRunner {
   private readonly rootDir: string
   private readonly dryRun: boolean
   private readonly cancelSignal?: AbortSignal
+  private readonly streamOutput: boolean
 
-  constructor(rootDir: string, dryRun: boolean, cancelSignal?: AbortSignal) {
+  constructor(rootDir: string, dryRun: boolean, cancelSignal?: AbortSignal, streamOutput = false) {
     this.rootDir = rootDir
     this.dryRun = dryRun
     this.cancelSignal = cancelSignal
+    this.streamOutput = streamOutput
   }
 
   async run(
@@ -30,11 +32,14 @@ export class ExecaProcessRunner implements ProcessRunner {
     }
 
     try {
+      const output = this.streamOutput ? (["inherit", "pipe"] as const) : "pipe"
       const result = await execa(command, args, {
         cwd,
         cancelSignal: this.cancelSignal,
         reject: false,
         all: false,
+        stdout: output,
+        stderr: output,
         env: { ...process.env, FORCE_COLOR: process.env.FORCE_COLOR ?? "1" },
       })
       const exitCode = result.exitCode ?? 1

@@ -27,7 +27,7 @@ export async function runDeploy(
   const startedAt = new Date()
   const runId = createRunId(startedAt)
   const controller = createAbortController()
-  const runner = new ExecaProcessRunner(rootDir, options.dryRun, controller.signal)
+  const runner = new ExecaProcessRunner(rootDir, options.dryRun, controller.signal, !options.json)
   const supabase = new SupabaseProvider(rootDir, config, runner)
   const railway = new RailwayProvider(rootDir, config, runner)
   const selected = resolveTargets(config, options.targets, options.all)
@@ -61,6 +61,7 @@ export async function runDeploy(
   }
 
   for (const target of expanded) {
+    logger.info(`deploying ${target.id}`)
     const result = baseResult(target.id)
     const commandStart = runner.records.length
     try {
