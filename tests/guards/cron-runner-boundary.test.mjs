@@ -32,9 +32,10 @@ test("sync script includes every Railway cron service", () => {
   }
 })
 
-test("deploy script uploads from repo root for rootDirectory-based cron services", () => {
-  const script = readFileSync(path.join(repoRoot, "scripts", "deploy.sh"), "utf8")
-  assert.doesNotMatch(script, /railway up "\$ROOT_DIR\/apps\/\$subdir" --path-as-root/)
-  assert.match(script, /railway up --service "\$service" --detach/)
-  assert.match(script, /railway service status --service "\$service" --json/)
+test("deploy CLI uploads from repo root for rootDirectory-based cron services", () => {
+  const wrapper = readFileSync(path.join(repoRoot, "scripts", "deploy.sh"), "utf8")
+  const railwayProvider = readFileSync(path.join(repoRoot, "packages", "deploy-cli", "src", "providers", "railway.ts"), "utf8")
+  assert.doesNotMatch(wrapper + railwayProvider, /railway up "\$ROOT_DIR\/apps\/\$subdir" --path-as-root/)
+  assert.match(railwayProvider, /"up", "--service", name, "--detach"/)
+  assert.match(railwayProvider, /"service", "status", "--service", name, "--json"/)
 })

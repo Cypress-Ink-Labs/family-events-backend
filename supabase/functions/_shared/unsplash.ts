@@ -253,36 +253,42 @@ export async function findFallbackImage(
   if (queue.length === 0) return null
 
   for (const { searchTerm } of queue) {
-    const query = `${searchTerm} family`
-    const url = `${SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=5&content_filter=high`
+    // Two-pass strategy for each term:
+    // 1. Try bare term first (more specific for activity searches)
+    // 2. Fall back to "{term} family" only when bare returns empty
+    const attempts = [searchTerm, `${searchTerm} family`]
 
-    try {
-      const res = await fetcher(url, {
-        headers: {
-          Authorization: `Client-ID ${accessKey}`,
-          "Accept-Version": "v1",
-        },
-        signal: AbortSignal.timeout(5_000),
-      })
-      if (!res.ok) continue
+    for (const query of attempts) {
+      const url = `${SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=5&content_filter=high`
 
-      const body = (await res.json()) as UnsplashSearchResponse
-      const results = body.results ?? []
-      if (results.length === 0) continue
+      try {
+        const res = await fetcher(url, {
+          headers: {
+            Authorization: `Client-ID ${accessKey}`,
+            "Accept-Version": "v1",
+          },
+          signal: AbortSignal.timeout(5_000),
+        })
+        if (!res.ok) continue
 
-      // Pick randomly among returned results so events sharing the same
-      // primary term don't all get the same photo permanently.
-      const hit = results[Math.floor(Math.random() * results.length)]
-      const photoUrl = hit?.urls?.regular
-      if (!hit || !photoUrl) continue
+        const body = (await res.json()) as UnsplashSearchResponse
+        const results = body.results ?? []
+        if (results.length === 0) continue
 
-      const attribution = attributionFromHit(hit)
-      if (!attribution) continue
+        // Pick randomly among returned results so events sharing the same
+        // primary term don't all get the same photo permanently.
+        const hit = results[Math.floor(Math.random() * results.length)]
+        const photoUrl = hit?.urls?.regular
+        if (!hit || !photoUrl) continue
 
-      return { url: photoUrl, matchedTag: searchTerm, attribution }
-    } catch {
-      // Network / timeout / parse failure: try the next candidate, then bail.
-      continue
+        const attribution = attributionFromHit(hit)
+        if (!attribution) continue
+
+        return { url: photoUrl, matchedTag: query, attribution }
+      } catch {
+        // Network / timeout / parse failure: try the next pass, then next term.
+        continue
+      }
     }
   }
   return null

@@ -1,0 +1,33 @@
+{
+  "name": "@family-events/deploy-cli",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "family-events-deploy": "./src/cli.ts"
+  },
+  "scripts": {
+    "cli": "tsx src/cli.ts",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.json --noEmit",
+    "format": "oxfmt --config ../config-quality/oxfmt.base.json --write src tests",
+    "format:check": "oxfmt --config ../config-quality/oxfmt.base.json --check src tests"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.5.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "execa": "^9.6.1",
+    "ora": "^9.4.0",
+    "pino": "^10.3.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@family-events/config-quality": "workspace:*",
+    "@family-events/config-typescript": "workspace:*",
+    "@types/node": "latest",
+    "tsx": "latest",
+    "vitest": "4.1.7"
+  }
+}
