@@ -104,15 +104,25 @@ describe("findFallbackImage", () => {
     })
     expect(result?.matchedTag).toBe("splash park")
     const firstCall = fetchSpy.mock.calls[0]?.[0] as string
-    expect(firstCall).toContain("query=splash%20park%20family")
-    // Only one fetch — title query succeeded, never fell through to tag slug
+    // Two-pass: tries bare term first
+    expect(firstCall).toContain("query=splash%20park")
+    expect(firstCall).not.toContain("family")
+    // Only one fetch — bare term succeeded immediately, no suffix fallback needed
     expect(fetchSpy).toHaveBeenCalledTimes(1)
   })
 
   it("falls through to tag slugs when title query returns no results", async () => {
     const fetchSpy = vi.fn(async (url: string | URL) => {
       const target = url.toString()
+      // Two-pass for title: bare first, then suffix
+      if (target.includes("query=splash%20park") && !target.includes("family")) {
+        return jsonResponse({ results: [] })
+      }
       if (target.includes("query=splash%20park%20family")) {
+        return jsonResponse({ results: [] })
+      }
+      // Two-pass for first tag: bare first, then suffix
+      if (target.includes("query=sports") && !target.includes("family")) {
         return jsonResponse({ results: [] })
       }
       if (target.includes("query=sports%20family")) {
@@ -127,8 +137,10 @@ describe("findFallbackImage", () => {
       title: "Splash Park",
     })
     expect(result?.url).toBe("https://images.unsplash.com/sports.jpg")
-    expect(result?.matchedTag).toBe("sports")
-    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    // matchedTag reflects the actual query that succeeded (with suffix)
+    expect(result?.matchedTag).toBe("sports family")
+    // 4 fetches: title bare, title suffix, sports bare, sports suffix
+    expect(fetchSpy).toHaveBeenCalledTimes(4)
   })
 
   it("hits the search endpoint and returns image plus attribution metadata", async () => {
@@ -147,7 +159,9 @@ describe("findFallbackImage", () => {
       },
     })
     const firstCall = fetchSpy.mock.calls[0]?.[0] as string
-    expect(firstCall).toContain("query=museum%20family")
+    // Two-pass: tries bare term first
+    expect(firstCall).toContain("query=museum")
+    expect(firstCall).not.toContain("family")
     expect(firstCall).toContain("orientation=landscape")
     expect(firstCall).toContain("per_page=5")
     expect(fetchSpy).toHaveBeenCalledTimes(1)
@@ -173,7 +187,15 @@ describe("findFallbackImage", () => {
   it("falls through to the next tag when the first one yields no results", async () => {
     const fetchSpy = vi.fn(async (url: string | URL) => {
       const target = url.toString()
+      // Two-pass for obscure: bare first, then suffix
+      if (target.includes("query=obscure") && !target.includes("family")) {
+        return jsonResponse({ results: [] })
+      }
       if (target.includes("query=obscure%20family")) {
+        return jsonResponse({ results: [] })
+      }
+      // Two-pass for park: bare first, then suffix
+      if (target.includes("query=park") && !target.includes("family")) {
         return jsonResponse({ results: [] })
       }
       if (target.includes("query=park%20family")) {
@@ -185,7 +207,8 @@ describe("findFallbackImage", () => {
     })
     const result = await findFallbackImage(["obscure", "park"], "key", { fetchImpl: mockFetch(fetchSpy) })
     expect(result?.url).toBe("https://images.unsplash.com/park.jpg")
-    expect(result?.matchedTag).toBe("park")
+    // matchedTag reflects the actual query that succeeded (with suffix)
+    expect(result?.matchedTag).toBe("park family")
   })
 
   it("returns null when every candidate misses", async () => {
@@ -234,7 +257,9 @@ describe("findFallbackImage", () => {
     const result = await findFallbackImage(["", "   ", "library"], "key", { fetchImpl: mockFetch(fetchSpy) })
     expect(result?.matchedTag).toBe("library")
     const firstCall = fetchSpy.mock.calls[0]?.[0] as string
-    expect(firstCall).toContain("query=library%20family")
+    // Two-pass: tries bare term first
+    expect(firstCall).toContain("query=library")
+    expect(firstCall).not.toContain("family")
   })
 
   it("picks randomly among multiple results", async () => {
@@ -257,6 +282,84 @@ describe("findFallbackImage", () => {
     // Math.floor(0.9 * 3) = 2 → picks index 2
     expect(result?.url).toBe("https://images.unsplash.com/r2.jpg")
     randomSpy.mockRestore()
+  })
+
+  // Two-pass behavior tests
+  it("uses bare term when it returns results (no suffix needed)", async () => {
+    const fetchSpy = vi.fn(async (url: string | URL) => {
+      const target = url.toString()
+      if (target.includes("query=yoga") && !target.includes("family")) {
+        return jsonResponse({
+          results: [unsplashHit({ urls: { regular: "https://images.unsplash.com/yoga.jpg" } })],
+        })
+      }
+      // Should never reach the suffix query
+      return jsonResponse({ results: [] })
+    })
+    const result = await findFallbackImage(["yoga"], "key", { fetchImpl: mockFetch(fetchSpy) })
+    expect(result?.url).toBe("https://images.unsplash.com/yoga.jpg")
+    expect(result?.matchedTag).toBe("yoga")
+    // Only one fetch — bare term succeeded immediately
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it("falls back to suffix when bare term returns empty", async () => {
+    const fetchSpy = vi.fn(async (url: string | URL) => {
+      const target = url.toString()
+      if (target.includes("query=cooking") && !target.includes("family")) {
+        return jsonResponse({ results: [] })
+      }
+      if (target.includes("query=cooking%20family")) {
+        return jsonResponse({
+          results: [unsplashHit({ urls: { regular: "https://images.unsplash.com/cooking.jpg" } })],
+        })
+      }
+      return jsonResponse({ results: [] })
+    })
+    const result = await findFallbackImage(["cooking"], "key", { fetchImpl: mockFetch(fetchSpy) })
+    expect(result?.url).toBe("https://images.unsplash.com/cooking.jpg")
+    expect(result?.matchedTag).toBe("cooking family")
+    // Two fetches — bare miss, suffix hit
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it("returns null when both bare and suffixed queries return empty", async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ results: [] }))
+    const result = await findFallbackImage(["obscure-niche-term"], "key", { fetchImpl: mockFetch(fetchSpy) })
+    expect(result).toBeNull()
+    // Two fetches — bare miss, suffix miss
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it("matchedTag reflects the term that actually succeeded (bare vs suffixed)", async () => {
+    const fetchSpy = vi.fn(async (url: string | URL) => {
+      const target = url.toString()
+      // First term: bare succeeds
+      if (target.includes("query=sports") && !target.includes("family")) {
+        return jsonResponse({
+          results: [unsplashHit({ urls: { regular: "https://images.unsplash.com/sports.jpg" } })],
+        })
+      }
+      return jsonResponse({ results: [] })
+    })
+    const result = await findFallbackImage(["sports"], "key", { fetchImpl: mockFetch(fetchSpy) })
+    expect(result?.matchedTag).toBe("sports")
+
+    // Second scenario: suffix succeeds
+    const fetchSpy2 = vi.fn(async (url: string | URL) => {
+      const target = url.toString()
+      if (target.includes("query=picnic") && !target.includes("family")) {
+        return jsonResponse({ results: [] })
+      }
+      if (target.includes("query=picnic%20family")) {
+        return jsonResponse({
+          results: [unsplashHit({ urls: { regular: "https://images.unsplash.com/picnic.jpg" } })],
+        })
+      }
+      return jsonResponse({ results: [] })
+    })
+    const result2 = await findFallbackImage(["picnic"], "key", { fetchImpl: mockFetch(fetchSpy2) })
+    expect(result2?.matchedTag).toBe("picnic family")
   })
 })
 
