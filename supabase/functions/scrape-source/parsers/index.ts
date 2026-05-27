@@ -6,6 +6,8 @@ import { icalParser } from "./ical.ts";
 import { manualParser } from "./manual.ts";
 import { macaroniKidParser } from "./macaroni-kid.ts";
 import { brecParser } from "./brec.ts";
+import { downtownLafayetteParser } from "./downtownlafayette.ts";
+import { lcgLafayetteParser } from "./lcg-lafayette.ts";
 
 export const parsers = {
   [websiteParser.type]: websiteParser,
@@ -14,6 +16,8 @@ export const parsers = {
   [manualParser.type]: manualParser,
   [macaroniKidParser.type]: macaroniKidParser,
   [brecParser.type]: brecParser,
+  [downtownLafayetteParser.type]: downtownLafayetteParser,
+  [lcgLafayetteParser.type]: lcgLafayetteParser,
 } as const satisfies Record<SourceType, SourceParser>;
 
 export type { SourceParser } from "./_lib/types.ts";

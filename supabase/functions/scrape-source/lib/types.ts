@@ -5,7 +5,9 @@ import type {
 
 export type SourceType =
   | "brec"
+  | "downtownlafayette"
   | "ical"
+  | "lcglafayette"
   | "macaronikid"
   | "manual"
   | "rss"
