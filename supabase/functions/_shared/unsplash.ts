@@ -1,16 +1,27 @@
-// Unsplash search client — looks up a landscape photo by tag slug for
-// events that landed with empty `events.images`.
+// Unsplash search client — looks up a landscape photo by event title or tag
+// slug for events that landed with empty `events.images`.
 //
 // Why this exists: scraper sources frequently strip image URLs (hot-link
 // blocking, robots policies, login-walled CDN). Without a fallback, every
 // affected card on web / iOS / Android renders a generic picsum.photos
 // placeholder that doesn't match the event. Unsplash returns a real photo
-// keyed by the tag we already classified the event with, which keeps the
-// "warm editorial bulletin board" DESIGN.md aesthetic intact.
+// keyed to the event subject, which keeps the "warm editorial bulletin board"
+// DESIGN.md aesthetic intact.
+//
+// Query strategy — most-specific first:
+//   1. Title-derived term: normalize the event title into a 2-4 word phrase
+//      (strip venue suffixes, punctuation) and search that. A "Splash Park"
+//      event becomes "splash park family" → water-play photos. This is always
+//      more relevant than the tag slug for niche activity events.
+//   2. Tag slug fallback: walk tags in confidence DESC order and try each as
+//      "{slug} family". Used when the title query returns no results or no
+//      title was supplied.
 //
 // API guidelines (https://unsplash.com/documentation):
 //   - Authenticate with Client-ID <UNSPLASH_ACCESS_KEY>.
 //   - Use the orientation=landscape filter for card-shaped photos.
+//   - Request per_page=5 and pick randomly to avoid every event with the
+//     same primary term getting the identical photo permanently.
 //   - Trigger the download-tracking endpoint when a photo is "used" (i.e.
 //     persisted into our DB). Tracking is awaited by the caller after the
 //     DB write so failures can be retried from persisted attribution rows.
@@ -52,7 +63,7 @@ export interface UnsplashAttributionMetadata {
 
 export interface UnsplashResult {
   url: string
-  /** Tag we matched on (for logging). */
+  /** Search term we matched on (for logging). May be a title-derived term or a tag slug. */
   matchedTag: string
   attribution: UnsplashAttributionMetadata
 }
@@ -113,6 +124,35 @@ function attributionFromHit(hit: UnsplashSearchHit): UnsplashAttributionMetadata
   }
 }
 
+/**
+ * Derive a 2-4 word search term from an event title.
+ *
+ * Strips common venue suffix patterns ("at West Regional Library",
+ * "presented by BREC", "hosted by …") and punctuation, then takes the
+ * first four words. Returns null when the result is too short to be useful.
+ *
+ * Examples:
+ *   "Splash Park at East Side Recreation Center" → "splash park"
+ *   "Story Time for Toddlers at the Library" → "story time for toddlers"
+ *   "Community Day" → "community day" (short but still useful)
+ */
+export function deriveTitleSearchTerm(title: string): string | null {
+  const normalized = title
+    // Strip "at <Venue>", "presented by …", "hosted by …", "sponsored by …"
+    .replace(/\s+(?:at|presented by|hosted by|sponsored by)\b.*/i, "")
+    // Strip remaining punctuation (keep spaces and word chars)
+    .replace(/[^\w\s]/g, " ")
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 4)
+    .join(" ")
+
+  // Require at least 4 characters (filters out single-char noise after stripping)
+  return normalized.length >= 4 ? normalized : null
+}
+
 export async function trackUnsplashDownload(
   downloadLocation: string,
   accessKey: string,
@@ -138,15 +178,6 @@ export async function trackUnsplashDownload(
   }
 }
 
-/**
- * Resolve a single Unsplash image URL for an event given its tag slugs.
- *
- * Walks tags in order (callers pass tags ordered by confidence DESC) and
- * stops at the first tag that yields a search result with complete attribution
- * metadata. Returns `null` when the access key is missing, when every tag
- * misses, or on any network / parse error — the caller treats this as "leave
- * images empty, next tick will retry."
- */
 /**
  * Fetch attribution metadata for an existing Unsplash CDN image URL.
  * Extracts the CDN path slug (e.g. "photo-abc123") and calls GET /photos/:id.
@@ -178,22 +209,52 @@ export async function lookupUnsplashPhotoFromUrl(
   }
 }
 
+/**
+ * Resolve a single Unsplash image URL for an event.
+ *
+ * Search order (most-specific first):
+ *   1. Title-derived term — strips venue suffix, normalizes to 2-4 words.
+ *      E.g. "Splash Park at East Side Recreation Center" → "splash park family".
+ *      Produces the most relevant photos for niche activity events.
+ *   2. Tag slugs — walks tags in caller-supplied order (confidence DESC) and
+ *      tries "{slug} family" for each. Used as fallback when the title yields
+ *      no results or no title was supplied.
+ *
+ * For each search term we request per_page=5 and pick a result randomly.
+ * This prevents all events sharing the same primary term from permanently
+ * receiving the identical photo.
+ *
+ * Returns `null` when the access key is missing, when every candidate misses,
+ * or on any network / parse error — the caller treats this as "leave images
+ * empty, next tick will retry."
+ */
 export async function findFallbackImage(
   tags: string[],
   accessKey: string,
-  options: { fetchImpl?: typeof fetch } = {},
+  options: { fetchImpl?: typeof fetch; title?: string } = {},
 ): Promise<UnsplashResult | null> {
   if (!accessKey) return null
-  if (tags.length === 0) return null
 
   const fetcher = options.fetchImpl ?? fetch
 
+  // Build the ordered search queue: title-derived term first, tag slugs after.
+  const queue: Array<{ searchTerm: string }> = []
+
+  if (options.title) {
+    const term = deriveTitleSearchTerm(options.title)
+    if (term) queue.push({ searchTerm: term })
+  }
+
   for (const rawTag of tags) {
     const tag = rawTag.trim()
-    if (!tag) continue
+    if (tag) queue.push({ searchTerm: tag })
+  }
 
-    const query = `${tag} family`
-    const url = `${SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=1&content_filter=high`
+  if (queue.length === 0) return null
+
+  for (const { searchTerm } of queue) {
+    const query = `${searchTerm} family`
+    const url = `${SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=5&content_filter=high`
 
     try {
       const res = await fetcher(url, {
@@ -206,16 +267,21 @@ export async function findFallbackImage(
       if (!res.ok) continue
 
       const body = (await res.json()) as UnsplashSearchResponse
-      const hit = body.results?.[0]
+      const results = body.results ?? []
+      if (results.length === 0) continue
+
+      // Pick randomly among returned results so events sharing the same
+      // primary term don't all get the same photo permanently.
+      const hit = results[Math.floor(Math.random() * results.length)]
       const photoUrl = hit?.urls?.regular
       if (!hit || !photoUrl) continue
 
       const attribution = attributionFromHit(hit)
       if (!attribution) continue
 
-      return { url: photoUrl, matchedTag: tag, attribution }
+      return { url: photoUrl, matchedTag: searchTerm, attribution }
     } catch {
-      // Network / timeout / parse failure: try the next tag, then bail.
+      // Network / timeout / parse failure: try the next candidate, then bail.
       continue
     }
   }

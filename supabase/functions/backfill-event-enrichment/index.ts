@@ -245,7 +245,7 @@ async function enrichOne(
   // the event, and (d) we have an API key. Failure leaves images empty
   // and the row stays on the queue for the next tick.
   if (row.needs_images && images.length === 0 && row.tags.length > 0) {
-    unsplashResult = await findFallbackImage(row.tags, unsplashAccessKey);
+    unsplashResult = await findFallbackImage(row.tags, unsplashAccessKey, { title: row.title });
     if (unsplashResult) {
       images = [unsplashResult.url];
       imageSource = "unsplash";
