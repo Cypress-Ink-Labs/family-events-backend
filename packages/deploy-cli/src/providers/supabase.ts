@@ -57,12 +57,20 @@ export class SupabaseProvider {
     await this.runner.run(this.supabaseCommand(), ["db", "lint", "--linked"], {
       allowFailure: true,
     })
-    await this.runner.run(this.supabaseCommand(), ["db", "push", "--linked", "--include-all", "--dry-run"], {
-      allowFailure: true,
-    })
-    const result = await this.runner.run(this.supabaseCommand(), ["db", "push", "--linked", "--include-all"], {
-      allowFailure: true,
-    })
+    await this.runner.run(
+      this.supabaseCommand(),
+      ["db", "push", "--linked", "--include-all", "--dry-run"],
+      {
+        allowFailure: true,
+      }
+    )
+    const result = await this.runner.run(
+      this.supabaseCommand(),
+      ["db", "push", "--linked", "--include-all"],
+      {
+        allowFailure: true,
+      }
+    )
     if (
       result.exitCode !== 0 ||
       /(^|\s)ERROR:|Try rerunning the command/.test(`${result.stdout}\n${result.stderr}`)
