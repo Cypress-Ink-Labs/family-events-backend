@@ -39,3 +39,39 @@ Deno.test("deriveTitleSearchTerm - strips punctuation", () => {
     "kids art workshop"
   );
 });
+
+// Library context preservation tests
+Deno.test("deriveTitleSearchTerm - preserves 'library' context in title", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Story Time at West Regional Library"),
+    "story time at west"
+  );
+});
+
+Deno.test("deriveTitleSearchTerm - preserves 'library' with 4-word limit", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Baby Storytime for Toddlers at Main Library"),
+    "baby storytime for toddlers"
+  );
+});
+
+Deno.test("deriveTitleSearchTerm - preserves 'library' case-insensitive", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Family Movie Night at LIBRARY"),
+    "family movie night at"
+  );
+});
+
+Deno.test("deriveTitleSearchTerm - preserves 'library' mid-title", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Library Story Hour presented by BREC"),
+    "library story hour"
+  );
+});
+
+Deno.test("deriveTitleSearchTerm - non-library 'at' suffix still stripped", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Yoga in the Park at Community Center"),
+    "yoga in the park"
+  );
+});
