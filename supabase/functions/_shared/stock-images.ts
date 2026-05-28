@@ -133,9 +133,18 @@ function firstString(...values: Array<string | undefined | null>): string | null
  *   "Community Day" → "community day" (short but still useful)
  */
 export function deriveTitleSearchTerm(title: string): string | null {
+  // Preserve venue keywords that provide essential activity context
+  const hasLibrary = /\blibrary\b/i.test(title)
+
   const normalized = title
-    // Strip "at <Venue>", "presented by …", "hosted by …", "sponsored by …"
-    .replace(/\s+(?:at|presented by|hosted by|sponsored by)\b.*/i, "")
+    // For library events, DON'T strip "at Library" — it's essential context.
+    // For other events, strip all venue suffixes as before.
+    .replace(
+      hasLibrary
+        ? /\s+(?:presented by|hosted by|sponsored by)\b.*/i
+        : /\s+(?:at|presented by|hosted by|sponsored by)\b.*/i,
+      ""
+    )
     // Strip remaining punctuation (keep spaces and word chars)
     .replace(/[^\w\s]/g, " ")
     .trim()
