@@ -22,10 +22,10 @@ Deno.test("deriveTitleSearchTerm - keeps short titles", () => {
   );
 });
 
-Deno.test("deriveTitleSearchTerm - limits to 4 words", () => {
+Deno.test("deriveTitleSearchTerm - limits to 4 words after noise filtering", () => {
   assertEquals(
     deriveTitleSearchTerm("Story Time for Toddlers at the Library"),
-    "story time for toddlers"
+    "story time toddlers at"
   );
 });
 
@@ -48,10 +48,10 @@ Deno.test("deriveTitleSearchTerm - preserves 'library' context in title", () => 
   );
 });
 
-Deno.test("deriveTitleSearchTerm - preserves 'library' with 4-word limit", () => {
+Deno.test("deriveTitleSearchTerm - preserves 'library' with noise filtering", () => {
   assertEquals(
     deriveTitleSearchTerm("Baby Storytime for Toddlers at Main Library"),
-    "baby storytime for toddlers"
+    "baby storytime toddlers at"
   );
 });
 
@@ -72,6 +72,35 @@ Deno.test("deriveTitleSearchTerm - preserves 'library' mid-title", () => {
 Deno.test("deriveTitleSearchTerm - non-library 'at' suffix still stripped", () => {
   assertEquals(
     deriveTitleSearchTerm("Yoga in the Park at Community Center"),
-    "yoga in the park"
+    "yoga park"
+  );
+});
+
+// Noise word filtering tests
+Deno.test("deriveTitleSearchTerm - filters 'free' noise word", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Free FIFA World Cup Watch Party"),
+    "fifa world cup watch"
+  );
+});
+
+Deno.test("deriveTitleSearchTerm - filters 'annual' noise word", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Annual Summer Reading Program"),
+    "summer reading program"
+  );
+});
+
+Deno.test("deriveTitleSearchTerm - filters 'the' noise word", () => {
+  assertEquals(
+    deriveTitleSearchTerm("The Great Outdoors Festival"),
+    "great outdoors festival"
+  );
+});
+
+Deno.test("deriveTitleSearchTerm - filters multiple noise words", () => {
+  assertEquals(
+    deriveTitleSearchTerm("Weekly Yoga in the Park"),
+    "yoga park"
   );
 });

@@ -121,15 +121,40 @@ function firstString(...values: Array<string | undefined | null>): string | null
 }
 
 /**
+ * Words that dilute stock-photo search specificity without adding visual
+ * meaning. Filtered out before the 4-word cap so the query slots are
+ * occupied by content-bearing terms instead.
+ */
+const NOISE_WORDS = new Set([
+  "free",
+  "annual",
+  "weekly",
+  "monthly",
+  "daily",
+  "special",
+  "new",
+  "the",
+  "a",
+  "an",
+  "and",
+  "or",
+  "for",
+  "with",
+  "in",
+])
+
+/**
  * Derive a 2-4 word search term from an event title.
  *
  * Strips common venue suffix patterns ("at West Regional Library",
- * "presented by BREC", "hosted by …") and punctuation, then takes the
- * first four words. Returns null when the result is too short to be useful.
+ * "presented by BREC", "hosted by …"), punctuation, and noise words
+ * (articles, frequency markers like "weekly", filler prepositions),
+ * then takes the first four remaining words. Returns null when the
+ * result is too short to be useful.
  *
  * Examples:
  *   "Splash Park at East Side Recreation Center" → "splash park"
- *   "Story Time for Toddlers at the Library" → "story time for toddlers"
+ *   "Free FIFA World Cup Watch Party" → "fifa world cup watch"
  *   "Community Day" → "community day" (short but still useful)
  */
 export function deriveTitleSearchTerm(title: string): string | null {
@@ -151,6 +176,7 @@ export function deriveTitleSearchTerm(title: string): string | null {
     .toLowerCase()
     .split(/\s+/)
     .filter(Boolean)
+    .filter((w) => !NOISE_WORDS.has(w))
     .slice(0, 4)
     .join(" ")
 
