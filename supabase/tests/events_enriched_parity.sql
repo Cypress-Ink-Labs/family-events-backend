@@ -81,7 +81,7 @@ SELECT (v)::uuid,
          WHEN 'ev_other' THEN now() + interval '3 days'
          ELSE                 now() + interval '4 days'
        END,
-       CASE k WHEN 'ev_draft' THEN 'draft' ELSE 'published' END,
+       (CASE k WHEN 'ev_draft' THEN 'draft' ELSE 'published' END)::public.event_status,
        CASE k
          WHEN 'ev_other' THEN (SELECT (v)::uuid FROM _fx WHERE k='city_b')
          ELSE                 (SELECT (v)::uuid FROM _fx WHERE k='city_a')

@@ -58,16 +58,29 @@ DROP POLICY IF EXISTS "Authenticated users can read approved comments or admins 
 DROP POLICY IF EXISTS "Anon can read published events" ON public.events;
 DROP POLICY IF EXISTS "Authenticated reads published or admin reads all" ON public.events;
 
+-- Anon read policies that depend on the public_events view (recreated unchanged below).
+DROP POLICY IF EXISTS "Anon can read approved comments on published events" ON public.comments;
+DROP POLICY IF EXISTS "Anon can read event tags for published events" ON public.event_tags;
+DROP POLICY IF EXISTS "Anon can read ratings for published events" ON public.ratings;
+
 DROP VIEW IF EXISTS public.public_events;
 
+-- BEFORE UPDATE OF status trigger depends on the column; recreated unchanged below.
+DROP TRIGGER IF EXISTS trg_clear_llm_review_on_status_change ON public.events;
+
 -- ---------------------------------------------------------------------------
--- 4. Swap the column type and drop the now-redundant CHECK constraint.
+-- 4. Swap the column type. The CHECK is dropped first because it is
+--    re-evaluated against the new type during the table rewrite.
 -- ---------------------------------------------------------------------------
+ALTER TABLE public.events DROP CONSTRAINT IF EXISTS events_status_check;
 ALTER TABLE public.events ALTER COLUMN status DROP DEFAULT;
 ALTER TABLE public.events
   ALTER COLUMN status TYPE public.event_status USING status::public.event_status;
 ALTER TABLE public.events ALTER COLUMN status SET DEFAULT 'draft'::public.event_status;
-ALTER TABLE public.events DROP CONSTRAINT IF EXISTS events_status_check;
+
+CREATE TRIGGER trg_clear_llm_review_on_status_change
+  BEFORE UPDATE OF status ON public.events
+  FOR EACH ROW EXECUTE FUNCTION private.clear_llm_review_on_status_change();
 
 -- ---------------------------------------------------------------------------
 -- 5. Recreate the dropped dependents with bare 'published' literals
@@ -96,9 +109,24 @@ CREATE OR REPLACE VIEW public.public_events WITH (security_invoker='true') AS
    FROM public.events e
   WHERE status = 'published';
 ALTER VIEW public.public_events OWNER TO postgres;
-GRANT ALL ON TABLE public.public_events TO anon;
-GRANT ALL ON TABLE public.public_events TO authenticated;
-GRANT ALL ON TABLE public.public_events TO service_role;
+-- A view is read-only; grant only SELECT (keeps anon free of mutation grants,
+-- enforced by tests/api_surface_hardening.sql).
+GRANT SELECT ON TABLE public.public_events TO anon;
+GRANT SELECT ON TABLE public.public_events TO authenticated;
+GRANT SELECT ON TABLE public.public_events TO service_role;
+
+CREATE POLICY "Anon can read approved comments on published events" ON public.comments
+  FOR SELECT TO anon
+  USING ((is_approved = true) AND (EXISTS ( SELECT 1
+     FROM public.public_events pe WHERE (pe.id = comments.event_id))));
+
+CREATE POLICY "Anon can read event tags for published events" ON public.event_tags
+  FOR SELECT TO anon
+  USING (EXISTS ( SELECT 1 FROM public.public_events pe WHERE (pe.id = event_tags.event_id)));
+
+CREATE POLICY "Anon can read ratings for published events" ON public.ratings
+  FOR SELECT TO anon
+  USING (EXISTS ( SELECT 1 FROM public.public_events pe WHERE (pe.id = ratings.event_id)));
 
 CREATE POLICY "Anon can read published events" ON public.events
   FOR SELECT TO anon USING (status = 'published');
@@ -868,6 +896,62 @@ BEGIN
     p.llm_reviewed_at, p.llm_review_error,
     p.total_count
   FROM page p;
+END;
+$function$;
+
+
+CREATE OR REPLACE FUNCTION private.admin_event_facets(p_keyword text DEFAULT NULL::text)
+ RETURNS TABLE(city_id uuid, status text, count bigint)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+BEGIN
+  IF NOT private.is_admin() THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  WITH search_input AS (
+    SELECT
+      CASE
+        WHEN p_keyword IS NULL OR btrim(p_keyword) = '' OR length(p_keyword) > 100 THEN NULL::text
+        ELSE btrim(p_keyword)
+      END AS kw,
+      CASE
+        WHEN p_keyword IS NULL OR btrim(p_keyword) = '' OR length(p_keyword) > 100 THEN NULL::tsquery
+        ELSE websearch_to_tsquery('english', btrim(p_keyword))
+      END AS tsq,
+      CASE
+        WHEN p_keyword IS NULL OR btrim(p_keyword) = '' OR length(p_keyword) > 100 THEN NULL::text
+        ELSE replace(replace(replace(btrim(p_keyword), '\\', '\\\\'), '%', '\\%'), '_', '\\_')
+      END AS escaped_kw
+  )
+  SELECT
+    e.city_id,
+    e.status::text,
+    COUNT(*)::bigint AS count
+  FROM public.events e
+  CROSS JOIN search_input si
+  WHERE
+    (
+      si.kw IS NULL
+      OR (
+        si.tsq IS NOT NULL
+        AND numnode(si.tsq) > 0
+        AND e.search_vector @@ si.tsq
+      )
+      OR (
+        si.escaped_kw IS NOT NULL
+        AND (si.tsq IS NULL OR numnode(si.tsq) = 0 OR length(si.kw) < 3)
+        AND (
+          e.title ILIKE '%' || si.escaped_kw || '%' ESCAPE '\\'
+          OR e.description ILIKE '%' || si.escaped_kw || '%' ESCAPE '\\'
+        )
+      )
+    )
+  GROUP BY e.city_id, e.status
+  ORDER BY e.city_id, e.status;
 END;
 $function$;
 

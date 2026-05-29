@@ -41,7 +41,7 @@ INSERT INTO public.events (id, title, start_datetime, status)
 SELECT (v)::uuid,
        CASE k WHEN 'pub_event' THEN 'H3 Published' ELSE 'H3 Draft' END,
        now() + interval '1 day',
-       CASE k WHEN 'pub_event' THEN 'published' ELSE 'draft' END
+       (CASE k WHEN 'pub_event' THEN 'published' ELSE 'draft' END)::public.event_status
 FROM _fx WHERE k IN ('pub_event', 'draft_event');
 
 -- -----------------------------------------------------------------------------

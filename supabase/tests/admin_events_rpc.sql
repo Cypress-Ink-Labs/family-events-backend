@@ -408,7 +408,7 @@ BEGIN
   SELECT
     gen_random_uuid(),
     format('ADMIN RPC Keyword Seed %s', g),
-    CASE WHEN g % 2 = 0 THEN 'published' ELSE 'draft' END,
+    (CASE WHEN g % 2 = 0 THEN 'published' ELSE 'draft' END)::public.event_status,
     now() + interval '1 day',
     now() - (g || ' minutes')::interval,
     now() - (g || ' minutes')::interval
