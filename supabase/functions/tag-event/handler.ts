@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
+import { embedEvent } from "../embed-event/handler.ts";
 import {
   parseJsonContent,
   postOpenAiChatCompletion,
@@ -886,6 +887,34 @@ export function createTagEventHandler(
           topConfidence,
           deps.geocode,
         );
+
+        // Auto-embed after classification (non-fatal — embedding failure
+        // must not block tagging). Only when OPENAI_API_KEY is available.
+        const openAiKey = deps.getEnv("OPENAI_API_KEY") ?? "";
+        if (openAiKey) {
+          try {
+            const embedStart = Date.now();
+            await embedEvent(
+              {
+                event_id: input.eventId,
+                title: input.title,
+                description: input.description || undefined,
+              },
+              { supabase, openAiApiKey: openAiKey },
+            );
+            logEdgeEvent("log", "tag-event auto-embed succeeded", {
+              function: "tag-event",
+              event_id: input.eventId,
+              embedding_ms: Date.now() - embedStart,
+            });
+          } catch (embedErr) {
+            logEdgeEvent("warn", "tag-event auto-embed failed (non-fatal)", {
+              function: "tag-event",
+              event_id: input.eventId,
+              error: embedErr instanceof Error ? embedErr.message : String(embedErr),
+            });
+          }
+        }
       }
 
       logTagEventClassified({

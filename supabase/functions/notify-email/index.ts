@@ -312,8 +312,10 @@ async function sendViaResendTemplate(args: {
     body: JSON.stringify({
       from: args.from,
       to: [args.to],
-      template_alias: args.templateAlias,
-      variables: args.variables,
+      template: {
+        id: args.templateAlias,
+        variables: args.variables,
+      },
     }),
     signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
   })
