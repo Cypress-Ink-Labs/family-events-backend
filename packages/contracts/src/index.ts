@@ -1,4 +1,3 @@
-export { eventContractSchema } from "./event"
 export {
   LLM_EVENT_REVIEW_DECISION,
   LLM_EVENT_REVIEW_DECISIONS,
@@ -24,4 +23,3 @@ export type {
   SourceExtractionMode,
   SourceScrapeQueueStatus,
 } from "./database-enums"
-export type { EventContract } from "./event"

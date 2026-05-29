@@ -1,4 +1,4 @@
-import * as Sentry from "https://deno.land/x/sentry/index.mjs"
+import * as Sentry from "https://deno.land/x/sentry@8.55.0/index.mjs"
 import { toError } from "./logger.ts"
 
 let initialized = false
@@ -14,10 +14,11 @@ function initSentry() {
     return
   }
 
+  const rate = Number(Deno.env.get("SENTRY_TRACES_SAMPLE_RATE") ?? "0.1")
   Sentry.init({
     dsn,
     defaultIntegrations: false,
-    tracesSampleRate: 1,
+    tracesSampleRate: Number.isFinite(rate) ? rate : 0.1,
   })
 
   initialized = true
