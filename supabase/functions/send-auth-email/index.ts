@@ -25,6 +25,7 @@ import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
 
 const RESEND_API_ENDPOINT = "https://api.resend.com/emails";
 const RESEND_TIMEOUT_MS = 10_000;
+const JSON_HEADERS = { "Content-Type": "application/json" };
 
 interface AuthEmailHookPayload {
   user: {
@@ -73,14 +74,43 @@ function buildVerifyLink(
   return `${emailData.site_url}/auth/v1/verify?${params.toString()}`;
 }
 
-type ResendBody =
-  | {
-    from: string;
-    to: string[];
-    template_alias: string;
-    variables: Record<string, string>;
-  }
-  | { from: string; to: string[]; subject: string; html: string };
+function buildActionEmailHtml({
+  username,
+  intro,
+  actionLabel,
+  actionUrl,
+}: {
+  username: string;
+  intro: string;
+  actionLabel: string;
+  actionUrl: string;
+}): string {
+  return `
+    <div style="font-family: ui-sans-serif, system-ui, sans-serif; color: #0f172a; max-width: 560px;">
+      <h2 style="margin-bottom: 8px;">${escapeHtml(actionLabel)}</h2>
+      <p style="margin: 0 0 16px;">Hi ${escapeHtml(username)},</p>
+      <p style="margin: 0 0 24px;">${escapeHtml(intro)}</p>
+      <p style="margin: 0 0 24px;">
+        <a href="${escapeHtml(actionUrl)}"
+           style="background: #4f46e5; color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 700;">
+          ${escapeHtml(actionLabel)}
+        </a>
+      </p>
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
+        If you didn't request this, you can safely ignore this email.
+      </p>
+    </div>
+  `.trim();
+}
+
+type ResendBody = { from: string; to: string[]; subject: string; html: string };
+
+function jsonResponse(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: JSON_HEADERS,
+  });
+}
 
 async function sendEmail(
   apiKey: string,
@@ -128,9 +158,7 @@ Deno.serve(async (req: Request) => {
       logEdgeEvent("warn", "send-auth-email: invalid webhook signature", {
         function: "send-auth-email",
       });
-      return new Response(JSON.stringify({ error: "invalid signature" }), {
-        status: 401,
-      });
+      return jsonResponse({ error: "invalid signature" }, 401);
     }
   } else {
     // Local/dev only: no secret configured. Supabase CLI / Inbucket flows run
@@ -146,9 +174,7 @@ Deno.serve(async (req: Request) => {
   try {
     payload = JSON.parse(raw) as AuthEmailHookPayload;
   } catch {
-    return new Response(JSON.stringify({ error: "invalid JSON body" }), {
-      status: 400,
-    });
+    return jsonResponse({ error: "invalid JSON body" }, 400);
   }
 
   const { user, email_data } = payload;
@@ -165,7 +191,7 @@ Deno.serve(async (req: Request) => {
       email_action_type,
     });
     // Return success so Supabase Auth does not block the flow in local/dev
-    return new Response(JSON.stringify({}), { status: 200 });
+    return jsonResponse({});
   }
 
   try {
@@ -173,39 +199,35 @@ Deno.serve(async (req: Request) => {
     let body: ResendBody;
 
     if (email_action_type === "magiclink" || email_action_type === "signup") {
-      // Use the deployed family-events-magic-link template for both magic link
-      // sign-ins and email confirmation links (same UX: click to continue).
+      const actionLabel = email_action_type === "signup"
+        ? "Confirm your email"
+        : "Sign in to Family Events";
       body = {
         from: resendFrom,
         to: [user.email],
-        template_alias: "family-events-magic-link",
-        variables: {
-          USERNAME: username,
-          MAGIC_LINK: verifyLink,
-          EXPIRES_IN: "24 hours",
-        },
+        subject: email_action_type === "signup"
+          ? "Confirm your Family Events email"
+          : "Your Family Events sign-in link",
+        html: buildActionEmailHtml({
+          username,
+          intro:
+            "Click the button below to continue to Family Events. This link expires in 24 hours.",
+          actionLabel,
+          actionUrl: verifyLink,
+        }),
       };
     } else if (email_action_type === "recovery") {
       body = {
         from: resendFrom,
         to: [user.email],
         subject: "Reset your Family Events password",
-        html: `
-          <div style="font-family: ui-sans-serif, system-ui, sans-serif; color: #0f172a; max-width: 560px;">
-            <h2 style="margin-bottom: 8px;">Reset your password</h2>
-            <p style="margin: 0 0 16px;">Hi ${escapeHtml(username)},</p>
-            <p style="margin: 0 0 24px;">Click the button below to reset your Family Events password. This link expires in 24 hours.</p>
-            <p style="margin: 0 0 24px;">
-              <a href="${escapeHtml(verifyLink)}"
-                 style="background: #4f46e5; color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 700;">
-                Reset password
-              </a>
-            </p>
-            <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
-              If you didn't request this, you can safely ignore this email.
-            </p>
-          </div>
-        `.trim(),
+        html: buildActionEmailHtml({
+          username,
+          intro:
+            "Click the button below to reset your Family Events password. This link expires in 24 hours.",
+          actionLabel: "Reset password",
+          actionUrl: verifyLink,
+        }),
       };
     } else {
       // email_change_new, email_change_current, reauthentication
@@ -213,22 +235,12 @@ Deno.serve(async (req: Request) => {
         from: resendFrom,
         to: [user.email],
         subject: "Confirm your action on Family Events",
-        html: `
-          <div style="font-family: ui-sans-serif, system-ui, sans-serif; color: #0f172a; max-width: 560px;">
-            <h2 style="margin-bottom: 8px;">Confirm your action</h2>
-            <p style="margin: 0 0 16px;">Hi ${escapeHtml(username)},</p>
-            <p style="margin: 0 0 24px;">Click the button below to confirm.</p>
-            <p style="margin: 0 0 24px;">
-              <a href="${escapeHtml(verifyLink)}"
-                 style="background: #4f46e5; color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 700;">
-                Confirm
-              </a>
-            </p>
-            <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
-              If you didn't request this, you can safely ignore this email.
-            </p>
-          </div>
-        `.trim(),
+        html: buildActionEmailHtml({
+          username,
+          intro: "Click the button below to confirm.",
+          actionLabel: "Confirm",
+          actionUrl: verifyLink,
+        }),
       };
     }
 
@@ -248,10 +260,7 @@ Deno.serve(async (req: Request) => {
       // Non-200 tells Supabase Auth the email failed (it will surface an error
       // to the user). This is intentional — a failed delivery is better than
       // silently dropping authentication emails.
-      return new Response(
-        JSON.stringify({ error: `resend_${result.status}` }),
-        { status: 502 },
-      );
+      return jsonResponse({ error: `resend_${result.status}` }, 502);
     }
 
     logEdgeEvent("log", "send-auth-email: sent", {
@@ -259,7 +268,7 @@ Deno.serve(async (req: Request) => {
       email_action_type,
       resend_id: result.id,
     });
-    return new Response(JSON.stringify({}), { status: 200 });
+    return jsonResponse({});
   } catch (err) {
     await captureEdgeException(
       err,
@@ -271,9 +280,12 @@ Deno.serve(async (req: Request) => {
       errorContext(err, { function: "send-auth-email" }),
     );
     // Generic body — full detail is in the Sentry capture + log above.
-    return new Response(
-      JSON.stringify({ error: "Internal error", executionId: Deno.env.get("SB_EXECUTION_ID") ?? null }),
-      { status: 500 },
+    return jsonResponse(
+      {
+        error: "Internal error",
+        executionId: Deno.env.get("SB_EXECUTION_ID") ?? null,
+      },
+      500,
     );
   }
 });
