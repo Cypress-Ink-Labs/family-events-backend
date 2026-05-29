@@ -66,12 +66,15 @@ function usernameFromUser(user: AuthEmailHookPayload["user"]): string {
 function buildVerifyLink(
   emailData: AuthEmailHookPayload["email_data"],
 ): string {
+  const authBaseUrl = (Deno.env.get("SUPABASE_URL") ?? emailData.site_url)
+    .replace(/\/auth\/v1\/?$/, "")
+    .replace(/\/$/, "");
   const params = new URLSearchParams({
     token: emailData.token_hash,
     type: emailData.email_action_type,
     redirect_to: emailData.redirect_to,
   });
-  return `${emailData.site_url}/auth/v1/verify?${params.toString()}`;
+  return `${authBaseUrl}/auth/v1/verify?${params.toString()}`;
 }
 
 function buildActionEmailHtml({
