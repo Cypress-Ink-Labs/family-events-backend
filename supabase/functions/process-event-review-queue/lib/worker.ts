@@ -573,6 +573,54 @@ export async function processReviewQueueRow(
       return await handleNonReviewableEvent(deps, startedRow, event);
     }
 
+    // Source auto-reject: skip LLM review for sources with high rejection rates
+    if (startedRow.source_id) {
+      try {
+        const autoRejectEnabled = await isMemoryFeatureEnabled(deps.supabase, "source-auto-reject");
+        if (autoRejectEnabled) {
+          const { data: shouldReject, error: arErr } = await deps.supabase
+            .rpc("should_auto_reject_source", { p_source_id: startedRow.source_id });
+
+          if (!arErr && shouldReject === true) {
+            // Auto-reject without LLM review
+            const autoRejectReview: AppliedLlmEventReviewDecision = {
+              status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
+              modelDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
+              appliedDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
+              confidence: 0.95,
+              reason: "Source has consistently high rejection rate; auto-rejected without LLM review.",
+              flags: ["source_auto_rejected"],
+              suggestedCategory: null,
+              normalizedTitle: null,
+              provider: null,
+              model: null,
+              promptVersion: deps.config.promptVersion,
+              rawResponse: null,
+              errorCode: null,
+              errorMessage: null,
+              processingMs: 0,
+            };
+
+            const applied = await applyEventDecision(
+              deps.supabase, event, startedRow, autoRejectReview,
+            );
+
+            if (applied) {
+              await logReviewEvent(deps, "log", "event_review_source_auto_rejected", {
+                function: "process-event-review-queue",
+                queue_id: startedRow.id,
+                event_id: event.id,
+                source_id: startedRow.source_id,
+              });
+              return { outcome: "succeeded", appliedDecision: LLM_EVENT_REVIEW_DECISION.REJECT, failed: false };
+            }
+          }
+        }
+      } catch {
+        // Auto-reject check failure is non-fatal — continue to LLM review
+      }
+    }
+
     return await reviewAndApplyEvent(deps, startedRow, event);
   } catch (error) {
     const message = errorMessage(error);

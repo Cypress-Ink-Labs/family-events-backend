@@ -175,7 +175,7 @@ verify_jwt = true
 #
 # For local dev, configure it in Supabase Studio (port 55323) or leave it
 # unset — auth emails will fall through to Inbucket (port 55324).
-enabled = true
+enabled = false
 uri     = "https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/send-auth-email"
 # The raw hook secret comes from root .env for config pushes; the remote config
 # stores only its hash.
