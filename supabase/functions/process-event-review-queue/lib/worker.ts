@@ -11,8 +11,14 @@ import {
   type LlmReviewConfig,
   resolveLlmReviewConfig,
   reviewEventWithLlm,
+  type ReviewMemoryContext,
 } from "../../event-review/mod.ts";
 import { errorMessage, logEdgeEvent } from "../../_shared/logger.ts";
+import {
+  fetchSimilarReviewContext,
+  formatReviewMemoryPrompt,
+  isMemoryFeatureEnabled,
+} from "../../_shared/memory-context.ts";
 
 const DEFAULT_BATCH_SIZE = 60;
 const MAX_BATCH_SIZE = 100;
@@ -441,16 +447,72 @@ async function logReviewSignals(
   }
 }
 
+async function fetchReviewMemory(
+  deps: ReviewQueueDeps,
+  eventId: string,
+): Promise<ReviewMemoryContext | null> {
+  try {
+    const enabled = await isMemoryFeatureEnabled(deps.supabase, "review-memory");
+    if (!enabled) return null;
+
+    // Look up existing embedding for this event
+    const { data: embRow, error: embErr } = await deps.supabase
+      .from("event_embeddings")
+      .select("embedding")
+      .eq("event_id", eventId)
+      .maybeSingle();
+
+    if (embErr || !embRow) return null;
+
+    // Parse the vector string back to number array
+    const embStr = String((embRow as { embedding: string }).embedding);
+    const embedding = JSON.parse(embStr) as number[];
+    if (!Array.isArray(embedding) || embedding.length === 0) return null;
+
+    // Fetch event's city_id for scoping
+    const { data: evt } = await deps.supabase
+      .from("events")
+      .select("city_id")
+      .eq("id", eventId)
+      .maybeSingle();
+
+    const cityId = (evt as { city_id: string | null } | null)?.city_id ?? null;
+
+    const { contexts, confidenceAdjustment } = await fetchSimilarReviewContext(
+      deps.supabase,
+      embedding,
+      eventId,
+      cityId,
+      5,
+    );
+
+    if (contexts.length === 0) return null;
+
+    return {
+      memoryPrompt: formatReviewMemoryPrompt(contexts),
+      similarEventIds: contexts.map((c) => c.eventId),
+      confidenceDelta: confidenceAdjustment.delta,
+      confidenceReason: confidenceAdjustment.reason,
+    };
+  } catch {
+    // Memory retrieval failure is non-fatal
+    return null;
+  }
+}
+
 async function reviewAndApplyEvent(
   deps: ReviewQueueDeps,
   startedRow: EventLlmReviewQueueRow,
   event: EventReviewRow,
 ): Promise<EventReviewQueueRowResult> {
+  const memoryCtx = await fetchReviewMemory(deps, event.id);
+
   const review = await (deps.reviewEvent ?? reviewEventWithLlm)(
     buildReviewInput(event),
     {
       config: deps.config,
     },
+    memoryCtx,
   );
 
   const applied = await applyEventDecision(

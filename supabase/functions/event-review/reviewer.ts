@@ -40,9 +40,17 @@ function failedDecision(
   };
 }
 
+export interface ReviewMemoryContext {
+  memoryPrompt: string;
+  similarEventIds: string[];
+  confidenceDelta: number;
+  confidenceReason: string;
+}
+
 export async function reviewEventWithLlm(
   input: ReviewEventInput,
   deps?: Partial<ReviewEventDeps>,
+  memoryContext?: ReviewMemoryContext | null,
 ): Promise<AppliedLlmEventReviewDecision> {
   const startedAt = deps?.now?.() ?? Date.now();
   const config = deps?.config ?? resolveLlmReviewConfig();
@@ -91,7 +99,7 @@ export async function reviewEventWithLlm(
     );
   }
 
-  const prompt = buildReviewPrompt(normalized.normalized);
+  const prompt = buildReviewPrompt(normalized.normalized, memoryContext?.memoryPrompt);
   const provider = deps?.provider ?? buildLlmReviewProvider(config);
 
   try {
@@ -111,15 +119,33 @@ export async function reviewEventWithLlm(
     );
     const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
 
+    // Apply memory-based confidence adjustment
+    let adjustedConfidence = applied.confidence;
+    const memoryFlags: string[] = [];
+    if (memoryContext && memoryContext.confidenceDelta !== 0 && adjustedConfidence !== null) {
+      adjustedConfidence = Math.max(0, Math.min(1, adjustedConfidence + memoryContext.confidenceDelta));
+      memoryFlags.push("memory_context_used");
+      if (memoryContext.confidenceDelta > 0) memoryFlags.push("memory_confidence_boosted");
+      if (memoryContext.confidenceDelta < 0) memoryFlags.push("memory_confidence_penalized");
+    } else if (memoryContext) {
+      memoryFlags.push("memory_context_used");
+    }
+
     return {
       status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
       modelDecision: applied.modelDecision,
       appliedDecision: applied.appliedDecision,
-      confidence: applied.confidence,
-      reason: applied.reason,
-      flags: applied.lowConfidence
-        ? [...new Set([...applied.flags, "low_confidence"])]
-        : applied.flags,
+      confidence: adjustedConfidence,
+      reason: memoryContext?.confidenceDelta
+        ? `${applied.reason} [Memory: ${memoryContext.confidenceReason}]`
+        : applied.reason,
+      flags: [
+        ...new Set([
+          ...applied.flags,
+          ...(applied.lowConfidence ? ["low_confidence"] : []),
+          ...memoryFlags,
+        ]),
+      ],
       suggestedCategory: applied.suggestedCategory,
       normalizedTitle: applied.normalizedTitle,
       provider: providerOutput.provider,
