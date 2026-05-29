@@ -1,4 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
+import { Webhook } from "npm:standardwebhooks@1.0.0";
 import { escapeHtml } from "../_shared/html.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
@@ -107,9 +108,43 @@ async function sendEmail(
 }
 
 Deno.serve(async (req: Request) => {
+  // Standard Webhooks signature verification. Supabase Auth signs the send_email
+  // hook payload with the secret configured in [auth.hook.send_email]
+  // (format: "v1,whsec_<base64>"). Without this check the endpoint is a public,
+  // unauthenticated email sender (auth bypass / phishing / Resend abuse).
+  const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") ?? "";
+  const raw = await req.text();
+
+  if (hookSecret) {
+    try {
+      // standardwebhooks expects the bare base64 secret, not the "v1,whsec_" prefix.
+      const wh = new Webhook(hookSecret.replace(/^v1,whsec_/, ""));
+      wh.verify(raw, {
+        "webhook-id": req.headers.get("webhook-id") ?? "",
+        "webhook-timestamp": req.headers.get("webhook-timestamp") ?? "",
+        "webhook-signature": req.headers.get("webhook-signature") ?? "",
+      });
+    } catch (_err) {
+      logEdgeEvent("warn", "send-auth-email: invalid webhook signature", {
+        function: "send-auth-email",
+      });
+      return new Response(JSON.stringify({ error: "invalid signature" }), {
+        status: 401,
+      });
+    }
+  } else {
+    // Local/dev only: no secret configured. Supabase CLI / Inbucket flows run
+    // without a hook secret. Production MUST set SEND_EMAIL_HOOK_SECRET.
+    logEdgeEvent(
+      "warn",
+      "send-auth-email: SEND_EMAIL_HOOK_SECRET not set; skipping signature verification (dev only)",
+      { function: "send-auth-email" },
+    );
+  }
+
   let payload: AuthEmailHookPayload;
   try {
-    payload = (await req.json()) as AuthEmailHookPayload;
+    payload = JSON.parse(raw) as AuthEmailHookPayload;
   } catch {
     return new Response(JSON.stringify({ error: "invalid JSON body" }), {
       status: 400,

@@ -314,4 +314,76 @@ BEGIN
   RAISE NOTICE 'EMAIL_PROVIDER_OK: email provider behavior preserved.';
 END $$;
 
+-- -----------------------------------------------------------------------------
+-- Default path (GUC absent): open registration.
+-- This is the production default after 20260601012000/014000/015000 — the GUC is
+-- unset, so private.invites_required() returns false and BOTH consumer functions
+-- (handle_new_user, enforce_invited_oauth_signup) must treat the gate as OFF.
+-- Regression guard for the half-applied invite-gate disable (audit H1): before
+-- 20260601015000 these functions read the GUC directly with a hardcoded 'true'
+-- default, so the absent-GUC path left new accounts disabled / OAuth blocked.
+-- -----------------------------------------------------------------------------
+SELECT set_config('app.settings.require_invite', NULL, false);
+
+-- invites_required() must report the gate OFF when the GUC is absent.
+DO $$
+BEGIN
+  IF private.invites_required() IS DISTINCT FROM false THEN
+    RAISE EXCEPTION 'DEFAULT_GUC_FAIL: invites_required() should be false when GUC is unset, got %',
+      private.invites_required();
+  END IF;
+END $$;
+
+-- Email signup on the default path must land ENABLED.
+DO $$
+DECLARE
+  uid uuid := gen_random_uuid();
+  access_enabled boolean;
+BEGIN
+  INSERT INTO auth.users (
+    id, email, aud, role, email_confirmed_at, instance_id,
+    raw_app_meta_data, raw_user_meta_data
+  )
+  VALUES (
+    uid, 'default-email@test.local', 'authenticated', 'authenticated', now(),
+    '00000000-0000-0000-0000-000000000000',
+    jsonb_build_object('provider', 'email', 'providers', jsonb_build_array('email')),
+    jsonb_build_object('display_name', 'Default Email')
+  );
+
+  SELECT is_enabled INTO access_enabled FROM public.user_access WHERE user_id = uid;
+
+  IF access_enabled IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'DEFAULT_EMAIL_FAIL: absent-GUC email signup should be enabled, got %', access_enabled;
+  END IF;
+
+  RAISE NOTICE 'DEFAULT_EMAIL_OK: email signup enabled when invite GUC is unset.';
+END $$;
+
+-- Google OAuth signup with no pending claim must be allowed (not blocked) and ENABLED.
+DO $$
+DECLARE
+  uid uuid := gen_random_uuid();
+  access_enabled boolean;
+BEGIN
+  INSERT INTO auth.users (
+    id, email, aud, role, email_confirmed_at, instance_id,
+    raw_app_meta_data, raw_user_meta_data
+  )
+  VALUES (
+    uid, 'default-google@test.local', 'authenticated', 'authenticated', now(),
+    '00000000-0000-0000-0000-000000000000',
+    jsonb_build_object('provider', 'google', 'providers', jsonb_build_array('google')),
+    jsonb_build_object('display_name', 'Default Google')
+  );
+
+  SELECT is_enabled INTO access_enabled FROM public.user_access WHERE user_id = uid;
+
+  IF access_enabled IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'DEFAULT_GOOGLE_FAIL: absent-GUC OAuth signup should be enabled, got %', access_enabled;
+  END IF;
+
+  RAISE NOTICE 'DEFAULT_GOOGLE_OK: Google OAuth signup allowed + enabled when invite GUC is unset.';
+END $$;
+
 ROLLBACK;
