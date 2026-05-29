@@ -66,6 +66,8 @@ function blockedIPv4Reason(octets: [number, number, number, number]): string | n
   if (a === 172 && b >= 16 && b <= 31) return "Blocked IPv4 range 172.16.0.0/12 (private)"
   if (a === 192 && b === 168) return "Blocked IPv4 range 192.168.0.0/16 (private)"
   if (a === 169 && b === 254) return "Blocked IPv4 range 169.254.0.0/16 (link-local/metadata)"
+  if (a === 0) return "Blocked IPv4 range 0.0.0.0/8 (unspecified)"
+  if (a >= 224) return "Blocked IPv4 range >= 224.0.0.0 (multicast/reserved)"
   return null
 }
 
@@ -119,6 +121,19 @@ function blockedIPv6Reason(groups: number[]): string | null {
   }
   if ((first & 0xffc0) === 0xfe80) {
     return "Blocked IPv6 range fe80::/10 (link-local)"
+  }
+  if (groups.every((g) => g === 0)) {
+    return "Blocked IPv6 address :: (unspecified)"
+  }
+  // ::ffff:a.b.c.d (IPv4-mapped) — re-check the embedded IPv4 against v4 ranges
+  if (groups.slice(0, 5).every((g) => g === 0) && groups[5] === 0xffff) {
+    const embedded = blockedIPv4Reason([
+      groups[6] >> 8,
+      groups[6] & 0xff,
+      groups[7] >> 8,
+      groups[7] & 0xff,
+    ])
+    if (embedded) return `Blocked IPv4-mapped IPv6 (${embedded})`
   }
   return null
 }

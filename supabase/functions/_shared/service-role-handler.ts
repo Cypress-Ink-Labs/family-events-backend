@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "./auth.ts";
-import { errorContext, errorMessage } from "./logger.ts";
+import { errorContext } from "./logger.ts";
 import { captureEdgeException } from "./sentry.ts";
 
 const corsHeaders = {
@@ -90,7 +90,12 @@ export function serveServiceRoleJson(
         err,
         errorContext(err, { function: functionName, stage: errorStage }),
       );
-      return jsonResponse({ error: errorMessage(err) }, 500);
+      // Do not leak DB/PostgREST detail (code=/details=) to callers. Full detail
+      // is logged + sent to Sentry above; the client gets a correlation id.
+      return jsonResponse(
+        { error: "Internal error", executionId: Deno.env.get("SB_EXECUTION_ID") ?? null },
+        500,
+      );
     }
   });
 }

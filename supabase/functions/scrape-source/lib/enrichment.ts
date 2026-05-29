@@ -1,4 +1,5 @@
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
+import { guardedFetch } from "../../_shared/guarded-fetch.ts";
 import type { ParsedEvent } from "./types.ts";
 
 const IMAGE_HEAD_TIMEOUT_MS = 5_000;
@@ -64,14 +65,13 @@ async function measureImageByteLength(
 ): Promise<number | null> {
   let response: Response;
   try {
-    response = await fetch(imageUrl, {
+    response = await guardedFetch(imageUrl, {
       method: "GET",
       headers: {
         "User-Agent":
           "family-events-ingester/1.0 (+https://family-events.local)",
         Accept: "image/*",
       },
-      redirect: "error",
       signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
     });
   } catch {
@@ -128,7 +128,7 @@ async function validateImageAtIngest(
 
   let response: Response;
   try {
-    response = await fetch(parsedUrl.toString(), {
+    response = await guardedFetch(parsedUrl.toString(), {
       method: "HEAD",
       headers: {
         "User-Agent":

@@ -8,7 +8,7 @@ import {
   jsonResponse,
   optionsResponse,
 } from "./http.ts";
-import { errorContext, errorMessage } from "./logger.ts";
+import { errorContext } from "./logger.ts";
 import { captureEdgeException } from "./sentry.ts";
 import { createServiceClient } from "./supabase-client.ts";
 
@@ -135,7 +135,9 @@ export function createAdminJsonHandler(
         err,
         errorContext(err, { function: functionName, stage: errorStage }),
       );
-      return errorJson(errorMessage(err), 500, corsHeaders);
+      // Do not leak DB/PostgREST detail (code=/details=) to callers. Full detail
+      // is logged + sent to Sentry above.
+      return errorJson("Internal error", 500, corsHeaders);
     }
   };
 }

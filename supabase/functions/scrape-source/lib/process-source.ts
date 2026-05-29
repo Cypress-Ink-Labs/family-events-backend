@@ -5,7 +5,7 @@ import {
   errorMessage as formatError,
   logEdgeEvent,
 } from "../../_shared/logger.ts";
-import { resolveAndCheckPublicIp } from "../../_shared/url-resolve.ts";
+import { guardedFetch } from "../../_shared/guarded-fetch.ts";
 import type { ParserContext } from "./parser-context.ts";
 import { resolveCityTimezone } from "./schedule.ts";
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
@@ -130,15 +130,10 @@ async function readResponseBodyCapped(
 const DEFAULT_FETCH_ACCEPT = "text/html,application/xml,text/xml,*/*";
 
 async function guardedFetchText(url: string, accept: string): Promise<string> {
-  // DNS-resolution-time SSRF check. validateExternalUrl alone only catches IP
-  // literals; resolveAndCheckPublicIp also rejects hostnames that resolve into
-  // private/loopback/link-local ranges (e.g. 169.254.169.254 metadata, RFC1918).
-  const validation = await resolveAndCheckPublicIp(url);
-  if (!validation.ok) {
-    throw new Error(`Source URL rejected by validator: ${validation.reason}`);
-  }
-
-  const response = await fetch(url, {
+  // SSRF-safe fetch. guardedFetch resolves + range-checks the URL AND every
+  // redirect hop, and never transparently follows a redirect into an
+  // unvalidated target (e.g. 169.254.169.254 metadata, RFC1918, 127.0.0.1).
+  const response = await guardedFetch(url, {
     headers: {
       "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
       Accept: accept,
