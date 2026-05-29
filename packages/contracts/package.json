@@ -13,9 +13,6 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests"
   },
-  "dependencies": {
-    "zod": "^4.4.3"
-  },
   "devDependencies": {
     "@family-events/config-quality": "workspace:*",
     "@family-events/config-typescript": "workspace:*"

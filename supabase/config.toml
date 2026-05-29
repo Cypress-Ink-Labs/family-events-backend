@@ -3,7 +3,7 @@ project_id = "family-events-ui"
 [api]
 enabled           = true
 port              = 55321
-schemas           = ["public", "storage"]
+schemas           = ["public", "storage", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows          = 1000
 
@@ -26,10 +26,10 @@ enabled = true
 
 [auth]
 enabled       = true
-site_url      = "http://localhost:5173"
+site_url      = "https://family-events.org"
 jwt_expiry    = 3600
 enable_signup = true
-minimum_password_length = 8
+minimum_password_length = 6
 # Keep this list in sync with Supabase Dashboard → Authentication → URL
 # Configuration → Redirect URLs. The dashboard list governs the hosted
 # project; this list governs `supabase start` only. Both must include any
@@ -40,28 +40,30 @@ additional_redirect_urls = [
   "http://localhost:5173/**",
   "https://family-events.up.railway.app",
   "https://family-events.up.railway.app/**",
+  "https://family-events.org/**",
 ]
 
 [auth.external.apple]
 enabled = true
-# Services ID is public; hardcode to prevent `supabase config push` from
-# clobbering prod when SUPABASE_AUTH_EXTERNAL_APPLE_CLIENT_ID is unset locally.
+# Services ID is public. The secret is the hosted project's existing hash so
+# config pushes do not overwrite Apple OAuth when the raw .p8/JWT is absent.
 client_id = "app.familyevents.web"
-secret    = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
-# Apple "secret" is the signed JWT computed from team ID + key ID + .p8.
-# Never run `supabase config push` without setting the secret env var first,
-# or prod Apple auth will break.
+secret    = "hash:fd39ad53627a44755fbcb4c820aa717bcfeaa1768db820d155fd5ccbf6206687"
 url              = ""
 redirect_uri     = ""
 skip_nonce_check = false
 
 [auth.external.google]
 enabled          = true
-client_id        = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+client_id        = "545014101545-6sdgf63hp1q1vucmio3p98qo84mojnk1.apps.googleusercontent.com,545014101545-in1qudtusha5kqlf5cben5oljjhmha6o.apps.googleusercontent.com,545014101545-nbm89gkb02g645n19ftk4pkan4kro0pl.apps.googleusercontent.com"
 secret           = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 url              = ""
 redirect_uri     = ""
-skip_nonce_check = false
+skip_nonce_check = true
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
 
 [storage]
 enabled         = true
@@ -175,8 +177,6 @@ verify_jwt = true
 # unset — auth emails will fall through to Inbucket (port 55324).
 enabled = true
 uri     = "https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/send-auth-email"
-# Must be a literal v1,whsec_<base64> value so Supabase CLI validation
-# passes in CI/preview environments where local .env files are unavailable.
-# Replace this with your project's generated hook secret when managing hook
-# config from source control.
-secrets = "v1,whsec_YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXowMTIzNDU2Nzg5QUI="
+# The raw hook secret comes from root .env for config pushes; the remote config
+# stores only its hash.
+secrets = "env(SEND_EMAIL_HOOK_SECRET)"

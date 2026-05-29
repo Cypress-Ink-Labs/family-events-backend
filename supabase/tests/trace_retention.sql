@@ -41,12 +41,12 @@ VALUES
 -- 2. Seed source_extraction_traces: 2 recent, 2 old
 -- =============================================
 INSERT INTO public.source_extraction_traces
-  (extraction_mode, extractor, status, created_at)
+  (extraction_mode, extractor, status, error, created_at)
 VALUES
-  ('deterministic', 'deterministic', 'success', now()),
-  ('deterministic', 'deterministic', 'success', now()),
-  ('deterministic', 'deterministic', 'success', now() - interval '100 days'),
-  ('deterministic', 'deterministic', 'success', now() - interval '100 days');
+  ('deterministic', 'deterministic', 'success', 'trace-retention-recent-1', now()),
+  ('deterministic', 'deterministic', 'success', 'trace-retention-recent-2', now()),
+  ('deterministic', 'deterministic', 'success', 'trace-retention-old-1', now() - interval '100 days'),
+  ('deterministic', 'deterministic', 'success', 'trace-retention-old-2', now() - interval '100 days');
 
 -- =============================================
 -- 3. Run maintenance
@@ -99,7 +99,7 @@ BEGIN
 
   SELECT count(*) INTO old_count
   FROM public.source_extraction_traces
-  WHERE created_at < cutoff;
+  WHERE error IN ('trace-retention-old-1', 'trace-retention-old-2');
 
   IF old_count <> 0 THEN
     RAISE EXCEPTION 'EXTRACTION_TRACES_OLD_FAIL: expected 0 old rows, got %', old_count;
@@ -108,7 +108,8 @@ BEGIN
 
   SELECT count(*) INTO recent_count
   FROM public.source_extraction_traces
-  WHERE created_at >= cutoff;
+  WHERE error IN ('trace-retention-recent-1', 'trace-retention-recent-2')
+    AND created_at >= cutoff;
 
   IF recent_count <> 2 THEN
     RAISE EXCEPTION 'EXTRACTION_TRACES_RECENT_FAIL: expected 2 recent rows, got %', recent_count;

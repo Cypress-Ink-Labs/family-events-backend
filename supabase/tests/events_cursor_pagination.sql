@@ -70,13 +70,13 @@ SELECT (v)::uuid,
          ELSE                  'CX Xylophone Unique Keyword Event'
        END,
        CASE k
-         WHEN 'ev_tie1'   THEN now() + interval '1 day'
-         WHEN 'ev_tie2'   THEN now() + interval '1 day'
-         WHEN 'ev_a3'     THEN now() + interval '2 days'
-         WHEN 'ev_a4'     THEN now() + interval '3 days'
-         WHEN 'ev_b1'     THEN now() + interval '1 day 6 hours'
-         WHEN 'ev_b2'     THEN now() + interval '4 days'
-         ELSE                  now() + interval '5 days'
+         WHEN 'ev_tie1'   THEN timestamptz '2099-01-01 10:00:00+00'
+         WHEN 'ev_tie2'   THEN timestamptz '2099-01-01 10:00:00+00'
+         WHEN 'ev_a3'     THEN timestamptz '2099-01-02 10:00:00+00'
+         WHEN 'ev_a4'     THEN timestamptz '2099-01-03 10:00:00+00'
+         WHEN 'ev_b1'     THEN timestamptz '2099-01-01 16:00:00+00'
+         WHEN 'ev_b2'     THEN timestamptz '2099-01-04 10:00:00+00'
+         ELSE                  timestamptz '2099-01-05 10:00:00+00'
        END,
        'published',
        CASE k
@@ -96,7 +96,11 @@ DECLARE
   out_of_order int;
 BEGIN
   SELECT COUNT(*) INTO n
-  FROM public.events_enriched(p_limit := 3)
+  FROM public.events_enriched(
+    p_date_from := timestamptz '2099-01-01 00:00:00+00',
+    p_date_to   := timestamptz '2099-01-06 00:00:00+00',
+    p_limit     := 3
+  )
   WHERE title LIKE 'CX %';
 
   IF n IS DISTINCT FROM 3 THEN
@@ -112,7 +116,11 @@ BEGIN
       id,
       LAG(start_datetime) OVER (ORDER BY start_datetime ASC, id ASC) AS prev_dt,
       LAG(id)             OVER (ORDER BY start_datetime ASC, id ASC) AS prev_id
-    FROM public.events_enriched(p_limit := 3)
+    FROM public.events_enriched(
+      p_date_from := timestamptz '2099-01-01 00:00:00+00',
+      p_date_to   := timestamptz '2099-01-06 00:00:00+00',
+      p_limit     := 3
+    )
     WHERE title LIKE 'CX %'
   ) ranked
   WHERE prev_dt IS NOT NULL
@@ -141,12 +149,18 @@ BEGIN
          (array_agg(r.start_datetime ORDER BY r.start_datetime ASC, r.id ASC))[3],
          (array_agg(r.id            ORDER BY r.start_datetime ASC, r.id ASC))[3]
     INTO page1_ids, last_dt, last_id
-  FROM public.events_enriched(p_limit := 3) r
+  FROM public.events_enriched(
+    p_date_from := timestamptz '2099-01-01 00:00:00+00',
+    p_date_to   := timestamptz '2099-01-06 00:00:00+00',
+    p_limit     := 3
+  ) r
   WHERE r.title LIKE 'CX %';
 
   SELECT array_agg(r.id ORDER BY r.start_datetime ASC, r.id ASC)
     INTO page2_ids
   FROM public.events_enriched(
+    p_date_from             := timestamptz '2099-01-01 00:00:00+00',
+    p_date_to               := timestamptz '2099-01-06 00:00:00+00',
     p_limit                := 3,
     p_after_start_datetime := last_dt,
     p_after_id             := last_id
@@ -214,7 +228,7 @@ BEGIN
 
   -- Events at +1d should be excluded.
   SELECT COUNT(*) INTO n
-  FROM public.events_enriched(p_date_from := now() + interval '1 day 12 hours')
+  FROM public.events_enriched(p_date_from := timestamptz '2099-01-01 22:00:00+00')
   WHERE id IN (tie1_id, tie2_id);
 
   IF n <> 0 THEN
@@ -223,7 +237,10 @@ BEGIN
 
   -- Events from +2d onward should still appear.
   SELECT COUNT(*) INTO n
-  FROM public.events_enriched(p_date_from := now() + interval '1 day 12 hours')
+  FROM public.events_enriched(
+    p_date_from := timestamptz '2099-01-01 22:00:00+00',
+    p_date_to   := timestamptz '2099-01-06 00:00:00+00'
+  )
   WHERE title LIKE 'CX %';
 
   IF n = 0 THEN
@@ -265,6 +282,8 @@ BEGIN
   INTO first_id, sec_id, last_dt, last_id
   FROM public.events_enriched(
     p_city_id := (SELECT (v)::uuid FROM _cx WHERE k='city_a'),
+    p_date_from := timestamptz '2099-01-01 00:00:00+00',
+    p_date_to   := timestamptz '2099-01-06 00:00:00+00',
     p_limit   := 2
   ) r;
 
@@ -278,6 +297,8 @@ BEGIN
     INTO p2_ids
   FROM public.events_enriched(
     p_city_id              := (SELECT (v)::uuid FROM _cx WHERE k='city_a'),
+    p_date_from            := timestamptz '2099-01-01 00:00:00+00',
+    p_date_to              := timestamptz '2099-01-06 00:00:00+00',
     p_limit                := 10,
     p_after_start_datetime := last_dt,
     p_after_id             := last_id
@@ -307,7 +328,11 @@ DECLARE
   wrong int;
 BEGIN
   SELECT COUNT(*) INTO wrong
-  FROM public.events_enriched(p_user_id := NULL)
+  FROM public.events_enriched(
+    p_user_id   := NULL,
+    p_date_from := timestamptz '2099-01-01 00:00:00+00',
+    p_date_to   := timestamptz '2099-01-06 00:00:00+00'
+  )
   WHERE title LIKE 'CX %'
     AND (is_favorited IS DISTINCT FROM false OR is_in_calendar IS DISTINCT FROM false);
 

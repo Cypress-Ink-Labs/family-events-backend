@@ -76,10 +76,10 @@ SELECT (v)::uuid,
          ELSE                 'P2 Draft Event'
        END,
        CASE k
-         WHEN 'ev_rated' THEN now() + interval '1 day'
-         WHEN 'ev_zero'  THEN now() + interval '2 days'
-         WHEN 'ev_other' THEN now() + interval '3 days'
-         ELSE                 now() + interval '4 days'
+         WHEN 'ev_rated' THEN timestamptz '2099-02-01 10:00:00+00'
+         WHEN 'ev_zero'  THEN timestamptz '2099-02-02 10:00:00+00'
+         WHEN 'ev_other' THEN timestamptz '2099-02-03 10:00:00+00'
+         ELSE                 timestamptz '2099-02-04 10:00:00+00'
        END,
        (CASE k WHEN 'ev_draft' THEN 'draft' ELSE 'published' END)::public.event_status,
        CASE k
@@ -145,14 +145,23 @@ BEGIN
 
   -- All three published events in city_a should come back when filtered by city_a;
   -- with no city filter we'd also get ev_other (city_b).
-  SELECT count(*) INTO n FROM public.events_enriched(p_city_id := NULL, p_user_id := NULL)
+  SELECT count(*) INTO n FROM public.events_enriched(
+    p_city_id := NULL,
+    p_user_id := NULL,
+    p_date_from := timestamptz '2099-02-01 00:00:00+00',
+    p_date_to := timestamptz '2099-02-05 00:00:00+00'
+  )
     WHERE id IN (ev_rated, ev_zero, ev_other);
   IF n <> 3 THEN
     RAISE EXCEPTION 'ANON_COUNT_FAIL: expected 3 published events, got %', n;
   END IF;
 
   -- Draft must NOT appear under default p_status='published'.
-  SELECT count(*) INTO n FROM public.events_enriched(p_user_id := NULL)
+  SELECT count(*) INTO n FROM public.events_enriched(
+    p_user_id := NULL,
+    p_date_from := timestamptz '2099-02-01 00:00:00+00',
+    p_date_to := timestamptz '2099-02-05 00:00:00+00'
+  )
     WHERE id = (SELECT (v)::uuid FROM _fx WHERE k='ev_draft');
   IF n <> 0 THEN
     RAISE EXCEPTION 'ANON_DRAFT_FAIL: draft event leaked into p_status=published result';
@@ -160,7 +169,7 @@ BEGIN
 
   -- is_favorited / is_in_calendar false for anon on ev_rated (which IS favorited by user_uid).
   SELECT is_favorited, is_in_calendar INTO r_fav, r_cal
-  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_rated;
+  FROM public.events_enriched(p_user_id := NULL, p_event_ids := ARRAY[ev_rated]) WHERE id = ev_rated;
   IF r_fav IS DISTINCT FROM false OR r_cal IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'ANON_USER_STATE_FAIL: got is_favorited=%, is_in_calendar=%, want false/false', r_fav, r_cal;
   END IF;
@@ -168,7 +177,7 @@ BEGIN
 
   -- Zero-rating event returns 0/0, not NULL.
   SELECT avg_rating, rating_count INTO r_avg, r_count
-  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_zero;
+  FROM public.events_enriched(p_user_id := NULL, p_event_ids := ARRAY[ev_zero]) WHERE id = ev_zero;
   IF r_avg IS DISTINCT FROM 0::numeric OR r_count IS DISTINCT FROM 0 THEN
     RAISE EXCEPTION 'ZERO_RATING_FAIL: got avg=%, count=%, want 0/0', r_avg, r_count;
   END IF;
@@ -176,7 +185,7 @@ BEGIN
 
   -- Rated event: avg = ROUND(AVG(5,4,3)=4.0, 1) = 4.0, count = 3.
   SELECT avg_rating, rating_count INTO r_avg, r_count
-  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_rated;
+  FROM public.events_enriched(p_user_id := NULL, p_event_ids := ARRAY[ev_rated]) WHERE id = ev_rated;
   IF r_avg IS DISTINCT FROM 4.0 OR r_count IS DISTINCT FROM 3 THEN
     RAISE EXCEPTION 'RATED_FAIL: got avg=%, count=%, want 4.0/3', r_avg, r_count;
   END IF;
@@ -184,7 +193,7 @@ BEGIN
 
   -- Tags: ev_rated has Art + Music; must be a jsonb array, alphabetized by name.
   SELECT tags INTO r_tags
-  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_rated;
+  FROM public.events_enriched(p_user_id := NULL, p_event_ids := ARRAY[ev_rated]) WHERE id = ev_rated;
   IF jsonb_typeof(r_tags) IS DISTINCT FROM 'array' OR jsonb_array_length(r_tags) <> 2 THEN
     RAISE EXCEPTION 'TAGS_SHAPE_FAIL: got %, want 2-element array', r_tags;
   END IF;
@@ -198,7 +207,7 @@ BEGIN
 
   -- Tags: ev_zero has no tags → '[]'::jsonb, never NULL.
   SELECT tags INTO r_tags
-  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_zero;
+  FROM public.events_enriched(p_user_id := NULL, p_event_ids := ARRAY[ev_zero]) WHERE id = ev_zero;
   IF r_tags IS DISTINCT FROM '[]'::jsonb THEN
     RAISE EXCEPTION 'TAGS_EMPTY_FAIL: got %, want []', r_tags;
   END IF;
@@ -207,12 +216,12 @@ BEGIN
   -- ai_tag_provider: ev_rated was UPDATEd to 'openai'; ev_zero left unset (NULL).
   -- Both must round-trip through the RPC's RETURNS TABLE unchanged.
   SELECT ai_tag_provider INTO r_provider
-  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_rated;
+  FROM public.events_enriched(p_user_id := NULL, p_event_ids := ARRAY[ev_rated]) WHERE id = ev_rated;
   IF r_provider IS DISTINCT FROM 'openai' THEN
     RAISE EXCEPTION 'AI_TAG_PROVIDER_RATED_FAIL: got %, want ''openai''', r_provider;
   END IF;
   SELECT ai_tag_provider INTO r_provider
-  FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_zero;
+  FROM public.events_enriched(p_user_id := NULL, p_event_ids := ARRAY[ev_zero]) WHERE id = ev_zero;
   IF r_provider IS NOT NULL THEN
     RAISE EXCEPTION 'AI_TAG_PROVIDER_NULL_FAIL: got %, want NULL', r_provider;
   END IF;
@@ -221,7 +230,9 @@ BEGIN
   -- p_city_id filter: passing city_b should return ONLY ev_other.
   SELECT count(*) INTO n FROM public.events_enriched(
     p_city_id := (SELECT (v)::uuid FROM _fx WHERE k='city_b'),
-    p_user_id := NULL
+    p_user_id := NULL,
+    p_date_from := timestamptz '2099-02-01 00:00:00+00',
+    p_date_to := timestamptz '2099-02-05 00:00:00+00'
   );
   IF n <> 1 THEN
     RAISE EXCEPTION 'CITY_FILTER_FAIL: p_city_id=city_b returned %, want 1', n;
@@ -266,7 +277,8 @@ BEGIN
   -- leaving only ev_other.
   SELECT count(*) INTO n FROM public.events_enriched(
     p_user_id := NULL,
-    p_date_from := now() + interval '2 days 12 hours'
+    p_date_from := timestamptz '2099-02-02 22:00:00+00',
+    p_date_to := timestamptz '2099-02-05 00:00:00+00'
   )
   WHERE id IN (ev_rated, ev_zero, ev_other);
   IF n <> 1 THEN
@@ -277,7 +289,8 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM public.events_enriched(
       p_user_id := NULL,
-      p_date_from := now() + interval '2 days 12 hours'
+      p_date_from := timestamptz '2099-02-02 22:00:00+00',
+      p_date_to := timestamptz '2099-02-05 00:00:00+00'
     ) WHERE id = ev_rated
   ) THEN
     RAISE EXCEPTION 'DATE_FROM_LOWER_BOUND_FAIL: ev_rated not excluded by lower bound';
@@ -288,7 +301,8 @@ BEGIN
   -- and exclude ev_zero (+2d), ev_other (+3d).
   SELECT count(*) INTO n FROM public.events_enriched(
     p_user_id := NULL,
-    p_date_to := now() + interval '1 day 12 hours'
+    p_date_from := timestamptz '2099-02-01 00:00:00+00',
+    p_date_to := timestamptz '2099-02-01 22:00:00+00'
   )
   WHERE id IN (ev_rated, ev_zero, ev_other);
   IF n <> 1 THEN
@@ -299,7 +313,8 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM public.events_enriched(
       p_user_id := NULL,
-      p_date_to := now() + interval '1 day 12 hours'
+      p_date_from := timestamptz '2099-02-01 00:00:00+00',
+      p_date_to := timestamptz '2099-02-01 22:00:00+00'
     ) WHERE id = ev_other
   ) THEN
     RAISE EXCEPTION 'DATE_TO_UPPER_BOUND_FAIL: ev_other not excluded by upper bound';
@@ -318,13 +333,13 @@ BEGIN
   SELECT (v)::uuid INTO ev_zero  FROM _fx WHERE k='ev_zero';
 
   SELECT is_favorited, is_in_calendar INTO r_fav, r_cal
-  FROM public.events_enriched(p_user_id := uid) WHERE id = ev_rated;
+  FROM public.events_enriched(p_user_id := uid, p_event_ids := ARRAY[ev_rated]) WHERE id = ev_rated;
   IF r_fav IS DISTINCT FROM true OR r_cal IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'AUTH_RATED_FAIL: got fav=%, cal=%, want true/false', r_fav, r_cal;
   END IF;
 
   SELECT is_favorited, is_in_calendar INTO r_fav, r_cal
-  FROM public.events_enriched(p_user_id := uid) WHERE id = ev_zero;
+  FROM public.events_enriched(p_user_id := uid, p_event_ids := ARRAY[ev_zero]) WHERE id = ev_zero;
   IF r_fav IS DISTINCT FROM false OR r_cal IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'AUTH_ZERO_FAIL: got fav=%, cal=%, want false/true', r_fav, r_cal;
   END IF;
@@ -347,7 +362,11 @@ BEGIN
 
   SET LOCAL role anon;
   SELECT EXISTS (
-    SELECT 1 FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_rated
+    SELECT 1 FROM public.events_enriched(
+      p_user_id := NULL,
+      p_date_from := timestamptz '2099-02-01 00:00:00+00',
+      p_date_to := timestamptz '2099-02-05 00:00:00+00'
+    ) WHERE id = ev_rated
   ) INTO pub_visible;
   -- events_enriched is SECURITY DEFINER — draft filtering is enforced by the
   -- p_status parameter (defaults to 'published'), not by RLS. Calling with
@@ -357,7 +376,11 @@ BEGIN
   -- We test that the DEFAULT path (p_status = 'published') correctly excludes
   -- draft rows for an anon caller.
   SELECT NOT EXISTS (
-    SELECT 1 FROM public.events_enriched(p_user_id := NULL) WHERE id = ev_draft
+    SELECT 1 FROM public.events_enriched(
+      p_user_id := NULL,
+      p_date_from := timestamptz '2099-02-01 00:00:00+00',
+      p_date_to := timestamptz '2099-02-05 00:00:00+00'
+    ) WHERE id = ev_draft
   ) INTO draft_visible;
   RESET role;
 
@@ -375,4 +398,3 @@ END $$;
 ROLLBACK;
 
 \echo 'events_enriched_parity: PASS'
-
