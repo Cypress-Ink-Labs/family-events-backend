@@ -156,6 +156,12 @@ verify_jwt = false
 # requests carry a Supabase-signed payload, not a bearer JWT.
 verify_jwt = false
 
+[functions.weather]
+# Server-side OpenWeather proxy (keeps OPENWEATHER_API_KEY out of the client
+# bundle). Requires a JWT so it isn't an open proxy; supabase-js sends the
+# anon/authenticated token on invoke.
+verify_jwt = true
+
 [auth.hook.send_email]
 # Routes all Supabase Auth emails (magic link, signup confirmation, recovery,
 # email change) through the send-auth-email edge function → Resend templates.
