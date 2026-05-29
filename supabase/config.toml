@@ -46,7 +46,7 @@ additional_redirect_urls = [
 enabled = true
 # Services ID is public; hardcode to prevent `supabase config push` from
 # clobbering prod when SUPABASE_AUTH_EXTERNAL_APPLE_CLIENT_ID is unset locally.
-client_id = "com.familyevents.app"
+client_id = "app.familyevents.web"
 secret    = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
 # Apple "secret" is the signed JWT computed from team ID + key ID + .p8.
 # Never run `supabase config push` without setting the secret env var first,
