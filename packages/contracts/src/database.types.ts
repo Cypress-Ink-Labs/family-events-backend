@@ -33,6 +33,63 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_event_decisions: {
+        Row: {
+          admin_user_id: string | null
+          created_at: string
+          decision_type: string
+          event_id: string
+          id: number
+          new_status: Database["public"]["Enums"]["event_status"] | null
+          new_tags: Json | null
+          old_status: Database["public"]["Enums"]["event_status"] | null
+          old_tags: Json | null
+          reason: string | null
+          source_context: Json | null
+        }
+        Insert: {
+          admin_user_id?: string | null
+          created_at?: string
+          decision_type: string
+          event_id: string
+          id?: number
+          new_status?: Database["public"]["Enums"]["event_status"] | null
+          new_tags?: Json | null
+          old_status?: Database["public"]["Enums"]["event_status"] | null
+          old_tags?: Json | null
+          reason?: string | null
+          source_context?: Json | null
+        }
+        Update: {
+          admin_user_id?: string | null
+          created_at?: string
+          decision_type?: string
+          event_id?: string
+          id?: number
+          new_status?: Database["public"]["Enums"]["event_status"] | null
+          new_tags?: Json | null
+          old_status?: Database["public"]["Enums"]["event_status"] | null
+          old_tags?: Json | null
+          reason?: string | null
+          source_context?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_event_decisions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_event_decisions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_feature_config: {
         Row: {
           enabled: boolean
@@ -264,6 +321,45 @@ export type Database = {
             columns: ["source_run_id"]
             isOneToOne: false
             referencedRelation: "source_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_embeddings: {
+        Row: {
+          created_at: string
+          embedding: string
+          event_id: string
+          id: number
+          model: string
+        }
+        Insert: {
+          created_at?: string
+          embedding: string
+          event_id: string
+          id?: number
+          model?: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string
+          event_id?: string
+          id?: number
+          model?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_embeddings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_embeddings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "public_events"
             referencedColumns: ["id"]
           },
         ]
@@ -2132,72 +2228,140 @@ export type Database = {
         Args: { p_event_id: string }
         Returns: boolean
       }
-      admin_update_event: {
-        Args: {
-          p_event_id: string
-          p_lock_edited_fields?: boolean
-          p_patch: Json
-          p_tag_ids: string[]
-        }
-        Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }
-        SetofOptions: {
-          from: "*"
-          to: "events"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      admin_update_event:
+        | {
+            Args: {
+              p_event_id: string
+              p_lock_edited_fields?: boolean
+              p_patch: Json
+              p_tag_ids: string[]
+            }
+            Returns: {
+              address: string | null
+              admin_last_edited_at: string | null
+              admin_last_edited_by: string | null
+              admin_locked_fields: string[]
+              age_max: number | null
+              age_min: number | null
+              ai_confidence: number | null
+              ai_tag_model: string | null
+              ai_tag_provider: string | null
+              ai_tag_status: string | null
+              city_id: string | null
+              created_at: string
+              description: string | null
+              end_datetime: string | null
+              id: string
+              images: Json
+              is_featured: boolean
+              is_free: boolean
+              is_outdoor: boolean | null
+              last_enrichment_attempt_at: string | null
+              latitude: number | null
+              llm_review_confidence: number | null
+              llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+              llm_review_error: string | null
+              llm_review_flags: string[]
+              llm_review_model: string | null
+              llm_review_prompt_version: string | null
+              llm_review_provider: string | null
+              llm_review_reason: string | null
+              llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+              llm_reviewed_at: string | null
+              longitude: number | null
+              parent_tips: Json | null
+              parent_tips_generated_at: string | null
+              parent_tips_model: string | null
+              parent_tips_prompt_version: string | null
+              parent_tips_provider: string | null
+              price: number | null
+              recurrence_info: Json | null
+              search_vector: unknown
+              source_id: string | null
+              source_name: string | null
+              source_url: string | null
+              start_datetime: string
+              status: Database["public"]["Enums"]["event_status"]
+              timezone: string
+              title: string
+              updated_at: string
+              venue_name: string | null
+              view_count: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "events"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              p_decision_reason?: string
+              p_event_id: string
+              p_lock_edited_fields?: boolean
+              p_patch: Json
+              p_tag_ids: string[]
+            }
+            Returns: {
+              address: string | null
+              admin_last_edited_at: string | null
+              admin_last_edited_by: string | null
+              admin_locked_fields: string[]
+              age_max: number | null
+              age_min: number | null
+              ai_confidence: number | null
+              ai_tag_model: string | null
+              ai_tag_provider: string | null
+              ai_tag_status: string | null
+              city_id: string | null
+              created_at: string
+              description: string | null
+              end_datetime: string | null
+              id: string
+              images: Json
+              is_featured: boolean
+              is_free: boolean
+              is_outdoor: boolean | null
+              last_enrichment_attempt_at: string | null
+              latitude: number | null
+              llm_review_confidence: number | null
+              llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+              llm_review_error: string | null
+              llm_review_flags: string[]
+              llm_review_model: string | null
+              llm_review_prompt_version: string | null
+              llm_review_provider: string | null
+              llm_review_reason: string | null
+              llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+              llm_reviewed_at: string | null
+              longitude: number | null
+              parent_tips: Json | null
+              parent_tips_generated_at: string | null
+              parent_tips_model: string | null
+              parent_tips_prompt_version: string | null
+              parent_tips_provider: string | null
+              price: number | null
+              recurrence_info: Json | null
+              search_vector: unknown
+              source_id: string | null
+              source_name: string | null
+              source_url: string | null
+              start_datetime: string
+              status: Database["public"]["Enums"]["event_status"]
+              timezone: string
+              title: string
+              updated_at: string
+              venue_name: string | null
+              view_count: number
+            }
+            SetofOptions: {
+              from: "*"
+              to: "events"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       admin_update_event_status: {
         Args: { p_event_id: string; p_reason?: string; p_status: string }
         Returns: {
@@ -2484,6 +2648,23 @@ export type Database = {
           updated_at: string
           venue_name: string
           view_count: number
+        }[]
+      }
+      find_similar_events: {
+        Args: {
+          p_city_id?: string
+          p_embedding: string
+          p_exclude_event_id?: string
+          p_limit?: number
+          p_threshold?: number
+        }
+        Returns: {
+          city_id: string
+          cosine_distance: number
+          event_id: string
+          source_id: string
+          status: Database["public"]["Enums"]["event_status"]
+          title: string
         }[]
       }
       get_approved_ai_models: {
