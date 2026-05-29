@@ -2,7 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { Webhook } from "npm:standardwebhooks@1.0.0";
 import { escapeHtml } from "../_shared/html.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
+import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
 
 // send-auth-email
 // ----------------------------------------------------------------
@@ -270,8 +270,10 @@ Deno.serve(async (req: Request) => {
       "send-auth-email outer failure",
       errorContext(err, { function: "send-auth-email" }),
     );
-    return new Response(JSON.stringify({ error: errorMessage(err) }), {
-      status: 500,
-    });
+    // Generic body — full detail is in the Sentry capture + log above.
+    return new Response(
+      JSON.stringify({ error: "Internal error", executionId: Deno.env.get("SB_EXECUTION_ID") ?? null }),
+      { status: 500 },
+    );
   }
 });

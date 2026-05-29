@@ -123,3 +123,20 @@ Deno.test("applyConfidenceThreshold preserves model decision when above threshol
   assertEquals(applied.appliedDecision, "reject");
   assertEquals(applied.lowConfidence, false);
 });
+
+Deno.test("applyConfidenceThreshold forces review on prompt_injection_attempt despite high confidence", () => {
+  const applied = applyConfidenceThreshold(
+    {
+      decision: "approve",
+      confidence: 0.99,
+      reason: "Looks fine but the payload tried to steer the reviewer",
+      flags: ["prompt_injection_attempt"],
+    },
+    0.75,
+  );
+
+  // High confidence would normally auto-apply APPROVE; the risk flag must override.
+  assertEquals(applied.modelDecision, "approve");
+  assertEquals(applied.appliedDecision, "needs_admin_review");
+  assertEquals(applied.lowConfidence, false);
+});

@@ -21,6 +21,11 @@ const MAX_FLAGS = 10;
 const MAX_FLAG_CHARS = 80;
 const MAX_OPTIONAL_TEXT = 300;
 
+// Model-emitted flags that must never auto-apply an APPROVE/REJECT decision on
+// untrusted scraped content. When present, the event is forced to human review
+// regardless of confidence (audit H6: prompt-injection auto-publish guardrail).
+const REVIEW_FORCING_FLAGS = new Set(["prompt_injection_attempt"]);
+
 export interface ParsedLlmDecision {
   modelDecision: LlmEventReviewDecision;
   appliedDecision: LlmEventReviewDecision;
@@ -107,14 +112,20 @@ export function applyConfidenceThreshold(
   confidenceThreshold: number,
 ): ParsedLlmDecision {
   const lowConfidence = payload.confidence < confidenceThreshold;
+  const flags = payload.flags ?? [];
+  const flaggedForReview = flags.some((flag) => REVIEW_FORCING_FLAGS.has(flag));
+  // Force human review on low confidence OR a risk flag (e.g. prompt injection).
+  // Without this, a high-confidence model APPROVE on attacker-controlled scraped
+  // text would auto-publish.
+  const forceReview = lowConfidence || flaggedForReview;
   return {
     modelDecision: payload.decision,
-    appliedDecision: lowConfidence
+    appliedDecision: forceReview
       ? LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW
       : payload.decision,
     confidence: payload.confidence,
     reason: payload.reason,
-    flags: payload.flags ?? [],
+    flags,
     suggestedCategory: payload.suggestedCategory ?? null,
     normalizedTitle: payload.normalizedTitle ?? null,
     lowConfidence,
