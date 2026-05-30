@@ -415,6 +415,67 @@ Deno.test("handleTagEvent preserves manual tags and only fills missing event fie
   );
 });
 
+Deno.test("handleTagEvent normalizes fractional AI age ranges before persistence", async () => {
+  const db = new FakeSupabase();
+  db.tags = [{ id: "tag-storytime", slug: "storytime", name: "Storytime" }];
+  db.events.set("evt-fractional-age", {
+    id: "evt-fractional-age",
+    title: "Little Gym at the Library",
+    description: "For children 2.5 years to 5 years old.",
+    price: null,
+    is_free: true,
+    venue_name: null,
+    address: null,
+    latitude: 30,
+    longitude: -90,
+    city_id: null,
+  });
+
+  const handler = createTagEventHandler({
+    createSupabaseClient: () => db as never,
+    requireServiceRole: authOk,
+    classify: async () => ({
+      classification: {
+        tags: [{ slug: "storytime", confidence: 0.82, reason: "library" }],
+        ageMin: 2.5,
+        ageMax: 5,
+        price: null,
+        isFree: true,
+        venueName: "South Regional Library",
+        provider: "openai",
+        reasoningSummary: "classified",
+        status: "success",
+        fallbackReason: null,
+        model: "gpt-4o-mini",
+      },
+      llmUsage: null,
+    }),
+    geocode: () => Promise.resolve(null),
+    loadFeatureConfig: () => Promise.resolve(null),
+  });
+
+  const response = await handler(makeRequest({
+    event_id: "evt-fractional-age",
+    title: "Little Gym at the Library",
+  }));
+
+  assertEquals(response.status, 200);
+  const body = await readJson(response);
+  assertEquals(body.age_min, 2);
+  assertEquals(body.age_max, 5);
+
+  const updatedEvent = db.events.get("evt-fractional-age");
+  assertEquals(updatedEvent?.age_min, 2);
+  assertEquals(updatedEvent?.age_max, 5);
+  assertEquals(db.traces[0].predicted_fields, {
+    age_min: 2,
+    age_max: 5,
+    price: null,
+    is_free: true,
+    venue_name: "South Regional Library",
+  });
+});
+
 Deno.test("handleTagEvent returns fallback output from classification failures", async () => {
   const db = new FakeSupabase();
   db.tags = [{ id: "tag-storytime", slug: "storytime", name: "Storytime" }];

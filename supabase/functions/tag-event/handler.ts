@@ -184,7 +184,7 @@ async function classifyWithLlm(
     "Constraints:",
     "- Choose up to 6 relevant tags from available_tags only.",
     "- confidence must be between 0 and 1. Calibrate honestly: 0.9+ = explicit evidence in text, 0.7–0.9 = strong implication, 0.5–0.7 = reasonable inference. Omit tags below 0.5 rather than guessing.",
-    "- Extract age_min and age_max if present. Use null when unknown.",
+    "- Extract age_min and age_max if present. Use whole-number years only: round age_min down and age_max up. Use null when unknown.",
     '- Extract price if mentioned (e.g. "$15"). If "free"/"no cost"/"complimentary": is_free=true, price=null. If a dollar amount: is_free=false, price=number. Otherwise: is_free=false, price=null.',
     "- Extract venue_name if mentioned, else null.",
     "- reasoning_summary: one sentence, max 20 words.",
@@ -546,6 +546,28 @@ function averageConfidence(tags: ClassificationTag[]): number {
   return tags.length > 0
     ? tags.reduce((total, tag) => total + tag.confidence, 0) / tags.length
     : 0;
+}
+
+function normalizeAgeBound(
+  value: number | null,
+  direction: "min" | "max",
+): number | null {
+  if (value === null || !Number.isFinite(value)) return null;
+  const normalized = direction === "min" ? Math.floor(value) : Math.ceil(value);
+  return Math.max(0, normalized);
+}
+
+function normalizeClassificationForPersistence(
+  classification: ClassificationResult,
+): ClassificationResult {
+  const ageMin = normalizeAgeBound(classification.ageMin, "min");
+  const ageMax = normalizeAgeBound(classification.ageMax, "max");
+
+  return {
+    ...classification,
+    ageMin: ageMin !== null && ageMax !== null && ageMin > ageMax ? null : ageMin,
+    ageMax: ageMin !== null && ageMax !== null && ageMin > ageMax ? null : ageMax,
+  };
 }
 
 async function persistTagTrace(
@@ -935,11 +957,15 @@ export function createTagEventHandler(
         }
       }
 
-      const { classification, llmUsage } = await deps.classify(
+      const classificationOutput = await deps.classify(
         input,
         availableTags,
         featureConfig,
         memoryCtx,
+      );
+      const llmUsage = classificationOutput.llmUsage;
+      const classification = normalizeClassificationForPersistence(
+        classificationOutput.classification,
       );
 
       const normalizedTags = normalizeClassificationTags(
