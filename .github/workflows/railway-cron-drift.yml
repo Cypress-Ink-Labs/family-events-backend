@@ -28,6 +28,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Node (for human-readable diagnostics)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Print Railway cron diagnostics (human readable)
+        # This step always runs and produces clear "expected vs live" output.
+        # It uses the robust JS parser (scripts/spacelift-railway-cron-poc.mjs).
+        # We || true so a diagnostics failure does not short-circuit the job;
+        # the Terraform step below is the actual gate (for Spacelift policy compatibility).
+        run: |
+          echo "=== Expected config from committed railway.toml files ==="
+          node scripts/spacelift-railway-cron-poc.mjs validate || true
+        env:
+          # The script will fall back to fixture mode or just print expected if no Railway auth
+          RAILWAY_POC_PROJECT_ACCESS_TOKEN: ${{ secrets.RAILWAY_POC_PROJECT_ACCESS_TOKEN }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
         with:
@@ -45,5 +62,7 @@ jobs:
       - name: Terraform validate
         run: terraform -chdir=infra/spacelift-railway-cron-poc validate
 
-      - name: Railway cron drift guard
-        run: terraform -chdir=infra/spacelift-railway-cron-poc plan -input=false -lock=false
+      - name: Enforce Railway cron drift guard (Terraform precondition)
+        # This is the real gate. It will fail the job (and any Spacelift policy)
+        # if the parsed repo config does not match live Railway state.
+        run: terraform -chdir=infra/spacelift-railway-cron-poc plan -input=false -lock=false -detailed-exitcode || exit 1
