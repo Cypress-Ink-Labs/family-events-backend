@@ -146,6 +146,9 @@ function createDependencies(overrides: {
       manual: parser({ type: "manual" }),
       macaronikid: parser({ type: "macaronikid" }),
       brec: parser({ type: "brec" }),
+      downtownlafayette: parser({ type: "downtownlafayette" }),
+      lcglafayette: parser({ type: "lcglafayette" }),
+      localhop: parser({ type: "localhop" }),
     } as Record<SourceType, SourceParser>,
     importParsedSourceEvents: (
       _supabase: unknown,

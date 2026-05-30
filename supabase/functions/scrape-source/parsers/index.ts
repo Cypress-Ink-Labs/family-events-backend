@@ -8,6 +8,7 @@ import { macaroniKidParser } from "./macaroni-kid.ts";
 import { brecParser } from "./brec.ts";
 import { downtownLafayetteParser } from "./downtownlafayette.ts";
 import { lcgLafayetteParser } from "./lcg-lafayette.ts";
+import { localHopParser } from "./localhop.ts";
 
 export const parsers = {
   [websiteParser.type]: websiteParser,
@@ -18,6 +19,7 @@ export const parsers = {
   [brecParser.type]: brecParser,
   [downtownLafayetteParser.type]: downtownLafayetteParser,
   [lcgLafayetteParser.type]: lcgLafayetteParser,
+  [localHopParser.type]: localHopParser,
 } as const satisfies Record<SourceType, SourceParser>;
 
 export type { SourceParser } from "./_lib/types.ts";

@@ -8,6 +8,7 @@ export type SourceType =
   | "downtownlafayette"
   | "ical"
   | "lcglafayette"
+  | "localhop"
   | "macaronikid"
   | "manual"
   | "rss"

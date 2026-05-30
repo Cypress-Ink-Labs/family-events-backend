@@ -151,4 +151,89 @@ if (typeof Deno !== "undefined") {
     assertEquals(events[0].venueName, "Acadiana Center for the Arts")
     assertEquals(events[0].address, "101 W Vermilion St, Lafayette, LA, 70501")
   })
+
+  Deno.test("parseWebsite extracts Baton Rouge Zoo event cards", () => {
+    const html = `
+      <section>
+        <h2>Special Events</h2>
+        <div class="repeater-list-card-img-lg">
+          <div class="repeater-list-item">
+            <a href="https://brzoo.org/events-rentals/calendar/twilight-tour?occdate=2026-06-02">
+              <div class="item-date">
+                <b class="event-month">Jun</b>
+                <b class="event-day">2</b>
+              </div>
+              <img data-src="https://brzoo.org/twilight.jpg" alt="Twilight Tour">
+              <h3 class="repeater-list-card-img-lg-item-header">Twilight Tour</h3>
+              <i class="item-time">6:00pm–7:30pm</i>
+            </a>
+          </div>
+        </div>
+      </section>
+    `
+
+    const events = parseWebsite(html, "https://brzoo.org/", "America/Chicago")
+
+    assertEquals(events.length, 1)
+    assertEquals(events[0].title, "Twilight Tour")
+    assertEquals(events[0].startDatetime, "2026-06-02T23:00:00.000Z")
+    assertEquals(events[0].endDatetime, "2026-06-03T00:30:00.000Z")
+    assertEquals(events[0].sourceUrl, "https://brzoo.org/events-rentals/calendar/twilight-tour?occdate=2026-06-02")
+    assertEquals(events[0].imageUrl, "https://brzoo.org/twilight.jpg")
+  })
+
+  Deno.test("parseWebsite extracts All-in-One Event Calendar popovers", () => {
+    const html = `
+      <main>
+        <h1>May – June 2026</h1>
+        <a class="ai1ec-event-container ai1ec-load-event" data-instance-id="809"
+          href="https://perkinsrowe.com/event/sidewalk-astronomy-51/?instance_id=809">
+          <div class="ai1ec-event">
+            <span class="ai1ec-event-title">Sidewalk Astronomy</span>
+            <span class="ai1ec-event-time">7:00 pm</span>
+          </div>
+        </a>
+        <div class="ai1ec-popover">
+          <span class="ai1ec-popup-title">
+            <a href="https://perkinsrowe.com/event/sidewalk-astronomy-51/?instance_id=809">Sidewalk Astronomy</a>
+            <span class="ai1ec-event-location">@ Perkins Rowe</span>
+          </span>
+          <div class="ai1ec-event-time">May 26 @ 7:00 pm – 9:00 pm</div>
+          <div class="ai1ec-event-description">Bring your friends and get a glimpse of the sky.</div>
+        </div>
+      </main>
+    `
+
+    const events = parseWebsite(html, "https://perkinsrowe.com/happenings/", "America/Chicago")
+
+    assertEquals(events.length, 1)
+    assertEquals(events[0].title, "Sidewalk Astronomy")
+    assertEquals(events[0].startDatetime, "2026-05-27T00:00:00.000Z")
+    assertEquals(events[0].endDatetime, "2026-05-27T02:00:00.000Z")
+    assertEquals(events[0].venueName, "Perkins Rowe")
+  })
+
+  Deno.test("parseWebsite extracts Squarespace summary event cards", () => {
+    const html = `
+      <div class="summary-item summary-item-record-type-event">
+        <a href="/comingsoon/sunsetblvd" data-title="Sunset Boulevard - $5 Movie">
+          <img data-src="https://images.squarespace-cdn.com/sunset.png" alt="Sunset Boulevard - $5 Movie">
+        </a>
+        <div class="summary-content">
+          <time class="summary-metadata-item summary-metadata-item--date">May 30, 2026</time>
+          <div class="summary-title">
+            <a href="/comingsoon/sunsetblvd" class="summary-title-link">Sunset Boulevard - $5 Movie</a>
+          </div>
+        </div>
+      </div>
+    `
+
+    const events = parseWebsite(html, "https://manshiptheatre.org/", "America/Chicago")
+
+    assertEquals(events.length, 1)
+    assertEquals(events[0].title, "Sunset Boulevard - $5 Movie")
+    assertEquals(events[0].startDatetime, "2026-05-30T05:00:00.000Z")
+    assertEquals(events[0].sourceUrl, "https://manshiptheatre.org/comingsoon/sunsetblvd")
+    assertEquals(events[0].imageUrl, "https://images.squarespace-cdn.com/sunset.png")
+  })
 }

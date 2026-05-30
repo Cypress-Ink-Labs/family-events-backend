@@ -4422,7 +4422,7 @@ CREATE TABLE IF NOT EXISTS "public"."event_sources" (
     "date_window_days" integer,
     "extraction_mode" "public"."source_extraction_mode" DEFAULT 'deterministic'::"public"."source_extraction_mode" NOT NULL,
     CONSTRAINT "event_sources_last_status_check" CHECK (("last_status" = ANY (ARRAY['pending'::"text", 'success'::"text", 'error'::"text", 'partial'::"text"]))),
-    CONSTRAINT "event_sources_source_type_check" CHECK (("source_type" = ANY (ARRAY['website'::"text", 'ical'::"text", 'rss'::"text", 'manual'::"text", 'macaronikid'::"text", 'brec'::"text"])))
+    CONSTRAINT "event_sources_source_type_check" CHECK (("source_type" = ANY (ARRAY['website'::"text", 'ical'::"text", 'rss'::"text", 'manual'::"text", 'macaronikid'::"text", 'brec'::"text", 'downtownlafayette'::"text", 'lcglafayette'::"text", 'localhop'::"text"])))
 );
 
 
@@ -6919,4 +6919,3 @@ CREATE OR REPLACE TRIGGER "enforce_invited_oauth_signup" BEFORE INSERT ON "auth"
 
 
 CREATE OR REPLACE TRIGGER "on_auth_user_created" AFTER INSERT ON "auth"."users" FOR EACH ROW EXECUTE FUNCTION "public"."handle_new_user"();
-

@@ -4,7 +4,17 @@ import { parsers } from "./index.ts"
 // Keep this list in lockstep with the consolidated event_sources.source_type
 // CHECK constraint. If you add a parser, update both the schema baseline and
 // this test so the TS-side registry and DB-side CHECK cannot silently drift.
-const DB_ALLOWED_SOURCE_TYPES = ["brec", "ical", "macaronikid", "manual", "rss", "website"]
+const DB_ALLOWED_SOURCE_TYPES = [
+  "brec",
+  "downtownlafayette",
+  "ical",
+  "lcglafayette",
+  "localhop",
+  "macaronikid",
+  "manual",
+  "rss",
+  "website",
+]
 
 if (typeof Deno !== "undefined") {
   Deno.test("parser registry keys match the DB CHECK constraint allowlist", () => {

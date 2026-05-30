@@ -21,7 +21,8 @@ ALTER TABLE public.event_sources
     'macaronikid'::text,
     'brec'::text,
     'downtownlafayette'::text,
-    'lcglafayette'::text
+    'lcglafayette'::text,
+    'localhop'::text
   ]));
 
 -- Insert new sources

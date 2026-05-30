@@ -1,4 +1,3 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 import { requireAdminOrService } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
