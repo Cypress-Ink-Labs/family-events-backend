@@ -2094,6 +2094,10 @@ export type Database = {
         Args: { p_queue_id: number }
         Returns: boolean
       }
+      admin_retry_dead_tag_queue: {
+        Args: { p_queue_id: number }
+        Returns: boolean
+      }
       admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
       admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
       admin_run_due_scrapes: { Args: never; Returns: undefined }
