@@ -107,25 +107,47 @@ const templates = [
   },
 ]
 
+// Fetch all existing templates once to avoid per-template API calls
+console.log("Fetching existing templates...")
+const existingTemplates = await resend.templates.list()
+const existingByAlias = new Map<string, string>()
+for (const t of existingTemplates.data?.data ?? []) {
+  if (t.alias) existingByAlias.set(t.alias, t.id)
+}
+console.log(`Found ${existingByAlias.size} existing templates`)
+
 for (const template of templates) {
   console.log(`Deploying template: ${template.name}`)
-  // Build the create payload explicitly. resend@6.x's Templates.performCreate
-  // checks `if (payload.react)` and then calls a `renderAsync` it pulls from
-  // `@react-email/render`. v2.x of that package only exports `render`, not
-  // `renderAsync`, so any payload that still carries the JSX field crashes
-  // with "this.renderAsync is not a function" even when we passed pre-rendered
-  // HTML. Strip `react` out and pass html directly to keep that branch dormant.
+
+  // Render the React Email template to HTML
   const html = await render(template.react)
-  const result = await resend.templates
-    .create({
+
+  const existingId = existingByAlias.get(template.alias)
+
+  if (existingId) {
+    // Update existing template
+    console.log(`  Updating existing template (id: ${existingId})...`)
+    const result = await resend.templates.update(existingId, {
       name: template.name,
-      alias: template.alias,
       subject: template.subject,
       variables: template.variables,
       html,
     })
-    .publish()
-  console.log(`  Created template id: ${result.data?.id ?? "unknown"}`)
+    console.log(`  Updated template id: ${result.data?.id ?? existingId}`)
+  } else {
+    // Create new template
+    console.log("  Creating new template...")
+    const result = await resend.templates
+      .create({
+        name: template.name,
+        alias: template.alias,
+        subject: template.subject,
+        variables: template.variables,
+        html,
+      })
+      .publish()
+    console.log(`  Created template id: ${result.data?.id ?? "unknown"}`)
+  }
 }
 
 console.log("All templates deployed.")
