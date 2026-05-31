@@ -13,10 +13,12 @@ interface MockQueryChain {
   from: string;
   selectStr: string;
   eqCalls: Array<{ col: string; val: unknown }>;
+  inCalls: Array<{ col: string; val: unknown[] }>;
 }
 
 function createMockSupabase(opts: {
   prefsRows?: Array<Record<string, unknown>>;
+  profileRows?: Array<Record<string, unknown>>;
   searchEventsResult?: Record<string, unknown[]>;
   rpcCalls?: MockRpcCall[];
   queryCalls?: MockQueryChain[];
@@ -38,7 +40,11 @@ function createMockSupabase(opts: {
       },
       eq(col: string, val: unknown) {
         eqCalls.push({ col, val });
-        queryCalls.push({ from: tableName, selectStr, eqCalls: [...eqCalls] });
+        queryCalls.push({ from: tableName, selectStr, eqCalls: [...eqCalls], inCalls: [] });
+        return Promise.resolve({ data: rows, error: null });
+      },
+      in(col: string, val: unknown[]) {
+        queryCalls.push({ from: tableName, selectStr, eqCalls: [...eqCalls], inCalls: [{ col, val }] });
         return Promise.resolve({ data: rows, error: null });
       },
     };
@@ -49,6 +55,9 @@ function createMockSupabase(opts: {
     from(table: string) {
       if (table === "user_notification_preferences") {
         return buildSelectChain(table, opts.prefsRows ?? []);
+      }
+      if (table === "user_profiles") {
+        return buildSelectChain(table, opts.profileRows ?? []);
       }
       return buildSelectChain(table, []);
     },
@@ -78,8 +87,12 @@ function createMockSupabase(opts: {
 // Since the edge function uses Deno.serve via serveServiceRoleJson, we test
 // the business logic by replicating the key steps in isolation.
 
-function buildDigestUsers(prefsRows: Array<Record<string, unknown>>) {
+function buildDigestUsers(
+  prefsRows: Array<Record<string, unknown>>,
+  profileRows: Array<Record<string, unknown>>,
+) {
   type ProfileRow = {
+    id: string;
     email: string | null;
     display_name: string | null;
     city_preference_id: string | null;
@@ -94,9 +107,14 @@ function buildDigestUsers(prefsRows: Array<Record<string, unknown>>) {
     city_name: string;
   }
 
+  const profilesById = new Map<string, ProfileRow>();
+  for (const profile of profileRows as unknown as ProfileRow[]) {
+    profilesById.set(profile.id, profile);
+  }
+
   const digestUsers: DigestUser[] = [];
   for (const row of prefsRows) {
-    const profile = row.user_profiles as unknown as ProfileRow | null;
+    const profile = profilesById.get(row.user_id as string);
     if (!profile?.email || !profile.cities) continue;
     digestUsers.push({
       user_id: row.user_id as string,
@@ -114,28 +132,28 @@ function buildDigestUsers(prefsRows: Array<Record<string, unknown>>) {
 // ---------------------------------------------------------------------------
 
 Deno.test("buildDigestUsers flattens join rows correctly", () => {
-  const rows = [
+  const prefsRows = [
+    { user_id: "u1" },
+    { user_id: "u2" },
+  ];
+  const profileRows = [
     {
-      user_id: "u1",
-      user_profiles: {
-        email: "alice@test.com",
-        display_name: "Alice",
-        city_preference_id: "c1",
-        cities: { id: "c1", name: "Lafayette" },
-      },
+      id: "u1",
+      email: "alice@test.com",
+      display_name: "Alice",
+      city_preference_id: "c1",
+      cities: { id: "c1", name: "Lafayette" },
     },
     {
-      user_id: "u2",
-      user_profiles: {
-        email: "bob@test.com",
-        display_name: null,
-        city_preference_id: "c2",
-        cities: { id: "c2", name: "Houston" },
-      },
+      id: "u2",
+      email: "bob@test.com",
+      display_name: null,
+      city_preference_id: "c2",
+      cities: { id: "c2", name: "Houston" },
     },
   ];
 
-  const users = buildDigestUsers(rows);
+  const users = buildDigestUsers(prefsRows, profileRows);
   assertEquals(users.length, 2);
   assertEquals(users[0].email, "alice@test.com");
   assertEquals(users[0].city_name, "Lafayette");
@@ -144,37 +162,68 @@ Deno.test("buildDigestUsers flattens join rows correctly", () => {
 });
 
 Deno.test("buildDigestUsers skips users without email", () => {
-  const rows = [
+  const prefsRows = [{ user_id: "u1" }];
+  const profileRows = [
     {
-      user_id: "u1",
-      user_profiles: {
-        email: null,
-        display_name: "No Email",
-        city_preference_id: "c1",
-        cities: { id: "c1", name: "Lafayette" },
-      },
+      id: "u1",
+      email: null,
+      display_name: "No Email",
+      city_preference_id: "c1",
+      cities: { id: "c1", name: "Lafayette" },
     },
   ];
 
-  const users = buildDigestUsers(rows);
+  const users = buildDigestUsers(prefsRows, profileRows);
   assertEquals(users.length, 0);
 });
 
 Deno.test("buildDigestUsers skips users without city", () => {
-  const rows = [
+  const prefsRows = [{ user_id: "u1" }];
+  const profileRows = [
     {
-      user_id: "u1",
-      user_profiles: {
-        email: "alice@test.com",
-        display_name: "Alice",
-        city_preference_id: null,
-        cities: null,
-      },
+      id: "u1",
+      email: "alice@test.com",
+      display_name: "Alice",
+      city_preference_id: null,
+      cities: null,
     },
   ];
 
-  const users = buildDigestUsers(rows);
+  const users = buildDigestUsers(prefsRows, profileRows);
   assertEquals(users.length, 0);
+});
+
+Deno.test("digest user reads avoid nonexistent preferences to profiles embed", async () => {
+  const queryCalls: MockQueryChain[] = [];
+  const supabase = createMockSupabase({
+    prefsRows: [{ user_id: "u1" }, { user_id: "u2" }],
+    profileRows: [
+      {
+        id: "u1",
+        email: "alice@test.com",
+        display_name: "Alice",
+        city_preference_id: "c1",
+        cities: { id: "c1", name: "Lafayette" },
+      },
+    ],
+    queryCalls,
+  });
+
+  await supabase
+    .from("user_notification_preferences")
+    .select("user_id")
+    .eq("digest_email", true);
+  await supabase
+    .from("user_profiles")
+    .select("id, email, display_name, city_preference_id, cities!inner(id, name)")
+    .in("id", ["u1", "u2"]);
+
+  assertEquals(queryCalls.length, 2);
+  assertEquals(queryCalls[0].from, "user_notification_preferences");
+  assertEquals(queryCalls[0].selectStr, "user_id");
+  assertEquals(queryCalls[0].eqCalls, [{ col: "digest_email", val: true }]);
+  assertEquals(queryCalls[1].from, "user_profiles");
+  assertEquals(queryCalls[1].inCalls, [{ col: "id", val: ["u1", "u2"] }]);
 });
 
 Deno.test("mock Supabase queries events by city via search_events RPC", async () => {

@@ -28,6 +28,10 @@ interface DigestUser {
   city_name: string;
 }
 
+interface DigestPreference {
+  user_id: string;
+}
+
 interface DigestEvent {
   id: string;
   title: string;
@@ -150,38 +154,56 @@ serveServiceRoleJson(
   async ({ request, supabase }) => {
     const cronCtx = cronRunContextFromRequest(request);
 
-    // 1. Query users with digest_email = true, joined with their profile + city
-    const { data: users, error: usersError } = await supabase
+    // 1. Query digest opt-ins, then load profiles with cities. PostgREST cannot
+    // embed user_profiles through auth.users, so keep this as two explicit reads.
+    const { data: preferences, error: preferencesError } = await supabase
       .from("user_notification_preferences")
-      .select(`
-        user_id,
-        user_profiles!inner(email, display_name, city_preference_id,
-          cities!inner(id, name)
-        )
-      `)
+      .select("user_id")
       .eq("digest_email", true);
 
-    if (usersError) {
+    if (preferencesError) {
       await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest users", {
-        error: usersError.message,
+        error: preferencesError.message,
       });
-      throw usersError;
+      throw preferencesError;
     }
 
-    // Flatten join results into DigestUser[]
-    // PostgREST returns user_profiles as an object (1:1 via user_id unique),
-    // and cities as an object (inner join on city_preference_id).
-    // Cast through unknown to handle PostgREST's loosely-typed response.
+    const preferenceRows = (preferences ?? []) as DigestPreference[];
+    const userIds = [...new Set(preferenceRows.map((row) => row.user_id).filter(Boolean))];
+
+    if (userIds.length === 0) {
+      await logCronRunEvent(supabase, cronCtx, "log", "No digest users found", {});
+      return { ok: true, sent: 0, skipped: 0, failed: 0 };
+    }
+
     type ProfileRow = {
+      id: string;
       email: string | null;
       display_name: string | null;
       city_preference_id: string | null;
       cities: { id: string; name: string } | null;
     };
 
+    const { data: profiles, error: profilesError } = await supabase
+      .from("user_profiles")
+      .select("id, email, display_name, city_preference_id, cities!inner(id, name)")
+      .in("id", userIds);
+
+    if (profilesError) {
+      await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest profiles", {
+        error: profilesError.message,
+      });
+      throw profilesError;
+    }
+
+    const profilesById = new Map<string, ProfileRow>();
+    for (const profile of (profiles ?? []) as unknown as ProfileRow[]) {
+      profilesById.set(profile.id, profile);
+    }
+
     const digestUsers: DigestUser[] = [];
-    for (const row of users ?? []) {
-      const profile = row.user_profiles as unknown as ProfileRow | null;
+    for (const row of preferenceRows) {
+      const profile = profilesById.get(row.user_id);
       if (!profile?.email || !profile.cities) continue;
       digestUsers.push({
         user_id: row.user_id,
