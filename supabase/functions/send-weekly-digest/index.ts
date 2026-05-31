@@ -157,107 +157,34 @@ function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
     </table>`;
 }
 
-function renderDigestHtml(
+interface DigestTemplateVariables {
+  USERNAME: string;
+  CITY_NAME: string;
+  EVENT_COUNT: string;
+  EVENTS_HTML: string;
+  APP_URL: string;
+  LOGO_URL: string;
+  UNSUBSCRIBE_URL: string;
+}
+
+// Build the Resend template variables for one recipient. The email shell is the
+// published `family-events-weekly-digest` template; only EVENTS_HTML is rendered
+// here. USERNAME/CITY_NAME are escaped (template uses raw {{{triple}}} braces);
+// EVENTS_HTML is intentionally raw HTML, already field-escaped in card rendering.
+function buildDigestVariables(
   user: DigestUser,
   events: DigestEvent[],
   appUrl: string,
-): string {
-  const username = escapeHtml(user.display_name || "there");
-  const cityName = escapeHtml(user.city_name);
-  const eventCount = String(events.length);
-  const eventLabel = events.length === 1 ? "event" : "events";
-  const eventsHtml = events.map((e) => renderEventCardHtml(e, appUrl)).join("\n");
-  const unsubscribeUrl = `${appUrl}/profile?tab=notifications`;
-  const logoUrl = `${appUrl}/brand/family-events-logo.png`;
-
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="supported-color-schemes" content="light" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="${FONTS_HREF}" rel="stylesheet" />
-  <style>
-    body { margin:0; padding:0; background:${THEME.bg}; -webkit-font-smoothing:antialiased; }
-    a { text-decoration:none; }
-    @media only screen and (max-width:600px) {
-      .fe-shell { width:100% !important; border-radius:0 !important; }
-      .fe-pad { padding-left:20px !important; padding-right:20px !important; }
-    }
-  </style>
-</head>
-<body style="margin:0;padding:0;background:${THEME.bg};font-family:${FONT_SANS};">
-  <span style="display:none;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;mso-hide:all;">${eventCount} family events this week in ${cityName}</span>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${THEME.bg};">
-    <tr>
-      <td align="center" style="padding:32px 12px;">
-        <table role="presentation" class="fe-shell" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:${THEME.surface};border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(28,24,40,0.10);">
-
-          <!-- Header -->
-          <tr>
-            <td style="background:${THEME.violet};background-image:linear-gradient(135deg,${THEME.violet} 0%,${THEME.violetDeep} 100%);padding:36px 40px 32px;" class="fe-pad">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="left">
-                    <img src="${escapeHtml(logoUrl)}" width="28" height="28" alt="" style="vertical-align:middle;border-radius:7px;display:inline-block;" />
-                    <span style="font-family:${FONT_SANS};font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#F2ECFB;vertical-align:middle;padding-left:10px;">Family Events</span>
-                  </td>
-                </tr>
-              </table>
-              <div style="font-family:${FONT_DISPLAY};font-size:34px;line-height:1.1;font-weight:600;color:#FFFFFF;margin:22px 0 0;">Your Weekly Digest</div>
-              <div style="display:inline-block;margin-top:14px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.25);border-radius:9999px;padding:6px 14px;font-family:${FONT_MONO};font-size:12px;letter-spacing:0.03em;color:#FFFFFF;">${eventCount} ${eventLabel} this week in ${cityName}</div>
-            </td>
-          </tr>
-
-          <!-- Greeting -->
-          <tr>
-            <td style="padding:30px 40px 6px;" class="fe-pad">
-              <div style="font-family:${FONT_DISPLAY};font-size:21px;font-weight:600;color:${THEME.textPrimary};margin:0 0 8px;">Hi ${username},</div>
-              <div style="font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0;">Here are the upcoming family-friendly events near you this week — curated for your neighborhood and ready to add to the weekend plan.</div>
-            </td>
-          </tr>
-
-          <!-- Event cards -->
-          <tr>
-            <td style="padding:22px 40px 6px;" class="fe-pad">
-              ${eventsHtml}
-            </td>
-          </tr>
-
-          <!-- CTA -->
-          <tr>
-            <td align="center" style="padding:18px 40px 36px;" class="fe-pad">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="background:${THEME.peach};border-radius:9999px;">
-                    <a href="${escapeHtml(appUrl)}" style="display:inline-block;font-family:${FONT_SANS};font-size:15px;font-weight:700;color:#FFFFFF;padding:14px 30px;border-radius:9999px;">Browse all events &rarr;</a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="background:${THEME.bg};padding:26px 40px;border-top:1px solid ${THEME.border};" class="fe-pad">
-              <div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">
-                You're receiving this because you enabled digest emails.<br />
-                <a href="${escapeHtml(unsubscribeUrl)}" style="color:${THEME.violetDeep};font-weight:500;text-decoration:underline;">Manage preferences</a>
-              </div>
-              <div style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.04em;color:${THEME.textMuted};text-align:center;margin:14px 0 0;opacity:0.7;">FAMILY EVENTS · ${cityName}</div>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`.trim();
+): DigestTemplateVariables {
+  return {
+    USERNAME: escapeHtml(user.display_name || "there"),
+    CITY_NAME: escapeHtml(user.city_name),
+    EVENT_COUNT: String(events.length),
+    EVENTS_HTML: events.map((e) => renderEventCardHtml(e, appUrl)).join("\n"),
+    APP_URL: appUrl,
+    LOGO_URL: `${appUrl}/brand/family-events-logo.png`,
+    UNSUBSCRIBE_URL: `${appUrl}/profile?tab=notifications`,
+  };
 }
 
 function sleep(ms: number): Promise<void> {
@@ -406,7 +333,7 @@ serveServiceRoleJson(
           continue;
         }
 
-        const html = renderDigestHtml(user, events, appUrl);
+        const variables = buildDigestVariables(user, events, appUrl);
         const subject = `${events.length} family events this week in ${user.city_name}`;
 
         try {
@@ -420,7 +347,10 @@ serveServiceRoleJson(
               from: resendFrom,
               to: [user.email],
               subject,
-              html,
+              template: {
+                id: DIGEST_TEMPLATE_ALIAS,
+                variables,
+              },
             }),
             signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
           });
