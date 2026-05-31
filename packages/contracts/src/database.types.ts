@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -1221,6 +1216,54 @@ export type Database = {
           },
         ]
       }
+      notification_queue: {
+        Row: {
+          change_detail: Json | null
+          change_type: string
+          created_at: string
+          event_id: string
+          id: string
+          processed: boolean
+          processed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          change_detail?: Json | null
+          change_type: string
+          created_at?: string
+          event_id: string
+          id?: string
+          processed?: boolean
+          processed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          change_detail?: Json | null
+          change_type?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          processed?: boolean
+          processed_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_queue_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_queue_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pending_invite_claims: {
         Row: {
           claimed_at: string | null
@@ -1255,6 +1298,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth_key: string | null
+          created_at: string
+          endpoint: string | null
+          id: string
+          p256dh: string | null
+          platform: string
+          token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth_key?: string | null
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          p256dh?: string | null
+          platform: string
+          token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth_key?: string | null
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          p256dh?: string | null
+          platform?: string
+          token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       ratings: {
         Row: {
@@ -1692,6 +1771,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          event_id: string | null
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_profiles: {
         Row: {
@@ -2736,58 +2863,6 @@ export type Database = {
           view_count: number
         }[]
       }
-      events_enriched_v2: {
-        Args: {
-          p_after_id?: string
-          p_after_start_datetime?: string
-          p_city_id?: string
-          p_date_from?: string
-          p_date_to?: string
-          p_event_ids?: string[]
-          p_limit?: number
-          p_status?: string
-          p_user_id?: string
-        }
-        Returns: {
-          address: string
-          age_max: number
-          age_min: number
-          ai_confidence: number
-          ai_tag_provider: string
-          avg_rating: number
-          city_id: string
-          created_at: string
-          description: string
-          end_datetime: string
-          id: string
-          image_attributions: Json
-          images: Json
-          is_favorited: boolean
-          is_featured: boolean
-          is_free: boolean
-          is_in_calendar: boolean
-          is_outdoor: boolean
-          latitude: number
-          longitude: number
-          parent_tips: Json
-          parent_tips_generated_at: string
-          price: number
-          rating_count: number
-          recurrence_info: Json
-          search_vector: unknown
-          source_id: string
-          source_name: string
-          source_url: string
-          start_datetime: string
-          status: string
-          tags: Json
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string
-          view_count: number
-        }[]
-      }
       find_similar_events: {
         Args: {
           p_city_id?: string
@@ -2907,6 +2982,7 @@ export type Database = {
         }
         Returns: number
       }
+      mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_event_enrichment_attempt: {
         Args: { p_event_id: string }
         Returns: undefined
@@ -2936,6 +3012,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      mark_notification_read: {
+        Args: { p_notification_id: string }
+        Returns: undefined
       }
       mark_source_scrape_queue_skipped: {
         Args: { p_queue_id: number; p_skip_reason: string }
@@ -3045,6 +3125,32 @@ export type Database = {
       redeem_invite_for_email: {
         Args: { p_code: string; p_email: string }
         Returns: boolean
+      }
+      register_push_subscription: {
+        Args: {
+          p_auth_key?: string
+          p_endpoint?: string
+          p_p256dh?: string
+          p_platform: string
+          p_token?: string
+        }
+        Returns: {
+          auth_key: string | null
+          created_at: string
+          endpoint: string | null
+          id: string
+          p256dh: string | null
+          platform: string
+          token: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "push_subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       release_unstarted_event_llm_review_rows: {
         Args: { p_claimed_ids: number[] }
@@ -3225,84 +3331,6 @@ export type Database = {
               isSetofReturn: true
             }
           }
-      search_events_v2: {
-        Args: {
-          p_after_id?: string
-          p_after_start_datetime?: string
-          p_age_max?: number
-          p_age_min?: number
-          p_city_id?: string
-          p_date_from?: string
-          p_date_to?: string
-          p_is_featured?: boolean
-          p_is_free?: boolean
-          p_keyword?: string
-          p_limit?: number
-          p_offset?: number
-          p_status?: string
-          p_tag_slugs?: string[]
-        }
-        Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "events"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
       should_auto_reject_source: {
         Args: {
           p_min_events?: number
@@ -3314,6 +3342,10 @@ export type Database = {
       }
       source_scrape_queue_schedule_retry: {
         Args: { p_attempt_count: number; p_error: string; p_queue_id: number }
+        Returns: undefined
+      }
+      unregister_push_subscription: {
+        Args: { p_subscription_id: string }
         Returns: undefined
       }
       update_event_enrichment: {
@@ -3582,3 +3614,4 @@ export const Constants = {
     },
   },
 } as const
+

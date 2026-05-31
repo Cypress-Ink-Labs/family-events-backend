@@ -1,0 +1,9 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Daily at 6:00 AM Central (11:00 UTC). Sends day-before and morning-of
+# reminders for saved events. Toggle from admin UI (private.cron_enabled).
+cronSchedule = "0 11 * * *"
+restartPolicyType = "ON_FAILURE"

@@ -9,7 +9,10 @@ const cronFunctionByLabel: Record<string, string> = {
   "cron-enrich-events": "backfill-event-enrichment",
   "cron-review-events": "process-event-review-queue",
   "cron-scrape-sources": "scrape-due-sources",
+  "cron-send-reminders": "send-reminders",
   "cron-tag-queue": "process-tag-queue",
+  "cron-weekly-digest": "send-weekly-digest",
+  "cron-process-notification-queue": "process-notification-queue",
 };
 
 function truncateBody(body: string): string {

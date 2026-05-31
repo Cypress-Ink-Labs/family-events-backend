@@ -2,7 +2,7 @@
   "name": "@family-events/supabase-functions",
   "private": true,
   "scripts": {
-    "dev": "cd ../.. && bash scripts/supabase.sh functions serve",
+    "dev": "cd ../.. && bash scripts/supabase-functions-serve.sh",
     "test": "vitest run"
   }
 }

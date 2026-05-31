@@ -1,0 +1,9 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Weekly: Monday 8:00 AM CT (13:00 UTC, or 14:00 UTC during CDT).
+# Using 13:00 UTC to target ~8am CT year-round (exact offset varies with DST).
+cronSchedule = "0 13 * * 1"
+restartPolicyType = "ON_FAILURE"

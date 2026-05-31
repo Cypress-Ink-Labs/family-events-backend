@@ -1,0 +1,6 @@
+{
+  "name": "@family-events/cron-send-reminders",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Railway cron service that triggers send-reminders daily. Sends day-before and morning-of event reminders."
+}

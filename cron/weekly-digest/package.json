@@ -1,0 +1,6 @@
+{
+  "name": "@family-events/cron-weekly-digest",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Railway cron service that sends weekly digest emails every Monday at 8am CT."
+}
