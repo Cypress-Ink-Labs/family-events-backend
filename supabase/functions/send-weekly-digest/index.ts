@@ -15,6 +15,10 @@ import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-
 // pattern. Rate-limits with small delays between batches.
 
 const RESEND_API_ENDPOINT = "https://api.resend.com/emails";
+// Alias of the published Resend template (packages/email/emails/weekly-digest.tsx,
+// deployed via packages/email/scripts/deploy-templates.tsx). The shell lives in
+// Resend; this function only renders the EVENTS_HTML block and passes variables.
+const DIGEST_TEMPLATE_ALIAS = "family-events-weekly-digest";
 const RESEND_TIMEOUT_MS = 10_000;
 const BATCH_SIZE = 5;
 const BATCH_DELAY_MS = 500;
@@ -52,58 +56,105 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
-function formatDate(isoDate: string): string {
-  try {
-    const d = new Date(isoDate);
-    return d.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  } catch {
-    return isoDate;
-  }
-}
-
 function formatPrice(event: DigestEvent): string {
   if (event.is_free) return "Free";
   if (event.price != null) return `$${Number(event.price).toFixed(2)}`;
   return "";
 }
 
+// ── Dusk-Meadow theme tokens (mirrors packages/design-system) ─────────────────
+// Inlined here because edge functions can't import the design-system package.
+const THEME = {
+  bg: "#F5F3FC", // lavender-white bedrock
+  surface: "#FDFCFF", // cards
+  surfaceAlt: "#F2EEFB", // image placeholder fill
+  textPrimary: "#1C1828", // deep violet-plum
+  textMuted: "#6B6278", // secondary text
+  border: "#EAE4F6", // hairline borders
+  violet: "#7B5CC8", // brand anchor
+  violetDeep: "#5E42A6", // gradient end / strong links
+  peach: "#E89060", // action color (CTA)
+  peachDeep: "#C2703B", // paid-price text
+  peachSoft: "#FBEDE3", // paid-price pill fill
+  blue: "#5A7EA8", // location
+  gold: "#D4AA28", // kid affordances
+  successText: "#2E7D5B", // free-price text
+  successSoft: "#E6F2EC", // free-price pill fill
+} as const;
+
+// Fonts used inline by the event-card HTML (EVENTS_HTML). The email shell and its
+// @font-face web fonts live in the Resend template; cards self-declare stacks.
+const FONT_SANS = `'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+const FONT_DISPLAY = `'Fraunces', ui-serif, Georgia, 'Times New Roman', serif`;
+const FONT_MONO = `'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace`;
+
+function splitDateTime(isoDate: string): { date: string; time: string } {
+  try {
+    const d = new Date(isoDate);
+    const date = d.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+    const time = d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    return { date, time };
+  } catch {
+    return { date: isoDate, time: "" };
+  }
+}
+
+function renderPricePill(event: DigestEvent): string {
+  const price = formatPrice(event);
+  if (!price) return "";
+  const isFree = event.is_free;
+  const fill = isFree ? THEME.successSoft : THEME.peachSoft;
+  const color = isFree ? THEME.successText : THEME.peachDeep;
+  return `<span style="display:inline-block;background:${fill};color:${color};font-family:${FONT_MONO};font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;">${escapeHtml(price)}</span>`;
+}
+
 function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
   const eventUrl = `${appUrl}/events/${event.id}`;
   const thumbnail = event.images?.[0]?.url;
   const location = event.venue_name || event.address || "";
-  const price = formatPrice(event);
+  const { date, time } = splitDateTime(event.start_datetime);
+  const initial = escapeHtml((event.title.trim()[0] || "•").toUpperCase());
+
+  const imageCell = thumbnail
+    ? `<img src="${escapeHtml(thumbnail)}" width="92" height="92" alt=""
+           style="width:92px;height:92px;border-radius:12px;object-fit:cover;display:block;border:1px solid ${THEME.border};" />`
+    : `<div style="width:92px;height:92px;border-radius:12px;background:${THEME.surfaceAlt};border:1px solid ${THEME.border};text-align:center;line-height:92px;font-family:${FONT_DISPLAY};font-size:34px;font-weight:600;color:${THEME.violet};">${initial}</div>`;
+
+  const metaLine = [
+    `<span style="font-family:${FONT_MONO};font-size:12px;color:${THEME.textMuted};">${escapeHtml(date)}${time ? ` · ${escapeHtml(time)}` : ""}</span>`,
+    renderPricePill(event),
+  ]
+    .filter(Boolean)
+    .join(`<span style="color:${THEME.border};">&nbsp;&nbsp;</span>`);
 
   return `
-    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:0 40px 12px;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-        <tr>
-          ${
-            thumbnail
-              ? `<td width="80" valign="top" style="padding-right:12px;">
-                  <img src="${escapeHtml(thumbnail)}" width="80" height="60"
-                       style="border-radius:6px;object-fit:cover;display:block;" alt="" />
-                </td>`
-              : ""
-          }
-          <td valign="top">
-            <a href="${escapeHtml(eventUrl)}" style="font-size:15px;font-weight:600;color:#0f172a;text-decoration:none;">
-              ${escapeHtml(event.title)}
-            </a>
-            <div style="font-size:13px;color:#64748b;margin-top:4px;">
-              ${escapeHtml(formatDate(event.start_datetime))}
-            </div>
-            ${location ? `<div style="font-size:13px;color:#64748b;margin-top:2px;">${escapeHtml(location)}</div>` : ""}
-            ${price ? `<div style="font-size:13px;color:#475569;font-weight:500;margin-top:2px;">${escapeHtml(price)}</div>` : ""}
-          </td>
-        </tr>
-      </table>
-    </div>`;
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;margin:0 0 14px;">
+      <tr>
+        <td style="background:${THEME.surface};border:1px solid ${THEME.border};border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(28,24,40,0.04);">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+            <tr>
+              <td width="92" valign="top" style="padding-right:16px;">${imageCell}</td>
+              <td valign="top">
+                <a href="${escapeHtml(eventUrl)}" style="font-family:${FONT_DISPLAY};font-size:18px;line-height:1.25;font-weight:600;color:${THEME.textPrimary};text-decoration:none;">${escapeHtml(event.title)}</a>
+                <div style="margin-top:8px;">${metaLine}</div>
+                ${
+    location
+      ? `<div style="font-family:${FONT_SANS};font-size:13px;color:${THEME.blue};margin-top:6px;">&#9679;&nbsp;${escapeHtml(location)}</div>`
+      : ""
+  }
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>`;
 }
 
 function renderDigestHtml(
@@ -114,33 +165,97 @@ function renderDigestHtml(
   const username = escapeHtml(user.display_name || "there");
   const cityName = escapeHtml(user.city_name);
   const eventCount = String(events.length);
+  const eventLabel = events.length === 1 ? "event" : "events";
   const eventsHtml = events.map((e) => renderEventCardHtml(e, appUrl)).join("\n");
   const unsubscribeUrl = `${appUrl}/profile?tab=notifications`;
+  const logoUrl = `${appUrl}/brand/family-events-logo.png`;
 
   return `
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8" /></head>
-<body style="background-color:#f6f9fc;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;margin:0;padding:0;">
-  <div style="background-color:#ffffff;padding:0;border-radius:8px;margin:40px auto;max-width:560px;overflow:hidden;">
-    <div style="background-color:#f59e0b;padding:32px 40px 24px;text-align:center;">
-      <div style="font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 8px;">Family Events</div>
-      <div style="font-size:26px;font-weight:700;color:#0f172a;margin:0 0 6px;">Your Weekly Digest</div>
-      <div style="font-size:15px;color:#422006;margin:0;">${eventCount} events this week in ${cityName}</div>
-    </div>
-    <hr style="border-color:#e6e6e6;margin:0;" />
-    <div style="font-size:16px;color:#1a1a1a;padding:24px 40px 0;margin:0;">Hi ${username},</div>
-    <div style="font-size:15px;color:#475569;padding:8px 40px 16px;margin:0;">Here are the upcoming family-friendly events near you this week.</div>
-    ${eventsHtml}
-    <div style="text-align:center;padding:24px 40px 32px;">
-      <a href="${escapeHtml(appUrl)}" style="background-color:#f59e0b;color:#0f172a;padding:12px 24px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;display:inline-block;">Browse All Events</a>
-    </div>
-    <hr style="border-color:#e6e6e6;margin:0;" />
-    <div style="font-size:12px;color:#94a3b8;padding:20px 40px;margin:0;text-align:center;">
-      You're receiving this because you have digest emails enabled.
-      <a href="${escapeHtml(unsubscribeUrl)}" style="color:#64748b;text-decoration:underline;">Manage preferences</a>
-    </div>
-  </div>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="${FONTS_HREF}" rel="stylesheet" />
+  <style>
+    body { margin:0; padding:0; background:${THEME.bg}; -webkit-font-smoothing:antialiased; }
+    a { text-decoration:none; }
+    @media only screen and (max-width:600px) {
+      .fe-shell { width:100% !important; border-radius:0 !important; }
+      .fe-pad { padding-left:20px !important; padding-right:20px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:${THEME.bg};font-family:${FONT_SANS};">
+  <span style="display:none;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;mso-hide:all;">${eventCount} family events this week in ${cityName}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${THEME.bg};">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+        <table role="presentation" class="fe-shell" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:${THEME.surface};border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(28,24,40,0.10);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:${THEME.violet};background-image:linear-gradient(135deg,${THEME.violet} 0%,${THEME.violetDeep} 100%);padding:36px 40px 32px;" class="fe-pad">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="left">
+                    <img src="${escapeHtml(logoUrl)}" width="28" height="28" alt="" style="vertical-align:middle;border-radius:7px;display:inline-block;" />
+                    <span style="font-family:${FONT_SANS};font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#F2ECFB;vertical-align:middle;padding-left:10px;">Family Events</span>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family:${FONT_DISPLAY};font-size:34px;line-height:1.1;font-weight:600;color:#FFFFFF;margin:22px 0 0;">Your Weekly Digest</div>
+              <div style="display:inline-block;margin-top:14px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.25);border-radius:9999px;padding:6px 14px;font-family:${FONT_MONO};font-size:12px;letter-spacing:0.03em;color:#FFFFFF;">${eventCount} ${eventLabel} this week in ${cityName}</div>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:30px 40px 6px;" class="fe-pad">
+              <div style="font-family:${FONT_DISPLAY};font-size:21px;font-weight:600;color:${THEME.textPrimary};margin:0 0 8px;">Hi ${username},</div>
+              <div style="font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0;">Here are the upcoming family-friendly events near you this week — curated for your neighborhood and ready to add to the weekend plan.</div>
+            </td>
+          </tr>
+
+          <!-- Event cards -->
+          <tr>
+            <td style="padding:22px 40px 6px;" class="fe-pad">
+              ${eventsHtml}
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:18px 40px 36px;" class="fe-pad">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background:${THEME.peach};border-radius:9999px;">
+                    <a href="${escapeHtml(appUrl)}" style="display:inline-block;font-family:${FONT_SANS};font-size:15px;font-weight:700;color:#FFFFFF;padding:14px 30px;border-radius:9999px;">Browse all events &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:${THEME.bg};padding:26px 40px;border-top:1px solid ${THEME.border};" class="fe-pad">
+              <div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">
+                You're receiving this because you enabled digest emails.<br />
+                <a href="${escapeHtml(unsubscribeUrl)}" style="color:${THEME.violetDeep};font-weight:500;text-decoration:underline;">Manage preferences</a>
+              </div>
+              <div style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.04em;color:${THEME.textMuted};text-align:center;margin:14px 0 0;opacity:0.7;">FAMILY EVENTS · ${cityName}</div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`.trim();
 }

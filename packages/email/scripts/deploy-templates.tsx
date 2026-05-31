@@ -3,6 +3,7 @@ import { Resend } from "resend"
 import EventInviteEmail from "../emails/event-invite.tsx"
 import EventReminderEmail from "../emails/event-reminder.tsx"
 import MagicLinkEmail from "../emails/magic-link.tsx"
+import WeeklyDigestEmail from "../emails/weekly-digest.tsx"
 import WelcomeEmail from "../emails/welcome.tsx"
 
 const apiKey = process.env["RESEND_API_KEY"]
@@ -61,6 +62,21 @@ const templates = [
       str("EVENT_DATE"),
       str("EVENT_LOCATION"),
       str("EVENT_URL", "https://familyevents.app/events"),
+    ],
+  },
+  {
+    name: "Family Events – Weekly Digest",
+    alias: "family-events-weekly-digest",
+    subject: "{{{EVENT_COUNT}}} family events this week in {{{CITY_NAME}}}",
+    react: <WeeklyDigestEmail />,
+    variables: [
+      str("USERNAME", "there"),
+      str("CITY_NAME", "your city"),
+      str("EVENT_COUNT", "0"),
+      str("EVENTS_HTML", ""),
+      str("APP_URL", "https://familyevents.app"),
+      str("LOGO_URL", "https://familyevents.app/brand/family-events-logo.png"),
+      str("UNSUBSCRIBE_URL", "https://familyevents.app/profile?tab=notifications"),
     ],
   },
 ]
