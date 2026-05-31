@@ -118,6 +118,9 @@ verify_jwt = false
 # App-layer requireServiceRole still enforces auth.
 verify_jwt = false
 
+[functions.process-notification-queue]
+verify_jwt = false
+
 [functions.process-tag-queue]
 verify_jwt = false
 
@@ -130,6 +133,12 @@ verify_jwt = false
 [functions.backfill-event-enrichment]
 # Called by cron-enrich-events with sb_secret_* bearer. App-layer
 # requireServiceRole still enforces auth.
+verify_jwt = false
+
+[functions.backfill-embeddings]
+verify_jwt = false
+
+[functions.embed-event]
 verify_jwt = false
 
 [functions.generate-parent-tips]
@@ -161,6 +170,17 @@ verify_jwt = false
 [functions.send-auth-email]
 # Called by Supabase Auth as the send_email hook. Not a user JWT — hook
 # requests carry a Supabase-signed payload, not a bearer JWT.
+verify_jwt = false
+
+[functions.send-push]
+verify_jwt = false
+
+[functions.send-reminders]
+verify_jwt = false
+
+[functions.send-weekly-digest]
+# Called by cron-weekly-digest with sb_secret_* bearer. App-layer
+# requireServiceRole still enforces auth.
 verify_jwt = false
 
 [functions.weather]

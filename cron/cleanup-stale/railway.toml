@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPaths = ["apps/cron-cleanup-stale/**"]
 
 [deploy]
 # Every 30 minutes. Mirrors the pg_cron cleanup-stale-source-runs cadence

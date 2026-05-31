@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPaths = ["apps/cron-scrape-sources/**"]
 
 [deploy]
 # Hourly. run_due_source_scrapes checks event_sources for due rows using

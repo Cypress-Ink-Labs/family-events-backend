@@ -1,6 +1,7 @@
 [build]
 builder        = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPaths = ["apps/cron-enrich-events/**"]
 
 [deploy]
 # Every 15 minutes. Each tick pulls up to 25 events needing coord/image

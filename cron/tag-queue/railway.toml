@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPaths = ["apps/cron-tag-queue/**"]
 
 [deploy]
 # Every 5 minutes — Railway's hard minimum interval (any cronSchedule below

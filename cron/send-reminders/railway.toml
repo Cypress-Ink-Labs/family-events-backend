@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPaths = ["apps/cron-send-reminders/**"]
 
 [deploy]
 # Daily at 6:00 AM Central (11:00 UTC). Sends day-before and morning-of

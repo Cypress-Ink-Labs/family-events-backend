@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPaths = ["apps/cron-review-events/**"]
 
 [deploy]
 # Railway minimum cadence is 5 minutes. process-event-review-queue can be

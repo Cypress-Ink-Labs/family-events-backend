@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPaths = ["apps/cron-weekly-digest/**"]
 
 [deploy]
 # Weekly: Monday 8:00 AM CT (13:00 UTC, or 14:00 UTC during CDT).
