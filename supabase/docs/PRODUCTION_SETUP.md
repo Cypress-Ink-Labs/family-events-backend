@@ -63,7 +63,18 @@ supabase functions deploy tag-event
 supabase functions deploy process-tag-queue
 supabase functions deploy share-og
 supabase functions deploy notify-email
+supabase functions deploy weather
 ```
+
+The Plan page weather proxy requires an OpenWeather key in Supabase function
+secrets:
+
+```bash
+supabase secrets set OPENWEATHER_API_KEY=<your-openweather-api-key>
+```
+
+Without `OPENWEATHER_API_KEY`, `functions/v1/weather` returns
+`503 {"error":"weather unavailable"}` before calling OpenWeather.
 
 Verify AI provider secrets are set in Supabase if you want model-backed tagging.
 OpenAI is the default via OPENAI_API_KEY and OPENAI_MODEL. For a self-hosted
