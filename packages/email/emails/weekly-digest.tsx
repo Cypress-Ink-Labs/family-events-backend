@@ -1,15 +1,4 @@
-import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Link,
-  Preview,
-  Section,
-  Text,
-} from "react-email"
+import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from "react-email"
 
 /**
  * Weekly Digest email template.
@@ -41,25 +30,20 @@ export default function WeeklyDigestEmail() {
             <Text style={headerBrand}>Family Events</Text>
             <Heading style={headerTitle}>Your Weekly Digest</Heading>
             <Text style={headerSubtitle}>
-              {"{{{EVENT_COUNT}}}"} events this week in{" "}
-              {"{{{CITY_NAME}}}"}
+              {"{{{EVENT_COUNT}}}"} events this week in {"{{{CITY_NAME}}}"}
             </Text>
           </Section>
 
           <Hr style={divider} />
 
           {/* Greeting */}
-          <Text style={greeting}>
-            Hi {"{{{USERNAME}}}"},
-          </Text>
+          <Text style={greeting}>Hi {"{{{USERNAME}}}"},</Text>
           <Text style={introText}>
             Here are the upcoming family-friendly events near you this week.
           </Text>
 
           {/* Event cards – injected as pre-rendered HTML */}
-          <Section
-            dangerouslySetInnerHTML={{ __html: "{{{EVENTS_HTML}}}" }}
-          />
+          <Section dangerouslySetInnerHTML={{ __html: "{{{EVENTS_HTML}}}" }} />
 
           {/* CTA */}
           <Section style={ctaSection}>
@@ -87,8 +71,7 @@ export default function WeeklyDigestEmail() {
 
 const body: React.CSSProperties = {
   backgroundColor: "#f6f9fc",
-  fontFamily:
-    "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+  fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
   margin: 0,
   padding: 0,
 }

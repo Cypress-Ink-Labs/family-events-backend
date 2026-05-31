@@ -33,10 +33,7 @@ export type {
   SourceExtractionMode,
   SourceScrapeQueueStatus,
 } from "./database-enums"
-export {
-  NOTIFICATION_TYPES,
-  PUSH_PLATFORMS,
-} from "./notifications"
+export { NOTIFICATION_TYPES, PUSH_PLATFORMS } from "./notifications"
 export type {
   MarkNotificationReadParams,
   NotificationType,
