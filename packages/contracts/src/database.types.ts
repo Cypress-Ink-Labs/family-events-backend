@@ -1,6 +1,17 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -551,7 +562,9 @@ export type Database = {
       }
       event_llm_review_traces: {
         Row: {
-          applied_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          applied_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           confidence: number | null
           created_at: string
           error_code: string | null
@@ -561,7 +574,9 @@ export type Database = {
           id: number
           input_snapshot: Json | null
           model: string | null
-          model_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          model_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           normalized_title: string | null
           processing_ms: number | null
           prompt_version: string
@@ -575,7 +590,9 @@ export type Database = {
           suggested_category: string | null
         }
         Insert: {
-          applied_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          applied_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           confidence?: number | null
           created_at?: string
           error_code?: string | null
@@ -585,7 +602,9 @@ export type Database = {
           id?: number
           input_snapshot?: Json | null
           model?: string | null
-          model_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          model_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           normalized_title?: string | null
           processing_ms?: number | null
           prompt_version: string
@@ -599,7 +618,9 @@ export type Database = {
           suggested_category?: string | null
         }
         Update: {
-          applied_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          applied_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           confidence?: number | null
           created_at?: string
           error_code?: string | null
@@ -609,7 +630,9 @@ export type Database = {
           id?: number
           input_snapshot?: Json | null
           model?: string | null
-          model_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          model_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           normalized_title?: string | null
           processing_ms?: number | null
           prompt_version?: string
@@ -862,7 +885,9 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -914,7 +939,9 @@ export type Database = {
           last_enrichment_attempt_at?: string | null
           latitude?: number | null
           llm_review_confidence?: number | null
-          llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          llm_review_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           llm_review_error?: string | null
           llm_review_flags?: string[]
           llm_review_model?: string | null
@@ -966,7 +993,9 @@ export type Database = {
           last_enrichment_attempt_at?: string | null
           latitude?: number | null
           llm_review_confidence?: number | null
-          llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          llm_review_decision?:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           llm_review_error?: string | null
           llm_review_flags?: string[]
           llm_review_model?: string | null
@@ -1625,6 +1654,45 @@ export type Database = {
           },
         ]
       }
+      user_notification_preferences: {
+        Row: {
+          change_email: boolean
+          change_push: boolean
+          created_at: string
+          digest_email: boolean
+          digest_push: boolean
+          id: string
+          reminder_email: boolean
+          reminder_push: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          change_email?: boolean
+          change_push?: boolean
+          created_at?: string
+          digest_email?: boolean
+          digest_push?: boolean
+          id?: string
+          reminder_email?: boolean
+          reminder_push?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          change_email?: boolean
+          change_push?: boolean
+          created_at?: string
+          digest_email?: boolean
+          digest_push?: boolean
+          id?: string
+          reminder_email?: boolean
+          reminder_push?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -1681,7 +1749,9 @@ export type Database = {
           oldest_pending_enqueued_at: string | null
           oldest_processing_started_at: string | null
           row_count: number | null
-          status: Database["public"]["Enums"]["llm_event_review_queue_status"] | null
+          status:
+            | Database["public"]["Enums"]["llm_event_review_queue_status"]
+            | null
         }
         Relationships: []
       }
@@ -1810,7 +1880,9 @@ export type Database = {
           oldest_enqueued_at: string | null
           oldest_processing_started_at: string | null
           row_count: number | null
-          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null
+          status:
+            | Database["public"]["Enums"]["source_scrape_queue_status"]
+            | null
         }
         Relationships: []
       }
@@ -1869,7 +1941,9 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2090,11 +2164,11 @@ export type Database = {
         Args: { p_notes?: string; p_request_id: string }
         Returns: boolean
       }
-      admin_retry_source_scrape_queue: {
+      admin_retry_dead_tag_queue: {
         Args: { p_queue_id: number }
         Returns: boolean
       }
-      admin_retry_dead_tag_queue: {
+      admin_retry_source_scrape_queue: {
         Args: { p_queue_id: number }
         Returns: boolean
       }
@@ -2165,7 +2239,9 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2263,7 +2339,9 @@ export type Database = {
               last_enrichment_attempt_at: string | null
               latitude: number | null
               llm_review_confidence: number | null
-              llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+              llm_review_decision:
+                | Database["public"]["Enums"]["llm_event_review_decision"]
+                | null
               llm_review_error: string | null
               llm_review_flags: string[]
               llm_review_model: string | null
@@ -2330,7 +2408,9 @@ export type Database = {
               last_enrichment_attempt_at: string | null
               latitude: number | null
               llm_review_confidence: number | null
-              llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+              llm_review_decision:
+                | Database["public"]["Enums"]["llm_event_review_decision"]
+                | null
               llm_review_error: string | null
               llm_review_flags: string[]
               llm_review_model: string | null
@@ -2391,7 +2471,9 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2654,6 +2736,58 @@ export type Database = {
           view_count: number
         }[]
       }
+      events_enriched_v2: {
+        Args: {
+          p_after_id?: string
+          p_after_start_datetime?: string
+          p_city_id?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_event_ids?: string[]
+          p_limit?: number
+          p_status?: string
+          p_user_id?: string
+        }
+        Returns: {
+          address: string
+          age_max: number
+          age_min: number
+          ai_confidence: number
+          ai_tag_provider: string
+          avg_rating: number
+          city_id: string
+          created_at: string
+          description: string
+          end_datetime: string
+          id: string
+          image_attributions: Json
+          images: Json
+          is_favorited: boolean
+          is_featured: boolean
+          is_free: boolean
+          is_in_calendar: boolean
+          is_outdoor: boolean
+          latitude: number
+          longitude: number
+          parent_tips: Json
+          parent_tips_generated_at: string
+          price: number
+          rating_count: number
+          recurrence_info: Json
+          search_vector: unknown
+          source_id: string
+          source_name: string
+          source_url: string
+          start_datetime: string
+          status: string
+          tags: Json
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string
+          view_count: number
+        }[]
+      }
       find_similar_events: {
         Args: {
           p_city_id?: string
@@ -2662,6 +2796,17 @@ export type Database = {
           p_limit?: number
           p_threshold?: number
         }
+        Returns: {
+          city_id: string
+          cosine_distance: number
+          event_id: string
+          source_id: string
+          status: Database["public"]["Enums"]["event_status"]
+          title: string
+        }[]
+      }
+      find_similar_events_by_id: {
+        Args: { p_city_id?: string; p_event_id: string; p_limit?: number }
         Returns: {
           city_id: string
           cosine_distance: number
@@ -2845,6 +2990,10 @@ export type Database = {
         Args: { p_attribution_id: string; p_error?: string; p_success: boolean }
         Returns: undefined
       }
+      pipeline_learning_stats: {
+        Args: { p_window_days?: number }
+        Returns: Json
+      }
       plan_events_first_nonempty_window: {
         Args: {
           p_city_id?: string
@@ -2916,7 +3065,167 @@ export type Database = {
       run_cleanup_stale_runs: { Args: never; Returns: undefined }
       run_daily_maintenance: { Args: never; Returns: Json }
       run_due_source_scrapes: { Args: never; Returns: undefined }
-      search_events: {
+      search_events:
+        | {
+            Args: {
+              p_after_id?: string
+              p_after_start_datetime?: string
+              p_age_max?: number
+              p_age_min?: number
+              p_city_id?: string
+              p_date_from?: string
+              p_date_to?: string
+              p_is_featured?: boolean
+              p_is_free?: boolean
+              p_keyword?: string
+              p_limit?: number
+              p_offset?: number
+              p_status?: string
+              p_tag_slugs?: string[]
+            }
+            Returns: {
+              address: string | null
+              admin_last_edited_at: string | null
+              admin_last_edited_by: string | null
+              admin_locked_fields: string[]
+              age_max: number | null
+              age_min: number | null
+              ai_confidence: number | null
+              ai_tag_model: string | null
+              ai_tag_provider: string | null
+              ai_tag_status: string | null
+              city_id: string | null
+              created_at: string
+              description: string | null
+              end_datetime: string | null
+              id: string
+              images: Json
+              is_featured: boolean
+              is_free: boolean
+              is_outdoor: boolean | null
+              last_enrichment_attempt_at: string | null
+              latitude: number | null
+              llm_review_confidence: number | null
+              llm_review_decision:
+                | Database["public"]["Enums"]["llm_event_review_decision"]
+                | null
+              llm_review_error: string | null
+              llm_review_flags: string[]
+              llm_review_model: string | null
+              llm_review_prompt_version: string | null
+              llm_review_provider: string | null
+              llm_review_reason: string | null
+              llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+              llm_reviewed_at: string | null
+              longitude: number | null
+              parent_tips: Json | null
+              parent_tips_generated_at: string | null
+              parent_tips_model: string | null
+              parent_tips_prompt_version: string | null
+              parent_tips_provider: string | null
+              price: number | null
+              recurrence_info: Json | null
+              search_vector: unknown
+              source_id: string | null
+              source_name: string | null
+              source_url: string | null
+              start_datetime: string
+              status: Database["public"]["Enums"]["event_status"]
+              timezone: string
+              title: string
+              updated_at: string
+              venue_name: string | null
+              view_count: number
+            }[]
+            SetofOptions: {
+              from: "*"
+              to: "events"
+              isOneToOne: false
+              isSetofReturn: true
+            }
+          }
+        | {
+            Args: {
+              p_after_id?: string
+              p_after_start_datetime?: string
+              p_age_max?: number
+              p_age_min?: number
+              p_city_id?: string
+              p_date_from?: string
+              p_date_to?: string
+              p_is_featured?: boolean
+              p_is_free?: boolean
+              p_keyword?: string
+              p_lat?: number
+              p_limit?: number
+              p_lng?: number
+              p_offset?: number
+              p_radius_km?: number
+              p_status?: string
+              p_tag_slugs?: string[]
+            }
+            Returns: {
+              address: string | null
+              admin_last_edited_at: string | null
+              admin_last_edited_by: string | null
+              admin_locked_fields: string[]
+              age_max: number | null
+              age_min: number | null
+              ai_confidence: number | null
+              ai_tag_model: string | null
+              ai_tag_provider: string | null
+              ai_tag_status: string | null
+              city_id: string | null
+              created_at: string
+              description: string | null
+              end_datetime: string | null
+              id: string
+              images: Json
+              is_featured: boolean
+              is_free: boolean
+              is_outdoor: boolean | null
+              last_enrichment_attempt_at: string | null
+              latitude: number | null
+              llm_review_confidence: number | null
+              llm_review_decision:
+                | Database["public"]["Enums"]["llm_event_review_decision"]
+                | null
+              llm_review_error: string | null
+              llm_review_flags: string[]
+              llm_review_model: string | null
+              llm_review_prompt_version: string | null
+              llm_review_provider: string | null
+              llm_review_reason: string | null
+              llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
+              llm_reviewed_at: string | null
+              longitude: number | null
+              parent_tips: Json | null
+              parent_tips_generated_at: string | null
+              parent_tips_model: string | null
+              parent_tips_prompt_version: string | null
+              parent_tips_provider: string | null
+              price: number | null
+              recurrence_info: Json | null
+              search_vector: unknown
+              source_id: string | null
+              source_name: string | null
+              source_url: string | null
+              start_datetime: string
+              status: Database["public"]["Enums"]["event_status"]
+              timezone: string
+              title: string
+              updated_at: string
+              venue_name: string | null
+              view_count: number
+            }[]
+            SetofOptions: {
+              from: "*"
+              to: "events"
+              isOneToOne: false
+              isSetofReturn: true
+            }
+          }
+      search_events_v2: {
         Args: {
           p_after_id?: string
           p_after_start_datetime?: string
@@ -2956,7 +3265,9 @@ export type Database = {
           last_enrichment_attempt_at: string | null
           latitude: number | null
           llm_review_confidence: number | null
-          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null
+          llm_review_decision:
+            | Database["public"]["Enums"]["llm_event_review_decision"]
+            | null
           llm_review_error: string | null
           llm_review_flags: string[]
           llm_review_model: string | null
@@ -2991,6 +3302,15 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      should_auto_reject_source: {
+        Args: {
+          p_min_events?: number
+          p_source_id: string
+          p_threshold?: number
+          p_window_days?: number
+        }
+        Returns: boolean
       }
       source_scrape_queue_schedule_retry: {
         Args: { p_attempt_count: number; p_error: string; p_queue_id: number }
@@ -3036,17 +3356,65 @@ export type Database = {
         }
         Returns: string
       }
+      upsert_notification_preferences: {
+        Args: {
+          p_change_email: boolean
+          p_change_push: boolean
+          p_digest_email: boolean
+          p_digest_push: boolean
+          p_reminder_email: boolean
+          p_reminder_push: boolean
+        }
+        Returns: {
+          change_email: boolean
+          change_push: boolean
+          created_at: string
+          digest_email: boolean
+          digest_push: boolean
+          id: string
+          reminder_email: boolean
+          reminder_push: boolean
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_notification_preferences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       event_processing_mode: "manual_review" | "auto_approve" | "llm_review"
       event_status: "draft" | "published" | "rejected" | "archived"
-      event_tag_queue_status: "pending" | "processing" | "failed" | "dead" | "succeeded"
+      event_tag_queue_status:
+        | "pending"
+        | "processing"
+        | "failed"
+        | "dead"
+        | "succeeded"
       invite_request_status: "pending" | "approved" | "rejected"
       llm_event_review_decision: "approve" | "reject" | "needs_admin_review"
-      llm_event_review_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
-      llm_event_review_status: "not_required" | "pending" | "succeeded" | "failed" | "skipped"
+      llm_event_review_queue_status:
+        | "pending"
+        | "processing"
+        | "retrying"
+        | "succeeded"
+        | "dead"
+      llm_event_review_status:
+        | "not_required"
+        | "pending"
+        | "succeeded"
+        | "failed"
+        | "skipped"
       source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
-      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead"
+      source_scrape_queue_status:
+        | "pending"
+        | "processing"
+        | "retrying"
+        | "succeeded"
+        | "dead"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3077,8 +3445,10 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -3174,13 +3544,41 @@ export const Constants = {
     Enums: {
       event_processing_mode: ["manual_review", "auto_approve", "llm_review"],
       event_status: ["draft", "published", "rejected", "archived"],
-      event_tag_queue_status: ["pending", "processing", "failed", "dead", "succeeded"],
+      event_tag_queue_status: [
+        "pending",
+        "processing",
+        "failed",
+        "dead",
+        "succeeded",
+      ],
       invite_request_status: ["pending", "approved", "rejected"],
       llm_event_review_decision: ["approve", "reject", "needs_admin_review"],
-      llm_event_review_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
-      llm_event_review_status: ["not_required", "pending", "succeeded", "failed", "skipped"],
-      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
-      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
+      llm_event_review_queue_status: [
+        "pending",
+        "processing",
+        "retrying",
+        "succeeded",
+        "dead",
+      ],
+      llm_event_review_status: [
+        "not_required",
+        "pending",
+        "succeeded",
+        "failed",
+        "skipped",
+      ],
+      source_extraction_mode: [
+        "deterministic",
+        "llm",
+        "deterministic_then_llm",
+      ],
+      source_scrape_queue_status: [
+        "pending",
+        "processing",
+        "retrying",
+        "succeeded",
+        "dead",
+      ],
     },
   },
 } as const

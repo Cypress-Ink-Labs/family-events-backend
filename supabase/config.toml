@@ -108,6 +108,11 @@ verify_jwt = false
 # with the anon key — RLS on that view is the real gate.
 verify_jwt = false
 
+[functions.sitemap]
+# Public: search engine crawlers (Googlebot, Bingbot) never carry a user JWT.
+# The function reads only the public_events view with the anon key.
+verify_jwt = false
+
 [functions.notify-email]
 # Triggered by dispatch_email_notification / pg_net with sb_secret_* bearer.
 # App-layer requireServiceRole still enforces auth.

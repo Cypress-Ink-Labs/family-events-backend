@@ -4,6 +4,16 @@ export {
   LLM_EVENT_REVIEW_STATUS,
   LLM_EVENT_REVIEW_STATUSES,
 } from "./database-enums"
+export {
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  NOTIFICATION_PREFERENCE_FIELDS,
+  toUpsertParams,
+} from "./notification-preferences"
+export type {
+  NotificationPreferences,
+  NotificationPreferencesRow,
+  UpsertNotificationPreferencesParams,
+} from "./notification-preferences"
 export { Constants } from "./database.types"
 export type {
   CompositeTypes,
