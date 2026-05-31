@@ -40,7 +40,16 @@ interface DigestEvent {
   address: string | null;
   is_free: boolean;
   price: number | null;
-  images: Array<{ url?: string }> | null;
+  // events.images is a jsonb array; elements are URL strings in practice, but
+  // tolerate { url } objects too in case enrichment shape changes.
+  images: Array<string | { url?: string }> | null;
+}
+
+function firstImageUrl(event: DigestEvent): string | undefined {
+  const first = event.images?.[0];
+  if (typeof first === "string") return first;
+  if (first && typeof first === "object") return first.url;
+  return undefined;
 }
 
 function escapeHtml(value: string): string {
@@ -50,6 +59,12 @@ function escapeHtml(value: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+// Some source events carry HTML markup in title/venue/address (e.g.
+// "<p>Cajun Field</p>"). Strip tags and collapse whitespace before escaping.
+function stripTags(value: string): string {
+  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function formatPrice(event: DigestEvent): string {
@@ -115,10 +130,11 @@ function renderPricePill(event: DigestEvent): string {
 
 function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
   const eventUrl = `${appUrl}/events/${event.id}`;
-  const thumbnail = event.images?.[0]?.url;
-  const location = event.venue_name || event.address || "";
+  const thumbnail = firstImageUrl(event);
+  const title = stripTags(event.title);
+  const location = stripTags(event.venue_name || event.address || "");
   const { date, time } = splitDateTime(event.start_datetime);
-  const initial = escapeHtml((event.title.trim()[0] || "•").toUpperCase());
+  const initial = escapeHtml((title[0] || "•").toUpperCase());
 
   const imageCell = thumbnail
     ? `<img src="${escapeHtml(thumbnail)}" width="92" height="92" alt=""
@@ -140,7 +156,7 @@ function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
             <tr>
               <td width="92" valign="top" style="padding-right:16px;">${imageCell}</td>
               <td valign="top">
-                <a href="${escapeHtml(eventUrl)}" style="font-family:${FONT_DISPLAY};font-size:18px;line-height:1.25;font-weight:600;color:${THEME.textPrimary};text-decoration:none;">${escapeHtml(event.title)}</a>
+                <a href="${escapeHtml(eventUrl)}" style="font-family:${FONT_DISPLAY};font-size:18px;line-height:1.25;font-weight:600;color:${THEME.textPrimary};text-decoration:none;">${escapeHtml(title)}</a>
                 <div style="margin-top:8px;">${metaLine}</div>
                 ${
     location
