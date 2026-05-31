@@ -1,0 +1,4 @@
+# Only cron-runner.sh is needed in the image.
+# Ignore everything else to keep Docker context tiny.
+*
+!cron-runner.sh
