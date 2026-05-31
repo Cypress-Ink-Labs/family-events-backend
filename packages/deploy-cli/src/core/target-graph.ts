@@ -16,6 +16,11 @@ export function allTargets(config: DeployConfig): DeployTarget[] {
       name,
     })),
     { id: "railway:all", label: "Railway all services", kind: "railway:all" },
+    {
+      id: "railway:crons",
+      label: "Railway cron services (all except web)",
+      kind: "railway:crons" as const,
+    },
     ...config.railway.services.map((service) => ({
       id: `railway:${service.name}`,
       label: `Railway service: ${service.name}`,
@@ -66,6 +71,16 @@ export function expandTarget(config: DeployConfig, target: DeployTarget): Deploy
       name,
     }))
   }
+  if (target.kind === "railway:crons") {
+    return config.railway.allOrder
+      .filter((name) => name !== "web")
+      .map((name) => ({
+        id: `railway:${name}`,
+        label: `Railway service: ${name}`,
+        kind: "railway:service" as const,
+        name,
+      }))
+  }
   return [target]
 }
 
@@ -80,12 +95,15 @@ export function normalizeTargetId(input: string): string {
 function dedupeTargets(targets: DeployTarget[]): DeployTarget[] {
   const hasSupabaseAll = targets.some((target) => target.kind === "supabase:functions:all")
   const hasRailwayAll = targets.some((target) => target.kind === "railway:all")
+  const hasRailwayCrons = targets.some((target) => target.kind === "railway:crons")
   const seen = new Set<string>()
   const output: DeployTarget[] = []
 
   for (const target of targets) {
     if (hasSupabaseAll && target.kind === "supabase:function") continue
     if (hasRailwayAll && target.kind === "railway:service") continue
+    if (hasRailwayAll && target.kind === "railway:crons") continue
+    if (hasRailwayCrons && target.kind === "railway:service" && target.name !== "web") continue
     if (seen.has(target.id)) continue
     seen.add(target.id)
     output.push(target)

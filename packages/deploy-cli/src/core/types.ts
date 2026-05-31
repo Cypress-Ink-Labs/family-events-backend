@@ -5,6 +5,7 @@ export type TargetKind =
   | "supabase:functions:all"
   | "supabase:function"
   | "railway:all"
+  | "railway:crons"
   | "railway:service"
 
 export type ExitCode = 0 | 1 | 2 | 3 | 4 | 5

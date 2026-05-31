@@ -293,6 +293,7 @@ async function deployTarget(
       return
     case "supabase:functions:all":
     case "railway:all":
+    case "railway:crons":
       throw new ValidationError(`Unexpected unexpanded target: ${target.id}`)
   }
 }
