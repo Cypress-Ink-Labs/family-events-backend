@@ -45,3 +45,5 @@ export type {
   UserNotification,
   UserNotificationRow,
 } from "./notifications"
+export { COMMUNITY_EVENT_DAILY_LIMIT } from "./community-event"
+export type { CommunityEventInput } from "./community-event"
