@@ -157,6 +157,83 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;")
 }
 
+// ── Dusk-Meadow theme tokens (mirrors packages/design-system) ─────────────────
+const THEME = {
+  bg: "#F5F3FC",
+  surface: "#FDFCFF",
+  textPrimary: "#1C1828",
+  textMuted: "#6B6278",
+  border: "#EAE4F6",
+  violet: "#7B5CC8",
+  violetDeep: "#5E42A6",
+  peach: "#E89060",
+} as const
+
+const FONT_SANS = `'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif`
+const FONT_DISPLAY = `'Fraunces', ui-serif, Georgia, serif`
+const FONT_EDITORIAL = `'Newsreader', ui-serif, Georgia, serif`
+const FONT_MONO = `'Geist Mono', ui-monospace, 'SF Mono', monospace`
+
+function wrapEmailShell({
+  heading,
+  tagline,
+  bodyHtml,
+  footerHtml,
+  appUrl,
+}: {
+  heading: string
+  tagline: string
+  bodyHtml: string
+  footerHtml: string
+  appUrl: string
+}): string {
+  const logoUrl = `${appUrl.replace(/\/$/, "")}/brand/family-events-logo.png`
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet" />
+</head>
+<body style="margin:0;padding:0;background:${THEME.bg};font-family:${FONT_SANS};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${THEME.bg};">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${THEME.surface};border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(28,24,40,0.10);">
+          <!-- Header -->
+          <tr>
+            <td style="background:${THEME.violet};background-image:linear-gradient(135deg,${THEME.violet} 0%,${THEME.violetDeep} 100%);padding:36px 40px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="left">
+                    <img src="${escapeHtml(logoUrl)}" width="28" height="28" alt="" style="vertical-align:middle;border-radius:7px;display:inline-block;" />
+                    <span style="font-family:${FONT_SANS};font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#F2ECFB;vertical-align:middle;padding-left:10px;">Family Events</span>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family:${FONT_DISPLAY};font-size:34px;line-height:1.1;font-weight:600;color:#FFFFFF;margin:22px 0 0;">${escapeHtml(heading)}</div>
+              <div style="display:inline-block;margin-top:14px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.25);border-radius:9999px;padding:6px 14px;font-family:${FONT_MONO};font-size:12px;letter-spacing:0.03em;color:#FFFFFF;">${escapeHtml(tagline)}</div>
+            </td>
+          </tr>
+          <!-- Body -->
+          ${bodyHtml}
+          <!-- Footer -->
+          <tr>
+            <td style="background:${THEME.bg};padding:26px 40px;border-top:1px solid ${THEME.border};">
+              ${footerHtml}
+              <div style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.04em;color:${THEME.textMuted};text-align:center;margin:14px 0 0;opacity:0.7;">FAMILY EVENTS</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim()
+}
+
 interface RenderedEmail {
   to: string
   subject: string
@@ -171,40 +248,47 @@ function renderAdminRequest(
   const message = payload.message?.trim()
   const linkUrl = `${appUrl.replace(/\/$/, "")}/admin/invites`
 
+  const bodyHtml = `
+    <tr>
+      <td style="padding:30px 40px 6px;">
+        <div style="font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0 0 20px;">
+          Someone just asked to join Family Events.
+        </div>
+        <table style="width:100%;border-collapse:collapse;background:${THEME.bg};border:1px solid ${THEME.border};border-radius:12px;overflow:hidden;">
+          <tr>
+            <td style="padding:12px 16px;font-family:${FONT_MONO};font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:${THEME.textMuted};border-bottom:1px solid ${THEME.border};">Email</td>
+            <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:15px;font-weight:600;color:${THEME.textPrimary};border-bottom:1px solid ${THEME.border};">${escapeHtml(payload.email)}</td>
+          </tr>
+          ${message ? `
+          <tr>
+            <td style="padding:12px 16px;font-family:${FONT_MONO};font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:${THEME.textMuted};vertical-align:top;">Message</td>
+            <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${THEME.textPrimary};white-space:pre-wrap;">${escapeHtml(message)}</td>
+          </tr>` : ""}
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding:28px 40px 36px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="background:${THEME.peach};border-radius:9999px;">
+              <a href="${escapeHtml(linkUrl)}" style="display:inline-block;font-family:${FONT_SANS};font-size:15px;font-weight:700;color:#FFFFFF;padding:14px 28px;border-radius:9999px;text-decoration:none;">Review in admin &rarr;</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`
+
   return {
     to: adminEmail,
     subject: `[Family Events] New invite request from ${payload.email}`,
-    html: `
-      <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; color: #0f172a; max-width: 560px;">
-        <h2 style="margin-bottom: 8px;">New invite request</h2>
-        <p style="color: #475569; margin: 0 0 16px;">
-          Someone just asked to join Family Events.
-        </p>
-        <table style="border-collapse: collapse; margin: 16px 0;">
-          <tr>
-            <td style="padding: 6px 12px 6px 0; color: #64748b; vertical-align: top;">Email</td>
-            <td style="padding: 6px 0; font-weight: 600;">${escapeHtml(payload.email)}</td>
-          </tr>
-          ${
-            message
-              ? `<tr>
-                  <td style="padding: 6px 12px 6px 0; color: #64748b; vertical-align: top;">Message</td>
-                  <td style="padding: 6px 0; white-space: pre-wrap;">${escapeHtml(message)}</td>
-                </tr>`
-              : ""
-          }
-        </table>
-        <p style="margin: 24px 0;">
-          <a href="${escapeHtml(linkUrl)}"
-             style="background: #f59e0b; color: #0f172a; padding: 10px 16px; border-radius: 10px; text-decoration: none; font-weight: 700;">
-            Review in admin
-          </a>
-        </p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
-          One-click approve there to generate + reveal the code.
-        </p>
-      </div>
-    `.trim(),
+    html: wrapEmailShell({
+      heading: "New Invite Request",
+      tagline: "Action needed",
+      bodyHtml,
+      footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">One-click approve there to generate + reveal the code.</div>`,
+      appUrl,
+    }),
   }
 }
 
@@ -215,53 +299,72 @@ function renderRequestApproved(
   const url = (payload.app_url ?? appUrl).replace(/\/$/, "")
   const signupUrl = `${url}/sign-up`
 
+  const bodyHtml = `
+    <tr>
+      <td style="padding:30px 40px 6px;">
+        <div style="font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0 0 20px;">
+          Thanks for asking to join Family Events. Here's your invite code:
+        </div>
+        <div style="background:${THEME.bg};border:1px solid ${THEME.border};border-radius:16px;padding:24px;text-align:center;">
+          <div style="font-family:${FONT_MONO};font-size:28px;font-weight:700;letter-spacing:0.2em;color:${THEME.textPrimary};">${escapeHtml(payload.code)}</div>
+        </div>
+        <div style="font-family:${FONT_SANS};font-size:13px;color:${THEME.textMuted};margin-top:16px;">
+          The code is single-use. Paste it on the sign-up screen along with your email to finish creating your account.
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding:28px 40px 36px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="background:${THEME.peach};border-radius:9999px;">
+              <a href="${escapeHtml(signupUrl)}" style="display:inline-block;font-family:${FONT_SANS};font-size:16px;font-weight:700;color:#FFFFFF;padding:16px 32px;border-radius:9999px;text-decoration:none;">Create your account &rarr;</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`
+
   return {
     to: payload.email,
     subject: "Your Family Events invite code",
-    html: `
-      <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; color: #0f172a; max-width: 560px;">
-        <h2 style="margin-bottom: 8px;">You're in!</h2>
-        <p style="margin: 0 0 16px;">Thanks for asking to join Family Events. Here's your invite code:</p>
-        <div style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 22px; font-weight: 700; letter-spacing: 0.18em;">
-          ${escapeHtml(payload.code)}
-        </div>
-        <p style="margin: 24px 0;">
-          <a href="${escapeHtml(signupUrl)}"
-             style="background: #f59e0b; color: #0f172a; padding: 10px 16px; border-radius: 10px; text-decoration: none; font-weight: 700;">
-            Create your account
-          </a>
-        </p>
-        <p style="color: #475569; font-size: 13px;">
-          The code is single-use. Paste it on the sign-up screen along with your email to finish creating your account.
-        </p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
-          Didn't request this? You can ignore this email.
-        </p>
-      </div>
-    `.trim(),
+    html: wrapEmailShell({
+      heading: "You're In!",
+      tagline: "Welcome aboard",
+      bodyHtml,
+      footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">Didn't request this? You can safely ignore this email.</div>`,
+      appUrl: url,
+    }),
   }
 }
 
 function renderRequestRejected(
-  payload: Extract<Payload, { kind: "request_rejected" }>
+  payload: Extract<Payload, { kind: "request_rejected" }>,
+  appUrl: string
 ): RenderedEmail {
+  const bodyHtml = `
+    <tr>
+      <td style="padding:30px 40px 36px;">
+        <div style="font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0 0 16px;">
+          Thanks for asking to join Family Events. After review, we're not able to approve your request at this time.
+        </div>
+        <div style="font-family:${FONT_SANS};font-size:14px;color:${THEME.textMuted};">
+          No further action is needed on your end. If you think this was a mistake, please email
+          <a href="mailto:support@family-events.org" style="color:${THEME.violetDeep};font-weight:500;text-decoration:underline;">support@family-events.org</a>.
+        </div>
+      </td>
+    </tr>`
+
   return {
     to: payload.email,
     subject: "Update on your Family Events invite request",
-    html: `
-      <div style="font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; color: #0f172a; max-width: 560px;">
-        <h2 style="margin-bottom: 8px;">About your invite request</h2>
-        <p style="margin: 0 0 16px;">
-          Thanks for asking to join Family Events. After review, we're not able to approve your request at this time.
-        </p>
-        <p style="color: #475569; font-size: 13px;">
-          No further action is needed on your end. If you think this was a mistake, please send an email to <a href="mailto:support@family-events.org">support@family-events.org</a>.
-        </p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
-          Didn't request this? You can ignore this email.
-        </p>
-      </div>
-    `.trim(),
+    html: wrapEmailShell({
+      heading: "Request Update",
+      tagline: "About your invite",
+      bodyHtml,
+      footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">Didn't request this? You can safely ignore this email.</div>`,
+      appUrl,
+    }),
   }
 }
 
@@ -430,7 +533,7 @@ Deno.serve(async (req: Request) => {
     } else if (payload.kind === "request_approved") {
       rendered = renderRequestApproved(payload, appUrl)
     } else if (payload.kind === "request_rejected") {
-      rendered = renderRequestRejected(payload)
+      rendered = renderRequestRejected(payload, appUrl)
     } else {
       return new Response(JSON.stringify({ error: "unknown kind" }), {
         status: 400,

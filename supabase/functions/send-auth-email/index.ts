@@ -77,33 +77,105 @@ function buildVerifyLink(
   return `${authBaseUrl}/auth/v1/verify?${params.toString()}`;
 }
 
+// ── Dusk-Meadow theme tokens (mirrors packages/design-system) ─────────────────
+const THEME = {
+  bg: "#F5F3FC",
+  surface: "#FDFCFF",
+  textPrimary: "#1C1828",
+  textMuted: "#6B6278",
+  border: "#EAE4F6",
+  violet: "#7B5CC8",
+  violetDeep: "#5E42A6",
+  peach: "#E89060",
+} as const;
+
+const FONT_SANS = `'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif`;
+const FONT_DISPLAY = `'Fraunces', ui-serif, Georgia, serif`;
+const FONT_EDITORIAL = `'Newsreader', ui-serif, Georgia, serif`;
+const FONT_MONO = `'Geist Mono', ui-monospace, 'SF Mono', monospace`;
+
 function buildActionEmailHtml({
   username,
   intro,
   actionLabel,
   actionUrl,
+  heading,
+  tagline,
 }: {
   username: string;
   intro: string;
   actionLabel: string;
   actionUrl: string;
+  heading?: string;
+  tagline?: string;
 }): string {
+  const logoUrl = (Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app").replace(/\/$/, "") + "/brand/family-events-logo.png";
+  const displayHeading = heading ?? actionLabel;
+  const displayTagline = tagline ?? "One-click access";
+
   return `
-    <div style="font-family: ui-sans-serif, system-ui, sans-serif; color: #0f172a; max-width: 560px;">
-      <h2 style="margin-bottom: 8px;">${escapeHtml(actionLabel)}</h2>
-      <p style="margin: 0 0 16px;">Hi ${escapeHtml(username)},</p>
-      <p style="margin: 0 0 24px;">${escapeHtml(intro)}</p>
-      <p style="margin: 0 0 24px;">
-        <a href="${escapeHtml(actionUrl)}"
-           style="background: #4f46e5; color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 700;">
-          ${escapeHtml(actionLabel)}
-        </a>
-      </p>
-      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">
-        If you didn't request this, you can safely ignore this email.
-      </p>
-    </div>
-  `.trim();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet" />
+</head>
+<body style="margin:0;padding:0;background:${THEME.bg};font-family:${FONT_SANS};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${THEME.bg};">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${THEME.surface};border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(28,24,40,0.10);">
+          <!-- Header -->
+          <tr>
+            <td style="background:${THEME.violet};background-image:linear-gradient(135deg,${THEME.violet} 0%,${THEME.violetDeep} 100%);padding:36px 40px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="left">
+                    <img src="${escapeHtml(logoUrl)}" width="28" height="28" alt="" style="vertical-align:middle;border-radius:7px;display:inline-block;" />
+                    <span style="font-family:${FONT_SANS};font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#F2ECFB;vertical-align:middle;padding-left:10px;">Family Events</span>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family:${FONT_DISPLAY};font-size:34px;line-height:1.1;font-weight:600;color:#FFFFFF;margin:22px 0 0;">${escapeHtml(displayHeading)}</div>
+              <div style="display:inline-block;margin-top:14px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.25);border-radius:9999px;padding:6px 14px;font-family:${FONT_MONO};font-size:12px;letter-spacing:0.03em;color:#FFFFFF;">${escapeHtml(displayTagline)}</div>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:30px 40px 6px;">
+              <div style="font-family:${FONT_DISPLAY};font-size:21px;font-weight:600;color:${THEME.textPrimary};margin:0 0 8px;">Hi ${escapeHtml(username)},</div>
+              <div style="font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0;">${escapeHtml(intro)}</div>
+            </td>
+          </tr>
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:28px 40px 36px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background:${THEME.peach};border-radius:9999px;">
+                    <a href="${escapeHtml(actionUrl)}" style="display:inline-block;font-family:${FONT_SANS};font-size:16px;font-weight:700;color:#FFFFFF;padding:16px 32px;border-radius:9999px;text-decoration:none;">${escapeHtml(actionLabel)}</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background:${THEME.bg};padding:26px 40px;border-top:1px solid ${THEME.border};">
+              <div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">
+                If you didn't request this, you can safely ignore this email.
+              </div>
+              <div style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.04em;color:${THEME.textMuted};text-align:center;margin:14px 0 0;opacity:0.7;">FAMILY EVENTS</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim();
 }
 
 type ResendBody = { from: string; to: string[]; subject: string; html: string };
@@ -202,21 +274,20 @@ Deno.serve(async (req: Request) => {
     let body: ResendBody;
 
     if (email_action_type === "magiclink" || email_action_type === "signup") {
-      const actionLabel = email_action_type === "signup"
-        ? "Confirm your email"
-        : "Sign in to Family Events";
+      const isSignup = email_action_type === "signup";
       body = {
         from: resendFrom,
         to: [user.email],
-        subject: email_action_type === "signup"
+        subject: isSignup
           ? "Confirm your Family Events email"
           : "Your Family Events sign-in link",
         html: buildActionEmailHtml({
           username,
-          intro:
-            "Click the button below to continue to Family Events. This link expires in 24 hours.",
-          actionLabel,
+          intro: "Click the button below to continue to Family Events. This link expires in 24 hours.",
+          actionLabel: isSignup ? "Confirm email" : "Sign in to Family Events",
           actionUrl: verifyLink,
+          heading: isSignup ? "Confirm Your Email" : "Sign In",
+          tagline: isSignup ? "One step left" : "One-click access",
         }),
       };
     } else if (email_action_type === "recovery") {
@@ -226,10 +297,11 @@ Deno.serve(async (req: Request) => {
         subject: "Reset your Family Events password",
         html: buildActionEmailHtml({
           username,
-          intro:
-            "Click the button below to reset your Family Events password. This link expires in 24 hours.",
+          intro: "Click the button below to reset your Family Events password. This link expires in 24 hours.",
           actionLabel: "Reset password",
           actionUrl: verifyLink,
+          heading: "Reset Password",
+          tagline: "Secure access",
         }),
       };
     } else {
@@ -240,9 +312,11 @@ Deno.serve(async (req: Request) => {
         subject: "Confirm your action on Family Events",
         html: buildActionEmailHtml({
           username,
-          intro: "Click the button below to confirm.",
+          intro: "Click the button below to confirm your action.",
           actionLabel: "Confirm",
           actionUrl: verifyLink,
+          heading: "Confirm Action",
+          tagline: "Security verification",
         }),
       };
     }
