@@ -33,20 +33,23 @@ type JoinRow = {
     email: string | null
     display_name: string | null
   } | null
-  user_notification_preferences: {
-    reminder_email: boolean
-    reminder_push: boolean
-  } | null
 }
 
-function flattenRows(rows: JoinRow[], reminderType: "day_before" | "morning_of"): ReminderTarget[] {
+type PrefRow = { user_id: string; reminder_email: boolean; reminder_push: boolean }
+
+function flattenRows(
+  rows: JoinRow[],
+  reminderType: "day_before" | "morning_of",
+  prefs: Map<string, PrefRow>,
+): ReminderTarget[] {
   const targets: ReminderTarget[] = []
   for (const row of rows) {
     const event = row.events
     const profile = row.user_profiles
-    const prefs = row.user_notification_preferences
 
     if (!event || !profile?.email) continue
+
+    const userPref = prefs.get(row.user_id)
 
     targets.push({
       user_id: row.user_id,
@@ -57,8 +60,8 @@ function flattenRows(rows: JoinRow[], reminderType: "day_before" | "morning_of")
       start_datetime: event.start_datetime,
       venue_name: event.venue_name,
       address: event.address,
-      reminder_email: prefs?.reminder_email ?? true,
-      reminder_push: prefs?.reminder_push ?? true,
+      reminder_email: userPref?.reminder_email ?? true,
+      reminder_push: userPref?.reminder_push ?? true,
       reminder_type: reminderType,
     })
   }
@@ -110,14 +113,13 @@ Deno.test("flattenRows extracts valid reminder targets", () => {
         email: "alice@test.com",
         display_name: "Alice",
       },
-      user_notification_preferences: {
-        reminder_email: true,
-        reminder_push: true,
-      },
     },
   ]
+  const prefs = new Map<string, PrefRow>([
+    ["u1", { user_id: "u1", reminder_email: true, reminder_push: true }],
+  ])
 
-  const targets = flattenRows(rows, "day_before")
+  const targets = flattenRows(rows, "day_before", prefs)
   assertEquals(targets.length, 1)
   assertEquals(targets[0].email, "alice@test.com")
   assertEquals(targets[0].event_title, "Park Day")
@@ -133,11 +135,10 @@ Deno.test("flattenRows skips rows without event data", () => {
       event_id: "e1",
       events: null,
       user_profiles: { email: "alice@test.com", display_name: "Alice" },
-      user_notification_preferences: { reminder_email: true, reminder_push: true },
     },
   ]
 
-  const targets = flattenRows(rows, "day_before")
+  const targets = flattenRows(rows, "day_before", new Map())
   assertEquals(targets.length, 0)
 })
 
@@ -155,11 +156,10 @@ Deno.test("flattenRows skips rows without user email", () => {
         status: "published",
       },
       user_profiles: { email: null, display_name: "No Email" },
-      user_notification_preferences: { reminder_email: true, reminder_push: true },
     },
   ]
 
-  const targets = flattenRows(rows, "morning_of")
+  const targets = flattenRows(rows, "morning_of", new Map())
   assertEquals(targets.length, 0)
 })
 
@@ -177,11 +177,10 @@ Deno.test("flattenRows defaults preferences to true when null", () => {
         status: "published",
       },
       user_profiles: { email: "bob@test.com", display_name: null },
-      user_notification_preferences: null,
     },
   ]
 
-  const targets = flattenRows(rows, "day_before")
+  const targets = flattenRows(rows, "day_before", new Map())
   assertEquals(targets.length, 1)
   assertEquals(targets[0].reminder_email, true)
   assertEquals(targets[0].reminder_push, true)
@@ -205,11 +204,13 @@ Deno.test("users with reminder_email=false skip email dispatch", () => {
         status: "published",
       },
       user_profiles: { email: "alice@test.com", display_name: "Alice" },
-      user_notification_preferences: { reminder_email: false, reminder_push: true },
     },
   ]
+  const prefs = new Map<string, PrefRow>([
+    ["u1", { user_id: "u1", reminder_email: false, reminder_push: true }],
+  ])
 
-  const targets = flattenRows(rows, "day_before")
+  const targets = flattenRows(rows, "day_before", prefs)
   assertEquals(targets.length, 1)
   assertEquals(targets[0].reminder_email, false)
   assertEquals(targets[0].reminder_push, true)
@@ -235,11 +236,13 @@ Deno.test("users with reminder_push=false skip push dispatch", () => {
         status: "published",
       },
       user_profiles: { email: "bob@test.com", display_name: "Bob" },
-      user_notification_preferences: { reminder_email: true, reminder_push: false },
     },
   ]
+  const prefs = new Map<string, PrefRow>([
+    ["u2", { user_id: "u2", reminder_email: true, reminder_push: false }],
+  ])
 
-  const targets = flattenRows(rows, "morning_of")
+  const targets = flattenRows(rows, "morning_of", prefs)
   assertEquals(targets[0].reminder_push, false)
   assertEquals(targets[0].reminder_email, true)
 })

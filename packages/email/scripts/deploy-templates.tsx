@@ -1,5 +1,6 @@
 import { render } from "@react-email/render"
 import { Resend } from "resend"
+import EventChangeEmail from "../emails/event-change.tsx"
 import EventInviteEmail from "../emails/event-invite.tsx"
 import EventReminderEmail from "../emails/event-reminder.tsx"
 import MagicLinkEmail from "../emails/magic-link.tsx"
@@ -25,7 +26,11 @@ const templates = [
     alias: "family-events-welcome",
     subject: "Welcome to Family Events",
     react: <WelcomeEmail />,
-    variables: [str("USERNAME", "there"), str("APP_URL", "https://familyevents.app")],
+    variables: [
+      str("USERNAME", "there"),
+      str("APP_URL", "https://familyevents.app"),
+      str("LOGO_URL", "https://familyevents.app/brand/family-events-logo.png"),
+    ],
   },
   {
     name: "Family Events – Magic Link",
@@ -36,6 +41,7 @@ const templates = [
       str("USERNAME", "there"),
       str("MAGIC_LINK", "https://familyevents.app/auth"),
       str("EXPIRES_IN", "15 minutes"),
+      str("LOGO_URL", "https://familyevents.app/brand/family-events-logo.png"),
     ],
   },
   {
@@ -49,6 +55,24 @@ const templates = [
       str("EVENT_DATE"),
       str("EVENT_LOCATION"),
       str("EVENT_URL", "https://familyevents.app/events"),
+      str("LOGO_URL", "https://familyevents.app/brand/family-events-logo.png"),
+      str("APP_URL", "https://familyevents.app"),
+    ],
+  },
+  {
+    name: "Family Events – Event Change",
+    alias: "family-events-event-change",
+    subject: "Update: {{{EVENT_TITLE}}} has changed",
+    react: <EventChangeEmail />,
+    variables: [
+      str("USERNAME", "there"),
+      str("EVENT_TITLE", "your event"),
+      str("CHANGE_SUMMARY", "Details have been updated"),
+      str("EVENT_DATE"),
+      str("EVENT_LOCATION"),
+      str("EVENT_URL", "https://familyevents.app/events"),
+      str("LOGO_URL", "https://familyevents.app/brand/family-events-logo.png"),
+      str("APP_URL", "https://familyevents.app"),
     ],
   },
   {
@@ -62,6 +86,8 @@ const templates = [
       str("EVENT_DATE"),
       str("EVENT_LOCATION"),
       str("EVENT_URL", "https://familyevents.app/events"),
+      str("LOGO_URL", "https://familyevents.app/brand/family-events-logo.png"),
+      str("APP_URL", "https://familyevents.app"),
     ],
   },
   {

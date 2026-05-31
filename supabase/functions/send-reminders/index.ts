@@ -67,7 +67,11 @@ serveServiceRoleJson(
     const tomorrowStart = new Date(todayEnd)
     const tomorrowEnd = new Date(tomorrowStart.getTime() + 24 * 60 * 60 * 1000)
 
-    // Query favorites (saved events) joined with events and user preferences
+    // Query favorites (saved events) joined with events.
+    // PostgREST cannot embed user_notification_preferences through
+    // auth.users (same issue as send-weekly-digest), so preferences
+    // are queried separately and joined in memory.
+    //
     // Day-before: events starting tomorrow
     // Morning-of: events starting today
     const { data: dayBeforeRows, error: dbErr } = await supabase
@@ -76,8 +80,7 @@ serveServiceRoleJson(
         user_id,
         event_id,
         events!inner(id, title, start_datetime, venue_name, address, status),
-        user_profiles!inner(email, display_name),
-        user_notification_preferences(reminder_email, reminder_push)
+        user_profiles!inner(email, display_name)
       `)
       .gte("events.start_datetime", tomorrowStart.toISOString())
       .lt("events.start_datetime", tomorrowEnd.toISOString())
@@ -96,8 +99,7 @@ serveServiceRoleJson(
         user_id,
         event_id,
         events!inner(id, title, start_datetime, venue_name, address, status),
-        user_profiles!inner(email, display_name),
-        user_notification_preferences(reminder_email, reminder_push)
+        user_profiles!inner(email, display_name)
       `)
       .gte("events.start_datetime", todayStart.toISOString())
       .lt("events.start_datetime", todayEnd.toISOString())
@@ -110,7 +112,7 @@ serveServiceRoleJson(
       throw moErr
     }
 
-    // Flatten rows into ReminderTargets
+    // Collect all user IDs from both result sets to batch-load preferences
     type JoinRow = {
       user_id: string
       event_id: string
@@ -126,21 +128,49 @@ serveServiceRoleJson(
         email: string | null
         display_name: string | null
       } | null
-      user_notification_preferences: {
-        reminder_email: boolean
-        reminder_push: boolean
-      } | null
     }
 
-    function flattenRows(rows: unknown[], reminderType: "day_before" | "morning_of"): ReminderTarget[] {
+    const allRows = [...((dayBeforeRows ?? []) as unknown as JoinRow[]), ...((morningOfRows ?? []) as unknown as JoinRow[])]
+    const userIdSet = new Set<string>()
+    for (const row of allRows) {
+      if (row.user_profiles?.email) userIdSet.add(row.user_id)
+    }
+
+    type PrefRow = { user_id: string; reminder_email: boolean; reminder_push: boolean }
+    let prefMap = new Map<string, PrefRow>()
+
+    if (userIdSet.size > 0) {
+      const { data: prefRows, error: prefErr } = await supabase
+        .from("user_notification_preferences")
+        .select("user_id, reminder_email, reminder_push")
+        .in("user_id", [...userIdSet])
+
+      if (prefErr) {
+        await logCronRunEvent(supabase, cronCtx, "error", "Failed to query notification preferences", {
+          error: prefErr.message,
+        })
+        throw prefErr
+      }
+
+      for (const p of (prefRows ?? []) as unknown as PrefRow[]) {
+        prefMap.set(p.user_id, p)
+      }
+    }
+
+    function flattenRows(
+      rows: unknown[],
+      reminderType: "day_before" | "morning_of",
+      prefs: Map<string, PrefRow>,
+    ): ReminderTarget[] {
       const targets: ReminderTarget[] = []
       for (const raw of rows) {
         const row = raw as JoinRow
         const event = row.events as JoinRow["events"]
         const profile = row.user_profiles as JoinRow["user_profiles"]
-        const prefs = row.user_notification_preferences as JoinRow["user_notification_preferences"]
 
         if (!event || !profile?.email) continue
+
+        const userPref = prefs.get(row.user_id)
 
         targets.push({
           user_id: row.user_id,
@@ -151,8 +181,8 @@ serveServiceRoleJson(
           start_datetime: event.start_datetime,
           venue_name: event.venue_name,
           address: event.address,
-          reminder_email: prefs?.reminder_email ?? true, // default true
-          reminder_push: prefs?.reminder_push ?? true,   // default true
+          reminder_email: userPref?.reminder_email ?? true, // default true
+          reminder_push: userPref?.reminder_push ?? true,   // default true
           reminder_type: reminderType,
         })
       }
@@ -160,8 +190,8 @@ serveServiceRoleJson(
     }
 
     const targets = [
-      ...flattenRows(dayBeforeRows ?? [], "day_before"),
-      ...flattenRows(morningOfRows ?? [], "morning_of"),
+      ...flattenRows(dayBeforeRows ?? [], "day_before", prefMap),
+      ...flattenRows(morningOfRows ?? [], "morning_of", prefMap),
     ]
 
     if (targets.length === 0) {
@@ -239,6 +269,8 @@ serveServiceRoleJson(
                     EVENT_DATE: formatEventDate(target.start_datetime),
                     EVENT_LOCATION: target.venue_name || target.address || "TBD",
                     EVENT_URL: eventUrl,
+                    LOGO_URL: `${appUrl}/brand/family-events-logo.png`,
+                    APP_URL: appUrl,
                   },
                 },
               }),
