@@ -78,12 +78,13 @@ BEGIN
   );
 
   -- Fire-and-forget via pg_net
-  PERFORM extensions.http_post(
+  PERFORM net.http_post(
     url := v_supabase_url || '/functions/v1/notify-email',
-    body := v_payload::text,
+    body := v_payload,
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || v_service_role_key
+      'Authorization', 'Bearer ' || v_service_role_key,
+      'apikey', v_service_role_key
     )
   );
 
