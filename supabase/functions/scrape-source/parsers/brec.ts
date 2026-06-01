@@ -138,6 +138,59 @@ function extractArticleImage(article: Element, base: string): string | null {
   return url && validateExternalUrl(url).ok ? url : null;
 }
 
+function parseArticle(
+  article: Element,
+  date: { y: number; m: number; d: number },
+  sourceUrl: string,
+  timeZone: string,
+  seenKeys: Set<string>,
+  events: ParsedEvent[],
+): void {
+  const title = stripHtml(
+    article.querySelector("h3")?.textContent ?? "",
+  ).trim();
+  if (!title) return;
+
+  const timeText = article.querySelector(".time")?.textContent ?? "";
+  const { startDatetime, endDatetime } = parseTimeRange(date, timeText, timeZone);
+
+  const venueName = stripHtml(
+    article.querySelector(".park")?.textContent ?? "",
+  ).trim() || null;
+
+  const linkHref = article.querySelector("a[href]")?.getAttribute("href") ??
+    null;
+  const eventUrl = resolveUrl(linkHref, sourceUrl);
+
+  const dayIndex = stripHtml(
+    article.querySelector(".day-index")?.textContent ?? "",
+  ).trim();
+  const description = cleanDescription(
+    [venueName, dayIndex].filter(Boolean).join(" — "),
+  ) || title;
+
+  const imageUrl = extractArticleImage(article, sourceUrl);
+  const priceInfo = extractPrice(description);
+
+  const key = `${eventUrl ?? title}::${startDatetime}`;
+  if (seenKeys.has(key)) return;
+  seenKeys.add(key);
+
+  events.push({
+    title,
+    description: description.slice(0, 500),
+    startDatetime,
+    endDatetime,
+    venueName,
+    address: venueName,
+    sourceUrl: eventUrl,
+    imageUrl,
+    images: imageUrl ? [imageUrl] : [],
+    price: priceInfo.price,
+    isFree: priceInfo.isFree,
+  });
+}
+
 export function parseBrecCalendar(
   html: string,
   sourceUrl: string,
@@ -148,8 +201,9 @@ export function parseBrecCalendar(
 
   const events: ParsedEvent[] = [];
   const seenKeys = new Set<string>();
-  // The events-list container interleaves <header class="day-header"> with
-  // sibling <article> blocks until the next day-header.
+
+  // Standard path: .events-list container interleaves <header class="day-header">
+  // with sibling <article> blocks until the next day-header.
   const lists = doc.querySelectorAll(".events-list");
   for (const list of lists) {
     let currentDate: { y: number; m: number; d: number } | null = null;
@@ -162,59 +216,29 @@ export function parseBrecCalendar(
       if (child.tagName?.toLowerCase() !== "article" || !currentDate) {
         continue;
       }
-      const article = child;
-      const title = stripHtml(
-        article.querySelector("h3")?.textContent ?? "",
-      ).trim();
-      if (!title) continue;
+      parseArticle(child as Element, currentDate, sourceUrl, timeZone, seenKeys, events);
+    }
+  }
 
-      const timeText = article.querySelector(".time")?.textContent ?? "";
-      const { startDatetime, endDatetime } = parseTimeRange(
-        currentDate,
-        timeText,
-        timeZone,
-      );
-
-      const venueName = stripHtml(
-        article.querySelector(".park")?.textContent ?? "",
-      ).trim() || null;
-
-      const linkHref = article.querySelector("a[href]")?.getAttribute("href") ??
-        null;
-      const eventUrl = resolveUrl(linkHref, sourceUrl);
-
-      const dayIndex = stripHtml(
-        article.querySelector(".day-index")?.textContent ?? "",
-      ).trim();
-      const description = cleanDescription(
-        [venueName, dayIndex].filter(Boolean).join(" — "),
-      ) || title;
-
-      const imageUrl = extractArticleImage(article, sourceUrl);
-      const priceInfo = extractPrice(description);
-
-      const key = `${eventUrl ?? title}::${startDatetime}`;
-      if (seenKeys.has(key)) continue;
-      seenKeys.add(key);
-
-      events.push({
-        title,
-        description: description.slice(0, 500),
-        startDatetime,
-        endDatetime,
-        venueName,
-        address: venueName,
-        sourceUrl: eventUrl,
-        imageUrl,
-        images: imageUrl ? [imageUrl] : [],
-        price: priceInfo.price,
-        isFree: priceInfo.isFree,
-      });
+  // Fallback: BREC category snippet API returns flat <article> elements
+  // where each article embeds its own <h2> date heading instead of using
+  // separate .day-header siblings.
+  if (events.length === 0) {
+    const articles = doc.querySelectorAll("article");
+    for (const el of articles) {
+      const article = el as Element;
+      const heading = article.querySelector("h2")?.textContent ?? "";
+      const date = parseDayHeading(heading);
+      if (!date) continue;
+      parseArticle(article, date, sourceUrl, timeZone, seenKeys, events);
     }
   }
 
   return events;
 }
+
+const BREC_SNIPPET_PER_PAGE = 20;
+const BREC_SNIPPET_MAX_PAGES = 10;
 
 export const brecParser: SourceParser<"brec"> = {
   type: "brec",
@@ -222,6 +246,41 @@ export const brecParser: SourceParser<"brec"> = {
     const html = await ctx.fetchText(source.url, {
       accept: "text/html,application/xhtml+xml,*/*",
     });
+
+    // BREC category pages (e.g. /calendar/category/KidsCalendar) render an
+    // empty .events-list container and load events via AJAX.  Detect the
+    // empty container, extract the category ID, and fetch the snippet API
+    // that returns the actual event markup.
+    const catMatch = html.match(
+      /id="container-events"[^>]*\bcategory-id="(\d+)"[^>]*\bnum-events="(\d+)"/,
+    );
+    if (catMatch) {
+      const categoryId = catMatch[1];
+      const numEvents = Number(catMatch[2]);
+      if (numEvents > 0) {
+        const totalPages = Math.min(
+          Math.ceil(numEvents / BREC_SNIPPET_PER_PAGE),
+          BREC_SNIPPET_MAX_PAGES,
+        );
+        const origin = new URL(source.url).origin;
+        const fragments: string[] = [];
+        for (let page = 1; page <= totalPages; page++) {
+          const snippetUrl =
+            `${origin}/?action=calendar.category_events.snip&categoryID=${categoryId}&pageNum=${page}`;
+          fragments.push(
+            await ctx.fetchText(snippetUrl, {
+              accept: "text/html,application/xhtml+xml,*/*",
+            }),
+          );
+        }
+        return {
+          url: source.url,
+          contentType: "text/html",
+          body: `<html><body>${fragments.join("\n")}</body></html>`,
+        };
+      }
+    }
+
     return { url: source.url, contentType: "text/html", body: html };
   },
   extractEvents(source, artifact, ctx) {

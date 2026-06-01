@@ -61,7 +61,49 @@ if (typeof Deno !== "undefined") {
     assertEquals(third.endDatetime, "2026-05-02T20:00:00.000Z")
   })
 
-  Deno.test("parseBrecCalendar returns [] when no events-list present", () => {
+  Deno.test("parseBrecCalendar parses flat articles from category snippet API", () => {
+    const html = `
+      <html><body>
+        <article class="extended">
+          <h2>Monday, June 1, 2026</h2>
+          <h3>BREC T-Ball</h3>
+          <span class="time">6:00 PM <br>-<br> 9:00 PM</span>
+          <span class="park">Hartley/Vey Sports Park (Oak Villa)</span>
+          <a href="/calendar/detail/brec-tball/21546">BREC T-Ball</a>
+        </article>
+        <article class="extended">
+          <h2>Monday, June 1, 2026</h2>
+          <h3>BREC Coach Pitch</h3>
+          <span class="time">6:00 PM <br>-<br> 9:00 PM</span>
+          <span class="park">Hartley/Vey Sports Park (Oak Villa)</span>
+          <a href="/calendar/detail/brec-coach-pitch/21562">BREC Coach Pitch</a>
+        </article>
+        <article class="extended">
+          <h2>Tuesday, June 2, 2026</h2>
+          <h3>BREC Girls Fast Pitch Softball</h3>
+          <span class="time">6:00 PM <br>-<br> 9:00 PM</span>
+          <span class="park">Hartley/Vey Sports Park (Oak Villa)</span>
+          <a href="/calendar/detail/brec-girls-fast-pitch-softball/21595">BREC Girls Fast Pitch Softball</a>
+        </article>
+      </body></html>
+    `
+    const events = parseBrecCalendar(html, "https://www.brec.org/calendar/category/KidsCalendar", "America/Chicago")
+    assertEquals(events.length, 3)
+
+    assertEquals(events[0].title, "BREC T-Ball")
+    assertEquals(events[0].venueName, "Hartley/Vey Sports Park (Oak Villa)")
+    assertEquals(events[0].sourceUrl, "https://www.brec.org/calendar/detail/brec-tball/21546")
+    // 6 PM CDT (UTC-5) = 23:00 UTC
+    assertEquals(events[0].startDatetime, "2026-06-01T23:00:00.000Z")
+    assertEquals(events[0].endDatetime, "2026-06-02T02:00:00.000Z")
+
+    assertEquals(events[1].title, "BREC Coach Pitch")
+    assertEquals(events[2].title, "BREC Girls Fast Pitch Softball")
+    // June 2 at 6 PM CDT = 23:00 UTC
+    assertEquals(events[2].startDatetime, "2026-06-02T23:00:00.000Z")
+  })
+
+  Deno.test("parseBrecCalendar returns [] when no events-list and no articles present", () => {
     const events = parseBrecCalendar(
       "<html><body><div>nothing</div></body></html>",
       "https://www.brec.org/calendar",
