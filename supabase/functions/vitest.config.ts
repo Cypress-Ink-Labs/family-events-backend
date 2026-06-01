@@ -4,5 +4,6 @@ export default defineConfig({
   test: {
     include: ["_shared/**/*.test.ts"],
     environment: "node",
+    includeTaskLocation: true,
   },
 })
