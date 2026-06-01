@@ -16,5 +16,5 @@ export interface CommunityEventInput {
   price?: number | null
 }
 
-/** Max community event submissions per user per 24-hour window. */
+/** Max community event submissions per user per 24-hour period. */
 export const COMMUNITY_EVENT_DAILY_LIMIT = 5
