@@ -43,6 +43,21 @@ type Payload =
       email: string
       username: string
     }
+  | {
+      kind: "community_event_approved"
+      email: string
+      username: string
+      event_title: string
+      event_id: string
+      app_url?: string
+    }
+  | {
+      kind: "community_event_rejected"
+      email: string
+      username: string
+      event_title: string
+      app_url?: string
+    }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -142,6 +157,27 @@ function parsePayload(value: unknown): Payload {
       kind,
       email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
       username: readString(value, "username", { required: true, maxLength: 120 }),
+    }
+  }
+
+  if (kind === "community_event_approved") {
+    return {
+      kind,
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
+      username: readString(value, "username", { required: true, maxLength: 120 }),
+      event_title: readString(value, "event_title", { required: true, maxLength: 300 }),
+      event_id: readString(value, "event_id", { required: true, maxLength: 64 }),
+      app_url: readString(value, "app_url", { maxLength: 256 }),
+    }
+  }
+
+  if (kind === "community_event_rejected") {
+    return {
+      kind,
+      email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
+      username: readString(value, "username", { required: true, maxLength: 120 }),
+      event_title: readString(value, "event_title", { required: true, maxLength: 300 }),
+      app_url: readString(value, "app_url", { maxLength: 256 }),
     }
   }
 
@@ -368,6 +404,62 @@ function renderRequestRejected(
   }
 }
 
+function renderCommunityEventStatus(
+  payload: Extract<Payload, { kind: "community_event_approved" }> | Extract<Payload, { kind: "community_event_rejected" }>,
+  appUrl: string,
+  status: "approved" | "rejected"
+): RenderedEmail {
+  const isApproved = status === "approved"
+  const eventTitle = escapeHtml(payload.event_title)
+  const username = escapeHtml(payload.username)
+
+  const statusMessage = isApproved
+    ? `Great news! Your event "${eventTitle}" has been approved and is now live on Family Events. Local families can discover it and add it to their calendars.`
+    : `Thanks for submitting "${eventTitle}". After review, we weren't able to publish it at this time. You're welcome to submit other events anytime.`
+
+  const ctaUrl = isApproved && "event_id" in payload
+    ? `${appUrl}/events/${payload.event_id}`
+    : `${appUrl}/submit-event`
+
+  const ctaLabel = isApproved ? "View Your Event" : "Submit Another Event"
+
+  const bodyHtml = `
+    <tr>
+      <td style="padding:30px 40px 36px;">
+        <div style="font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0 0 8px;">
+          Hi ${username},
+        </div>
+        <div style="background:${THEME.bg};border-radius:12px;padding:16px 20px;margin:0 0 16px;">
+          <div style="font-family:${FONT_SANS};font-size:15px;font-weight:600;color:${THEME.textPrimary};margin:0;">
+            ${eventTitle}
+          </div>
+        </div>
+        <div style="font-family:${FONT_SANS};font-size:14px;line-height:1.6;color:${THEME.textMuted};margin:0 0 24px;">
+          ${statusMessage}
+        </div>
+        <div style="text-align:center;">
+          <a href="${ctaUrl}" style="display:inline-block;background:${THEME.violet};color:#ffffff;font-family:${FONT_SANS};font-size:14px;font-weight:600;text-decoration:none;border-radius:999px;padding:12px 32px;">
+            ${ctaLabel}
+          </a>
+        </div>
+      </td>
+    </tr>`
+
+  return {
+    to: payload.email,
+    subject: isApproved
+      ? `Your event "${payload.event_title}" is now live!`
+      : `Update on your event "${payload.event_title}"`,
+    html: wrapEmailShell({
+      heading: isApproved ? "Event Approved! 🎉" : "Event Review Update",
+      tagline: "Community event submission",
+      bodyHtml,
+      footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">You received this because you submitted an event on <a href="${appUrl}" style="color:${THEME.violetDeep};text-decoration:underline;">Family Events</a>.</div>`,
+      appUrl,
+    }),
+  }
+}
+
 async function sendViaResend(args: {
   apiKey: string
   from: string
@@ -534,6 +626,10 @@ Deno.serve(async (req: Request) => {
       rendered = renderRequestApproved(payload, appUrl)
     } else if (payload.kind === "request_rejected") {
       rendered = renderRequestRejected(payload, appUrl)
+    } else if (payload.kind === "community_event_approved") {
+      rendered = renderCommunityEventStatus(payload, appUrl, "approved")
+    } else if (payload.kind === "community_event_rejected") {
+      rendered = renderCommunityEventStatus(payload, appUrl, "rejected")
     } else {
       return new Response(JSON.stringify({ error: "unknown kind" }), {
         status: 400,
