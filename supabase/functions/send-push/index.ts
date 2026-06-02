@@ -4,6 +4,18 @@ import {
   serviceRoleJsonError,
 } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
+import {
+  buildApnsRequest,
+  buildFcmMessage,
+  getFcmAccessToken,
+  mobileCredentialStatus,
+  parseFcmServiceAccount,
+  partitionMobileSubscriptions,
+  signApnsJwt,
+  type ApnsCredentials,
+  type MobilePushCredentials,
+  type PushSubscriptionRow,
+} from "./lib/mobile-push.ts"
 
 // send-push
 // ----------------------------------------------------------------
@@ -294,22 +306,44 @@ serveServiceRoleJson(
   async ({ request, supabase }) => {
     const payload = parsePayload(await request.json())
 
-    // Read VAPID keys: vault-first, fallback to env
+    // Read provider credentials: vault-first, fallback to env.
     let vapidPrivateKey = ""
     let vapidPublicKey = ""
     let vapidSubject = ""
+    let apnsTeamId = ""
+    let apnsKeyId = ""
+    let apnsPrivateKey = ""
+    let apnsBundleId = ""
+    let apnsEnvironment = ""
+    let fcmServiceAccountJson = ""
 
     try {
       const { data: secrets } = await supabase
         .from("vault.decrypted_secrets" as "push_subscriptions") // cast to satisfy type
         .select("name, decrypted_secret")
-        .in("name", ["vapid_private_key", "vapid_public_key", "vapid_subject"])
+        .in("name", [
+          "vapid_private_key",
+          "vapid_public_key",
+          "vapid_subject",
+          "apns_team_id",
+          "apns_key_id",
+          "apns_private_key",
+          "apns_bundle_id",
+          "apns_environment",
+          "fcm_service_account_json",
+        ])
 
       if (secrets) {
         for (const s of secrets as Array<{ name: string; decrypted_secret: string }>) {
           if (s.name === "vapid_private_key") vapidPrivateKey = s.decrypted_secret
           if (s.name === "vapid_public_key") vapidPublicKey = s.decrypted_secret
           if (s.name === "vapid_subject") vapidSubject = s.decrypted_secret
+          if (s.name === "apns_team_id") apnsTeamId = s.decrypted_secret
+          if (s.name === "apns_key_id") apnsKeyId = s.decrypted_secret
+          if (s.name === "apns_private_key") apnsPrivateKey = s.decrypted_secret
+          if (s.name === "apns_bundle_id") apnsBundleId = s.decrypted_secret
+          if (s.name === "apns_environment") apnsEnvironment = s.decrypted_secret
+          if (s.name === "fcm_service_account_json") fcmServiceAccountJson = s.decrypted_secret
         }
       }
     } catch {
@@ -320,32 +354,66 @@ serveServiceRoleJson(
     if (!vapidPrivateKey) vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? ""
     if (!vapidPublicKey) vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? ""
     if (!vapidSubject) vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:push@family-events.org"
+    if (!apnsTeamId) apnsTeamId = Deno.env.get("APNS_TEAM_ID") ?? ""
+    if (!apnsKeyId) apnsKeyId = Deno.env.get("APNS_KEY_ID") ?? ""
+    if (!apnsPrivateKey) apnsPrivateKey = Deno.env.get("APNS_PRIVATE_KEY") ?? ""
+    if (!apnsBundleId) apnsBundleId = Deno.env.get("APNS_BUNDLE_ID") ?? "com.familyevents.app"
+    if (!apnsEnvironment) apnsEnvironment = Deno.env.get("APNS_ENVIRONMENT") ?? "production"
+    if (!fcmServiceAccountJson) fcmServiceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON") ?? ""
 
-    // Soft-failure: no VAPID keys → log + 200
-    if (!vapidPrivateKey || !vapidPublicKey) {
-      logEdgeEvent("warn", "send-push: VAPID keys not configured; would have sent push", {
+    let fcmCredentials = undefined
+    try {
+      fcmCredentials = parseFcmServiceAccount(fcmServiceAccountJson)
+    } catch (err) {
+      logEdgeEvent("warn", "send-push: invalid FCM service account JSON", {
         function: "send-push",
-        user_id: payload.user_id,
-        title: payload.title,
+        error: err instanceof Error ? err.message : String(err),
       })
-      return { sent: 0, dev: true }
     }
 
-    // Fetch user's web push subscriptions
+    const apnsCredentials: ApnsCredentials | undefined =
+      apnsTeamId && apnsKeyId && apnsPrivateKey && apnsBundleId
+        ? {
+          teamId: apnsTeamId,
+          keyId: apnsKeyId,
+          privateKey: apnsPrivateKey,
+          bundleId: apnsBundleId,
+          environment: apnsEnvironment === "sandbox" ? "sandbox" : "production",
+        }
+        : undefined
+    const mobileCredentials: MobilePushCredentials = {
+      apns: apnsCredentials,
+      fcm: fcmCredentials,
+    }
+    const credentialStatus = mobileCredentialStatus(mobileCredentials)
+
+    // Fetch user's push subscriptions
     const { data: subscriptions, error: subError } = await supabase
       .from("push_subscriptions")
-      .select("id, endpoint, p256dh, auth_key")
+      .select("id, platform, endpoint, token, p256dh, auth_key")
       .eq("user_id", payload.user_id)
-      .eq("platform", "web")
 
     if (subError) throw subError
 
     if (!subscriptions || subscriptions.length === 0) {
-      logEdgeEvent("log", "send-push: no web push subscriptions for user", {
+      logEdgeEvent("log", "send-push: no push subscriptions for user", {
         function: "send-push",
         user_id: payload.user_id,
       })
       return { sent: 0, reason: "no_subscriptions" }
+    }
+
+    const webSubscriptions = subscriptions.filter((sub) => sub.platform === "web")
+    const mobileSubscriptions = partitionMobileSubscriptions(
+      subscriptions as unknown as PushSubscriptionRow[],
+    )
+
+    if (webSubscriptions.length > 0 && (!vapidPrivateKey || !vapidPublicKey)) {
+      logEdgeEvent("warn", "send-push: VAPID keys not configured; skipping web push", {
+        function: "send-push",
+        user_id: payload.user_id,
+        title: payload.title,
+      })
     }
 
     const pushPayload = JSON.stringify({
@@ -358,7 +426,8 @@ serveServiceRoleJson(
     let failed = 0
     const pruned: string[] = []
 
-    for (const sub of subscriptions) {
+    for (const sub of webSubscriptions) {
+      if (!vapidPrivateKey || !vapidPublicKey) continue
       if (!sub.endpoint || !sub.p256dh || !sub.auth_key) {
         failed++
         continue
@@ -415,6 +484,132 @@ serveServiceRoleJson(
           error: err instanceof Error ? err.message : String(err),
         })
         failed++
+      }
+    }
+
+    if (mobileSubscriptions.apns.length > 0 && !credentialStatus.apns) {
+      logEdgeEvent("warn", "send-push: APNs credentials not configured; skipping iOS push", {
+        function: "send-push",
+        user_id: payload.user_id,
+        count: mobileSubscriptions.apns.length,
+      })
+    } else if (apnsCredentials) {
+      let apnsJwt = ""
+      try {
+        apnsJwt = await signApnsJwt(apnsCredentials)
+      } catch (err) {
+        logEdgeEvent("warn", "send-push: APNs JWT signing failed", {
+          function: "send-push",
+          error: err instanceof Error ? err.message : String(err),
+        })
+      }
+
+      if (apnsJwt) {
+        for (const sub of mobileSubscriptions.apns) {
+          try {
+            const request = buildApnsRequest({
+              token: sub.token ?? "",
+              jwt: apnsJwt,
+              bundleId: apnsCredentials.bundleId,
+              environment: apnsCredentials.environment,
+              payload,
+            })
+            const response = await fetch(request.url, {
+              method: "POST",
+              headers: request.headers,
+              body: request.body,
+              signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
+            })
+
+            if (response.ok) {
+              sent++
+            } else if (response.status === 410 || response.status === 400) {
+              pruned.push(sub.id)
+              await supabase.from("push_subscriptions").delete().eq("id", sub.id)
+            } else {
+              failed++
+              const body = await response.text().catch(() => "")
+              logEdgeEvent("warn", "send-push: APNs delivery failed", {
+                function: "send-push",
+                subscription_id: sub.id,
+                status: response.status,
+                body: body.slice(0, 300),
+              })
+            }
+          } catch (err) {
+            failed++
+            logEdgeEvent("warn", "send-push: APNs delivery error", {
+              function: "send-push",
+              subscription_id: sub.id,
+              error: err instanceof Error ? err.message : String(err),
+            })
+          }
+        }
+      }
+    }
+
+    if (mobileSubscriptions.fcm.length > 0 && !credentialStatus.fcm) {
+      logEdgeEvent("warn", "send-push: FCM credentials not configured; skipping Android push", {
+        function: "send-push",
+        user_id: payload.user_id,
+        count: mobileSubscriptions.fcm.length,
+      })
+    } else if (fcmCredentials) {
+      let accessToken = ""
+      try {
+        accessToken = await getFcmAccessToken(fcmCredentials)
+      } catch (err) {
+        logEdgeEvent("warn", "send-push: FCM access token failed", {
+          function: "send-push",
+          error: err instanceof Error ? err.message : String(err),
+        })
+      }
+
+      if (accessToken) {
+        for (const sub of mobileSubscriptions.fcm) {
+          try {
+            const response = await fetch(
+              `https://fcm.googleapis.com/v1/projects/${fcmCredentials.projectId}/messages:send`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(buildFcmMessage({
+                  token: sub.token ?? "",
+                  title: payload.title,
+                  body: payload.body,
+                  url: payload.url,
+                })),
+                signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
+              },
+            )
+
+            if (response.ok) {
+              sent++
+            } else if (response.status === 404 || response.status === 400) {
+              pruned.push(sub.id)
+              await supabase.from("push_subscriptions").delete().eq("id", sub.id)
+            } else {
+              failed++
+              const body = await response.text().catch(() => "")
+              logEdgeEvent("warn", "send-push: FCM delivery failed", {
+                function: "send-push",
+                subscription_id: sub.id,
+                status: response.status,
+                body: body.slice(0, 300),
+              })
+            }
+          } catch (err) {
+            failed++
+            logEdgeEvent("warn", "send-push: FCM delivery error", {
+              function: "send-push",
+              subscription_id: sub.id,
+              error: err instanceof Error ? err.message : String(err),
+            })
+          }
+        }
       }
     }
 
