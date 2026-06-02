@@ -115,8 +115,8 @@ export default function EventInviteEmail() {
             {/* Greeting */}
             <Section className="px-10 pb-1.5 pt-7">
               <Text className="m-0 font-editorial text-[17px] leading-relaxed text-text-muted">
-                <span className="font-semibold text-text-primary">{"{{{INVITER_NAME}}}"}</span> thinks
-                you'd enjoy this event and wanted to share it with you.
+                <span className="font-semibold text-text-primary">{"{{{INVITER_NAME}}}"}</span>{" "}
+                thinks you'd enjoy this event and wanted to share it with you.
               </Text>
             </Section>
 

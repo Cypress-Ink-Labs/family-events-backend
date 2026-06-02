@@ -75,8 +75,7 @@ export default function WeeklyDigestEmail() {
           fontFamily="Fraunces"
           fallbackFontFamily="serif"
           webFont={{
-            url:
-              "https://fonts.gstatic.com/s/fraunces/v36/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0jzMzwS6Q.woff2",
+            url: "https://fonts.gstatic.com/s/fraunces/v36/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0jzMzwS6Q.woff2",
             format: "woff2",
           }}
           fontWeight={600}
@@ -154,7 +153,10 @@ export default function WeeklyDigestEmail() {
             <Section className="border-t border-solid border-border bg-bg px-10 py-6">
               <Text className="m-0 text-center font-sans text-xs leading-relaxed text-text-muted">
                 You're receiving this because you enabled digest emails.{" "}
-                <Link href={"{{{UNSUBSCRIBE_URL}}}"} className="font-medium text-violet-deep underline">
+                <Link
+                  href={"{{{UNSUBSCRIBE_URL}}}"}
+                  className="font-medium text-violet-deep underline"
+                >
                   Manage preferences
                 </Link>
               </Text>

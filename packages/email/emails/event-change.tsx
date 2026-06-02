@@ -181,7 +181,10 @@ export default function EventChangeEmail() {
             <Section className="border-t border-solid border-border bg-bg px-10 py-6">
               <Text className="m-0 text-center font-sans text-xs leading-relaxed text-text-muted">
                 You're receiving this because you saved {"{{{EVENT_TITLE}}}"}.{" "}
-                <Link href={"{{{APP_URL}}}/settings/notifications"} className="font-medium text-violet-deep underline">
+                <Link
+                  href={"{{{APP_URL}}}/settings/notifications"}
+                  className="font-medium text-violet-deep underline"
+                >
                   Manage preferences
                 </Link>
               </Text>

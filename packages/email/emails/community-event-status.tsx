@@ -62,7 +62,9 @@ export default function CommunityEventStatusEmail() {
           fontStyle="normal"
         />
       </Head>
-      <Preview>Your community event "{`{{{EVENT_TITLE}}}`}" has been {`{{{STATUS}}}`}</Preview>
+      <Preview>
+        Your community event "{`{{{EVENT_TITLE}}}`}" has been {`{{{STATUS}}}`}
+      </Preview>
       <Tailwind config={tailwindConfig}>
         <Body className="bg-bg font-sans">
           <Container className="mx-auto max-w-[520px] py-8">

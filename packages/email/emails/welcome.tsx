@@ -172,7 +172,10 @@ export default function WelcomeEmail() {
             <Section className="border-t border-solid border-border bg-bg px-10 py-6">
               <Text className="m-0 text-center font-sans text-xs leading-relaxed text-text-muted">
                 You're receiving this because you signed up for Family Events.{" "}
-                <Link href={"{{{APP_URL}}}/settings/notifications"} className="font-medium text-violet-deep underline">
+                <Link
+                  href={"{{{APP_URL}}}/settings/notifications"}
+                  className="font-medium text-violet-deep underline"
+                >
                   Manage preferences
                 </Link>
               </Text>
