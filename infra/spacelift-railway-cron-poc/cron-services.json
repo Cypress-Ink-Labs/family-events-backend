@@ -22,14 +22,14 @@
   },
   "cron-cleanup-stale": {
     "config_path": "apps/cron-cleanup-stale/railway.toml",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-cleanup-stale",
     "required_latest_deployment_status": "SUCCESS",
     "forbidden_instance_statuses": ["CRASHED", "FAILED"]
   },
   "cron-enrich-events": {
     "config_path": "apps/cron-enrich-events/railway.toml",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-enrich-events",
     "required_latest_deployment_status": "SUCCESS",
     "forbidden_instance_statuses": ["CRASHED", "FAILED"]
