@@ -1439,7 +1439,6 @@ DECLARE
   v_caller      uuid;
   v_alphabet    constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   v_length      constant int  := 24;
-  i             int;
 BEGIN
   IF NOT private.is_admin() THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
@@ -1459,7 +1458,7 @@ BEGIN
   END IF;
 
   v_code := '';
-  FOR i IN 1..v_length LOOP
+  FOR pos IN 1..v_length LOOP
     v_code := v_code || substr(v_alphabet, 1 + floor(random() * length(v_alphabet))::int, 1);
   END LOOP;
 
@@ -1622,7 +1621,7 @@ BEGIN
   VALUES (patch->>'title', (patch->>'start_datetime')::timestamptz, 'Manual')
   RETURNING * INTO created_row;
 
-  created_row := private.admin_update_event(created_row.id, patch, p_tag_ids, true);
+  created_row := private.admin_update_event(created_row.id, patch, p_tag_ids, true, NULL);
 
   INSERT INTO public.admin_audit_log (admin_user_id, action, target_type, target_id, metadata)
   VALUES (
@@ -1664,7 +1663,7 @@ BEGIN
 
   -- Build a 24-char URL-safe code. 32 alphabet chars ^ 24 ≈ 2^120 entropy.
   v_code := '';
-  FOR i IN 1..v_length LOOP
+  FOR pos IN 1..v_length LOOP
     v_code := v_code || substr(v_alphabet, 1 + floor(random() * length(v_alphabet))::int, 1);
   END LOOP;
 
@@ -2141,7 +2140,7 @@ BEGIN
          source_name = CASE WHEN patch ? 'source_name' AND jsonb_typeof(patch->'source_name') = 'null' THEN NULL WHEN patch ? 'source_name' THEN patch->>'source_name' ELSE source_name END,
          source_id = CASE WHEN patch ? 'source_id' AND jsonb_typeof(patch->'source_id') = 'null' THEN NULL WHEN patch ? 'source_id' THEN (patch->>'source_id')::uuid ELSE source_id END,
          images = CASE WHEN patch ? 'images' THEN patch->'images' ELSE images END,
-         status = CASE WHEN patch ? 'status' THEN patch->>'status' ELSE status END,
+         status = CASE WHEN patch ? 'status' THEN (patch->>'status')::public.event_status ELSE status END,
          recurrence_info = CASE WHEN patch ? 'recurrence_info' THEN patch->'recurrence_info' ELSE recurrence_info END,
          is_featured = CASE WHEN patch ? 'is_featured' THEN (patch->>'is_featured')::boolean ELSE is_featured END,
          admin_locked_fields = next_locked_fields,
@@ -2876,8 +2875,8 @@ CREATE OR REPLACE FUNCTION "private"."plan_events_first_nonempty_window"("p_user
     SET "search_path" TO ''
     AS $$
 DECLARE
-  v_offset int;
-  v_found  boolean := false;
+  v_day_offset int;
+  v_found      boolean := false;
 BEGIN
   IF p_user_id IS NOT NULL
      AND p_user_id IS DISTINCT FROM auth.uid()
@@ -2893,10 +2892,10 @@ BEGIN
     p_max_days := 14;
   END IF;
 
-  FOR v_offset IN 0..p_max_days LOOP
+  FOR v_day_offset IN 0..p_max_days LOOP
     RETURN QUERY
     SELECT
-      v_offset AS day_offset,
+      v_day_offset AS day_offset,
       pe.event_id,
       pe.score,
       pe.distance_score,
@@ -2906,7 +2905,7 @@ BEGIN
       pe.distance_km
     FROM public.plan_events_for_user(
       p_user_id,
-      (p_date + (v_offset || ' days')::interval)::date,
+      (p_date + (v_day_offset || ' days')::interval)::date,
       p_city_id, p_lat, p_lng, p_kid_age, p_weather_fit, p_limit
     ) pe;
 

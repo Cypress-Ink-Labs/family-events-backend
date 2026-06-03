@@ -198,7 +198,7 @@ BEGIN
          source_name = CASE WHEN patch ? 'source_name' AND jsonb_typeof(patch->'source_name') = 'null' THEN NULL WHEN patch ? 'source_name' THEN patch->>'source_name' ELSE source_name END,
          source_id = CASE WHEN patch ? 'source_id' AND jsonb_typeof(patch->'source_id') = 'null' THEN NULL WHEN patch ? 'source_id' THEN (patch->>'source_id')::uuid ELSE source_id END,
          images = CASE WHEN patch ? 'images' THEN patch->'images' ELSE images END,
-         status = CASE WHEN patch ? 'status' THEN patch->>'status' ELSE status END,
+         status = CASE WHEN patch ? 'status' THEN (patch->>'status')::public.event_status ELSE status END,
          recurrence_info = CASE WHEN patch ? 'recurrence_info' THEN patch->'recurrence_info' ELSE recurrence_info END,
          is_featured = CASE WHEN patch ? 'is_featured' THEN (patch->>'is_featured')::boolean ELSE is_featured END,
          admin_locked_fields = next_locked_fields,
