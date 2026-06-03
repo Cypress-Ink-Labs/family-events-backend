@@ -2400,6 +2400,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_delete_user: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       admin_toggle_cron_job: {
         Args: { p_active: boolean; p_job_name: string }
         Returns: undefined
