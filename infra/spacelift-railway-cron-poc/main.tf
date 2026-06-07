@@ -42,36 +42,18 @@ locals {
 
   cron_services_manifest = jsondecode(file("${path.module}/cron-services.json"))
 
-  # NOTE: These four extractions are intentionally defensive. The canonical,
-  # more robust parser (with multiple fallback paths for Railway's meta shape)
-  # lives in scripts/spacelift-railway-cron-poc.mjs. These regexes only exist so
-  # the Terraform precondition can still act as a hard gate.
+  # The TypeScript validator reads .railway/railway.ts directly. Terraform
+  # cannot evaluate TypeScript, so this manifest mirrors the cron fields that
+  # the precondition needs as a hard gate.
   railway_cron_services = {
     for name, svc in local.cron_services_manifest : name => {
-      config_path    = svc.config_path
-      source_repo    = svc.source_repo
-      root_directory = svc.root_directory
-
-      # try(...) turns a regex miss into "" instead of a confusing "did not match"
-      # error. Empty values then produce clear diagnostics below.
-      builder = upper(
-        try(
-          regex("builder\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0],
-          ""
-        )
-      )
-      dockerfile_path = try(
-        regex("dockerfilePath\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0],
-        ""
-      )
-      cron_schedule = try(
-        regex("cronSchedule\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0],
-        ""
-      )
-      restart_policy = try(
-        regex("restartPolicyType\\s*=\\s*\"([^\"]+)\"", file("${path.module}/../../${svc.config_path}"))[0],
-        ""
-      )
+      config_path     = svc.config_path
+      source_repo     = svc.source_repo
+      root_directory  = svc.root_directory
+      builder         = upper(svc.builder)
+      dockerfile_path = svc.dockerfile_path
+      cron_schedule   = svc.cron_schedule
+      restart_policy  = upper(svc.restart_policy_type)
 
       required_latest_deployment_status = upper(svc.required_latest_deployment_status)
       forbidden_instance_statuses       = [for status in svc.forbidden_instance_statuses : upper(status)]
@@ -228,7 +210,7 @@ locals {
         "${expected_name}: live Railway metadata missing latestDeployment.status; expected \"${expected.required_latest_deployment_status}\""
       ] : [],
       length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].cron_schedule, null) != null && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != "" && try(local.railway_service_matches[expected_name][0].cron_schedule, "") != expected.cron_schedule ? [
-        "${expected_name}: cronSchedule mismatch: expected \"${expected.cron_schedule}\" (from ${expected.config_path}), live \"${try(local.railway_service_matches[expected_name][0].cron_schedule, "")}\". Fix: edit the toml + commit, or redeploy the service in Railway."
+        "${expected_name}: cronSchedule mismatch: expected \"${expected.cron_schedule}\" (from ${expected.config_path}), live \"${try(local.railway_service_matches[expected_name][0].cron_schedule, "")}\". Fix: edit .railway/railway.ts + commit, then apply Railway config or redeploy the service."
       ] : [],
       length(local.railway_service_matches[expected_name]) > 0 && try(local.railway_service_matches[expected_name][0].repo, null) != null && try(local.railway_service_matches[expected_name][0].repo, "") != "" && try(local.railway_service_matches[expected_name][0].repo, "") != expected.source_repo ? [
         "${expected_name}: source repo mismatch: expected \"${expected.source_repo}\" from manifest, live \"${try(local.railway_service_matches[expected_name][0].repo, "")}\""

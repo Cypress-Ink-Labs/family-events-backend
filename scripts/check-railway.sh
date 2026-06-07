@@ -5,7 +5,7 @@
 #   - Service created via `railway add --service <name>` (empty) gets
 #     rootDirectory=NULL. railway up then builds the whole monorepo,
 #     usually serving Vite static output instead of the actual app.
-#   - cronSchedule drift between Railway-stored config and apps/<svc>/railway.toml.
+#   - cronSchedule drift between Railway-stored config and .railway/railway.ts.
 #
 # Usage:
 #   bash scripts/check-railway.sh           # report only
@@ -28,20 +28,13 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Services that intentionally use NULL rootDirectory (monorepo-aware builders
-# like turbo on the web app build from repo root). Add new exceptions here.
-INTENTIONAL_NULL_ROOTDIR=(web)
-
-# Service-name → expected apps/ subdir. Used for overrides where the
-# Railway service name doesn't match the apps/<service-name> convention.
-# Currently empty after llm-ollama/llm-proxy teardown.
-declare -A SERVICE_ROOT_OVERRIDE=()
-
 TOKEN=$(jq -r '.user.accessToken' ~/.railway/config.json)
 if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
   echo -e "${RED}✗${NC} No Railway access token in ~/.railway/config.json. Run: railway login"
   exit 1
 fi
+
+IAC_JSON=$(pnpm exec railway-iac-ts "$ROOT_DIR/.railway/railway.ts")
 
 graphql() {
   curl -s -X POST https://backboard.railway.com/graphql/v2 \
@@ -50,37 +43,35 @@ graphql() {
     -d "{\"query\":$(jq -Rsc <<<"$1")}"
 }
 
-intentional_null() {
+service_in_iac() {
   local name="$1"
-  for n in "${INTENTIONAL_NULL_ROOTDIR[@]}"; do
-    [ "$n" = "$name" ] && return 0
-  done
-  return 1
+  jq -e --arg name "$name" '.graph.resources[] | select(.type == "service" and .name == $name)' <<<"$IAC_JSON" >/dev/null
 }
 
 expected_root_for() {
   local name="$1"
-  if [ -n "${SERVICE_ROOT_OVERRIDE[$name]:-}" ]; then
-    echo "${SERVICE_ROOT_OVERRIDE[$name]}"
+  if ! service_in_iac "$name"; then
+    echo "UNMANAGED"
     return
   fi
-  echo "apps/$name"
+  jq -r --arg name "$name" '
+    .graph.resources[]
+    | select(.type == "service" and .name == $name)
+    | .source.rootDirectory // "NULL"
+  ' <<<"$IAC_JSON"
 }
 
 expected_cron_for() {
-  local rootdir="$1"
-  local toml="$ROOT_DIR/$rootdir/railway.toml"
-  [ -f "$toml" ] || { echo ""; return; }
-  # Match `cronSchedule = "* * * * *"` (or any whitespace), preserving the
-  # spaces inside the cron expression. Strip surrounding quotes only.
-  awk '
-    /^[[:space:]]*cronSchedule[[:space:]]*=/ {
-      sub(/^[^=]*=[[:space:]]*/, "", $0)
-      sub(/^"/, "", $0)
-      sub(/"[[:space:]]*$/, "", $0)
-      print
-      exit
-    }' "$toml"
+  local name="$1"
+  if ! service_in_iac "$name"; then
+    echo ""
+    return
+  fi
+  jq -r --arg name "$name" '
+    .graph.resources[]
+    | select(.type == "service" and .name == $name)
+    | .deploy.cronSchedule // ""
+  ' <<<"$IAC_JSON"
 }
 
 echo -e "${CYAN}→${NC} Querying Railway project services..."
@@ -102,21 +93,14 @@ while IFS='|' read -r SVC_ID NAME; do
   GOT_ROOT=$(echo "$INSTANCE" | jq -r '.data.serviceInstance.rootDirectory // "NULL"')
   GOT_CRON=$(echo "$INSTANCE" | jq -r '.data.serviceInstance.cronSchedule // ""')
 
-  if intentional_null "$NAME"; then
-    EXPECTED_ROOT="NULL"
-  else
-    EXPECTED_ROOT=$(expected_root_for "$NAME")
-  fi
+  EXPECTED_ROOT=$(expected_root_for "$NAME")
 
   ROOT_OK=true
   if [ "$GOT_ROOT" != "$EXPECTED_ROOT" ]; then
     ROOT_OK=false
   fi
 
-  EXPECTED_CRON=""
-  if [ "$GOT_ROOT" != "NULL" ]; then
-    EXPECTED_CRON=$(expected_cron_for "$GOT_ROOT")
-  fi
+  EXPECTED_CRON=$(expected_cron_for "$NAME")
   CRON_OK=true
   if [ -n "$EXPECTED_CRON" ] && [ "$GOT_CRON" != "$EXPECTED_CRON" ]; then
     CRON_OK=false
@@ -132,13 +116,13 @@ while IFS='|' read -r SVC_ID NAME; do
     STATUS="${RED}ROOT DRIFT${NC}"
     ISSUES=$((ISSUES + 1))
   else
-    STATUS="${YELLOW}CRON DRIFT (toml=$EXPECTED_CRON)${NC}"
+    STATUS="${YELLOW}CRON DRIFT (iac=$EXPECTED_CRON)${NC}"
     ISSUES=$((ISSUES + 1))
   fi
 
   printf "%-25s | %-30s | %-30s | %b\n" "$NAME" "$GOT_ROOT" "$EXPECTED_ROOT" "$STATUS"
 
-  if $FIX && ! $ROOT_OK && [ "$EXPECTED_ROOT" != "NULL" ]; then
+  if $FIX && ! $ROOT_OK && [ "$EXPECTED_ROOT" != "NULL" ] && [ "$EXPECTED_ROOT" != "UNMANAGED" ]; then
     RES=$(graphql "mutation { serviceInstanceUpdate(serviceId: \"$SVC_ID\", environmentId: \"$ENV_ID\", input: { rootDirectory: \"$EXPECTED_ROOT\" }) }")
     if echo "$RES" | jq -e '.data.serviceInstanceUpdate' >/dev/null 2>&1; then
       echo -e "  ${GREEN}✓${NC} fixed rootDirectory → $EXPECTED_ROOT"
