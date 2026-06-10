@@ -96,7 +96,7 @@ DO $$
 BEGIN
   IF has_function_privilege(
     'anon',
-    'public.admin_events_enriched(text,uuid,boolean,text,timestamptz,uuid,int,public.llm_event_review_status,public.llm_event_review_decision,boolean)',
+    'public.admin_events_enriched(text,uuid,boolean,text,timestamptz,uuid,int,public.llm_event_review_status,public.llm_event_review_decision,boolean,uuid)',
     'EXECUTE'
   ) THEN
     RAISE EXCEPTION 'ANON_ALLOWED_EVENTS';
@@ -393,7 +393,63 @@ BEGIN
   RAISE NOTICE 'FACETS_OK';
 END $$;
 
--- 6) Keyword filtering is consistent between list and facet totals.
+-- 6) Source filtering is consistent between list and facets.
+DO $$
+DECLARE
+  uid uuid;
+  source_one uuid := gen_random_uuid();
+  source_two uuid := gen_random_uuid();
+  list_total bigint;
+  source_one_total bigint;
+  source_two_total bigint;
+BEGIN
+  INSERT INTO public.event_sources (id, name, url, source_type, created_at, updated_at)
+  VALUES
+    (source_one, 'ADMIN RPC Source One', 'https://example.com/admin-rpc-source-one', 'website', now(), now()),
+    (source_two, 'ADMIN RPC Source Two', 'https://example.com/admin-rpc-source-two', 'website', now(), now());
+
+  INSERT INTO public.events (id, source_id, source_name, title, status, start_datetime, created_at, updated_at)
+  VALUES
+    (gen_random_uuid(), source_one, 'ADMIN RPC Source One', 'ADMIN RPC Source Seed A', 'draft', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), source_one, 'ADMIN RPC Source One', 'ADMIN RPC Source Seed B', 'draft', now() + interval '1 day', now(), now()),
+    (gen_random_uuid(), source_two, 'ADMIN RPC Source Two', 'ADMIN RPC Source Seed C', 'draft', now() + interval '1 day', now(), now());
+
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+
+  SELECT total_count INTO list_total
+  FROM public.admin_events_enriched(
+    p_keyword => 'ADMIN RPC Source Seed',
+    p_source_id => source_one,
+    p_limit => 50
+  )
+  LIMIT 1;
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO source_one_total
+  FROM public.admin_event_facets('ADMIN RPC Source Seed')
+  WHERE source_id = source_one;
+
+  SELECT COALESCE(SUM(count), 0)
+  INTO source_two_total
+  FROM public.admin_event_facets('ADMIN RPC Source Seed')
+  WHERE source_id = source_two;
+
+  RESET ROLE;
+
+  IF list_total IS DISTINCT FROM 2 THEN
+    RAISE EXCEPTION 'SOURCE_FILTER_LIST_FAIL: expected 2, got %', list_total;
+  END IF;
+
+  IF source_one_total <> 2 OR source_two_total <> 1 THEN
+    RAISE EXCEPTION 'SOURCE_FILTER_FACET_FAIL: expected (2,1), got (%,%)', source_one_total, source_two_total;
+  END IF;
+
+  RAISE NOTICE 'SOURCE_FILTER_OK';
+END $$;
+
+-- 7) Keyword filtering is consistent between list and facet totals.
 DO $$
 DECLARE
   uid uuid;

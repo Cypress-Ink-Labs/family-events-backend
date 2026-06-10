@@ -30,6 +30,10 @@ export class RailwayProvider {
     await requireRailwayAuth(this.runner)
   }
 
+  async applyConfig(): Promise<void> {
+    await this.runner.run("railway", ["config", "apply", "--yes"], { cwd: this.rootDir })
+  }
+
   serviceConfig(name: string): RailwayServiceConfig {
     const service = this.config.railway.services.find((candidate) => candidate.name === name)
     if (!service) {

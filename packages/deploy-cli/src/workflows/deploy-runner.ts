@@ -78,6 +78,17 @@ export async function runDeploy(
     }
   }
 
+  if (expanded.some((target) => target.kind.startsWith("railway"))) {
+    const spinner = createSpinner("Applying Railway config", useSpinner(options))
+    try {
+      await railway.applyConfig()
+      spinner?.succeed("Railway config applied")
+    } catch (error) {
+      spinner?.fail("Railway config apply failed")
+      throw error
+    }
+  }
+
   expanded.forEach((target, index) => {
     results[index] = baseResult(target.id)
   })

@@ -66,6 +66,7 @@ TEST_FILES=(
   supabase/tests/admin_events_rpc.sql
   supabase/tests/role_smoke.sql
   supabase/tests/admin_db_health.sql
+  supabase/tests/admin_dashboard_stats.sql
   supabase/tests/trace_retention.sql
   supabase/tests/api_surface_hardening.sql
   supabase/tests/events_enriched_parity.sql

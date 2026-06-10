@@ -1,0 +1,27 @@
+# Gitleaks configuration — extends the built-in default ruleset.
+# CI runs this via the gitleaks step in .github/workflows/ci.yml (secret-scan
+# job). Run locally with: gitleaks detect --config .gitleaks.toml
+#
+# Allowlist entries are known false positives only. Never allowlist a real
+# credential — rotate it instead.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known non-secrets"
+paths = [
+  # Playwright storage-state fixtures: JWTs signed by the local Supabase
+  # stack (127.0.0.1), useless outside a developer machine.
+  '''apps/web/e2e/\.auth/.*\.json''',
+  # SQL test fixtures use deterministic UUIDs and fake bcrypt salts.
+  '''supabase/tests/.*\.sql''',
+  # Lockfiles trip entropy rules on integrity hashes.
+  '''pnpm-lock\.yaml''',
+  '''.*deno\.lock''',
+]
+regexes = [
+  # supabase/config.toml stores the Apple OAuth secret as a SHA-256 hash
+  # placeholder (hash:...), not the raw secret.
+  '''hash:[a-f0-9]{64}''',
+]
