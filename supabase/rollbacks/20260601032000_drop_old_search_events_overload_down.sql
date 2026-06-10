@@ -96,6 +96,11 @@ GRANT EXECUTE ON FUNCTION public.search_events(uuid, timestamptz, timestamptz, i
 -- 2. Recreate public.admin_update_event 4-param wrapper.
 --    Body copied verbatim from 20260601000000_schema_baseline.sql.
 --    NOTE: 032000 dropped only this public wrapper; private.admin_update_event was NOT dropped.
+--    check_function_bodies must be off: after 021000 both 4-param and 5-param
+--    private.admin_update_event overloads exist, so this body is ambiguous at
+--    validation time — exactly the latent PGRST203 state that existed before
+--    032000 and that 032000 was written to fix.
+SET LOCAL check_function_bodies = off;
 CREATE OR REPLACE FUNCTION public.admin_update_event(
   p_event_id uuid,
   p_patch jsonb,

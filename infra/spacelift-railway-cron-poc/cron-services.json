@@ -1,7 +1,7 @@
 {
   "cron-tag-queue": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-tag-queue",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",
@@ -12,7 +12,7 @@
   },
   "cron-scrape-sources": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-scrape-sources",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",
@@ -23,7 +23,7 @@
   },
   "cron-db-maintenance": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-db-maintenance",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",
@@ -34,7 +34,7 @@
   },
   "cron-cleanup-stale": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-cleanup-stale",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",
@@ -45,7 +45,7 @@
   },
   "cron-enrich-events": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-enrich-events",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",
@@ -56,7 +56,7 @@
   },
   "cron-weekly-digest": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-weekly-digest",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",
@@ -67,7 +67,7 @@
   },
   "cron-send-reminders": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-send-reminders",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",
@@ -78,7 +78,7 @@
   },
   "cron-review-events": {
     "config_path": ".railway/railway.ts",
-    "source_repo": "HexSleeves/family-events-v2",
+    "source_repo": "HexSleeves/family-events",
     "root_directory": "apps/cron-review-events",
     "builder": "DOCKERFILE",
     "dockerfile_path": "Dockerfile",

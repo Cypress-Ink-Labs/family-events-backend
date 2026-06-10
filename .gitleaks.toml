@@ -16,6 +16,13 @@ paths = [
   '''apps/web/e2e/\.auth/.*\.json''',
   # SQL test fixtures use deterministic UUIDs and fake bcrypt salts.
   '''supabase/tests/.*\.sql''',
+  # Edge-function test fixtures use synthetic credentials.
+  '''supabase/functions/.*_test\.ts''',
+  # Xcode project files trip generic-api-key on build-setting identifiers.
+  '''apps/ios/FamilyEvents\.xcodeproj/project\.pbxproj''',
+  '''apps/ios/project\.yml''',
+  # Tooling state caches.
+  '''\.desloppify/.*''',
   # Lockfiles trip entropy rules on integrity hashes.
   '''pnpm-lock\.yaml''',
   '''.*deno\.lock''',
@@ -24,4 +31,7 @@ regexes = [
   # supabase/config.toml stores the Apple OAuth secret as a SHA-256 hash
   # placeholder (hash:...), not the raw secret.
   '''hash:[a-f0-9]{64}''',
+  # Supabase publishable (anon) keys are public by design and embedded in
+  # client configs (.env.hosted, Android EnvConfig, iOS project config).
+  '''sb_publishable_[A-Za-z0-9_-]+''',
 ]

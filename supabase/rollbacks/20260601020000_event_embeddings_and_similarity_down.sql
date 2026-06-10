@@ -23,17 +23,18 @@ DROP FUNCTION IF EXISTS private.find_similar_events(extensions.vector(1536), int
 -- WARNING: destroys all embedding data.
 DROP TABLE IF EXISTS public.event_embeddings;
 
--- 3. Restore the narrower ai_feature_config CHECK (tagging + event-review + parent-tips only).
+-- 3. Remove the ai_feature_config rows added by 020000 (must happen before
+--    narrowing the CHECK constraint, which these rows would violate).
+DELETE FROM public.ai_feature_config
+WHERE feature IN ('tag-memory', 'review-memory', 'source-auto-reject');
+
+-- 4. Restore the narrower ai_feature_config CHECK (tagging + event-review + parent-tips only).
 ALTER TABLE public.ai_feature_config
   DROP CONSTRAINT IF EXISTS ai_feature_config_feature_check;
 
 ALTER TABLE public.ai_feature_config
   ADD CONSTRAINT ai_feature_config_feature_check
   CHECK (feature IN ('tagging', 'event-review', 'parent-tips'));
-
--- 4. Remove the ai_feature_config rows added by 020000.
-DELETE FROM public.ai_feature_config
-WHERE feature IN ('tag-memory', 'review-memory', 'source-auto-reject');
 
 -- 5. Restore private.upsert_ai_feature_config to its pre-020000 body.
 -- Prior body sourced from 20260601005000_ai_models_and_cron_drilldown.sql (final block).

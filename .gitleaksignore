@@ -1,0 +1,8 @@
+# Acknowledged historical findings, pinned by exact fingerprint
+# (commit:file:rule:line). Pin specific fingerprints here rather than
+# allowlisting paths in .gitleaks.toml, so new leaks in the same files
+# still get caught.
+
+# Local Sentry relay credentials committed Apr 2026, untracked since.
+# Relay instance is local-only; keys are not reusable against sentry.io.
+c8337c5cb5bc6b798c45443d48c653309757ee4b:config/credentials.json:generic-api-key:2

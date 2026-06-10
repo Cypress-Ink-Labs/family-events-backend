@@ -9,7 +9,7 @@
               "serviceId": "92747fa2-b0fe-450e-91a5-5a16500b1dad",
               "cronSchedule": "*/5 * * * *",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
@@ -36,7 +36,7 @@
               "serviceId": "c48ad7ba-1454-4beb-9251-1ef090ff99cd",
               "cronSchedule": "0 * * * *",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
@@ -63,7 +63,7 @@
               "serviceId": "8ffaba4f-1d17-458f-b3b9-279736e10449",
               "cronSchedule": "15 3 * * *",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
@@ -90,7 +90,7 @@
               "serviceId": "b9551035-93bf-447a-9172-81f56c7fa33d",
               "cronSchedule": "*/30 * * * *",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
@@ -117,7 +117,7 @@
               "serviceId": "d4f2a1b3-8e5c-4d7f-a9b2-1c3e5f7a9d2b",
               "cronSchedule": "*/15 * * * *",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
@@ -144,7 +144,7 @@
               "serviceId": "94049b52-14a8-4118-939c-10adf4500fbf",
               "cronSchedule": "0 13 * * 1",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
@@ -171,7 +171,7 @@
               "serviceId": "75f83fdc-7af6-489d-a0d1-8230ea4f0cd7",
               "cronSchedule": "0 11 * * *",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
@@ -198,7 +198,7 @@
               "serviceId": "c1831dd9-890d-4685-b380-ae60dd9a5f75",
               "cronSchedule": "*/5 * * * *",
               "source": {
-                "repo": "HexSleeves/family-events-v2",
+                "repo": "HexSleeves/family-events",
                 "image": null
               },
               "latestDeployment": {
