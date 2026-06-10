@@ -57,14 +57,19 @@ up.
 
 ## 4. Deploy edge functions
 
+Use the deploy CLI — it knows every function target and applies the correct
+`--no-verify-jwt` flag from `config/deploy.config.json`
+(`supabase.noVerifyJwtFunctions`):
+
 ```bash
-supabase functions deploy scrape-source
-supabase functions deploy tag-event
-supabase functions deploy process-tag-queue
-supabase functions deploy share-og
-supabase functions deploy notify-email
-supabase functions deploy weather
+pnpm deploy:all              # everything (functions + Railway services)
+pnpm deploy deploy weather   # a single target
 ```
+
+If you deploy a function manually with `supabase functions deploy`, mirror
+the JWT setting yourself: any function listed in `noVerifyJwtFunctions`
+needs `--no-verify-jwt`, otherwise its cron/webhook callers (which
+authenticate with service-role bearer tokens, not user JWTs) get rejected.
 
 The Plan page weather proxy requires an OpenWeather key in Supabase function
 secrets:

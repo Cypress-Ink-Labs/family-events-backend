@@ -1,12 +1,12 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@supabase/functions-js@*": "2.106.1",
+    "jsr:@supabase/functions-js@2.108.1": "2.108.1",
     "npm:openai@^4.52.5": "4.104.0"
   },
   "jsr": {
-    "@supabase/functions-js@2.106.1": {
-      "integrity": "5f857e91d6b61a10be1b51860ae4077836a7df9a2ebd49f9353ee2961a3e7056",
+    "@supabase/functions-js@2.108.1": {
+      "integrity": "ac161d85d6696e77aebc78314e90e5a84df3e2eef045ad29c18d759478e9769b",
       "dependencies": [
         "npm:openai"
       ]
@@ -221,7 +221,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@supabase/functions-js@*"
+      "jsr:@supabase/functions-js@2.108.1"
     ]
   }
 }

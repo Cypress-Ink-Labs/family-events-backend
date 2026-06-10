@@ -29,7 +29,9 @@ enabled       = true
 site_url      = "https://family-events.org"
 jwt_expiry    = 3600
 enable_signup = true
-minimum_password_length = 6
+# Must match the client-side checks in apps/web (sign-up.tsx,
+# reset-password.tsx). Applies to new signups and password changes only.
+minimum_password_length = 8
 # Keep this list in sync with Supabase Dashboard → Authentication → URL
 # Configuration → Redirect URLs. The dashboard list governs the hosted
 # project; this list governs `supabase start` only. Both must include any

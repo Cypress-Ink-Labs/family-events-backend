@@ -1,7 +1,9 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { requireServiceRole } from "../_shared/auth.ts"
+import { escapeHtml } from "../_shared/html.ts"
 import { captureEdgeException } from "../_shared/sentry.ts"
 import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
+import { isRecord, readString } from "../_shared/validation.ts"
 
 // notify-email
 // ----------------------------------------------------------------
@@ -59,44 +61,11 @@ type Payload =
       app_url?: string
     }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-}
-
-type ReadStringOptions = { required?: boolean; maxLength?: number }
-
-function readString(
+function readOptionalString(
   value: Record<string, unknown>,
   key: string,
-  options: ReadStringOptions & { required: true }
-): string
-function readString(
-  value: Record<string, unknown>,
-  key: string,
-  options?: ReadStringOptions
-): string | null
-function readString(
-  value: Record<string, unknown>,
-  key: string,
-  options: ReadStringOptions = {}
-): string | null {
-  const raw = value[key]
-  if (raw == null) {
-    if (options.required) throw new Error(`missing ${key}`)
-    return null
-  }
-  if (typeof raw !== "string") throw new Error(`invalid ${key}`)
-
-  const trimmed = raw.trim()
-  if (options.required && !trimmed) throw new Error(`missing ${key}`)
-  if (options.maxLength && trimmed.length > options.maxLength) {
-    throw new Error(`invalid ${key}`)
-  }
-
-  return trimmed
-}
-
-function readOptionalString(value: Record<string, unknown>, key: string, maxLength: number): string | undefined {
+  maxLength: number
+): string | undefined {
   const raw = value[key]
   if (raw == null) return undefined
   if (typeof raw !== "string") throw new Error(`invalid ${key}`)
@@ -106,7 +75,11 @@ function readOptionalString(value: Record<string, unknown>, key: string, maxLeng
   return trimmed
 }
 
-function readNullableString(value: Record<string, unknown>, key: string, maxLength: number): string | null {
+function readNullableString(
+  value: Record<string, unknown>,
+  key: string,
+  maxLength: number
+): string | null {
   const raw = value[key]
   if (raw == null) return null
   if (typeof raw !== "string") throw new Error(`invalid ${key}`)
@@ -167,7 +140,7 @@ function parsePayload(value: unknown): Payload {
       username: readString(value, "username", { required: true, maxLength: 120 }),
       event_title: readString(value, "event_title", { required: true, maxLength: 300 }),
       event_id: readString(value, "event_id", { required: true, maxLength: 64 }),
-      app_url: readString(value, "app_url", { maxLength: 256 }),
+      app_url: readOptionalString(value, "app_url", 256),
     }
   }
 
@@ -177,20 +150,11 @@ function parsePayload(value: unknown): Payload {
       email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
       username: readString(value, "username", { required: true, maxLength: 120 }),
       event_title: readString(value, "event_title", { required: true, maxLength: 300 }),
-      app_url: readString(value, "app_url", { maxLength: 256 }),
+      app_url: readOptionalString(value, "app_url", 256),
     }
   }
 
   throw new Error("unknown kind")
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
 }
 
 // ── Dusk-Meadow theme tokens (mirrors packages/design-system) ─────────────────
@@ -295,11 +259,15 @@ function renderAdminRequest(
             <td style="padding:12px 16px;font-family:${FONT_MONO};font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:${THEME.textMuted};border-bottom:1px solid ${THEME.border};">Email</td>
             <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:15px;font-weight:600;color:${THEME.textPrimary};border-bottom:1px solid ${THEME.border};">${escapeHtml(payload.email)}</td>
           </tr>
-          ${message ? `
+          ${
+            message
+              ? `
           <tr>
             <td style="padding:12px 16px;font-family:${FONT_MONO};font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:${THEME.textMuted};vertical-align:top;">Message</td>
             <td style="padding:12px 16px;font-family:${FONT_SANS};font-size:14px;color:${THEME.textPrimary};white-space:pre-wrap;">${escapeHtml(message)}</td>
-          </tr>` : ""}
+          </tr>`
+              : ""
+          }
         </table>
       </td>
     </tr>
@@ -405,7 +373,9 @@ function renderRequestRejected(
 }
 
 function renderCommunityEventStatus(
-  payload: Extract<Payload, { kind: "community_event_approved" }> | Extract<Payload, { kind: "community_event_rejected" }>,
+  payload:
+    | Extract<Payload, { kind: "community_event_approved" }>
+    | Extract<Payload, { kind: "community_event_rejected" }>,
   appUrl: string,
   status: "approved" | "rejected"
 ): RenderedEmail {
@@ -417,9 +387,10 @@ function renderCommunityEventStatus(
     ? `Great news! Your event "${eventTitle}" has been approved and is now live on Family Events. Local families can discover it and add it to their calendars.`
     : `Thanks for submitting "${eventTitle}". After review, we weren't able to publish it at this time. You're welcome to submit other events anytime.`
 
-  const ctaUrl = isApproved && "event_id" in payload
-    ? `${appUrl}/events/${payload.event_id}`
-    : `${appUrl}/submit-event`
+  const ctaUrl =
+    isApproved && "event_id" in payload
+      ? `${appUrl}/events/${payload.event_id}`
+      : `${appUrl}/submit-event`
 
   const ctaLabel = isApproved ? "View Your Event" : "Submit Another Event"
 
@@ -542,10 +513,13 @@ Deno.serve(async (req: Request) => {
   try {
     payload = parsePayload(await req.json())
   } catch (error) {
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "invalid JSON body" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    })
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "invalid JSON body" }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    )
   }
 
   const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
@@ -558,11 +532,15 @@ Deno.serve(async (req: Request) => {
     // welcome: send via deployed Resend template
     if (payload.kind === "welcome") {
       if (!resendApiKey) {
-        logEdgeEvent("warn", "notify-email: RESEND_API_KEY not configured; would have sent welcome", {
-          function: "notify-email",
-          kind: payload.kind,
-          to: payload.email,
-        })
+        logEdgeEvent(
+          "warn",
+          "notify-email: RESEND_API_KEY not configured; would have sent welcome",
+          {
+            function: "notify-email",
+            kind: payload.kind,
+            to: payload.email,
+          }
+        )
         return new Response(JSON.stringify({ sent: false, dev: true }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

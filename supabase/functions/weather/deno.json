@@ -1,6 +1,6 @@
 {
   "nodeModulesDir": "auto",
   "imports": {
-    "@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js/edge-runtime.d.ts"
+    "@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js@2.108.1/edge-runtime.d.ts"
   }
 }

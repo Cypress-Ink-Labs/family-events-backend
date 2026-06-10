@@ -3,6 +3,7 @@ import {
   serveServiceRoleJson,
   serviceRoleJsonError,
 } from "../_shared/service-role-handler.ts";
+import { escapeHtml } from "../_shared/html.ts";
 import { logEdgeEvent } from "../_shared/logger.ts";
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts";
 
@@ -50,15 +51,6 @@ function firstImageUrl(event: DigestEvent): string | undefined {
   if (typeof first === "string") return first;
   if (first && typeof first === "object") return first.url;
   return undefined;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
 }
 
 // Some source events carry HTML markup in title/venue/address (e.g.

@@ -1,8 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
-import {
-  serveServiceRoleJson,
-  serviceRoleJsonError,
-} from "../_shared/service-role-handler.ts"
+import { serveServiceRoleJson, serviceRoleJsonError } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import {
   buildApnsRequest,
@@ -52,17 +49,23 @@ function base64urlDecode(input: string): Uint8Array {
   return bytes
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength)
+  copy.set(bytes)
+  return copy.buffer
+}
+
 /** Build a signed VAPID Authorization header (JWT signed with ES256). */
 async function buildVapidAuth(
   endpoint: string,
   vapidPrivateKey: string,
   vapidPublicKey: string,
-  subject: string,
+  subject: string
 ): Promise<{ authorization: string; cryptoKey: string }> {
   const audience = new URL(endpoint).origin
 
   const header = base64urlEncode(
-    new TextEncoder().encode(JSON.stringify({ typ: "JWT", alg: "ES256" })),
+    new TextEncoder().encode(JSON.stringify({ typ: "JWT", alg: "ES256" }))
   )
 
   const now = Math.floor(Date.now() / 1000)
@@ -72,8 +75,8 @@ async function buildVapidAuth(
         aud: audience,
         exp: now + 12 * 60 * 60, // 12 hours
         sub: subject,
-      }),
-    ),
+      })
+    )
   )
 
   const signingInput = `${header}.${payload}`
@@ -98,13 +101,13 @@ async function buildVapidAuth(
     jwk,
     { name: "ECDSA", namedCurve: "P-256" },
     false,
-    ["sign"],
+    ["sign"]
   )
 
   const signatureBuffer = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
     cryptoKey,
-    new TextEncoder().encode(signingInput),
+    new TextEncoder().encode(signingInput)
   )
 
   // Convert DER-encoded signature to raw r||s format expected by WebPush
@@ -150,7 +153,7 @@ function derToRaw(der: Uint8Array): Uint8Array {
 async function encryptPayload(
   payload: string,
   p256dhKey: string,
-  authSecret: string,
+  authSecret: string
 ): Promise<{ body: Uint8Array; salt: Uint8Array; localPublicKey: Uint8Array }> {
   const encoder = new TextEncoder()
 
@@ -158,7 +161,7 @@ async function encryptPayload(
   const localKeyPair = await crypto.subtle.generateKey(
     { name: "ECDH", namedCurve: "P-256" },
     true,
-    ["deriveBits"],
+    ["deriveBits"]
   )
 
   // Import subscriber's public key
@@ -168,19 +171,19 @@ async function encryptPayload(
     subscriberKeyBytes.buffer as ArrayBuffer,
     { name: "ECDH", namedCurve: "P-256" },
     false,
-    [],
+    []
   )
 
   // ECDH shared secret
   const sharedSecret = await crypto.subtle.deriveBits(
     { name: "ECDH", public: subscriberKey },
     localKeyPair.privateKey,
-    256,
+    256
   )
 
   // Export local public key (uncompressed)
   const localPublicKeyRaw = new Uint8Array(
-    await crypto.subtle.exportKey("raw", localKeyPair.publicKey),
+    await crypto.subtle.exportKey("raw", localKeyPair.publicKey)
   )
 
   // Salt (16 random bytes)
@@ -197,34 +200,33 @@ async function encryptPayload(
     ...localPublicKeyRaw,
   ])
 
-  const ikm = await crypto.subtle.importKey(
-    "raw",
-    new Uint8Array(sharedSecret),
-    "HKDF",
-    false,
-    ["deriveBits"],
-  )
+  const ikm = await crypto.subtle.importKey("raw", new Uint8Array(sharedSecret), "HKDF", false, [
+    "deriveBits",
+  ])
 
   // IKM for the final HKDF: HKDF(auth_secret, shared_secret, info, 32)
   const prkCombine = new Uint8Array(
     await crypto.subtle.deriveBits(
-      { name: "HKDF", hash: "SHA-256", salt: authSecretBytes.buffer as ArrayBuffer, info: infoInput.buffer as ArrayBuffer },
+      {
+        name: "HKDF",
+        hash: "SHA-256",
+        salt: authSecretBytes.buffer as ArrayBuffer,
+        info: infoInput.buffer as ArrayBuffer,
+      },
       ikm,
-      256,
-    ),
+      256
+    )
   )
 
   // PRK = HKDF-Extract(salt, prk_combine)
-  const prkKey = await crypto.subtle.importKey("raw", prkCombine, "HKDF", false, [
-    "deriveBits",
-  ])
+  const prkKey = await crypto.subtle.importKey("raw", prkCombine, "HKDF", false, ["deriveBits"])
 
   // CEK = HKDF-Expand(PRK, "Content-Encoding: aes128gcm\0", 16)
   const cekInfo = encoder.encode("Content-Encoding: aes128gcm\0")
   const cekBits = await crypto.subtle.deriveBits(
     { name: "HKDF", hash: "SHA-256", salt, info: cekInfo },
     prkKey,
-    128,
+    128
   )
 
   // Nonce = HKDF-Expand(PRK, "Content-Encoding: nonce\0", 12)
@@ -232,17 +234,13 @@ async function encryptPayload(
   const nonceBits = await crypto.subtle.deriveBits(
     { name: "HKDF", hash: "SHA-256", salt, info: nonceInfo },
     prkKey,
-    96,
+    96
   )
 
   // Encrypt with AES-128-GCM
-  const aesKey = await crypto.subtle.importKey(
-    "raw",
-    new Uint8Array(cekBits),
-    "AES-GCM",
-    false,
-    ["encrypt"],
-  )
+  const aesKey = await crypto.subtle.importKey("raw", new Uint8Array(cekBits), "AES-GCM", false, [
+    "encrypt",
+  ])
 
   // Pad payload: content + 0x02 delimiter (last record)
   const plaintext = new Uint8Array([...encoder.encode(payload), 2])
@@ -251,8 +249,8 @@ async function encryptPayload(
     await crypto.subtle.encrypt(
       { name: "AES-GCM", iv: new Uint8Array(nonceBits), tagLength: 128 },
       aesKey,
-      plaintext,
-    ),
+      plaintext
+    )
   )
 
   // aes128gcm header: salt (16) || rs (4) || idlen (1) || keyid (65) || ciphertext
@@ -301,326 +299,325 @@ function parsePayload(value: unknown): SendPushPayload {
 
 const PUSH_TIMEOUT_MS = 10_000
 
-serveServiceRoleJson(
-  { functionName: "send-push" },
-  async ({ request, supabase }) => {
-    const payload = parsePayload(await request.json())
+serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }) => {
+  const payload = parsePayload(await request.json())
 
-    // Read provider credentials: vault-first, fallback to env.
-    let vapidPrivateKey = ""
-    let vapidPublicKey = ""
-    let vapidSubject = ""
-    let apnsTeamId = ""
-    let apnsKeyId = ""
-    let apnsPrivateKey = ""
-    let apnsBundleId = ""
-    let apnsEnvironment = ""
-    let fcmServiceAccountJson = ""
+  // Read provider credentials: vault-first, fallback to env.
+  let vapidPrivateKey = ""
+  let vapidPublicKey = ""
+  let vapidSubject = ""
+  let apnsTeamId = ""
+  let apnsKeyId = ""
+  let apnsPrivateKey = ""
+  let apnsBundleId = ""
+  let apnsEnvironment = ""
+  let fcmServiceAccountJson = ""
 
-    try {
-      const { data: secrets } = await supabase
-        .from("vault.decrypted_secrets" as "push_subscriptions") // cast to satisfy type
-        .select("name, decrypted_secret")
-        .in("name", [
-          "vapid_private_key",
-          "vapid_public_key",
-          "vapid_subject",
-          "apns_team_id",
-          "apns_key_id",
-          "apns_private_key",
-          "apns_bundle_id",
-          "apns_environment",
-          "fcm_service_account_json",
-        ])
+  try {
+    const { data: secrets } = await supabase
+      .from("vault.decrypted_secrets" as "push_subscriptions") // cast to satisfy type
+      .select("name, decrypted_secret")
+      .in("name", [
+        "vapid_private_key",
+        "vapid_public_key",
+        "vapid_subject",
+        "apns_team_id",
+        "apns_key_id",
+        "apns_private_key",
+        "apns_bundle_id",
+        "apns_environment",
+        "fcm_service_account_json",
+      ])
 
-      if (secrets) {
-        for (const s of secrets as Array<{ name: string; decrypted_secret: string }>) {
-          if (s.name === "vapid_private_key") vapidPrivateKey = s.decrypted_secret
-          if (s.name === "vapid_public_key") vapidPublicKey = s.decrypted_secret
-          if (s.name === "vapid_subject") vapidSubject = s.decrypted_secret
-          if (s.name === "apns_team_id") apnsTeamId = s.decrypted_secret
-          if (s.name === "apns_key_id") apnsKeyId = s.decrypted_secret
-          if (s.name === "apns_private_key") apnsPrivateKey = s.decrypted_secret
-          if (s.name === "apns_bundle_id") apnsBundleId = s.decrypted_secret
-          if (s.name === "apns_environment") apnsEnvironment = s.decrypted_secret
-          if (s.name === "fcm_service_account_json") fcmServiceAccountJson = s.decrypted_secret
-        }
+    if (secrets) {
+      for (const s of secrets as Array<{ name: string; decrypted_secret: string }>) {
+        if (s.name === "vapid_private_key") vapidPrivateKey = s.decrypted_secret
+        if (s.name === "vapid_public_key") vapidPublicKey = s.decrypted_secret
+        if (s.name === "vapid_subject") vapidSubject = s.decrypted_secret
+        if (s.name === "apns_team_id") apnsTeamId = s.decrypted_secret
+        if (s.name === "apns_key_id") apnsKeyId = s.decrypted_secret
+        if (s.name === "apns_private_key") apnsPrivateKey = s.decrypted_secret
+        if (s.name === "apns_bundle_id") apnsBundleId = s.decrypted_secret
+        if (s.name === "apns_environment") apnsEnvironment = s.decrypted_secret
+        if (s.name === "fcm_service_account_json") fcmServiceAccountJson = s.decrypted_secret
       }
-    } catch {
-      // Vault may not be available in local dev
     }
+  } catch {
+    // Vault may not be available in local dev
+  }
 
-    // Env fallback
-    if (!vapidPrivateKey) vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? ""
-    if (!vapidPublicKey) vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? ""
-    if (!vapidSubject) vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:push@family-events.org"
-    if (!apnsTeamId) apnsTeamId = Deno.env.get("APNS_TEAM_ID") ?? ""
-    if (!apnsKeyId) apnsKeyId = Deno.env.get("APNS_KEY_ID") ?? ""
-    if (!apnsPrivateKey) apnsPrivateKey = Deno.env.get("APNS_PRIVATE_KEY") ?? ""
-    if (!apnsBundleId) apnsBundleId = Deno.env.get("APNS_BUNDLE_ID") ?? "com.familyevents.app"
-    if (!apnsEnvironment) apnsEnvironment = Deno.env.get("APNS_ENVIRONMENT") ?? "production"
-    if (!fcmServiceAccountJson) fcmServiceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON") ?? ""
+  // Env fallback
+  if (!vapidPrivateKey) vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? ""
+  if (!vapidPublicKey) vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? ""
+  if (!vapidSubject) vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:push@family-events.org"
+  if (!apnsTeamId) apnsTeamId = Deno.env.get("APNS_TEAM_ID") ?? ""
+  if (!apnsKeyId) apnsKeyId = Deno.env.get("APNS_KEY_ID") ?? ""
+  if (!apnsPrivateKey) apnsPrivateKey = Deno.env.get("APNS_PRIVATE_KEY") ?? ""
+  if (!apnsBundleId) apnsBundleId = Deno.env.get("APNS_BUNDLE_ID") ?? "com.familyevents.app"
+  if (!apnsEnvironment) apnsEnvironment = Deno.env.get("APNS_ENVIRONMENT") ?? "production"
+  if (!fcmServiceAccountJson) fcmServiceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON") ?? ""
 
-    let fcmCredentials = undefined
-    try {
-      fcmCredentials = parseFcmServiceAccount(fcmServiceAccountJson)
-    } catch (err) {
-      logEdgeEvent("warn", "send-push: invalid FCM service account JSON", {
-        function: "send-push",
-        error: err instanceof Error ? err.message : String(err),
-      })
-    }
+  let fcmCredentials = undefined
+  try {
+    fcmCredentials = parseFcmServiceAccount(fcmServiceAccountJson)
+  } catch (err) {
+    logEdgeEvent("warn", "send-push: invalid FCM service account JSON", {
+      function: "send-push",
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
 
-    const apnsCredentials: ApnsCredentials | undefined =
-      apnsTeamId && apnsKeyId && apnsPrivateKey && apnsBundleId
-        ? {
+  const apnsCredentials: ApnsCredentials | undefined =
+    apnsTeamId && apnsKeyId && apnsPrivateKey && apnsBundleId
+      ? {
           teamId: apnsTeamId,
           keyId: apnsKeyId,
           privateKey: apnsPrivateKey,
           bundleId: apnsBundleId,
           environment: apnsEnvironment === "sandbox" ? "sandbox" : "production",
         }
-        : undefined
-    const mobileCredentials: MobilePushCredentials = {
-      apns: apnsCredentials,
-      fcm: fcmCredentials,
-    }
-    const credentialStatus = mobileCredentialStatus(mobileCredentials)
+      : undefined
+  const mobileCredentials: MobilePushCredentials = {
+    apns: apnsCredentials,
+    fcm: fcmCredentials,
+  }
+  const credentialStatus = mobileCredentialStatus(mobileCredentials)
 
-    // Fetch user's push subscriptions
-    const { data: subscriptions, error: subError } = await supabase
-      .from("push_subscriptions")
-      .select("id, platform, endpoint, token, p256dh, auth_key")
-      .eq("user_id", payload.user_id)
+  // Fetch user's push subscriptions
+  const { data: subscriptions, error: subError } = await supabase
+    .from("push_subscriptions")
+    .select("id, platform, endpoint, token, p256dh, auth_key")
+    .eq("user_id", payload.user_id)
 
-    if (subError) throw subError
+  if (subError) throw subError
 
-    if (!subscriptions || subscriptions.length === 0) {
-      logEdgeEvent("log", "send-push: no push subscriptions for user", {
-        function: "send-push",
-        user_id: payload.user_id,
-      })
-      return { sent: 0, reason: "no_subscriptions" }
-    }
-
-    const webSubscriptions = subscriptions.filter((sub) => sub.platform === "web")
-    const mobileSubscriptions = partitionMobileSubscriptions(
-      subscriptions as unknown as PushSubscriptionRow[],
-    )
-
-    if (webSubscriptions.length > 0 && (!vapidPrivateKey || !vapidPublicKey)) {
-      logEdgeEvent("warn", "send-push: VAPID keys not configured; skipping web push", {
-        function: "send-push",
-        user_id: payload.user_id,
-        title: payload.title,
-      })
-    }
-
-    const pushPayload = JSON.stringify({
-      title: payload.title,
-      body: payload.body,
-      ...(payload.url ? { url: payload.url } : {}),
+  if (!subscriptions || subscriptions.length === 0) {
+    logEdgeEvent("log", "send-push: no push subscriptions for user", {
+      function: "send-push",
+      user_id: payload.user_id,
     })
+    return { sent: 0, reason: "no_subscriptions" }
+  }
 
-    let sent = 0
-    let failed = 0
-    const pruned: string[] = []
+  const webSubscriptions = subscriptions.filter((sub) => sub.platform === "web")
+  const mobileSubscriptions = partitionMobileSubscriptions(
+    subscriptions as unknown as PushSubscriptionRow[]
+  )
 
-    for (const sub of webSubscriptions) {
-      if (!vapidPrivateKey || !vapidPublicKey) continue
-      if (!sub.endpoint || !sub.p256dh || !sub.auth_key) {
-        failed++
-        continue
-      }
+  if (webSubscriptions.length > 0 && (!vapidPrivateKey || !vapidPublicKey)) {
+    logEdgeEvent("warn", "send-push: VAPID keys not configured; skipping web push", {
+      function: "send-push",
+      user_id: payload.user_id,
+      title: payload.title,
+    })
+  }
 
-      try {
-        const { authorization } = await buildVapidAuth(
-          sub.endpoint,
-          vapidPrivateKey,
-          vapidPublicKey,
-          vapidSubject,
-        )
+  const pushPayload = JSON.stringify({
+    title: payload.title,
+    body: payload.body,
+    ...(payload.url ? { url: payload.url } : {}),
+  })
 
-        const encrypted = await encryptPayload(pushPayload, sub.p256dh, sub.auth_key)
+  let sent = 0
+  let failed = 0
+  const pruned: string[] = []
 
-        const response = await fetch(sub.endpoint, {
-          method: "POST",
-          headers: {
-            Authorization: authorization,
-            "Content-Encoding": "aes128gcm",
-            "Content-Type": "application/octet-stream",
-            TTL: "86400",
-            Urgency: "normal",
-          },
-          body: encrypted.body,
-          signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-        })
+  for (const sub of webSubscriptions) {
+    if (!vapidPrivateKey || !vapidPublicKey) continue
+    if (!sub.endpoint || !sub.p256dh || !sub.auth_key) {
+      failed++
+      continue
+    }
 
-        if (response.ok || response.status === 201) {
-          sent++
-        } else if (response.status === 410 || response.status === 404) {
-          // Subscription expired/invalid — prune it
-          pruned.push(sub.id)
-          await supabase.from("push_subscriptions").delete().eq("id", sub.id)
-          logEdgeEvent("log", "send-push: pruned expired subscription", {
-            function: "send-push",
-            subscription_id: sub.id,
-            status: response.status,
-          })
-        } else {
-          const body = await response.text().catch(() => "")
-          logEdgeEvent("warn", "send-push: push delivery failed", {
-            function: "send-push",
-            subscription_id: sub.id,
-            status: response.status,
-            body: body.slice(0, 300),
-          })
-          failed++
-        }
-      } catch (err) {
-        logEdgeEvent("warn", "send-push: push delivery error", {
+    try {
+      const { authorization } = await buildVapidAuth(
+        sub.endpoint,
+        vapidPrivateKey,
+        vapidPublicKey,
+        vapidSubject
+      )
+
+      const encrypted = await encryptPayload(pushPayload, sub.p256dh, sub.auth_key)
+
+      const response = await fetch(sub.endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: authorization,
+          "Content-Encoding": "aes128gcm",
+          "Content-Type": "application/octet-stream",
+          TTL: "86400",
+          Urgency: "normal",
+        },
+        body: toArrayBuffer(encrypted.body),
+        signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
+      })
+
+      if (response.ok || response.status === 201) {
+        sent++
+      } else if (response.status === 410 || response.status === 404) {
+        // Subscription expired/invalid — prune it
+        pruned.push(sub.id)
+        await supabase.from("push_subscriptions").delete().eq("id", sub.id)
+        logEdgeEvent("log", "send-push: pruned expired subscription", {
           function: "send-push",
           subscription_id: sub.id,
-          error: err instanceof Error ? err.message : String(err),
+          status: response.status,
+        })
+      } else {
+        const body = await response.text().catch(() => "")
+        logEdgeEvent("warn", "send-push: push delivery failed", {
+          function: "send-push",
+          subscription_id: sub.id,
+          status: response.status,
+          body: body.slice(0, 300),
         })
         failed++
       }
+    } catch (err) {
+      logEdgeEvent("warn", "send-push: push delivery error", {
+        function: "send-push",
+        subscription_id: sub.id,
+        error: err instanceof Error ? err.message : String(err),
+      })
+      failed++
+    }
+  }
+
+  if (mobileSubscriptions.apns.length > 0 && !credentialStatus.apns) {
+    logEdgeEvent("warn", "send-push: APNs credentials not configured; skipping iOS push", {
+      function: "send-push",
+      user_id: payload.user_id,
+      count: mobileSubscriptions.apns.length,
+    })
+  } else if (apnsCredentials) {
+    let apnsJwt = ""
+    try {
+      apnsJwt = await signApnsJwt(apnsCredentials)
+    } catch (err) {
+      logEdgeEvent("warn", "send-push: APNs JWT signing failed", {
+        function: "send-push",
+        error: err instanceof Error ? err.message : String(err),
+      })
     }
 
-    if (mobileSubscriptions.apns.length > 0 && !credentialStatus.apns) {
-      logEdgeEvent("warn", "send-push: APNs credentials not configured; skipping iOS push", {
-        function: "send-push",
-        user_id: payload.user_id,
-        count: mobileSubscriptions.apns.length,
-      })
-    } else if (apnsCredentials) {
-      let apnsJwt = ""
-      try {
-        apnsJwt = await signApnsJwt(apnsCredentials)
-      } catch (err) {
-        logEdgeEvent("warn", "send-push: APNs JWT signing failed", {
-          function: "send-push",
-          error: err instanceof Error ? err.message : String(err),
-        })
-      }
+    if (apnsJwt) {
+      for (const sub of mobileSubscriptions.apns) {
+        try {
+          const request = buildApnsRequest({
+            token: sub.token ?? "",
+            jwt: apnsJwt,
+            bundleId: apnsCredentials.bundleId,
+            environment: apnsCredentials.environment,
+            payload,
+          })
+          const response = await fetch(request.url, {
+            method: "POST",
+            headers: request.headers,
+            body: request.body,
+            signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
+          })
 
-      if (apnsJwt) {
-        for (const sub of mobileSubscriptions.apns) {
-          try {
-            const request = buildApnsRequest({
-              token: sub.token ?? "",
-              jwt: apnsJwt,
-              bundleId: apnsCredentials.bundleId,
-              environment: apnsCredentials.environment,
-              payload,
-            })
-            const response = await fetch(request.url, {
-              method: "POST",
-              headers: request.headers,
-              body: request.body,
-              signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-            })
-
-            if (response.ok) {
-              sent++
-            } else if (response.status === 410 || response.status === 400) {
-              pruned.push(sub.id)
-              await supabase.from("push_subscriptions").delete().eq("id", sub.id)
-            } else {
-              failed++
-              const body = await response.text().catch(() => "")
-              logEdgeEvent("warn", "send-push: APNs delivery failed", {
-                function: "send-push",
-                subscription_id: sub.id,
-                status: response.status,
-                body: body.slice(0, 300),
-              })
-            }
-          } catch (err) {
+          if (response.ok) {
+            sent++
+          } else if (response.status === 410 || response.status === 400) {
+            pruned.push(sub.id)
+            await supabase.from("push_subscriptions").delete().eq("id", sub.id)
+          } else {
             failed++
-            logEdgeEvent("warn", "send-push: APNs delivery error", {
+            const body = await response.text().catch(() => "")
+            logEdgeEvent("warn", "send-push: APNs delivery failed", {
               function: "send-push",
               subscription_id: sub.id,
-              error: err instanceof Error ? err.message : String(err),
+              status: response.status,
+              body: body.slice(0, 300),
             })
           }
+        } catch (err) {
+          failed++
+          logEdgeEvent("warn", "send-push: APNs delivery error", {
+            function: "send-push",
+            subscription_id: sub.id,
+            error: err instanceof Error ? err.message : String(err),
+          })
         }
       }
     }
+  }
 
-    if (mobileSubscriptions.fcm.length > 0 && !credentialStatus.fcm) {
-      logEdgeEvent("warn", "send-push: FCM credentials not configured; skipping Android push", {
+  if (mobileSubscriptions.fcm.length > 0 && !credentialStatus.fcm) {
+    logEdgeEvent("warn", "send-push: FCM credentials not configured; skipping Android push", {
+      function: "send-push",
+      user_id: payload.user_id,
+      count: mobileSubscriptions.fcm.length,
+    })
+  } else if (fcmCredentials) {
+    let accessToken = ""
+    try {
+      accessToken = await getFcmAccessToken(fcmCredentials)
+    } catch (err) {
+      logEdgeEvent("warn", "send-push: FCM access token failed", {
         function: "send-push",
-        user_id: payload.user_id,
-        count: mobileSubscriptions.fcm.length,
+        error: err instanceof Error ? err.message : String(err),
       })
-    } else if (fcmCredentials) {
-      let accessToken = ""
-      try {
-        accessToken = await getFcmAccessToken(fcmCredentials)
-      } catch (err) {
-        logEdgeEvent("warn", "send-push: FCM access token failed", {
-          function: "send-push",
-          error: err instanceof Error ? err.message : String(err),
-        })
-      }
+    }
 
-      if (accessToken) {
-        for (const sub of mobileSubscriptions.fcm) {
-          try {
-            const response = await fetch(
-              `https://fcm.googleapis.com/v1/projects/${fcmCredentials.projectId}/messages:send`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(buildFcmMessage({
+    if (accessToken) {
+      for (const sub of mobileSubscriptions.fcm) {
+        try {
+          const response = await fetch(
+            `https://fcm.googleapis.com/v1/projects/${fcmCredentials.projectId}/messages:send`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(
+                buildFcmMessage({
                   token: sub.token ?? "",
                   title: payload.title,
                   body: payload.body,
                   url: payload.url,
-                })),
-                signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-              },
-            )
-
-            if (response.ok) {
-              sent++
-            } else if (response.status === 404 || response.status === 400) {
-              pruned.push(sub.id)
-              await supabase.from("push_subscriptions").delete().eq("id", sub.id)
-            } else {
-              failed++
-              const body = await response.text().catch(() => "")
-              logEdgeEvent("warn", "send-push: FCM delivery failed", {
-                function: "send-push",
-                subscription_id: sub.id,
-                status: response.status,
-                body: body.slice(0, 300),
-              })
+                })
+              ),
+              signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
             }
-          } catch (err) {
+          )
+
+          if (response.ok) {
+            sent++
+          } else if (response.status === 404 || response.status === 400) {
+            pruned.push(sub.id)
+            await supabase.from("push_subscriptions").delete().eq("id", sub.id)
+          } else {
             failed++
-            logEdgeEvent("warn", "send-push: FCM delivery error", {
+            const body = await response.text().catch(() => "")
+            logEdgeEvent("warn", "send-push: FCM delivery failed", {
               function: "send-push",
               subscription_id: sub.id,
-              error: err instanceof Error ? err.message : String(err),
+              status: response.status,
+              body: body.slice(0, 300),
             })
           }
+        } catch (err) {
+          failed++
+          logEdgeEvent("warn", "send-push: FCM delivery error", {
+            function: "send-push",
+            subscription_id: sub.id,
+            error: err instanceof Error ? err.message : String(err),
+          })
         }
       }
     }
+  }
 
-    logEdgeEvent("log", "send-push: complete", {
-      function: "send-push",
-      user_id: payload.user_id,
-      sent,
-      failed,
-      pruned: pruned.length,
-    })
+  logEdgeEvent("log", "send-push: complete", {
+    function: "send-push",
+    user_id: payload.user_id,
+    sent,
+    failed,
+    pruned: pruned.length,
+  })
 
-    return { sent, failed, pruned: pruned.length }
-  },
-)
+  return { sent, failed, pruned: pruned.length }
+})
