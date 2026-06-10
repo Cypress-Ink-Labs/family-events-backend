@@ -209,11 +209,29 @@ export function buildRepoCheckCommand({ repoSlug, ref, command = DEFAULT_REPO_CO
     "git checkout " + shellQuote(ref),
     "curl https://mise.run | sh",
     'export PATH="$HOME/.local/bin:$PATH"',
+    "mise trust --yes mise.toml",
     "mise install",
     "corepack enable",
     "pnpm install --frozen-lockfile",
     command,
   ].join("\n");
+}
+
+export function resolveRepoCheckCommand(commandArgs) {
+  if (commandArgs.length === 0) {
+    return DEFAULT_REPO_COMMAND;
+  }
+
+  if (commandArgs[0] === "--command") {
+    const command = commandArgs.slice(1).join(" ").trim();
+    if (!command) {
+      throw new UsageError("--command requires a value");
+    }
+
+    return command;
+  }
+
+  return commandArgs.join(" ").trim();
 }
 
 function sandboxCreateOptions(options, env = {}) {
@@ -342,7 +360,7 @@ async function repoCheck(options) {
   const remoteUrl = process.env.RAILWAY_SANDBOX_REPO_URL ?? currentGitRemoteUrl();
   const repoSlug = normalizeGitHubRepoSlug(remoteUrl);
   const ref = options.ref ?? process.env.RAILWAY_SANDBOX_GIT_REF ?? currentGitRef();
-  const command = options.commandArgs[0] ?? DEFAULT_REPO_COMMAND;
+  const command = resolveRepoCheckCommand(options.commandArgs);
 
   const sandbox = await Sandbox.create(sandboxCreateOptions(options, githubTokenEnv()));
   printSandbox(sandbox);

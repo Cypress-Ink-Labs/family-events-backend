@@ -1,0 +1,121 @@
+name: railway-sandbox-verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: Command to run in the Railway sandbox
+        required: true
+        default: pnpm run workspace:test
+      private_network:
+        description: Join Railway private network
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
+concurrency:
+  group: railway-sandbox-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate_trigger:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.evaluate.outputs.should_run }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: evaluate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          should_run=false
+
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'railway-sandbox') }}" == "true" ]]; then
+            should_run=true
+          else
+            changed_files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")
+
+            if echo "$changed_files" | grep -Eq '^(\\.railway/|scripts/railway-sandbox\\.mjs$|package\\.json$|pnpm-lock\\.yaml$|apps/cron-|apps/web/)'; then
+              should_run=true
+            fi
+          fi
+
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+
+  sandbox-verify:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.evaluate_trigger.outputs.should_run == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NODE_VERSION: "24"
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_ENVIRONMENT_ID: ${{ vars.RAILWAY_ENVIRONMENT_ID }}
+      GITHUB_TOKEN: ${{ github.token }}
+      RAILWAY_SANDBOX_GITHUB_TOKEN: ${{ secrets.RAILWAY_SANDBOX_GITHUB_TOKEN }}
+      SANDBOX_REF: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.pull_request.head.sha }}
+      SANDBOX_COMMAND: ${{ github.event_name == 'workflow_dispatch' && inputs.command || 'pnpm run workspace:test' }}
+      SANDBOX_PRIVATE_NETWORK: ${{ github.event_name == 'workflow_dispatch' && inputs.private_network || 'false' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Railway sandbox repo check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          args=()
+          if [ "${SANDBOX_PRIVATE_NETWORK}" = "true" ]; then
+            args+=(--private-network)
+          fi
+
+          if [ ${#args[@]} -eq 0 ]; then
+            pnpm run railway:sandbox:repo-check -- \
+              --ref "${SANDBOX_REF}" \
+              --timeout-sec 600 \
+              --command "${SANDBOX_COMMAND}"
+          else
+            pnpm run railway:sandbox:repo-check -- \
+              --ref "${SANDBOX_REF}" \
+              "${args[@]}" \
+              --timeout-sec 600 \
+              --command "${SANDBOX_COMMAND}"
+          fi
