@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { readExpectedCronConfigs } from "../../scripts/spacelift-railway-cron-poc.mjs";
+import { readExpectedCronConfigs } from "../../scripts/railway-cron-drift.mjs";
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
 

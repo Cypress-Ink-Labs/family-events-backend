@@ -5,7 +5,7 @@
 # - Spacelift as a policy + plan guard
 #
 # The actual robust parsing + nice diagnostics live in:
-#   scripts/spacelift-railway-cron-poc.mjs
+#   scripts/railway-cron-drift.mjs
 #   tests/railway-cron-poc.test.mjs
 #
 # This file exists primarily so we can use Terraform preconditions + outputs
@@ -38,7 +38,7 @@ variable "railway_fixture_path" {
 }
 
 locals {
-  validation_surface = "spacelift-before-plan"
+  validation_surface = "ci-before-plan"
 
   cron_services_manifest = jsondecode(file("${path.module}/cron-services.json"))
 

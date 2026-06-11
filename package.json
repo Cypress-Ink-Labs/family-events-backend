@@ -25,8 +25,8 @@
     "db:advisors:performance": "bash scripts/supabase.sh db advisors --linked --type performance --level warn --fail-on none",
     "db:functions:serve": "bash scripts/supabase-functions-serve.sh",
     "deno:install": "bash scripts/deno-install-functions.sh",
-    "spacelift:poc:test": "node --test tests/railway-cron-poc.test.mjs",
-    "spacelift:poc:validate": "node scripts/spacelift-railway-cron-poc.mjs validate"
+    "railway:drift:test": "node --test tests/railway-cron-poc.test.mjs",
+    "railway:drift:validate": "node scripts/railway-cron-drift.mjs validate"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",

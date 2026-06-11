@@ -15,7 +15,7 @@ permissions:
 env:
   TF_IN_AUTOMATION: true
   TF_VAR_railway_environment_id: 03e869e2-4e35-4849-84b7-6c0278c1c6fb
-  TF_VAR_railway_project_access_token: ${{ secrets.RAILWAY_POC_PROJECT_ACCESS_TOKEN }}
+  TF_VAR_railway_bearer_token: ${{ secrets.RAILWAY_API_TOKEN }}
 
 jobs:
   drift-guard:
@@ -23,46 +23,34 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Setup Node (for human-readable diagnostics)
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
-      - name: Print Railway cron diagnostics (human readable)
-        # This step always runs and produces clear "expected vs live" output.
-        # It uses the robust JS parser (scripts/spacelift-railway-cron-poc.mjs).
-        # We || true so a diagnostics failure does not short-circuit the job;
-        # the Terraform step below is the actual gate (for Spacelift policy compatibility).
-        run: |
-          echo "=== Expected config from committed railway.toml files ==="
-          node scripts/spacelift-railway-cron-poc.mjs validate || true
+      - name: Print Railway cron diagnostics
+        run: node scripts/railway-cron-drift.mjs validate || true
         env:
-          # The script will fall back to fixture mode or just print expected if no Railway auth
-          RAILWAY_POC_PROJECT_ACCESS_TOKEN: ${{ secrets.RAILWAY_POC_PROJECT_ACCESS_TOKEN }}
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
+      - uses: hashicorp/setup-terraform@v4
         with:
-          terraform_version: 1.5.7
+          terraform_version: 1.15.6
 
       - name: Validate secret
         shell: bash
         run: |
           set -euo pipefail
-          : "${TF_VAR_railway_project_access_token:?missing RAILWAY_POC_PROJECT_ACCESS_TOKEN secret}"
+          : "${TF_VAR_railway_bearer_token:?missing RAILWAY_API_TOKEN secret}"
 
       - name: Terraform init
-        run: terraform -chdir=infra/spacelift-railway-cron-poc init -backend=false
+        run: terraform -chdir=infra/railway-cron-drift init -backend=false
 
       - name: Terraform validate
-        run: terraform -chdir=infra/spacelift-railway-cron-poc validate
+        run: terraform -chdir=infra/railway-cron-drift validate
 
-      - name: Enforce Railway cron drift guard (Terraform precondition)
-        # This is the real gate. It will fail the job (and any Spacelift policy)
-        # if the parsed repo config does not match live Railway state.
-        run: terraform -chdir=infra/spacelift-railway-cron-poc plan -input=false -lock=false -detailed-exitcode || exit 1
+      - name: Railway cron drift guard
+        run: terraform -chdir=infra/railway-cron-drift plan -input=false -lock=false -detailed-exitcode || exit 1
