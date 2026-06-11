@@ -1,0 +1,42 @@
+{
+  "name": "family-events-backend",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1",
+  "scripts": {
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish",
+    "deploy": "pnpm --filter @family-events/deploy-cli cli",
+    "deploy:all": "pnpm --filter @family-events/deploy-cli cli deploy --all --yes",
+    "railway:plan": "railway config plan",
+    "railway:sandbox": "node scripts/railway-sandbox.mjs",
+    "railway:sandbox:create": "node scripts/railway-sandbox.mjs create",
+    "railway:sandbox:list": "node scripts/railway-sandbox.mjs list",
+    "check": "pnpm --filter @family-events/contracts check && pnpm --filter @family-events/deploy-cli check",
+    "test": "pnpm run workspace:test && pnpm run db:test",
+    "workspace:test": "node --test tests/guards/cron-runner-boundary.test.mjs tests/guards/deploy-cli-boundary.test.mjs tests/guards/supabase-function-auth-config.test.mjs tests/guards/migration-rollbacks.test.mjs",
+    "db:test": "bash scripts/test.sh",
+    "db:start": "bash scripts/supabase.sh start",
+    "db:stop": "bash scripts/supabase.sh stop",
+    "db:migrate": "bash scripts/supabase.sh db push",
+    "db:types": "bash scripts/supabase.sh gen types typescript --local --schema public > packages/contracts/src/database.types.ts",
+    "db:advisors:security": "bash scripts/supabase.sh db advisors --linked --type security --level warn --fail-on error",
+    "db:advisors:performance": "bash scripts/supabase.sh db advisors --linked --type performance --level warn --fail-on none",
+    "db:functions:serve": "bash scripts/supabase-functions-serve.sh",
+    "deno:install": "bash scripts/deno-install-functions.sh",
+    "spacelift:poc:test": "node --test tests/railway-cron-poc.test.mjs",
+    "spacelift:poc:validate": "node scripts/spacelift-railway-cron-poc.mjs validate"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
+    "@supabase/supabase-js": "^2.108.0",
+    "@types/node": "^25.9.2",
+    "oxfmt": "^0.54.0",
+    "oxlint": "^1.69.0",
+    "railway": "^3.1.1",
+    "typescript": "~6.0.3",
+    "vitest": "4.1.8"
+  }
+}

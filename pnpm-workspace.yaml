@@ -1,0 +1,10 @@
+packages:
+  - "packages/*"
+  - "supabase/functions"
+
+allowBuilds:
+  esbuild: true
+  supabase: false
+
+onlyBuiltDependencies:
+  - esbuild

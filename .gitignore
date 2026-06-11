@@ -1,0 +1,13 @@
+node_modules
+.turbo
+dist
+dist-ssr
+*.local
+**/.terraform/
+**/.turbo/
+**/build/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/functions/.cache/
