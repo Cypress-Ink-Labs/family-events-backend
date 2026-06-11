@@ -1,11 +1,18 @@
 {
   "name": "@family-events/contracts",
-  "private": true,
   "version": "0.0.1",
   "type": "module",
+  "description": "TypeScript types generated from the family-events Supabase schema.",
   "exports": {
     ".": "./src/index.ts",
     "./database-types": "./src/database.types.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "scripts": {
     "format": "oxfmt --config ../config-quality/oxfmt.base.json --write src",
