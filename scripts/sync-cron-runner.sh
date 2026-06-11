@@ -18,7 +18,9 @@ CRON_APPS=(
   cron-enrich-events
   cron-review-events
   cron-scrape-sources
+  cron-send-reminders
   cron-tag-queue
+  cron-weekly-digest
 )
 for app in "${CRON_APPS[@]}"; do
   dst="$ROOT/apps/$app/cron-runner.sh"

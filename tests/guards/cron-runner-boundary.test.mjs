@@ -11,7 +11,9 @@ const cronApps = [
   "cron-enrich-events",
   "cron-review-events",
   "cron-scrape-sources",
+  "cron-send-reminders",
   "cron-tag-queue",
+  "cron-weekly-digest",
 ]
 
 test("Railway cron services use the shared runner contract", () => {
@@ -23,6 +25,16 @@ test("Railway cron services use the shared runner contract", () => {
     const runnerPath = path.join(repoRoot, "apps", app, "cron-runner.sh")
     assert.equal(readFileSync(runnerPath, "utf8"), sharedRunner, `${app} runner drifted`)
   }
+})
+
+test("Railway cron runner fails hard for broken cron execution", () => {
+  const sharedRunner = readFileSync(sharedRunnerPath, "utf8")
+  assert.match(sharedRunner, /LOG_CRON_RUN_URL not set/)
+  assert.match(sharedRunner, /IS_CRON_ENABLED_URL not set/)
+  assert.match(sharedRunner, /cron enabled check failed/)
+  assert.match(sharedRunner, /non-2xx response/)
+  assert.match(sharedRunner, /exit "\$EXIT_CODE"/)
+  assert.doesNotMatch(sharedRunner, /Always exits 0/)
 })
 
 test("sync script includes every Railway cron service", () => {
