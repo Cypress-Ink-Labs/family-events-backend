@@ -1,6 +1,6 @@
 {
   "name": "@family-events/contracts",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "TypeScript types generated from the family-events Supabase schema.",
   "exports": {
