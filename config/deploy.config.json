@@ -1,0 +1,42 @@
+{
+  "supabase": {
+    "functions": [
+      "admin-run-cron",
+      "backfill-embeddings",
+      "backfill-event-enrichment",
+      "cleanup-stale-runs",
+      "db-maintenance",
+      "embed-event",
+      "generate-parent-tips",
+      "log-cron-run",
+      "notify-email",
+      "process-event-review-queue",
+      "process-notification-queue",
+      "process-source-queue",
+      "process-tag-queue",
+      "scrape-due-sources",
+      "scrape-source",
+      "send-auth-email",
+      "send-push",
+      "send-reminders",
+      "send-weekly-digest",
+      "share-og",
+      "sitemap",
+      "tag-event",
+      "weather"
+    ]
+  },
+  "railway": {
+    "services": [
+      { "name": "web" },
+      { "name": "cron-cleanup-stale" },
+      { "name": "cron-db-maintenance" },
+      { "name": "cron-enrich-events" },
+      { "name": "cron-review-events" },
+      { "name": "cron-scrape-sources" },
+      { "name": "cron-send-reminders" },
+      { "name": "cron-tag-queue" },
+      { "name": "cron-weekly-digest" }
+    ]
+  }
+}

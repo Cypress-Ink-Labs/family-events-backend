@@ -11,4 +11,4 @@ elif [ "${1:-}" != "deploy" ] && [ "${1:-}" != "targets" ] && [ "${1:-}" != "val
   args=("deploy" "$@")
 fi
 
-exec pnpm --filter @family-events/deploy-cli cli "${args[@]}"
+exec pnpm --filter @cypress-ink-labs/deploy-cli cli "${args[@]}"

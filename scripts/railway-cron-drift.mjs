@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const manifestRelativePath = "infra/spacelift-railway-cron-poc/cron-services.json";
+const manifestRelativePath = "infra/railway-cron-drift/cron-services.json";
 
 function loadServiceConfigs(repoRoot) {
   const manifest = JSON.parse(readFileSync(path.join(repoRoot, manifestRelativePath), "utf8"));
