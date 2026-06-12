@@ -18,8 +18,18 @@ function readSupabaseDbPort() {
   return port
 }
 
+function readCiWorkflow() {
+  return readFileSync(path.join(repoRoot, ".github", "workflows", "ci.yml"), "utf8")
+}
+
 test("db:types uses the configured local Supabase database port", () => {
   const dbTypes = readPackageScripts()["db:types"]
   assert.match(dbTypes, /gen types --lang typescript\b/)
   assert.match(dbTypes, new RegExp("127\\.0\\.0\\.1:" + readSupabaseDbPort() + "/postgres"))
+})
+
+test("CI db type drift check uses the configured local Supabase database port", () => {
+  const workflow = readCiWorkflow()
+  assert.match(workflow, /supabase gen types --lang typescript\b/)
+  assert.match(workflow, new RegExp("127\\.0\\.0\\.1:" + readSupabaseDbPort() + "/postgres"))
 })
