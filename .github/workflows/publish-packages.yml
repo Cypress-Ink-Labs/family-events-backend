@@ -51,4 +51,4 @@ jobs:
             pnpm publish --filter "${PKG}" --no-git-checks
           fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
