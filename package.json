@@ -2,7 +2,7 @@
   "name": "family-events-backend",
   "private": true,
   "version": "0.0.1",
-  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1",
+  "packageManager": "pnpm@11.6.0",
   "scripts": {
     "changeset": "changeset",
     "changeset:version": "changeset version",
@@ -31,11 +31,11 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "^2.31.0",
-    "@supabase/supabase-js": "^2.108.0",
-    "@types/node": "^25.9.2",
+    "@supabase/supabase-js": "^2.108.1",
+    "@types/node": "^25.9.3",
     "oxfmt": "^0.54.0",
     "oxlint": "^1.69.0",
-    "railway": "^3.1.1",
+    "railway": "^3.2.0",
     "typescript": "~6.0.3",
     "vitest": "4.1.8"
   }

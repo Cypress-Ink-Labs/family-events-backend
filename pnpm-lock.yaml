@@ -15,10 +15,10 @@ importers:
         specifier: ^2.31.0
         version: 2.31.0(@types/node@25.9.3)
       '@supabase/supabase-js':
-        specifier: ^2.108.0
+        specifier: ^2.108.1
         version: 2.108.1
       '@types/node':
-        specifier: ^25.9.2
+        specifier: ^25.9.3
         version: 25.9.3
       oxfmt:
         specifier: ^0.54.0
@@ -27,8 +27,8 @@ importers:
         specifier: ^1.69.0
         version: 1.69.0
       railway:
-        specifier: ^3.1.1
-        version: 3.1.4
+        specifier: ^3.2.0
+        version: 3.2.0
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
@@ -1831,8 +1831,8 @@ packages:
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
 
-  railway@3.1.4:
-    resolution: {integrity: sha512-eHeofR3eWSDeueubAwMm9+JRhjLIbs0MLuvNMM16Xzjd/R2iANmtqs4CMvEQpOpn7bf5O6jqLXkfxP/7jOySNw==}
+  railway@3.2.0:
+    resolution: {integrity: sha512-gNZxg6J3zcbuPPCr3W52mO4qeYgwn2I1Xi5B0KsKLXgWCjaxPvucGAGQN2YSYvje4zTmQR/e/IM+RCqq61OvYw==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -3710,7 +3710,7 @@ snapshots:
 
   quick-format-unescaped@4.0.4: {}
 
-  railway@3.1.4:
+  railway@3.2.0:
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.14.2)
       graphql: 16.14.2

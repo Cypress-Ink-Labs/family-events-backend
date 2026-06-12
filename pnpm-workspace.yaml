@@ -6,5 +6,8 @@ allowBuilds:
   esbuild: true
   supabase: false
 
+minimumReleaseAgeExclude:
+  - railway@3.2.0
+
 onlyBuiltDependencies:
   - esbuild
