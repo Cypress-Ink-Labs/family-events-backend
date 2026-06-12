@@ -349,7 +349,7 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
   // Env fallback
   if (!vapidPrivateKey) vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? ""
   if (!vapidPublicKey) vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? ""
-  if (!vapidSubject) vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:push@family-events.org"
+  if (!vapidSubject) vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:push@cypress-ink-labs.org"
   if (!apnsTeamId) apnsTeamId = Deno.env.get("APNS_TEAM_ID") ?? ""
   if (!apnsKeyId) apnsKeyId = Deno.env.get("APNS_KEY_ID") ?? ""
   if (!apnsPrivateKey) apnsPrivateKey = Deno.env.get("APNS_PRIVATE_KEY") ?? ""

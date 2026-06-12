@@ -354,7 +354,7 @@ function renderRequestRejected(
         </div>
         <div style="font-family:${FONT_SANS};font-size:14px;color:${THEME.textMuted};">
           No further action is needed on your end. If you think this was a mistake, please email
-          <a href="mailto:support@family-events.org" style="color:${THEME.violetDeep};font-weight:500;text-decoration:underline;">support@family-events.org</a>.
+          <a href="mailto:support@cypress-ink-labs.org" style="color:${THEME.violetDeep};font-weight:500;text-decoration:underline;">support@cypress-ink-labs.org</a>.
         </div>
       </td>
     </tr>`

@@ -8,14 +8,14 @@ const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "
 
 test("root deploy scripts route through the TypeScript deploy CLI", () => {
   const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"));
-  assert.equal(pkg.scripts.deploy, "pnpm --filter @family-events/deploy-cli cli");
+  assert.equal(pkg.scripts.deploy, "pnpm --filter @cypress-ink-labs/deploy-cli cli");
   assert.equal(
     pkg.scripts["deploy:all"],
-    "pnpm --filter @family-events/deploy-cli cli deploy --all --yes",
+    "pnpm --filter @cypress-ink-labs/deploy-cli cli deploy --all --yes",
   );
 
   const wrapper = readFileSync(path.join(repoRoot, "scripts", "deploy.sh"), "utf8");
-  assert.match(wrapper, /@family-events\/deploy-cli/);
+  assert.match(wrapper, /@cypress-ink-labs\/deploy-cli/);
   assert.match(wrapper, /pnpm --filter/);
 });
 

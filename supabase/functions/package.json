@@ -1,5 +1,5 @@
 {
-  "name": "@family-events/supabase-functions",
+  "name": "@cypress-ink-labs/supabase-functions",
   "private": true,
   "scripts": {
     "dev": "cd ../.. && bash scripts/supabase-functions-serve.sh",

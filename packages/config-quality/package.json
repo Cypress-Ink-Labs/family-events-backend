@@ -1,5 +1,5 @@
 {
-  "name": "@family-events/config-quality",
+  "name": "@cypress-ink-labs/config-quality",
   "private": true,
   "version": "0.0.0",
   "type": "module",

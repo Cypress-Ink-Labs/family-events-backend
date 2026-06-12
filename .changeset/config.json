@@ -8,9 +8,9 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@family-events/config-typescript",
-    "@family-events/config-quality",
-    "@family-events/email",
-    "@family-events/deploy-cli"
+    "@cypress-ink-labs/config-typescript",
+    "@cypress-ink-labs/config-quality",
+    "@cypress-ink-labs/email",
+    "@cypress-ink-labs/deploy-cli"
   ]
 }

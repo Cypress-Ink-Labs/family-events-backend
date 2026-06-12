@@ -1,5 +1,5 @@
 {
-  "name": "@family-events/config-typescript",
+  "name": "@cypress-ink-labs/config-typescript",
   "private": true,
   "version": "0.0.0",
   "type": "module",

@@ -1,5 +1,5 @@
 {
-  "name": "@family-events/contracts",
+  "name": "@cypress-ink-labs/contracts",
   "version": "0.0.2",
   "type": "module",
   "description": "TypeScript types generated from the family-events Supabase schema.",
@@ -25,7 +25,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
-    "@family-events/config-quality": "workspace:*",
-    "@family-events/config-typescript": "workspace:*"
+    "@cypress-ink-labs/config-quality": "workspace:*",
+    "@cypress-ink-labs/config-typescript": "workspace:*"
   }
 }
