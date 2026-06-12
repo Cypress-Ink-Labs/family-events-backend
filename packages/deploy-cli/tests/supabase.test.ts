@@ -25,7 +25,7 @@ describe("Supabase provider", () => {
     process.env.SUPABASE_PROJECT_REF = "project"
     const provider = new SupabaseProvider(rootDir, config, new FakeRunner())
     expect(provider.functionDeployArgs("tag-event", "production")).toContain("--no-verify-jwt")
-    expect(provider.functionDeployArgs("share-og", "production")).not.toContain("--no-verify-jwt")
+    expect(provider.functionDeployArgs("weather", "production")).not.toContain("--no-verify-jwt")
     delete process.env.SUPABASE_PROJECT_REF
   })
 })

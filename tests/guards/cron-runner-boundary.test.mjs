@@ -4,26 +4,24 @@ import path from "node:path"
 import test from "node:test"
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..")
-const sharedRunnerPath = path.join(repoRoot, "apps", "_shared", "cron-runner.sh")
-const cronApps = [
-  "cron-cleanup-stale",
-  "cron-db-maintenance",
-  "cron-enrich-events",
-  "cron-review-events",
-  "cron-scrape-sources",
-  "cron-send-reminders",
-  "cron-tag-queue",
-  "cron-weekly-digest",
-]
+const sharedRunnerPath = path.join(repoRoot, "cron", "_shared", "cron-runner.sh")
+const cronServices = Object.entries(
+  JSON.parse(
+    readFileSync(path.join(repoRoot, "infra", "railway-cron-drift", "cron-services.json"), "utf8")
+  )
+).map(([name, service]) => ({
+  name,
+  rootDirectory: service.root_directory,
+}))
 
 test("Railway cron services use the shared runner contract", () => {
   const sharedRunner = readFileSync(sharedRunnerPath, "utf8")
   for (const required of ["X-Cron-Run-Key", "X-Cron-Label", "run_key", "runner_log"]) {
     assert.match(sharedRunner, new RegExp(required))
   }
-  for (const app of cronApps) {
-    const runnerPath = path.join(repoRoot, "apps", app, "cron-runner.sh")
-    assert.equal(readFileSync(runnerPath, "utf8"), sharedRunner, `${app} runner drifted`)
+  for (const service of cronServices) {
+    const runnerPath = path.join(repoRoot, service.rootDirectory, "cron-runner.sh")
+    assert.equal(readFileSync(runnerPath, "utf8"), sharedRunner, `${service.name} runner drifted`)
   }
 })
 
@@ -39,8 +37,9 @@ test("Railway cron runner fails hard for broken cron execution", () => {
 
 test("sync script includes every Railway cron service", () => {
   const script = readFileSync(path.join(repoRoot, "scripts", "sync-cron-runner.sh"), "utf8")
-  for (const app of cronApps) {
-    assert.match(script, new RegExp(`\\b${app}\\b`))
+  assert.match(script, /cron\/_shared\/cron-runner\.sh/)
+  for (const service of cronServices) {
+    assert.match(script, new RegExp(`\\b${service.rootDirectory}\\b`))
   }
 })
 

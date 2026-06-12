@@ -1,4 +1,12 @@
 {
+  "environments": {
+    "production": {
+      "supabase": {
+        "projectRefFile": "supabase/.temp/project-ref",
+        "projectRefEnv": "SUPABASE_PROJECT_REF"
+      }
+    }
+  },
   "supabase": {
     "functions": [
       "admin-run-cron",
@@ -24,19 +32,106 @@
       "sitemap",
       "tag-event",
       "weather"
+    ],
+    "noVerifyJwtFunctions": [
+      "backfill-embeddings",
+      "backfill-event-enrichment",
+      "cleanup-stale-runs",
+      "db-maintenance",
+      "embed-event",
+      "generate-parent-tips",
+      "log-cron-run",
+      "notify-email",
+      "process-event-review-queue",
+      "process-notification-queue",
+      "process-source-queue",
+      "process-tag-queue",
+      "scrape-due-sources",
+      "scrape-source",
+      "send-auth-email",
+      "send-push",
+      "send-reminders",
+      "send-weekly-digest",
+      "share-og",
+      "sitemap",
+      "tag-event"
     ]
   },
   "railway": {
+    "allOrder": [
+      "web",
+      "cron-cleanup-stale",
+      "cron-db-maintenance",
+      "cron-enrich-events",
+      "cron-review-events",
+      "cron-scrape-sources",
+      "cron-send-reminders",
+      "cron-tag-queue",
+      "cron-weekly-digest"
+    ],
     "services": [
-      { "name": "web" },
-      { "name": "cron-cleanup-stale" },
-      { "name": "cron-db-maintenance" },
-      { "name": "cron-enrich-events" },
-      { "name": "cron-review-events" },
-      { "name": "cron-scrape-sources" },
-      { "name": "cron-send-reminders" },
-      { "name": "cron-tag-queue" },
-      { "name": "cron-weekly-digest" }
+      {
+        "name": "web",
+        "rootDirectory": null,
+        "pollTimeoutSeconds": 600,
+        "allowAutoCreate": false
+      },
+      {
+        "name": "cron-cleanup-stale",
+        "rootDirectory": "cron/cleanup-stale",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true
+      },
+      {
+        "name": "cron-db-maintenance",
+        "rootDirectory": "cron/db-maintenance",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true
+      },
+      {
+        "name": "cron-enrich-events",
+        "rootDirectory": "cron/enrich-events",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true
+      },
+      {
+        "name": "cron-review-events",
+        "rootDirectory": "cron/review-events",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true,
+        "bootstrapFromService": "cron-enrich-events"
+      },
+      {
+        "name": "cron-scrape-sources",
+        "rootDirectory": "cron/scrape-sources",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true
+      },
+      {
+        "name": "cron-send-reminders",
+        "rootDirectory": "cron/send-reminders",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true
+      },
+      {
+        "name": "cron-tag-queue",
+        "rootDirectory": "cron/tag-queue",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true
+      },
+      {
+        "name": "cron-weekly-digest",
+        "rootDirectory": "cron/weekly-digest",
+        "pollTimeoutSeconds": 300,
+        "allowAutoCreate": true
+      }
     ]
+  },
+  "smoke": {
+    "functionDrift": true,
+    "cronEnabledProbe": {
+      "enabledWhenEnvPresent": true,
+      "label": "cron-tag-queue"
+    }
   }
 }
