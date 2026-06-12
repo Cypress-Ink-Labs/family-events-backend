@@ -15,43 +15,40 @@ concurrency:
 
 jobs:
   publish:
-    name: Version or Publish
+    name: Publish
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       packages: write
-      pull-requests: write
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "22"
           registry-url: https://npm.pkg.github.com
           scope: "@family-events"
           cache: pnpm
 
-      - name: Install dependencies
+      - name: Install
         run: pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish packages
+      - name: Publish
         run: |
-          set -euo pipefail
-          for pkg_dir in packages/contracts; do
-            pkg=$(node -e "console.log(require('./${pkg_dir}/package.json').name)")
-            version=$(node -e "console.log(require('./${pkg_dir}/package.json').version)")
-            if npm view "${pkg}@${version}" --registry https://npm.pkg.github.com version 2>/dev/null | grep -q "${version}"; then
-              echo "${pkg}@${version} already published -- skipping"
-            else
-              echo "Publishing ${pkg}@${version}"
-              pnpm publish --filter "${pkg}" --no-git-checks
-            fi
-          done
+          set -eu
+          PKG_DIR=packages/contracts
+          PKG=$(node -e "process.stdout.write(require('./${PKG_DIR}/package.json').name)")
+          VER=$(node -e "process.stdout.write(require('./${PKG_DIR}/package.json').version)")
+          PUBLISHED=$(npm view "${PKG}@${VER}" version --registry https://npm.pkg.github.com 2>/dev/null || true)
+          if [ "${PUBLISHED}" = "${VER}" ]; then
+            echo "${PKG}@${VER} already published"
+          else
+            echo "Publishing ${PKG}@${VER}"
+            pnpm publish --filter "${PKG}" --no-git-checks
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
