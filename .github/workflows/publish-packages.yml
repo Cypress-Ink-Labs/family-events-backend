@@ -41,6 +41,17 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish packages
-        run: pnpm changeset publish
+        run: |
+          set -euo pipefail
+          for pkg_dir in packages/contracts; do
+            pkg=$(node -e "console.log(require('./${pkg_dir}/package.json').name)")
+            version=$(node -e "console.log(require('./${pkg_dir}/package.json').version)")
+            if npm view "${pkg}@${version}" --registry https://npm.pkg.github.com version 2>/dev/null | grep -q "${version}"; then
+              echo "${pkg}@${version} already published — skipping"
+            else
+              echo "Publishing ${pkg}@${version}"
+              pnpm publish --filter "${pkg}" --no-git-checks
+            fi
+          done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
