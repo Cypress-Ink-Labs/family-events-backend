@@ -1,0 +1,278 @@
+{
+  "nodes": [],
+  "edges": [
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "function:packages/deploy-cli/src/commands/deploy.ts:registerDeployCommand",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "function:packages/deploy-cli/src/commands/deploy.ts:registerDeployCommand",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/doctor.ts",
+      "target": "function:packages/deploy-cli/src/commands/doctor.ts:registerDoctorCommand",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/doctor.ts",
+      "target": "function:packages/deploy-cli/src/commands/doctor.ts:registerDoctorCommand",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "function:packages/deploy-cli/src/core/config.ts:repoRootFrom",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "function:packages/deploy-cli/src/core/config.ts:repoRootFrom",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "function:packages/deploy-cli/src/core/config.ts:loadConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "function:packages/deploy-cli/src/core/config.ts:loadConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "function:packages/deploy-cli/src/core/config.ts:resolveProjectRef",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "function:packages/deploy-cli/src/core/config.ts:resolveProjectRef",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/errors.ts",
+      "target": "class:packages/deploy-cli/src/core/errors.ts:CliError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/errors.ts",
+      "target": "class:packages/deploy-cli/src/core/errors.ts:CliError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/exec.ts",
+      "target": "class:packages/deploy-cli/src/core/exec.ts:ExecaProcessRunner",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/exec.ts",
+      "target": "class:packages/deploy-cli/src/core/exec.ts:ExecaProcessRunner",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/redaction.ts",
+      "target": "function:packages/deploy-cli/src/core/redaction.ts:redact",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/redaction.ts",
+      "target": "function:packages/deploy-cli/src/core/redaction.ts:redact",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "function:packages/deploy-cli/src/core/target-graph.ts:allTargets",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "function:packages/deploy-cli/src/core/target-graph.ts:allTargets",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "function:packages/deploy-cli/src/core/target-graph.ts:resolveTargets",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "function:packages/deploy-cli/src/core/target-graph.ts:resolveTargets",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "function:packages/deploy-cli/src/core/target-graph.ts:expandTarget",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "function:packages/deploy-cli/src/core/target-graph.ts:expandTarget",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/railway.ts",
+      "target": "class:packages/deploy-cli/src/providers/railway.ts:RailwayProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/railway.ts",
+      "target": "class:packages/deploy-cli/src/providers/railway.ts:RailwayProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "target": "class:packages/deploy-cli/src/providers/supabase.ts:SupabaseProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "target": "class:packages/deploy-cli/src/providers/supabase.ts:SupabaseProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "function:packages/deploy-cli/src/workflows/deploy-runner.ts:runDeploy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "function:packages/deploy-cli/src/workflows/deploy-runner.ts:runDeploy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "function:packages/deploy-cli/src/workflows/deploy-runner.ts:deployStage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "function:packages/deploy-cli/src/workflows/deploy-runner.ts:deployTarget",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "target": "function:packages/deploy-cli/src/workflows/smoke-checks.ts:runSmokeChecks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "target": "function:packages/deploy-cli/src/workflows/smoke-checks.ts:runSmokeChecks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/tests/deploy-runner.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/errors.ts",
+      "target": "file:packages/deploy-cli/tests/errors.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/railway.ts",
+      "target": "file:packages/deploy-cli/tests/railway.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "target": "file:packages/deploy-cli/tests/smoke-checks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "target": "file:packages/deploy-cli/tests/supabase.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "file:packages/deploy-cli/tests/target-graph.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

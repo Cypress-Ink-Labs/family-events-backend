@@ -1,0 +1,39 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/functions/_shared/memory-context.ts", "language": "typescript", "sizeLines": 319, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/memory-context_test.ts", "language": "typescript", "sizeLines": 133, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/config.ts", "language": "typescript", "sizeLines": 138, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/config_test.ts", "language": "typescript", "sizeLines": 141, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/mod.ts", "language": "typescript", "sizeLines": 7, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/normalizer.ts", "language": "typescript", "sizeLines": 91, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/normalizer_test.ts", "language": "typescript", "sizeLines": 65, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/prompt.ts", "language": "typescript", "sizeLines": 105, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/prompt_test.ts", "language": "typescript", "sizeLines": 84, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/provider.ts", "language": "typescript", "sizeLines": 66, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/reviewer.ts", "language": "typescript", "sizeLines": 182, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/schema.ts", "language": "typescript", "sizeLines": 133, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/schema_test.ts", "language": "typescript", "sizeLines": 142, "fileCategory": "code"},
+    {"path": "supabase/functions/event-review/types.ts", "language": "typescript", "sizeLines": 132, "fileCategory": "code"},
+    {"path": "supabase/functions/process-event-review-queue/lib/worker.ts", "language": "typescript", "sizeLines": 763, "fileCategory": "code"},
+    {"path": "supabase/functions/process-event-review-queue/lib/worker_test.ts", "language": "typescript", "sizeLines": 579, "fileCategory": "code"}
+  ],
+  "batchImportData": {
+    "supabase/functions/_shared/memory-context.ts": ["supabase/functions/_shared/logger.ts"],
+    "supabase/functions/_shared/memory-context_test.ts": ["supabase/functions/_shared/memory-context.ts"],
+    "supabase/functions/event-review/config.ts": ["supabase/functions/event-review/prompt.ts", "supabase/functions/event-review/types.ts"],
+    "supabase/functions/event-review/config_test.ts": ["supabase/functions/event-review/config.ts"],
+    "supabase/functions/event-review/mod.ts": [],
+    "supabase/functions/event-review/normalizer.ts": ["supabase/functions/event-review/types.ts"],
+    "supabase/functions/event-review/normalizer_test.ts": ["supabase/functions/event-review/normalizer.ts", "supabase/functions/event-review/types.ts"],
+    "supabase/functions/event-review/prompt.ts": ["supabase/functions/event-review/types.ts"],
+    "supabase/functions/event-review/prompt_test.ts": ["supabase/functions/event-review/prompt.ts"],
+    "supabase/functions/event-review/provider.ts": ["supabase/functions/event-review/types.ts"],
+    "supabase/functions/event-review/reviewer.ts": ["supabase/functions/event-review/config.ts", "supabase/functions/event-review/normalizer.ts", "supabase/functions/event-review/prompt.ts", "supabase/functions/event-review/provider.ts", "supabase/functions/event-review/schema.ts", "supabase/functions/event-review/types.ts"],
+    "supabase/functions/event-review/schema.ts": ["supabase/functions/event-review/types.ts"],
+    "supabase/functions/event-review/schema_test.ts": ["supabase/functions/event-review/schema.ts"],
+    "supabase/functions/event-review/types.ts": [],
+    "supabase/functions/process-event-review-queue/lib/worker.ts": ["supabase/functions/_shared/cron-run-log.ts", "supabase/functions/_shared/logger.ts", "supabase/functions/_shared/memory-context.ts", "supabase/functions/event-review/mod.ts"],
+    "supabase/functions/process-event-review-queue/lib/worker_test.ts": ["supabase/functions/event-review/types.ts", "supabase/functions/process-event-review-queue/lib/worker.ts"]
+  }
+}

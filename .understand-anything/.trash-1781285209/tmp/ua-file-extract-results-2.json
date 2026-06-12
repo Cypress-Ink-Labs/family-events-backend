@@ -1,0 +1,2769 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 23,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/functions/_shared/auth.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 165,
+      "nonEmptyLines": 140,
+      "functions": [
+        {
+          "name": "extractBearer",
+          "startLine": 21,
+          "endLine": 26,
+          "params": [
+            "req"
+          ]
+        },
+        {
+          "name": "timingSafeEqual",
+          "startLine": 28,
+          "endLine": 38,
+          "params": [
+            "a",
+            "b"
+          ]
+        },
+        {
+          "name": "looksLikeLegacyJwt",
+          "startLine": 40,
+          "endLine": 42,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "looksLikeSecretKey",
+          "startLine": 44,
+          "endLine": 46,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "isServiceRoleToken",
+          "startLine": 48,
+          "endLine": 73,
+          "params": [
+            "token",
+            "serviceRoleKey"
+          ]
+        },
+        {
+          "name": "requireAdminOrService",
+          "startLine": 84,
+          "endLine": 150,
+          "params": [
+            "req",
+            "serviceClient",
+            "supabaseUrl",
+            "serviceRoleKey",
+            "anonKey",
+            "userClientFactory"
+          ]
+        },
+        {
+          "name": "requireServiceRole",
+          "startLine": 156,
+          "endLine": 165,
+          "params": [
+            "req",
+            "serviceRoleKey"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "requireAdminOrService",
+          "line": 84,
+          "isDefault": false
+        },
+        {
+          "name": "requireServiceRole",
+          "line": 156,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "extractBearer",
+          "callee": "req.headers.get",
+          "lineNumber": 22
+        },
+        {
+          "caller": "extractBearer",
+          "callee": "req.headers.get",
+          "lineNumber": 22
+        },
+        {
+          "caller": "extractBearer",
+          "callee": "header.match",
+          "lineNumber": 24
+        },
+        {
+          "caller": "extractBearer",
+          "callee": "match[1].trim",
+          "lineNumber": 25
+        },
+        {
+          "caller": "timingSafeEqual",
+          "callee": "enc.encode",
+          "lineNumber": 30
+        },
+        {
+          "caller": "timingSafeEqual",
+          "callee": "enc.encode",
+          "lineNumber": 31
+        },
+        {
+          "caller": "looksLikeLegacyJwt",
+          "callee": "value.split",
+          "lineNumber": 41
+        },
+        {
+          "caller": "looksLikeSecretKey",
+          "callee": "value.startsWith",
+          "lineNumber": 45
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "token.trim",
+          "lineNumber": 49
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "serviceRoleKey.trim",
+          "lineNumber": 50
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "looksLikeSecretKey",
+          "lineNumber": 58
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "looksLikeSecretKey",
+          "lineNumber": 60
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "timingSafeEqual",
+          "lineNumber": 61
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "looksLikeLegacyJwt",
+          "lineNumber": 65
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "looksLikeLegacyJwt",
+          "lineNumber": 67
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "timingSafeEqual",
+          "lineNumber": 68
+        },
+        {
+          "caller": "isServiceRoleToken",
+          "callee": "timingSafeEqual",
+          "lineNumber": 72
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "extractBearer",
+          "lineNumber": 92
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "isServiceRoleToken",
+          "lineNumber": 97
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "userClientFactory",
+          "lineNumber": 103
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "userClient.auth.getUser",
+          "lineNumber": 111
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from(\"user_profiles\")\n    .select(\"role\")\n    .eq(\"id\", user.id)\n    .maybeSingle",
+          "lineNumber": 117
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from(\"user_profiles\")\n    .select(\"role\")\n    .eq",
+          "lineNumber": 117
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from(\"user_profiles\")\n    .select",
+          "lineNumber": 117
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from",
+          "lineNumber": 117
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from(\"user_access\")\n    .select(\"is_enabled, access_expires_at\")\n    .eq(\"user_id\", user.id)\n    .maybeSingle",
+          "lineNumber": 131
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from(\"user_access\")\n    .select(\"is_enabled, access_expires_at\")\n    .eq",
+          "lineNumber": 131
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from(\"user_access\")\n    .select",
+          "lineNumber": 131
+        },
+        {
+          "caller": "requireAdminOrService",
+          "callee": "serviceClient\n    .from",
+          "lineNumber": 131
+        },
+        {
+          "caller": "requireServiceRole",
+          "callee": "extractBearer",
+          "lineNumber": 157
+        },
+        {
+          "caller": "requireServiceRole",
+          "callee": "isServiceRoleToken",
+          "lineNumber": 161
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/auth_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 197,
+      "nonEmptyLines": 170,
+      "functions": [
+        {
+          "name": "assert",
+          "startLine": 5,
+          "endLine": 9,
+          "params": [
+            "condition",
+            "message"
+          ]
+        },
+        {
+          "name": "assertEquals",
+          "startLine": 11,
+          "endLine": 15,
+          "params": [
+            "actual",
+            "expected"
+          ]
+        },
+        {
+          "name": "makeRequest",
+          "startLine": 17,
+          "endLine": 24,
+          "params": [
+            "token"
+          ]
+        },
+        {
+          "name": "makeServiceClient",
+          "startLine": 26,
+          "endLine": 65,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "makeUserClient",
+          "startLine": 67,
+          "endLine": 76,
+          "params": [
+            "userId",
+            "error"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "assertEquals",
+          "callee": "JSON.stringify",
+          "lineNumber": 12
+        },
+        {
+          "caller": "assertEquals",
+          "callee": "JSON.stringify",
+          "lineNumber": 12
+        },
+        {
+          "caller": "assertEquals",
+          "callee": "JSON.stringify",
+          "lineNumber": 13
+        },
+        {
+          "caller": "assertEquals",
+          "callee": "JSON.stringify",
+          "lineNumber": 13
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/cors.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 51,
+      "nonEmptyLines": 47,
+      "functions": [
+        {
+          "name": "resolveAllowedOrigin",
+          "startLine": 21,
+          "endLine": 29,
+          "params": [
+            "origin"
+          ]
+        },
+        {
+          "name": "buildCorsHeaders",
+          "startLine": 37,
+          "endLine": 51,
+          "params": [
+            "allowedOrigin",
+            "methods"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "DEFAULT_ALLOWED_ORIGINS",
+          "line": 5,
+          "isDefault": false
+        },
+        {
+          "name": "resolveAllowedOrigin",
+          "line": 21,
+          "isDefault": false
+        },
+        {
+          "name": "buildCorsHeaders",
+          "line": 37,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "Deno.env.get",
+          "lineNumber": 22
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "(configured?.split(\",\") ?? DEFAULT_ALLOWED_ORIGINS)\n    .map((value) => value.trim())\n    .filter",
+          "lineNumber": 23
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "(configured?.split(\",\") ?? DEFAULT_ALLOWED_ORIGINS)\n    .map",
+          "lineNumber": 23
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "configured?.split",
+          "lineNumber": 23
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "value.trim",
+          "lineNumber": 24
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "allowlist.includes",
+          "lineNumber": 28
+        },
+        {
+          "caller": "buildCorsHeaders",
+          "callee": "methods.join",
+          "lineNumber": 43
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/cron-run-log.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 48,
+      "nonEmptyLines": 40,
+      "functions": [
+        {
+          "name": "cronRunContextFromRequest",
+          "startLine": 12,
+          "endLine": 20,
+          "params": [
+            "req"
+          ]
+        },
+        {
+          "name": "logCronRunEvent",
+          "startLine": 22,
+          "endLine": 48,
+          "params": [
+            "supabase",
+            "context",
+            "level",
+            "message",
+            "metadata"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "cronRunContextFromRequest",
+          "line": 12,
+          "isDefault": false
+        },
+        {
+          "name": "logCronRunEvent",
+          "line": 22,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "cronRunContextFromRequest",
+          "callee": "req.headers.get",
+          "lineNumber": 13
+        },
+        {
+          "caller": "cronRunContextFromRequest",
+          "callee": "req.headers.get",
+          "lineNumber": 14
+        },
+        {
+          "caller": "cronRunContextFromRequest",
+          "callee": "RUN_KEY_RE.test",
+          "lineNumber": 17
+        },
+        {
+          "caller": "cronRunContextFromRequest",
+          "callee": "headerLabel.slice",
+          "lineNumber": 18
+        },
+        {
+          "caller": "logCronRunEvent",
+          "callee": "logEdgeEvent",
+          "lineNumber": 29
+        },
+        {
+          "caller": "logCronRunEvent",
+          "callee": "supabase.rpc",
+          "lineNumber": 33
+        },
+        {
+          "caller": "logCronRunEvent",
+          "callee": "logEdgeEvent",
+          "lineNumber": 43
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/function-invoke.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 46,
+      "nonEmptyLines": 44,
+      "functions": [
+        {
+          "name": "invokeFunction",
+          "startLine": 17,
+          "endLine": 46,
+          "params": [
+            "name",
+            "body",
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "invokeFunction",
+          "line": 17,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "invokeFunction",
+          "callee": "fetchImpl",
+          "lineNumber": 23
+        },
+        {
+          "caller": "invokeFunction",
+          "callee": "options.supabaseUrl.replace",
+          "lineNumber": 24
+        },
+        {
+          "caller": "invokeFunction",
+          "callee": "JSON.stringify",
+          "lineNumber": 32
+        },
+        {
+          "caller": "invokeFunction",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 35
+        },
+        {
+          "caller": "invokeFunction",
+          "callee": "response.text().catch",
+          "lineNumber": 38
+        },
+        {
+          "caller": "invokeFunction",
+          "callee": "response.text",
+          "lineNumber": 38
+        },
+        {
+          "caller": "invokeFunction",
+          "callee": "bodyText.slice",
+          "lineNumber": 44
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/function-invoke_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 44,
+      "nonEmptyLines": 42,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/html.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "functions": [
+        {
+          "name": "escapeHtml",
+          "startLine": 1,
+          "endLine": 8,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "escapeHtml",
+          "line": 1,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "escapeHtml",
+          "callee": "value\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll(\"<\", \"&lt;\")\n    .replaceAll(\">\", \"&gt;\")\n    .replaceAll('\"', \"&quot;\")\n    .replaceAll",
+          "lineNumber": 2
+        },
+        {
+          "caller": "escapeHtml",
+          "callee": "value\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll(\"<\", \"&lt;\")\n    .replaceAll(\">\", \"&gt;\")\n    .replaceAll",
+          "lineNumber": 2
+        },
+        {
+          "caller": "escapeHtml",
+          "callee": "value\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll(\"<\", \"&lt;\")\n    .replaceAll",
+          "lineNumber": 2
+        },
+        {
+          "caller": "escapeHtml",
+          "callee": "value\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll",
+          "lineNumber": 2
+        },
+        {
+          "caller": "escapeHtml",
+          "callee": "value\n    .replaceAll",
+          "lineNumber": 2
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/html_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 9,
+      "nonEmptyLines": 8,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/logger.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 111,
+      "nonEmptyLines": 98,
+      "functions": [
+        {
+          "name": "looksLikePostgrestError",
+          "startLine": 14,
+          "endLine": 23,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "serializeError",
+          "startLine": 25,
+          "endLine": 73,
+          "params": [
+            "error"
+          ]
+        },
+        {
+          "name": "toError",
+          "startLine": 75,
+          "endLine": 81,
+          "params": [
+            "error"
+          ]
+        },
+        {
+          "name": "errorMessage",
+          "startLine": 83,
+          "endLine": 93,
+          "params": [
+            "error"
+          ]
+        },
+        {
+          "name": "logEdgeEvent",
+          "startLine": 95,
+          "endLine": 104,
+          "params": [
+            "level",
+            "message",
+            "context"
+          ]
+        },
+        {
+          "name": "errorContext",
+          "startLine": 106,
+          "endLine": 111,
+          "params": [
+            "error",
+            "extra"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "toError",
+          "line": 75,
+          "isDefault": false
+        },
+        {
+          "name": "errorMessage",
+          "line": 83,
+          "isDefault": false
+        },
+        {
+          "name": "logEdgeEvent",
+          "line": 95,
+          "isDefault": false
+        },
+        {
+          "name": "errorContext",
+          "line": 106,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "serializeError",
+          "callee": "looksLikePostgrestError",
+          "lineNumber": 41
+        },
+        {
+          "caller": "serializeError",
+          "callee": "String",
+          "lineNumber": 44
+        },
+        {
+          "caller": "serializeError",
+          "callee": "JSON.stringify",
+          "lineNumber": 58
+        },
+        {
+          "caller": "serializeError",
+          "callee": "String",
+          "lineNumber": 60
+        },
+        {
+          "caller": "serializeError",
+          "callee": "String",
+          "lineNumber": 63
+        },
+        {
+          "caller": "toError",
+          "callee": "String",
+          "lineNumber": 80
+        },
+        {
+          "caller": "errorMessage",
+          "callee": "serializeError",
+          "lineNumber": 87
+        },
+        {
+          "caller": "errorMessage",
+          "callee": "parts.push",
+          "lineNumber": 89
+        },
+        {
+          "caller": "errorMessage",
+          "callee": "parts.push",
+          "lineNumber": 91
+        },
+        {
+          "caller": "errorMessage",
+          "callee": "parts.filter(Boolean).join",
+          "lineNumber": 92
+        },
+        {
+          "caller": "errorMessage",
+          "callee": "parts.filter",
+          "lineNumber": 92
+        },
+        {
+          "caller": "logEdgeEvent",
+          "callee": "new Date().toISOString",
+          "lineNumber": 97
+        },
+        {
+          "caller": "logEdgeEvent",
+          "callee": "console[level]",
+          "lineNumber": 103
+        },
+        {
+          "caller": "logEdgeEvent",
+          "callee": "JSON.stringify",
+          "lineNumber": 103
+        },
+        {
+          "caller": "errorContext",
+          "callee": "serializeError",
+          "lineNumber": 109
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/sentry.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 58,
+      "nonEmptyLines": 47,
+      "functions": [
+        {
+          "name": "initSentry",
+          "startLine": 6,
+          "endLine": 25,
+          "params": []
+        },
+        {
+          "name": "captureEdgeException",
+          "startLine": 27,
+          "endLine": 58,
+          "params": [
+            "error",
+            "context"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "captureEdgeException",
+          "line": 27,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "initSentry",
+          "callee": "Deno.env.get",
+          "lineNumber": 11
+        },
+        {
+          "caller": "initSentry",
+          "callee": "Number",
+          "lineNumber": 17
+        },
+        {
+          "caller": "initSentry",
+          "callee": "Deno.env.get",
+          "lineNumber": 17
+        },
+        {
+          "caller": "initSentry",
+          "callee": "Sentry.init",
+          "lineNumber": 18
+        },
+        {
+          "caller": "initSentry",
+          "callee": "Number.isFinite",
+          "lineNumber": 21
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "initSentry",
+          "lineNumber": 31
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "Deno.env.get",
+          "lineNumber": 32
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "Sentry.withScope",
+          "lineNumber": 36
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "Deno.env.get",
+          "lineNumber": 37
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "Deno.env.get",
+          "lineNumber": 38
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "scope.setTag",
+          "lineNumber": 41
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "scope.setTag",
+          "lineNumber": 44
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "Object.entries",
+          "lineNumber": 47
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "scope.setTag",
+          "lineNumber": 49
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "String",
+          "lineNumber": 49
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "scope.setContext",
+          "lineNumber": 53
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "Sentry.captureException",
+          "lineNumber": 54
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "toError",
+          "lineNumber": 54
+        },
+        {
+          "caller": "captureEdgeException",
+          "callee": "Sentry.flush",
+          "lineNumber": 57
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/service-role-handler.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 101,
+      "nonEmptyLines": 87,
+      "functions": [
+        {
+          "name": "serviceRoleJsonError",
+          "startLine": 41,
+          "endLine": 43,
+          "params": [
+            "status",
+            "message"
+          ]
+        },
+        {
+          "name": "jsonResponse",
+          "startLine": 45,
+          "endLine": 50,
+          "params": [
+            "body",
+            "status"
+          ]
+        },
+        {
+          "name": "serveServiceRoleJson",
+          "startLine": 52,
+          "endLine": 101,
+          "params": [
+            "{ errorStage = \"handler\", functionName }",
+            "handler"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ServiceRoleJsonError",
+          "startLine": 31,
+          "endLine": 39,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ServiceRoleJsonError",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "serviceRoleJsonError",
+          "line": 41,
+          "isDefault": false
+        },
+        {
+          "name": "serveServiceRoleJson",
+          "line": 52,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 36
+        },
+        {
+          "caller": "jsonResponse",
+          "callee": "JSON.stringify",
+          "lineNumber": 46
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "Deno.serve",
+          "lineNumber": 56
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "Deno.env.get",
+          "lineNumber": 61
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "Deno.env.get",
+          "lineNumber": 62
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "jsonResponse",
+          "lineNumber": 65
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "requireServiceRole",
+          "lineNumber": 71
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "jsonResponse",
+          "lineNumber": 73
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "jsonResponse",
+          "lineNumber": 77
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "createClient",
+          "lineNumber": 81
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "jsonResponse",
+          "lineNumber": 82
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "handler",
+          "lineNumber": 83
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "jsonResponse",
+          "lineNumber": 87
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "captureEdgeException",
+          "lineNumber": 89
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "errorContext",
+          "lineNumber": 91
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "jsonResponse",
+          "lineNumber": 95
+        },
+        {
+          "caller": "serveServiceRoleJson",
+          "callee": "Deno.env.get",
+          "lineNumber": 96
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/stock-images.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 443,
+      "nonEmptyLines": 396,
+      "functions": [
+        {
+          "name": "firstString",
+          "startLine": 115,
+          "endLine": 121,
+          "params": [
+            "...values"
+          ]
+        },
+        {
+          "name": "deriveTitleSearchTerm",
+          "startLine": 160,
+          "endLine": 185,
+          "params": [
+            "title"
+          ]
+        },
+        {
+          "name": "searchPexels",
+          "startLine": 187,
+          "endLine": 226,
+          "params": [
+            "query",
+            "apiKey",
+            "options"
+          ]
+        },
+        {
+          "name": "searchPixabay",
+          "startLine": 228,
+          "endLine": 265,
+          "params": [
+            "query",
+            "apiKey",
+            "options"
+          ]
+        },
+        {
+          "name": "searchUnsplash",
+          "startLine": 267,
+          "endLine": 327,
+          "params": [
+            "query",
+            "accessKey",
+            "options"
+          ]
+        },
+        {
+          "name": "findFallbackImage",
+          "startLine": 357,
+          "endLine": 414,
+          "params": [
+            "tags",
+            "providerKeys",
+            "options"
+          ]
+        },
+        {
+          "name": "trackUnsplashDownload",
+          "startLine": 420,
+          "endLine": 443,
+          "params": [
+            "downloadLocation",
+            "accessKey",
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "deriveTitleSearchTerm",
+          "line": 160,
+          "isDefault": false
+        },
+        {
+          "name": "findFallbackImage",
+          "line": 357,
+          "isDefault": false
+        },
+        {
+          "name": "trackUnsplashDownload",
+          "line": 420,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "firstString",
+          "callee": "value?.trim",
+          "lineNumber": 117
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "/\\blibrary\\b/i.test",
+          "lineNumber": 162
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split(/\\s+/)\n    .filter(Boolean)\n    .filter((w) => !NOISE_WORDS.has(w))\n    .slice(0, 4)\n    .join",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split(/\\s+/)\n    .filter(Boolean)\n    .filter((w) => !NOISE_WORDS.has(w))\n    .slice",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split(/\\s+/)\n    .filter(Boolean)\n    .filter",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split(/\\s+/)\n    .filter",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace(\n      hasLibrary\n        ? /\\s+(?:presented by|hosted by|sponsored by)\\b.*/i\n        : /\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i,\n      \"\"\n    )\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // For library events, DON'T strip \"at Library\" — it's essential context.\n    // For other events, strip all venue suffixes as before.\n    .replace",
+          "lineNumber": 164
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "NOISE_WORDS.has",
+          "lineNumber": 179
+        },
+        {
+          "caller": "searchPexels",
+          "callee": "encodeURIComponent",
+          "lineNumber": 193
+        },
+        {
+          "caller": "searchPexels",
+          "callee": "fetcher",
+          "lineNumber": 196
+        },
+        {
+          "caller": "searchPexels",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 200
+        },
+        {
+          "caller": "searchPexels",
+          "callee": "res.json",
+          "lineNumber": 204
+        },
+        {
+          "caller": "searchPexels",
+          "callee": "Math.floor",
+          "lineNumber": 209
+        },
+        {
+          "caller": "searchPexels",
+          "callee": "Math.random",
+          "lineNumber": 209
+        },
+        {
+          "caller": "searchPexels",
+          "callee": "String",
+          "lineNumber": 216
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "encodeURIComponent",
+          "lineNumber": 234
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "fetcher",
+          "lineNumber": 237
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 238
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "res.json",
+          "lineNumber": 242
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "Math.floor",
+          "lineNumber": 247
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "Math.random",
+          "lineNumber": 247
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "String",
+          "lineNumber": 254
+        },
+        {
+          "caller": "searchPixabay",
+          "callee": "String",
+          "lineNumber": 256
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "encodeURIComponent",
+          "lineNumber": 273
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "fetcher",
+          "lineNumber": 276
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 281
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "res.json",
+          "lineNumber": 285
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "Math.floor",
+          "lineNumber": 289
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "Math.random",
+          "lineNumber": 289
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "firstString",
+          "lineNumber": 293
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "firstString",
+          "lineNumber": 294
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "firstString",
+          "lineNumber": 295
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "firstString",
+          "lineNumber": 296
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "firstString",
+          "lineNumber": 297
+        },
+        {
+          "caller": "searchUnsplash",
+          "callee": "firstString",
+          "lineNumber": 298
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "deriveTitleSearchTerm",
+          "lineNumber": 366
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "queue.push",
+          "lineNumber": 367
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "rawTag.trim",
+          "lineNumber": 371
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "queue.push",
+          "lineNumber": 372
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "providers.push",
+          "lineNumber": 385
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "providers.push",
+          "lineNumber": 388
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "providers.push",
+          "lineNumber": 391
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "provider.search",
+          "lineNumber": 405
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "downloadLocation.trim",
+          "lineNumber": 426
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "fetcher",
+          "lineNumber": 431
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 436
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "String",
+          "lineNumber": 441
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/stock-images_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 106,
+      "nonEmptyLines": 91,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/unsplash.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 376,
+      "nonEmptyLines": 340,
+      "functions": [
+        {
+          "name": "mockFetch",
+          "startLine": 4,
+          "endLine": 6,
+          "params": [
+            "impl"
+          ]
+        },
+        {
+          "name": "jsonResponse",
+          "startLine": 8,
+          "endLine": 13,
+          "params": [
+            "body",
+            "init"
+          ]
+        },
+        {
+          "name": "unsplashHit",
+          "startLine": 15,
+          "endLine": 30,
+          "params": [
+            "overrides"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "jsonResponse",
+          "callee": "JSON.stringify",
+          "lineNumber": 9
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/unsplash.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 295,
+      "nonEmptyLines": 264,
+      "functions": [
+        {
+          "name": "unsplashPhotoIdFromCdnUrl",
+          "startLine": 79,
+          "endLine": 88,
+          "params": [
+            "imageUrl"
+          ]
+        },
+        {
+          "name": "firstString",
+          "startLine": 90,
+          "endLine": 96,
+          "params": [
+            "...values"
+          ]
+        },
+        {
+          "name": "attributionFromHit",
+          "startLine": 98,
+          "endLine": 125,
+          "params": [
+            "hit"
+          ]
+        },
+        {
+          "name": "deriveTitleSearchTerm",
+          "startLine": 139,
+          "endLine": 154,
+          "params": [
+            "title"
+          ]
+        },
+        {
+          "name": "trackUnsplashDownload",
+          "startLine": 156,
+          "endLine": 179,
+          "params": [
+            "downloadLocation",
+            "accessKey",
+            "options"
+          ]
+        },
+        {
+          "name": "lookupUnsplashPhotoFromUrl",
+          "startLine": 186,
+          "endLine": 210,
+          "params": [
+            "imageUrl",
+            "accessKey",
+            "options"
+          ]
+        },
+        {
+          "name": "findFallbackImage",
+          "startLine": 231,
+          "endLine": 295,
+          "params": [
+            "tags",
+            "accessKey",
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "deriveTitleSearchTerm",
+          "line": 139,
+          "isDefault": false
+        },
+        {
+          "name": "trackUnsplashDownload",
+          "line": 156,
+          "isDefault": false
+        },
+        {
+          "name": "lookupUnsplashPhotoFromUrl",
+          "line": 186,
+          "isDefault": false
+        },
+        {
+          "name": "findFallbackImage",
+          "line": 231,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "unsplashPhotoIdFromCdnUrl",
+          "callee": "hostname.includes",
+          "lineNumber": 82
+        },
+        {
+          "caller": "unsplashPhotoIdFromCdnUrl",
+          "callee": "pathname.match",
+          "lineNumber": 83
+        },
+        {
+          "caller": "firstString",
+          "callee": "value?.trim",
+          "lineNumber": 92
+        },
+        {
+          "caller": "attributionFromHit",
+          "callee": "firstString",
+          "lineNumber": 99
+        },
+        {
+          "caller": "attributionFromHit",
+          "callee": "firstString",
+          "lineNumber": 100
+        },
+        {
+          "caller": "attributionFromHit",
+          "callee": "firstString",
+          "lineNumber": 101
+        },
+        {
+          "caller": "attributionFromHit",
+          "callee": "firstString",
+          "lineNumber": 102
+        },
+        {
+          "caller": "attributionFromHit",
+          "callee": "firstString",
+          "lineNumber": 103
+        },
+        {
+          "caller": "attributionFromHit",
+          "callee": "firstString",
+          "lineNumber": 104
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace(/\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i, \"\")\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split(/\\s+/)\n    .filter(Boolean)\n    .slice(0, 4)\n    .join",
+          "lineNumber": 140
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace(/\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i, \"\")\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split(/\\s+/)\n    .filter(Boolean)\n    .slice",
+          "lineNumber": 140
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace(/\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i, \"\")\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split(/\\s+/)\n    .filter",
+          "lineNumber": 140
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace(/\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i, \"\")\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase()\n    .split",
+          "lineNumber": 140
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace(/\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i, \"\")\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim()\n    .toLowerCase",
+          "lineNumber": 140
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace(/\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i, \"\")\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace(/[^\\w\\s]/g, \" \")\n    .trim",
+          "lineNumber": 140
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace(/\\s+(?:at|presented by|hosted by|sponsored by)\\b.*/i, \"\")\n    // Strip remaining punctuation (keep spaces and word chars)\n    .replace",
+          "lineNumber": 140
+        },
+        {
+          "caller": "deriveTitleSearchTerm",
+          "callee": "title\n    // Strip \"at <Venue>\", \"presented by …\", \"hosted by …\", \"sponsored by …\"\n    .replace",
+          "lineNumber": 140
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "downloadLocation.trim",
+          "lineNumber": 162
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "fetcher",
+          "lineNumber": 167
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 172
+        },
+        {
+          "caller": "trackUnsplashDownload",
+          "callee": "String",
+          "lineNumber": 177
+        },
+        {
+          "caller": "lookupUnsplashPhotoFromUrl",
+          "callee": "unsplashPhotoIdFromCdnUrl",
+          "lineNumber": 192
+        },
+        {
+          "caller": "lookupUnsplashPhotoFromUrl",
+          "callee": "fetcher",
+          "lineNumber": 197
+        },
+        {
+          "caller": "lookupUnsplashPhotoFromUrl",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 202
+        },
+        {
+          "caller": "lookupUnsplashPhotoFromUrl",
+          "callee": "res.json",
+          "lineNumber": 205
+        },
+        {
+          "caller": "lookupUnsplashPhotoFromUrl",
+          "callee": "attributionFromHit",
+          "lineNumber": 206
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "deriveTitleSearchTerm",
+          "lineNumber": 244
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "queue.push",
+          "lineNumber": 245
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "rawTag.trim",
+          "lineNumber": 249
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "queue.push",
+          "lineNumber": 250
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "encodeURIComponent",
+          "lineNumber": 262
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "fetcher",
+          "lineNumber": 265
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 270
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "res.json",
+          "lineNumber": 274
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "Math.floor",
+          "lineNumber": 280
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "Math.random",
+          "lineNumber": 280
+        },
+        {
+          "caller": "findFallbackImage",
+          "callee": "attributionFromHit",
+          "lineNumber": 284
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/validation.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 61,
+      "nonEmptyLines": 54,
+      "functions": [
+        {
+          "name": "isRecord",
+          "startLine": 6,
+          "endLine": 8,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "readString",
+          "startLine": 20,
+          "endLine": 39,
+          "params": [
+            "value",
+            "key",
+            "options"
+          ]
+        },
+        {
+          "name": "readEmail",
+          "startLine": 41,
+          "endLine": 51,
+          "params": [
+            "value",
+            "key"
+          ]
+        },
+        {
+          "name": "readUuid",
+          "startLine": 53,
+          "endLine": 61,
+          "params": [
+            "value",
+            "key"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "isRecord",
+          "line": 6,
+          "isDefault": false
+        },
+        {
+          "name": "readString",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "readEmail",
+          "line": 41,
+          "isDefault": false
+        },
+        {
+          "name": "readUuid",
+          "line": 53,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "isRecord",
+          "callee": "Array.isArray",
+          "lineNumber": 7
+        },
+        {
+          "caller": "readString",
+          "callee": "raw.trim",
+          "lineNumber": 32
+        },
+        {
+          "caller": "readEmail",
+          "callee": "readString",
+          "lineNumber": 45
+        },
+        {
+          "caller": "readEmail",
+          "callee": "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test",
+          "lineNumber": 47
+        },
+        {
+          "caller": "readEmail",
+          "callee": "email.toLowerCase",
+          "lineNumber": 50
+        },
+        {
+          "caller": "readUuid",
+          "callee": "readString",
+          "lineNumber": 57
+        },
+        {
+          "caller": "readUuid",
+          "callee": "UUID_PATTERN.test",
+          "lineNumber": 59
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/validation_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 49,
+      "nonEmptyLines": 44,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-embeddings/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 178,
+      "nonEmptyLines": 151,
+      "functions": [
+        {
+          "name": "findEventsWithoutEmbeddings",
+          "startLine": 31,
+          "endLine": 65,
+          "params": [
+            "supabase",
+            "limit"
+          ]
+        },
+        {
+          "name": "sleep",
+          "startLine": 67,
+          "endLine": 69,
+          "params": [
+            "ms"
+          ]
+        },
+        {
+          "name": "backfillEmbeddings",
+          "startLine": 71,
+          "endLine": 163,
+          "params": [
+            "supabase",
+            "openAiApiKey",
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "backfillEmbeddings",
+          "line": 71,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "supabase\n    .from(\"event_embeddings\")\n    .select",
+          "lineNumber": 37
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "supabase\n    .from",
+          "lineNumber": 37
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "(embeddedIds ?? []).map",
+          "lineNumber": 43
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "supabase\n    .from(\"events\")\n    .select(\"id, title, description\")\n    .order(\"created_at\", { ascending: true })\n    .limit",
+          "lineNumber": 48
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "supabase\n    .from(\"events\")\n    .select(\"id, title, description\")\n    .order",
+          "lineNumber": 48
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "supabase\n    .from(\"events\")\n    .select",
+          "lineNumber": 48
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "supabase\n    .from",
+          "lineNumber": 48
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "query.not",
+          "lineNumber": 59
+        },
+        {
+          "caller": "findEventsWithoutEmbeddings",
+          "callee": "excludeIds.join",
+          "lineNumber": 59
+        },
+        {
+          "caller": "sleep",
+          "callee": "setTimeout",
+          "lineNumber": 68
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "options?.now",
+          "lineNumber": 85
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "Date.now",
+          "lineNumber": 85
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "findEventsWithoutEmbeddings",
+          "lineNumber": 95
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "options?.now",
+          "lineNumber": 99
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "Date.now",
+          "lineNumber": 99
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "logEdgeEvent",
+          "lineNumber": 100
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "options?.now",
+          "lineNumber": 114
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "Date.now",
+          "lineNumber": 114
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "logEdgeEvent",
+          "lineNumber": 116
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "event.title?.trim",
+          "lineNumber": 125
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "embedEvent",
+          "lineNumber": 131
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "logEdgeEvent",
+          "lineNumber": 142
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "String",
+          "lineNumber": 145
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "sleep",
+          "lineNumber": 151
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "options?.now",
+          "lineNumber": 155
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "Date.now",
+          "lineNumber": 155
+        },
+        {
+          "caller": "backfillEmbeddings",
+          "callee": "logEdgeEvent",
+          "lineNumber": 157
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-embeddings/index_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 256,
+      "nonEmptyLines": 220,
+      "functions": [
+        {
+          "name": "makeFakeEmbedding",
+          "startLine": 6,
+          "endLine": 8,
+          "params": [
+            "dims"
+          ]
+        },
+        {
+          "name": "makeMockFetch",
+          "startLine": 10,
+          "endLine": 21,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "FakeSupabase",
+          "startLine": 30,
+          "endLine": 38,
+          "methods": [
+            "from"
+          ],
+          "properties": [
+            "events",
+            "embeddings",
+            "embeddingRows"
+          ]
+        },
+        {
+          "name": "FakeQuery",
+          "startLine": 40,
+          "endLine": 115,
+          "methods": [
+            "constructor",
+            "select",
+            "order",
+            "limit",
+            "not",
+            "upsert",
+            "then",
+            "catch"
+          ],
+          "properties": [
+            "supabase",
+            "table",
+            "_selectCols",
+            "_orderCol",
+            "_orderAsc",
+            "_limit",
+            "_notCol",
+            "_notOp",
+            "_notVal"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "makeFakeEmbedding",
+          "callee": "Array.from",
+          "lineNumber": 7
+        },
+        {
+          "caller": "makeFakeEmbedding",
+          "callee": "Math.sin",
+          "lineNumber": 7
+        },
+        {
+          "caller": "makeMockFetch",
+          "callee": "JSON.stringify",
+          "lineNumber": 13
+        },
+        {
+          "caller": "makeMockFetch",
+          "callee": "makeFakeEmbedding",
+          "lineNumber": 14
+        },
+        {
+          "caller": "upsert",
+          "callee": "this.supabase.embeddings.set",
+          "lineNumber": 82
+        },
+        {
+          "caller": "upsert",
+          "callee": "Promise.resolve",
+          "lineNumber": 88
+        },
+        {
+          "caller": "then",
+          "callee": "resolve",
+          "lineNumber": 94
+        },
+        {
+          "caller": "then",
+          "callee": "this._notVal.replace(/[()]/g, \"\").split(\",\").filter",
+          "lineNumber": 99
+        },
+        {
+          "caller": "then",
+          "callee": "this._notVal.replace(/[()]/g, \"\").split",
+          "lineNumber": 99
+        },
+        {
+          "caller": "then",
+          "callee": "this._notVal.replace",
+          "lineNumber": 99
+        },
+        {
+          "caller": "then",
+          "callee": "this.supabase.events\n        .filter((e) => !excludeIds.has(e.id))\n        .slice",
+          "lineNumber": 102
+        },
+        {
+          "caller": "then",
+          "callee": "this.supabase.events\n        .filter",
+          "lineNumber": 102
+        },
+        {
+          "caller": "then",
+          "callee": "excludeIds.has",
+          "lineNumber": 103
+        },
+        {
+          "caller": "then",
+          "callee": "resolve",
+          "lineNumber": 105
+        },
+        {
+          "caller": "then",
+          "callee": "resolve",
+          "lineNumber": 107
+        },
+        {
+          "caller": "failingFetch",
+          "callee": "JSON.stringify",
+          "lineNumber": 218
+        },
+        {
+          "caller": "failingFetch",
+          "callee": "makeFakeEmbedding",
+          "lineNumber": 219
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-event-enrichment/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 679,
+      "nonEmptyLines": 624,
+      "functions": [
+        {
+          "name": "fetchCityContext",
+          "startLine": 80,
+          "endLine": 97,
+          "params": [
+            "supabase",
+            "cityId"
+          ]
+        },
+        {
+          "name": "fetchSourceUrl",
+          "startLine": 99,
+          "endLine": 110,
+          "params": [
+            "supabase",
+            "sourceId"
+          ]
+        },
+        {
+          "name": "enrichOne",
+          "startLine": 112,
+          "endLine": 365,
+          "params": [
+            "supabase",
+            "row",
+            "cityCache",
+            "sourceCache",
+            "providerKeys"
+          ]
+        },
+        {
+          "name": "runPendingUnsplashTrackingPass",
+          "startLine": 367,
+          "endLine": 409,
+          "params": [
+            "supabase",
+            "unsplashAccessKey"
+          ]
+        },
+        {
+          "name": "runUnsplashAttributionBackfillPass",
+          "startLine": 425,
+          "endLine": 492,
+          "params": [
+            "supabase",
+            "unsplashAccessKey"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "fetchCityContext",
+          "callee": "supabase\n    .from(\"cities\")\n    .select(\"name, state, latitude, longitude\")\n    .eq(\"id\", cityId)\n    .maybeSingle",
+          "lineNumber": 85
+        },
+        {
+          "caller": "fetchCityContext",
+          "callee": "supabase\n    .from(\"cities\")\n    .select(\"name, state, latitude, longitude\")\n    .eq",
+          "lineNumber": 85
+        },
+        {
+          "caller": "fetchCityContext",
+          "callee": "supabase\n    .from(\"cities\")\n    .select",
+          "lineNumber": 85
+        },
+        {
+          "caller": "fetchCityContext",
+          "callee": "supabase\n    .from",
+          "lineNumber": 85
+        },
+        {
+          "caller": "fetchSourceUrl",
+          "callee": "supabase\n    .from(\"event_sources\")\n    .select(\"url\")\n    .eq(\"id\", sourceId)\n    .maybeSingle",
+          "lineNumber": 104
+        },
+        {
+          "caller": "fetchSourceUrl",
+          "callee": "supabase\n    .from(\"event_sources\")\n    .select(\"url\")\n    .eq",
+          "lineNumber": 104
+        },
+        {
+          "caller": "fetchSourceUrl",
+          "callee": "supabase\n    .from(\"event_sources\")\n    .select",
+          "lineNumber": 104
+        },
+        {
+          "caller": "fetchSourceUrl",
+          "callee": "supabase\n    .from",
+          "lineNumber": 104
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "cityCache.has",
+          "lineNumber": 133
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "cityCache.set",
+          "lineNumber": 134
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "fetchCityContext",
+          "lineNumber": 136
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "cityCache.get",
+          "lineNumber": 139
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "buildGeocodeQuery",
+          "lineNumber": 142
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "geocodeViaNominatim",
+          "lineNumber": 149
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "raw.lastIndexOf",
+          "lineNumber": 159
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "raw.substring(lastComma + 1).trim",
+          "lineNumber": 161
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "raw.substring",
+          "lineNumber": 161
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "buildGeocodeQuery",
+          "lineNumber": 163
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "geocodeViaNominatim",
+          "lineNumber": 170
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "buildGeocodeQuery",
+          "lineNumber": 189
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "geocodeViaNominatim",
+          "lineNumber": 196
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "sourceCache.has",
+          "lineNumber": 214
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "sourceCache.set",
+          "lineNumber": 215
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "fetchSourceUrl",
+          "lineNumber": 217
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "sourceCache.get",
+          "lineNumber": 220
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "new Date().toISOString",
+          "lineNumber": 230
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "sanitizeImagesForIngest",
+          "lineNumber": 240
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "findFallbackImage",
+          "lineNumber": 252
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "supabase.rpc",
+          "lineNumber": 267
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "supabase.rpc",
+          "lineNumber": 285
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "trackUnsplashDownload",
+          "lineNumber": 309
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "supabase.rpc",
+          "lineNumber": 313
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "supabase.rpc",
+          "lineNumber": 325
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "supabase\n      .from(\"event_image_attributions\")\n      .upsert",
+          "lineNumber": 334
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "supabase\n      .from",
+          "lineNumber": 334
+        },
+        {
+          "caller": "enrichOne",
+          "callee": "supabase.rpc",
+          "lineNumber": 355
+        },
+        {
+          "caller": "runPendingUnsplashTrackingPass",
+          "callee": "supabase.rpc",
+          "lineNumber": 379
+        },
+        {
+          "caller": "runPendingUnsplashTrackingPass",
+          "callee": "trackUnsplashDownload",
+          "lineNumber": 391
+        },
+        {
+          "caller": "runPendingUnsplashTrackingPass",
+          "callee": "supabase.rpc",
+          "lineNumber": 395
+        },
+        {
+          "caller": "runUnsplashAttributionBackfillPass",
+          "callee": "supabase.rpc",
+          "lineNumber": 438
+        },
+        {
+          "caller": "runUnsplashAttributionBackfillPass",
+          "callee": "lookupUnsplashPhotoFromUrl",
+          "lineNumber": 449
+        },
+        {
+          "caller": "runUnsplashAttributionBackfillPass",
+          "callee": "supabase\n        .from(\"event_image_attributions\")\n        .upsert",
+          "lineNumber": 459
+        },
+        {
+          "caller": "runUnsplashAttributionBackfillPass",
+          "callee": "supabase\n        .from",
+          "lineNumber": 459
+        },
+        {
+          "caller": "runUnsplashAttributionBackfillPass",
+          "callee": "new Date().toISOString",
+          "lineNumber": 475
+        }
+      ],
+      "metrics": {
+        "importCount": 10,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 127,
+      "nonEmptyLines": 115,
+      "functions": [
+        {
+          "name": "runParentTipsPass",
+          "startLine": 23,
+          "endLine": 127,
+          "params": [
+            "deps"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "runParentTipsPass",
+          "line": 23,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "runParentTipsPass",
+          "callee": "deps.supabase\n    .from(\"ai_feature_config\")\n    .select(\"enabled\")\n    .eq(\"feature\", \"parent-tips\")\n    .maybeSingle",
+          "lineNumber": 33
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "deps.supabase\n    .from(\"ai_feature_config\")\n    .select(\"enabled\")\n    .eq",
+          "lineNumber": 33
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "deps.supabase\n    .from(\"ai_feature_config\")\n    .select",
+          "lineNumber": 33
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "deps.supabase\n    .from",
+          "lineNumber": 33
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "deps.supabase.rpc",
+          "lineNumber": 44
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "logCronRunEvent",
+          "lineNumber": 49
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "errorMessage",
+          "lineNumber": 57
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "invokeFunction",
+          "lineNumber": 68
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "deps.supabase.rpc",
+          "lineNumber": 85
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "logCronRunEvent",
+          "lineNumber": 92
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "errorMessage",
+          "lineNumber": 101
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "logCronRunEvent",
+          "lineNumber": 111
+        },
+        {
+          "caller": "runParentTipsPass",
+          "callee": "errorMessage",
+          "lineNumber": 120
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 169,
+      "nonEmptyLines": 160,
+      "functions": [
+        {
+          "name": "withFetch",
+          "startLine": 50,
+          "endLine": 61,
+          "params": [
+            "fetchImpl",
+            "fn"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "FakeSupabase",
+          "startLine": 4,
+          "endLine": 48,
+          "methods": [
+            "from",
+            "rpc"
+          ],
+          "properties": [
+            "featureEnabled",
+            "claims",
+            "marked",
+            "calls",
+            "logged"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "maybeSingle",
+          "callee": "Promise.resolve",
+          "lineNumber": 22
+        },
+        {
+          "caller": "rpc",
+          "callee": "this.calls.push",
+          "lineNumber": 31
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 33
+        },
+        {
+          "caller": "rpc",
+          "callee": "this.marked.push",
+          "lineNumber": 39
+        },
+        {
+          "caller": "rpc",
+          "callee": "String",
+          "lineNumber": 39
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 40
+        },
+        {
+          "caller": "rpc",
+          "callee": "this.logged.push",
+          "lineNumber": 43
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 44
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 46
+        },
+        {
+          "caller": "withFetch",
+          "callee": "fn",
+          "lineNumber": 57
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "supabase/functions/cleanup-stale-runs/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 28,
+      "nonEmptyLines": 27,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

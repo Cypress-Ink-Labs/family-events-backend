@@ -1,0 +1,9 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "packages/contracts/CHANGELOG.md", "language": "markdown", "sizeLines": 7, "fileCategory": "docs"},
+    {"path": "packages/contracts/package.json", "language": "json", "sizeLines": 31, "fileCategory": "config"},
+    {"path": "packages/contracts/tsconfig.json", "language": "json", "sizeLines": 7, "fileCategory": "config"}
+  ],
+  "batchImportData": {"packages/contracts/CHANGELOG.md": [], "packages/contracts/package.json": [], "packages/contracts/tsconfig.json": []}
+}

@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "resource:cron/send-reminders/.dockerignore",
+      "type": "resource",
+      "name": ".dockerignore",
+      "filePath": "cron/send-reminders/.dockerignore",
+      "summary": "Docker build context exclusion rules for the send-reminders cron service, keeping the image build lean by omitting unnecessary files.",
+      "tags": ["configuration", "infrastructure", "containerization", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:cron/send-reminders/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "cron/send-reminders/Dockerfile",
+      "summary": "Minimal alpine:3.23-based Docker image that installs curl and ca-certificates, copies the shared cron-runner.sh script, and invokes it with the SEND_REMINDERS environment variable as the Supabase edge function trigger.",
+      "tags": ["containerization", "infrastructure", "deployment", "cron-job"],
+      "complexity": "simple",
+      "languageNotes": "Single-stage Dockerfile with no build dependencies — the alpine base plus curl is sufficient for HTTP-based edge function invocation."
+    }
+  ],
+  "edges": [
+    {
+      "source": "service:cron/send-reminders/Dockerfile",
+      "target": "resource:cron/send-reminders/.dockerignore",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

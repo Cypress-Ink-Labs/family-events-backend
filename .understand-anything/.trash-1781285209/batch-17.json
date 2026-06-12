@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "resource:cron/tag-queue/.dockerignore",
+      "type": "resource",
+      "name": ".dockerignore",
+      "filePath": "cron/tag-queue/.dockerignore",
+      "summary": "Docker build context exclusion rules for the tag-queue cron service, keeping the image build lean by omitting unnecessary files.",
+      "tags": ["configuration", "infrastructure", "containerization", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:cron/tag-queue/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "cron/tag-queue/Dockerfile",
+      "summary": "Minimal alpine:3.23-based Docker image that installs curl and ca-certificates, copies the shared cron-runner.sh script, and invokes it with the PROCESS_TAG_QUEUE environment variable as the Supabase edge function trigger.",
+      "tags": ["containerization", "infrastructure", "deployment", "cron-job"],
+      "complexity": "simple",
+      "languageNotes": "Single-stage Dockerfile with no build dependencies — the alpine base plus curl is sufficient for HTTP-based edge function invocation."
+    }
+  ],
+  "edges": [
+    {
+      "source": "service:cron/tag-queue/Dockerfile",
+      "target": "resource:cron/tag-queue/.dockerignore",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

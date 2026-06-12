@@ -1,0 +1,182 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "packages/contracts/src/database-enums.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 33,
+      "nonEmptyLines": 28,
+      "exports": [
+        {
+          "name": "LLM_EVENT_REVIEW_STATUSES",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "LLM_EVENT_REVIEW_STATUS",
+          "line": 11,
+          "isDefault": false
+        },
+        {
+          "name": "LLM_EVENT_REVIEW_DECISIONS",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "LLM_EVENT_REVIEW_DECISION",
+          "line": 21,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 4,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/contracts/src/database.types.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 3504,
+      "nonEmptyLines": 3494,
+      "exports": [
+        {
+          "name": "Constants",
+          "line": 3461,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/contracts/src/notification-preferences.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 72,
+      "nonEmptyLines": 66,
+      "functions": [
+        {
+          "name": "toUpsertParams",
+          "startLine": 61,
+          "endLine": 72,
+          "params": [
+            "prefs"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "NOTIFICATION_PREFERENCE_FIELDS",
+          "line": 23,
+          "isDefault": false
+        },
+        {
+          "name": "DEFAULT_NOTIFICATION_PREFERENCES",
+          "line": 36,
+          "isDefault": false
+        },
+        {
+          "name": "toUpsertParams",
+          "line": 61,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/contracts/src/notifications.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 58,
+      "nonEmptyLines": 46,
+      "exports": [
+        {
+          "name": "NOTIFICATION_TYPES",
+          "line": 5,
+          "isDefault": false
+        },
+        {
+          "name": "PUSH_PLATFORMS",
+          "line": 8,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-tag-queue/queue-policy.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 10,
+      "functions": [
+        {
+          "name": "resolveCompletedTagQueueStatus",
+          "startLine": 3,
+          "endLine": 5,
+          "params": []
+        },
+        {
+          "name": "shouldStopBeforeStartingNextTagRow",
+          "startLine": 7,
+          "endLine": 12,
+          "params": [
+            "elapsedMs",
+            "budgetMs"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "resolveCompletedTagQueueStatus",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "shouldStopBeforeStartingNextTagRow",
+          "line": 7,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-tag-queue/queue-policy_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 14,
+      "nonEmptyLines": 12,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

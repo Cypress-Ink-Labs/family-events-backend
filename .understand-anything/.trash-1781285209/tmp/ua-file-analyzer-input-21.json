@@ -1,0 +1,10 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": ".env.example", "language": "config", "sizeLines": 13, "fileCategory": "config"},
+    {"path": ".gitleaks.toml", "language": "toml", "sizeLines": 37, "fileCategory": "config"},
+    {"path": "package.json", "language": "json", "sizeLines": 42, "fileCategory": "config"},
+    {"path": "pnpm-workspace.yaml", "language": "yaml", "sizeLines": 10, "fileCategory": "config"}
+  ],
+  "batchImportData": {}
+}

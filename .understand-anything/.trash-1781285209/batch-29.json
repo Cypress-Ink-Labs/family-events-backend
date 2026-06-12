@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "config:packages/config-quality/oxfmt.base.json",
+      "type": "config",
+      "name": "oxfmt.base.json",
+      "filePath": "packages/config-quality/oxfmt.base.json",
+      "summary": "Base oxfmt (Biome-compatible formatter) configuration for the monorepo, specifying 2-space indentation, no semicolons, double quotes, ES5 trailing commas, and 100-character print width.",
+      "tags": ["configuration", "formatting", "build-system", "code-quality"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:packages/config-quality/oxlint.base.json",
+      "type": "config",
+      "name": "oxlint.base.json",
+      "filePath": "packages/config-quality/oxlint.base.json",
+      "summary": "Base oxlint configuration enabling React, TypeScript, unicorn, and oxc plugins with correctness rules as errors and warnings for exhaustive deps, unused vars, and explicit any.",
+      "tags": ["configuration", "linting", "code-quality", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:packages/config-quality/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "packages/config-quality/package.json",
+      "summary": "Package manifest for the shared code-quality config package (@cypress-ink-labs/config-quality), exporting oxfmt and oxlint base configs via the exports map.",
+      "tags": ["configuration", "package-manifest", "build-system", "code-quality"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": []
+}

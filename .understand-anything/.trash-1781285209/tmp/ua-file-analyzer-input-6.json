@@ -1,0 +1,39 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/functions/_shared/classification.test.ts", "language": "typescript", "sizeLines": 176, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/classification.ts", "language": "typescript", "sizeLines": 275, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/geocode.test.ts", "language": "typescript", "sizeLines": 93, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/geocode.ts", "language": "typescript", "sizeLines": 127, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/llm-config.ts", "language": "typescript", "sizeLines": 105, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/llm-config_test.ts", "language": "typescript", "sizeLines": 63, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/llm-openai.ts", "language": "typescript", "sizeLines": 97, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/llm-openai_test.ts", "language": "typescript", "sizeLines": 49, "fileCategory": "code"},
+    {"path": "supabase/functions/generate-parent-tips/handler.ts", "language": "typescript", "sizeLines": 415, "fileCategory": "code"},
+    {"path": "supabase/functions/generate-parent-tips/index.ts", "language": "typescript", "sizeLines": 4, "fileCategory": "code"},
+    {"path": "supabase/functions/generate-parent-tips/prompt.ts", "language": "typescript", "sizeLines": 91, "fileCategory": "code"},
+    {"path": "supabase/functions/tag-event/config.ts", "language": "typescript", "sizeLines": 62, "fileCategory": "code"},
+    {"path": "supabase/functions/tag-event/config_test.ts", "language": "typescript", "sizeLines": 20, "fileCategory": "code"},
+    {"path": "supabase/functions/tag-event/handler.ts", "language": "typescript", "sizeLines": 1056, "fileCategory": "code"},
+    {"path": "supabase/functions/tag-event/handler_test.ts", "language": "typescript", "sizeLines": 597, "fileCategory": "code"},
+    {"path": "supabase/functions/tag-event/index.ts", "language": "typescript", "sizeLines": 4, "fileCategory": "code"}
+  ],
+  "batchImportData": {
+    "supabase/functions/_shared/classification.test.ts": ["supabase/functions/_shared/classification.ts"],
+    "supabase/functions/_shared/classification.ts": [],
+    "supabase/functions/_shared/geocode.test.ts": ["supabase/functions/_shared/geocode.ts"],
+    "supabase/functions/_shared/geocode.ts": [],
+    "supabase/functions/_shared/llm-config.ts": [],
+    "supabase/functions/_shared/llm-config_test.ts": ["supabase/functions/_shared/llm-config.ts"],
+    "supabase/functions/_shared/llm-openai.ts": [],
+    "supabase/functions/_shared/llm-openai_test.ts": ["supabase/functions/_shared/llm-openai.ts"],
+    "supabase/functions/generate-parent-tips/handler.ts": ["supabase/functions/_shared/auth.ts", "supabase/functions/_shared/llm-config.ts", "supabase/functions/_shared/llm-openai.ts", "supabase/functions/_shared/logger.ts", "supabase/functions/_shared/sentry.ts", "supabase/functions/generate-parent-tips/prompt.ts"],
+    "supabase/functions/generate-parent-tips/index.ts": ["supabase/functions/generate-parent-tips/handler.ts"],
+    "supabase/functions/generate-parent-tips/prompt.ts": [],
+    "supabase/functions/tag-event/config.ts": ["supabase/functions/_shared/llm-config.ts"],
+    "supabase/functions/tag-event/config_test.ts": ["supabase/functions/tag-event/config.ts"],
+    "supabase/functions/tag-event/handler.ts": ["supabase/functions/_shared/auth.ts", "supabase/functions/_shared/classification.ts", "supabase/functions/_shared/geocode.ts", "supabase/functions/_shared/llm-openai.ts", "supabase/functions/_shared/logger.ts", "supabase/functions/_shared/memory-context.ts", "supabase/functions/_shared/sentry.ts", "supabase/functions/embed-event/handler.ts", "supabase/functions/tag-event/config.ts"],
+    "supabase/functions/tag-event/handler_test.ts": ["supabase/functions/tag-event/handler.ts"],
+    "supabase/functions/tag-event/index.ts": ["supabase/functions/tag-event/handler.ts"]
+  }
+}

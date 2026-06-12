@@ -1,0 +1,4773 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 25,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "graphify-out/cache/stat-index.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "sections": [
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.changeset/config.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.railway/railway.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/config/deploy.config.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/_shared/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/cleanup-stale/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/cleanup-stale/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/db-maintenance/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/db-maintenance/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/enrich-events/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/enrich-events/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/review-events/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/review-events/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/scrape-sources/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/scrape-sources/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/send-reminders/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/send-reminders/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/tag-queue/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/tag-queue/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/weekly-digest/cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/weekly-digest/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/.terraform.lock.hcl",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/cron-services.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/main.tf",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/versions.tf",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/oxfmt.base.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/oxlint.base.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/base.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/node.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/react-vite.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/community-event.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/database-enums.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/database.types.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/notification-preferences.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/notifications.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/tsconfig.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/vitest.config.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/cli.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/deploy.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/doctor.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/rollback-plan.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/status.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/targets.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/validate.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/config.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/errors.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/exec.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/logger.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/redaction.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/result.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/run-artifacts.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/signals.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/target-graph.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/types.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/providers/railway.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/providers/supabase.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/interactive.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/output.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/progress.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/deploy-runner.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/rollback.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/smoke-checks.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/config.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/deploy-runner.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/errors.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/railway.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/smoke-checks.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/supabase.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/target-graph.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tsconfig.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/community-event-status.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-change.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-invite.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-reminder.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/magic-link.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/weekly-digest.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/welcome.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/scripts/deploy-templates.tsx",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/src/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/src/templates.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/tsconfig.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/check-railway.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/collect-db-evidence.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/find-missing-end-times.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/wipe-live-events.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/deno-install-functions.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/deploy.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/drain-queues.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/railway-cron-drift.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/railway-sandbox.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/setup-local.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/supabase-functions-serve.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/supabase.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/sync-cron-runner.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/sync-url-validation.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/test.sh",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/verify-edge-fn.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/admin-handler.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/admin-handler_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/auth.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/auth_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/classification.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/classification.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/cors.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/cron-run-log.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/env.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/env_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/function-invoke.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/function-invoke_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/geocode.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/geocode.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/guarded-fetch.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/html.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/html_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/http.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/http_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-config.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-config_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-openai.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-openai_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/logger.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/memory-context.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/memory-context_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/parsing.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/parsing.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/sentry.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/service-role-handler.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/stock-images.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/stock-images_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/supabase-client.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/unsplash.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/unsplash.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-resolve.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-validation.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-validation.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/validation.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/validation_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/admin-run-cron/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/admin-run-cron/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/index_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/cleanup-stale-runs/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/cleanup-stale-runs/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/db-maintenance/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/db-maintenance/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/handler.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/handler_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/config.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/config_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/mod.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/normalizer.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/normalizer_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/prompt.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/prompt_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/provider.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/reviewer.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/schema.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/schema_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/types.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/handler.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/prompt.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/log-cron-run/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/log-cron-run/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/notify-email/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/notify-email/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/package.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/lib/worker.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/lib/worker_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-notification-queue/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-notification-queue/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/llm-extraction.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/worker.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/worker_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/index_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/queue-policy.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/queue-policy_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-due-sources/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-due-sources/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-api.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/date.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/date_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/enrichment.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/event-processing.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/event-processing_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/parser-context.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/process-source.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/process-source_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/schedule.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/source-queue.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/source-queue_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/types.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/_lib/types.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/brec.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/brec_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/downtownlafayette_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/index_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/localhop.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/localhop_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/macaroni-kid_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/manual.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/rss.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/rss_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/website.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/website_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-auth-email/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-auth-email/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/lib/mobile-push.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/lib/mobile-push_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/send-push.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/send-reminders.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/index_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/integration_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/sitemap/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/sitemap/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/config.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/config_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/handler.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/handler_test.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/vitest.config.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/weather/deno.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/weather/index.ts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601000000_schema_baseline.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601001000_reference_security_and_cron.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601007000_lafayette_new_sources.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601008000_tier3_lafayette_sources.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601009000_cron_review_events_allowlist.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601010000_admin_events_realtime.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601011001_fix_provider_constraint.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601012000_disable_invite_gate.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601013000_reset_invite_gate_guc.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601014000_fix_invite_gate_default.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601015000_fix_invite_gate_single_source.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601021000_admin_event_decisions.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601025000_baton_rouge_sources.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601027000_user_notification_preferences.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601028000_search_events_radius_filter.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601030000_push_and_notifications.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601031000_event_change_notifications.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601033000_community_event_submission.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601034000_activate_baton_rouge_sources.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601035000_community_event_status_notification.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601036000_admin_user_delete.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610170000_admin_events_source_filter.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000000_001_schema_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000100_002_functions_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000300_004_views_and_rpcs_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601002700_admin_event_lifetime_editing_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601017000_event_status_enum_and_validate_checks_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601018000_fix_events_enriched_enum_cast_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601019000_restore_events_enriched_cursor_signature_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601020000_event_embeddings_and_similarity_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601021000_admin_event_decisions_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601022000_source_auto_reject_and_stats_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601023000_fix_ai_settings_rpc_grants_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601024000_admin_retry_dead_tag_queue_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601025000_baton_rouge_sources_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601027000_user_notification_preferences_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601028000_search_events_radius_filter_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601029000_find_similar_events_by_id_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601030000_push_and_notifications_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601031000_event_change_notifications_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601032000_drop_old_search_events_overload_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601033000_community_event_submission_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601034000_activate_baton_rouge_sources_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601035000_community_event_status_notification_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601036000_admin_user_delete_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610162002_enqueue_source_scrape_rpc_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610170000_admin_events_source_filter_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610180000_admin_dashboard_stats_down.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/seed.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/snippets/add_macaroni_kids_source.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/snippets/provision_remote_admin_test_user.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_dashboard_stats.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_db_health.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_events_rpc.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/api_surface_hardening.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/cron_rpc_security.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/cron_toggle.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/events_cursor_pagination.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/events_enriched_parity.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/invite_gate_oauth_signup.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/llm_event_review_processing.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/reference_data.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_access_expiry.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_anon_read.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_privilege_escalation.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_public_events_view.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/role_smoke.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/trace_retention.sql",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/fixtures/railway-cron-poc-drift.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/fixtures/railway-cron-poc-live.json",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/cron-runner-boundary.test.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/db-types-script.test.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/deploy-cli-boundary.test.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/migration-rollbacks.test.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/supabase-function-auth-config.test.mjs",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/ci.yml",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/publish-packages.yml",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/railway-cron-drift.yml",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/railway-sandbox-verify.yml",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/CHANGELOG.md",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/pnpm-workspace.yaml",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/README.md",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/artifacts/p0-003-after.txt",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/artifacts/p0-003-before.txt",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/EMAIL.md",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/INVITE_GATE.md",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/LOCAL_LLM_TAGGING.md",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/PRODUCTION_SETUP.md",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/README.md",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/html/events-page.html",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/lcglafayette/events-page.html",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-page.html",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 381
+      }
+    },
+    {
+      "path": "infra/railway-cron-drift/.terraform-version",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "metrics": {}
+    },
+    {
+      "path": "infra/railway-cron-drift/.terraform.lock.hcl",
+      "language": "hcl",
+      "fileCategory": "code",
+      "totalLines": 23,
+      "nonEmptyLines": 22,
+      "metrics": {}
+    },
+    {
+      "path": "infra/railway-cron-drift/policies/railway-cron-poc-plan.rego",
+      "language": "rego",
+      "fileCategory": "code",
+      "totalLines": 18,
+      "nonEmptyLines": 15,
+      "metrics": {}
+    },
+    {
+      "path": "packages/contracts/src/.keep",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 0,
+      "metrics": {}
+    },
+    {
+      "path": "packages/contracts/src/community-event.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 20,
+      "nonEmptyLines": 18,
+      "exports": [
+        {
+          "name": "COMMUNITY_EVENT_DAILY_LIMIT",
+          "line": 20,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/contracts/src/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 50,
+      "nonEmptyLines": 50,
+      "exports": [
+        {
+          "name": "LLM_EVENT_REVIEW_DECISION",
+          "line": 2,
+          "isDefault": false
+        },
+        {
+          "name": "LLM_EVENT_REVIEW_DECISIONS",
+          "line": 2,
+          "isDefault": false
+        },
+        {
+          "name": "LLM_EVENT_REVIEW_STATUS",
+          "line": 2,
+          "isDefault": false
+        },
+        {
+          "name": "LLM_EVENT_REVIEW_STATUSES",
+          "line": 2,
+          "isDefault": false
+        },
+        {
+          "name": "DEFAULT_NOTIFICATION_PREFERENCES",
+          "line": 8,
+          "isDefault": false
+        },
+        {
+          "name": "NOTIFICATION_PREFERENCE_FIELDS",
+          "line": 8,
+          "isDefault": false
+        },
+        {
+          "name": "toUpsertParams",
+          "line": 8,
+          "isDefault": false
+        },
+        {
+          "name": "NotificationPreferences",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "NotificationPreferencesRow",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "UpsertNotificationPreferencesParams",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "Constants",
+          "line": 18,
+          "isDefault": false
+        },
+        {
+          "name": "CompositeTypes",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "Database",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "Enums",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "Json",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "Tables",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "TablesInsert",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "TablesUpdate",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "EventProcessingMode",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "EventTagQueueStatus",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "InviteRequestStatus",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "LlmEventReviewDecision",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "LlmEventReviewStatus",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "SourceExtractionMode",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "SourceScrapeQueueStatus",
+          "line": 28,
+          "isDefault": false
+        },
+        {
+          "name": "NOTIFICATION_TYPES",
+          "line": 37,
+          "isDefault": false
+        },
+        {
+          "name": "PUSH_PLATFORMS",
+          "line": 37,
+          "isDefault": false
+        },
+        {
+          "name": "MarkNotificationReadParams",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "NotificationType",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "PushPlatform",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "PushSubscription",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "PushSubscriptionRow",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "RegisterPushSubscriptionParams",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "UnregisterPushSubscriptionParams",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "UserNotification",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "UserNotificationRow",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "COMMUNITY_EVENT_DAILY_LIMIT",
+          "line": 49,
+          "isDefault": false
+        },
+        {
+          "name": "CommunityEventInput",
+          "line": 50,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 38,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/contracts/vitest.config.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 9,
+      "nonEmptyLines": 8,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 33,
+      "nonEmptyLines": 33,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "type",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "bin",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "scripts",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "dependencies",
+          "level": 1,
+          "line": 17
+        },
+        {
+          "heading": "devDependencies",
+          "level": 1,
+          "line": 26
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tsconfig.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 7,
+      "nonEmptyLines": 7,
+      "sections": [
+        {
+          "heading": "extends",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "compilerOptions",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "include",
+          "level": 1,
+          "line": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "packages/email/emails/community-event-status.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 126,
+      "nonEmptyLines": 117,
+      "functions": [
+        {
+          "name": "CommunityEventStatusEmail",
+          "startLine": 50,
+          "endLine": 126,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "CommunityEventStatusEmail",
+          "line": 50,
+          "isDefault": true
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/email/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 29,
+      "nonEmptyLines": 29,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "type",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "exports",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "scripts",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "dependencies",
+          "level": 1,
+          "line": 15
+        },
+        {
+          "heading": "devDependencies",
+          "level": 1,
+          "line": 22
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "packages/email/src/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 2,
+      "nonEmptyLines": 2,
+      "exports": [
+        {
+          "name": "TEMPLATES",
+          "line": 1,
+          "isDefault": false
+        },
+        {
+          "name": "TemplateAlias",
+          "line": 2,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/email/src/templates.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "exports": [
+        {
+          "name": "TEMPLATES",
+          "line": 1,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/email/tsconfig.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 15,
+      "nonEmptyLines": 15,
+      "sections": [
+        {
+          "heading": "extends",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "compilerOptions",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "include",
+          "level": 1,
+          "line": 8
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "scripts/drain-queues.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 278,
+      "nonEmptyLines": 241,
+      "functions": [
+        {
+          "name": "callJson",
+          "startLine": 76,
+          "endLine": 95,
+          "params": [
+            "url"
+          ]
+        },
+        {
+          "name": "callFunction",
+          "startLine": 97,
+          "endLine": 106,
+          "params": [
+            "functionName"
+          ]
+        },
+        {
+          "name": "callRpc",
+          "startLine": 108,
+          "endLine": 143,
+          "params": [
+            "functionName"
+          ]
+        },
+        {
+          "name": "getSummary",
+          "startLine": 145,
+          "endLine": 161,
+          "params": [
+            "viewName",
+            "statusOrder"
+          ]
+        },
+        {
+          "name": "drainSourceQueue",
+          "startLine": 163,
+          "endLine": 215,
+          "params": []
+        },
+        {
+          "name": "drainTagQueue",
+          "startLine": 217,
+          "endLine": 268,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "callJson",
+          "callee": "fetch",
+          "lineNumber": 77
+        },
+        {
+          "caller": "callJson",
+          "callee": "response.text",
+          "lineNumber": 78
+        },
+        {
+          "caller": "callJson",
+          "callee": "JSON.parse",
+          "lineNumber": 79
+        },
+        {
+          "caller": "callFunction",
+          "callee": "callJson",
+          "lineNumber": 99
+        },
+        {
+          "caller": "callRpc",
+          "callee": "fetch",
+          "lineNumber": 109
+        },
+        {
+          "caller": "callRpc",
+          "callee": "encodeURIComponent",
+          "lineNumber": 110
+        },
+        {
+          "caller": "callRpc",
+          "callee": "JSON.stringify",
+          "lineNumber": 116
+        },
+        {
+          "caller": "callRpc",
+          "callee": "response.text",
+          "lineNumber": 120
+        },
+        {
+          "caller": "callRpc",
+          "callee": "JSON.parse",
+          "lineNumber": 125
+        },
+        {
+          "caller": "callRpc",
+          "callee": "JSON.parse",
+          "lineNumber": 142
+        },
+        {
+          "caller": "getSummary",
+          "callee": "callJson",
+          "lineNumber": 147
+        },
+        {
+          "caller": "getSummary",
+          "callee": "Object.fromEntries",
+          "lineNumber": 152
+        },
+        {
+          "caller": "getSummary",
+          "callee": "statusOrder.map",
+          "lineNumber": 152
+        },
+        {
+          "caller": "getSummary",
+          "callee": "Number",
+          "lineNumber": 156
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "getSummary",
+          "lineNumber": 174
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "console.log",
+          "lineNumber": 175
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "hasWork",
+          "lineNumber": 179
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "callRpc",
+          "lineNumber": 183
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "Number",
+          "lineNumber": 184
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "console.log",
+          "lineNumber": 185
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "callFunction",
+          "lineNumber": 189
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "console.log",
+          "lineNumber": 193
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "console.log",
+          "lineNumber": 198
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "console.log",
+          "lineNumber": 208
+        },
+        {
+          "caller": "drainSourceQueue",
+          "callee": "setTimeout",
+          "lineNumber": 213
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "getSummary",
+          "lineNumber": 227
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "console.log",
+          "lineNumber": 228
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "hasWork",
+          "lineNumber": 232
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "callRpc",
+          "lineNumber": 236
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "Number",
+          "lineNumber": 237
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "console.log",
+          "lineNumber": 238
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "callFunction",
+          "lineNumber": 242
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "console.log",
+          "lineNumber": 246
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "console.log",
+          "lineNumber": 251
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "console.log",
+          "lineNumber": 261
+        },
+        {
+          "caller": "drainTagQueue",
+          "callee": "setTimeout",
+          "lineNumber": 266
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/railway-cron-drift.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 512,
+      "nonEmptyLines": 453,
+      "functions": [
+        {
+          "name": "loadServiceConfigs",
+          "startLine": 9,
+          "endLine": 19,
+          "params": [
+            "repoRoot"
+          ]
+        },
+        {
+          "name": "parseRailwayToml",
+          "startLine": 23,
+          "endLine": 51,
+          "params": [
+            "text"
+          ]
+        },
+        {
+          "name": "stripInlineTomlComment",
+          "startLine": 53,
+          "endLine": 81,
+          "params": [
+            "rawValue"
+          ]
+        },
+        {
+          "name": "parseTomlScalar",
+          "startLine": 83,
+          "endLine": 99,
+          "params": [
+            "rawValue"
+          ]
+        },
+        {
+          "name": "readExpectedCronConfigs",
+          "startLine": 101,
+          "endLine": 122,
+          "params": []
+        },
+        {
+          "name": "readRailwayIacGraph",
+          "startLine": 124,
+          "endLine": 142,
+          "params": [
+            "repoRoot"
+          ]
+        },
+        {
+          "name": "collectRailwayServiceState",
+          "startLine": 144,
+          "endLine": 213,
+          "params": [
+            "serviceName",
+            "sources"
+          ]
+        },
+        {
+          "name": "findServiceObjects",
+          "startLine": 215,
+          "endLine": 229,
+          "params": [
+            "value",
+            "serviceName"
+          ]
+        },
+        {
+          "name": "findFirstStringByPath",
+          "startLine": 231,
+          "endLine": 241,
+          "params": [
+            "values",
+            "paths"
+          ]
+        },
+        {
+          "name": "getPath",
+          "startLine": 243,
+          "endLine": 255,
+          "params": [
+            "value",
+            "pathParts"
+          ]
+        },
+        {
+          "name": "findStringsByPath",
+          "startLine": 257,
+          "endLine": 269,
+          "params": [
+            "values",
+            "paths"
+          ]
+        },
+        {
+          "name": "getPathMatches",
+          "startLine": 271,
+          "endLine": 291,
+          "params": [
+            "value",
+            "pathParts"
+          ]
+        },
+        {
+          "name": "findFirstStringByKey",
+          "startLine": 293,
+          "endLine": 312,
+          "params": [
+            "values",
+            "keys"
+          ]
+        },
+        {
+          "name": "walk",
+          "startLine": 314,
+          "endLine": 331,
+          "params": [
+            "value",
+            "visit"
+          ]
+        },
+        {
+          "name": "validateRailwayCronState",
+          "startLine": 333,
+          "endLine": 417,
+          "params": [
+            "expectedConfigs",
+            "liveSources"
+          ]
+        },
+        {
+          "name": "formatMissing",
+          "startLine": 419,
+          "endLine": 421,
+          "params": [
+            "expected",
+            "field"
+          ]
+        },
+        {
+          "name": "normalizeRestartPolicy",
+          "startLine": 423,
+          "endLine": 425,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "normalizeStatus",
+          "startLine": 427,
+          "endLine": 429,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "runRailwayJson",
+          "startLine": 431,
+          "endLine": 450,
+          "params": [
+            "args",
+            "cwd"
+          ]
+        },
+        {
+          "name": "loadLiveSources",
+          "startLine": 452,
+          "endLine": 461,
+          "params": []
+        },
+        {
+          "name": "parseArgs",
+          "startLine": 463,
+          "endLine": 477,
+          "params": [
+            "argv"
+          ]
+        },
+        {
+          "name": "main",
+          "startLine": 479,
+          "endLine": 508,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "parseRailwayToml",
+          "line": 23,
+          "isDefault": false
+        },
+        {
+          "name": "readExpectedCronConfigs",
+          "line": 101,
+          "isDefault": false
+        },
+        {
+          "name": "collectRailwayServiceState",
+          "line": 144,
+          "isDefault": false
+        },
+        {
+          "name": "validateRailwayCronState",
+          "line": 333,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "loadServiceConfigs",
+          "callee": "JSON.parse",
+          "lineNumber": 10
+        },
+        {
+          "caller": "loadServiceConfigs",
+          "callee": "readFileSync",
+          "lineNumber": 10
+        },
+        {
+          "caller": "loadServiceConfigs",
+          "callee": "path.join",
+          "lineNumber": 10
+        },
+        {
+          "caller": "loadServiceConfigs",
+          "callee": "Object.entries(manifest).map",
+          "lineNumber": 11
+        },
+        {
+          "caller": "loadServiceConfigs",
+          "callee": "Object.entries",
+          "lineNumber": 11
+        },
+        {
+          "caller": "loadServiceConfigs",
+          "callee": "normalizeStatus",
+          "lineNumber": 16
+        },
+        {
+          "caller": "loadServiceConfigs",
+          "callee": "(value.forbidden_instance_statuses ?? []).map",
+          "lineNumber": 17
+        },
+        {
+          "caller": "parseRailwayToml",
+          "callee": "text.split",
+          "lineNumber": 27
+        },
+        {
+          "caller": "parseRailwayToml",
+          "callee": "rawLine.trim",
+          "lineNumber": 28
+        },
+        {
+          "caller": "parseRailwayToml",
+          "callee": "line.startsWith",
+          "lineNumber": 29
+        },
+        {
+          "caller": "parseRailwayToml",
+          "callee": "line.match",
+          "lineNumber": 33
+        },
+        {
+          "caller": "parseRailwayToml",
+          "callee": "line.match",
+          "lineNumber": 41
+        },
+        {
+          "caller": "parseRailwayToml",
+          "callee": "parseTomlScalar",
+          "lineNumber": 47
+        },
+        {
+          "caller": "parseRailwayToml",
+          "callee": "stripInlineTomlComment",
+          "lineNumber": 47
+        },
+        {
+          "caller": "stripInlineTomlComment",
+          "callee": "rawValue.slice(0, index).trim",
+          "lineNumber": 76
+        },
+        {
+          "caller": "stripInlineTomlComment",
+          "callee": "rawValue.slice",
+          "lineNumber": 76
+        },
+        {
+          "caller": "stripInlineTomlComment",
+          "callee": "rawValue.trim",
+          "lineNumber": 80
+        },
+        {
+          "caller": "parseTomlScalar",
+          "callee": "rawValue.trim",
+          "lineNumber": 84
+        },
+        {
+          "caller": "parseTomlScalar",
+          "callee": "value.match",
+          "lineNumber": 85
+        },
+        {
+          "caller": "parseTomlScalar",
+          "callee": "/^-?\\d+(\\.\\d+)?$/.test",
+          "lineNumber": 95
+        },
+        {
+          "caller": "parseTomlScalar",
+          "callee": "Number",
+          "lineNumber": 96
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "process.cwd",
+          "lineNumber": 101
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "readRailwayIacGraph",
+          "lineNumber": 102
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "loadServiceConfigs(repoRoot).map",
+          "lineNumber": 104
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "loadServiceConfigs",
+          "lineNumber": 104
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "graph.resources.find",
+          "lineNumber": 105
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "normalizeStatus",
+          "lineNumber": 116
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "String",
+          "lineNumber": 117
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "String",
+          "lineNumber": 118
+        },
+        {
+          "caller": "readExpectedCronConfigs",
+          "callee": "normalizeRestartPolicy",
+          "lineNumber": 119
+        },
+        {
+          "caller": "readRailwayIacGraph",
+          "callee": "path.join",
+          "lineNumber": 125
+        },
+        {
+          "caller": "readRailwayIacGraph",
+          "callee": "existsSync",
+          "lineNumber": 126
+        },
+        {
+          "caller": "readRailwayIacGraph",
+          "callee": "execFileSync",
+          "lineNumber": 130
+        },
+        {
+          "caller": "readRailwayIacGraph",
+          "callee": "JSON.parse",
+          "lineNumber": 135
+        },
+        {
+          "caller": "readRailwayIacGraph",
+          "callee": "JSON.stringify",
+          "lineNumber": 138
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "Array.isArray",
+          "lineNumber": 145
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "sourceObjects.flatMap",
+          "lineNumber": 146
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findServiceObjects",
+          "lineNumber": 146
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByPath",
+          "lineNumber": 151
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByKey",
+          "lineNumber": 156
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "normalizeRestartPolicy",
+          "lineNumber": 157
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByPath",
+          "lineNumber": 158
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByKey",
+          "lineNumber": 164
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByPath",
+          "lineNumber": 172
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByKey",
+          "lineNumber": 176
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByPath",
+          "lineNumber": 179
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByKey",
+          "lineNumber": 180
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "normalizeStatus",
+          "lineNumber": 182
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByPath",
+          "lineNumber": 183
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByKey",
+          "lineNumber": 188
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByPath",
+          "lineNumber": 192
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByKey",
+          "lineNumber": 197
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "normalizeStatus",
+          "lineNumber": 199
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByPath",
+          "lineNumber": 200
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findFirstStringByKey",
+          "lineNumber": 201
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findStringsByPath(searchRoots, [\n      [\"latestDeployment\", \"instances\", \"*\", \"status\"],\n      [\"instances\", \"*\", \"status\"],\n    ]).map",
+          "lineNumber": 208
+        },
+        {
+          "caller": "collectRailwayServiceState",
+          "callee": "findStringsByPath",
+          "lineNumber": 208
+        },
+        {
+          "caller": "findServiceObjects",
+          "callee": "walk",
+          "lineNumber": 217
+        },
+        {
+          "caller": "findServiceObjects",
+          "callee": "Array.isArray",
+          "lineNumber": 218
+        },
+        {
+          "caller": "findServiceObjects",
+          "callee": "[node.name, node.serviceName, node.service_name].filter",
+          "lineNumber": 221
+        },
+        {
+          "caller": "findServiceObjects",
+          "callee": "names.some",
+          "lineNumber": 224
+        },
+        {
+          "caller": "findServiceObjects",
+          "callee": "name.startsWith",
+          "lineNumber": 224
+        },
+        {
+          "caller": "findServiceObjects",
+          "callee": "matches.push",
+          "lineNumber": 225
+        },
+        {
+          "caller": "findFirstStringByPath",
+          "callee": "getPath",
+          "lineNumber": 234
+        },
+        {
+          "caller": "getPath",
+          "callee": "Array.isArray",
+          "lineNumber": 246
+        },
+        {
+          "caller": "getPath",
+          "callee": "secretKeyPattern.test",
+          "lineNumber": 249
+        },
+        {
+          "caller": "findStringsByPath",
+          "callee": "getPathMatches",
+          "lineNumber": 261
+        },
+        {
+          "caller": "findStringsByPath",
+          "callee": "results.push",
+          "lineNumber": 263
+        },
+        {
+          "caller": "getPathMatches",
+          "callee": "Array.isArray",
+          "lineNumber": 282
+        },
+        {
+          "caller": "getPathMatches",
+          "callee": "Object.values",
+          "lineNumber": 282
+        },
+        {
+          "caller": "getPathMatches",
+          "callee": "children.flatMap",
+          "lineNumber": 283
+        },
+        {
+          "caller": "getPathMatches",
+          "callee": "getPathMatches",
+          "lineNumber": 283
+        },
+        {
+          "caller": "getPathMatches",
+          "callee": "Array.isArray",
+          "lineNumber": 286
+        },
+        {
+          "caller": "getPathMatches",
+          "callee": "secretKeyPattern.test",
+          "lineNumber": 286
+        },
+        {
+          "caller": "getPathMatches",
+          "callee": "getPathMatches",
+          "lineNumber": 290
+        },
+        {
+          "caller": "findFirstStringByKey",
+          "callee": "keys.map",
+          "lineNumber": 294
+        },
+        {
+          "caller": "findFirstStringByKey",
+          "callee": "key.toLowerCase",
+          "lineNumber": 294
+        },
+        {
+          "caller": "findFirstStringByKey",
+          "callee": "walk",
+          "lineNumber": 298
+        },
+        {
+          "caller": "findFirstStringByKey",
+          "callee": "wanted.has",
+          "lineNumber": 302
+        },
+        {
+          "caller": "findFirstStringByKey",
+          "callee": "key.toLowerCase",
+          "lineNumber": 302
+        },
+        {
+          "caller": "walk",
+          "callee": "visit",
+          "lineNumber": 315
+        },
+        {
+          "caller": "walk",
+          "callee": "Array.isArray",
+          "lineNumber": 320
+        },
+        {
+          "caller": "walk",
+          "callee": "value.forEach",
+          "lineNumber": 321
+        },
+        {
+          "caller": "walk",
+          "callee": "walk",
+          "lineNumber": 321
+        },
+        {
+          "caller": "walk",
+          "callee": "Object.entries",
+          "lineNumber": 325
+        },
+        {
+          "caller": "walk",
+          "callee": "secretKeyPattern.test",
+          "lineNumber": 326
+        },
+        {
+          "caller": "walk",
+          "callee": "walk",
+          "lineNumber": 329
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "collectRailwayServiceState",
+          "lineNumber": 337
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 340
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "formatMissing",
+          "lineNumber": 340
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 344
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "formatMissing",
+          "lineNumber": 344
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 348
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "formatMissing",
+          "lineNumber": 348
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 352
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "formatMissing",
+          "lineNumber": 352
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 356
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "formatMissing",
+          "lineNumber": 356
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 360
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "formatMissing",
+          "lineNumber": 360
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 364
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "formatMissing",
+          "lineNumber": 364
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 368
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 373
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 378
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 383
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 388
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 393
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 398
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "live.instanceStatuses.filter",
+          "lineNumber": 403
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "expected.forbiddenInstanceStatuses.includes",
+          "lineNumber": 404
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "diagnostics.push",
+          "lineNumber": 407
+        },
+        {
+          "caller": "validateRailwayCronState",
+          "callee": "forbiddenStatuses.join",
+          "lineNumber": 408
+        },
+        {
+          "caller": "normalizeRestartPolicy",
+          "callee": "String(value).trim().toUpperCase",
+          "lineNumber": 424
+        },
+        {
+          "caller": "normalizeRestartPolicy",
+          "callee": "String(value).trim",
+          "lineNumber": 424
+        },
+        {
+          "caller": "normalizeRestartPolicy",
+          "callee": "String",
+          "lineNumber": 424
+        },
+        {
+          "caller": "normalizeStatus",
+          "callee": "String(value).trim().toUpperCase",
+          "lineNumber": 428
+        },
+        {
+          "caller": "normalizeStatus",
+          "callee": "String(value).trim",
+          "lineNumber": 428
+        },
+        {
+          "caller": "normalizeStatus",
+          "callee": "String",
+          "lineNumber": 428
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "execFileSync",
+          "lineNumber": 433
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "JSON.parse",
+          "lineNumber": 438
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "String(error.stderr ?? error.message ?? \"\")\n      .split(/\\r?\\n/)\n      .filter((line) => line.trim() && !secretKeyPattern.test(line))\n      .slice(0, 4)\n      .join",
+          "lineNumber": 440
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "String(error.stderr ?? error.message ?? \"\")\n      .split(/\\r?\\n/)\n      .filter((line) => line.trim() && !secretKeyPattern.test(line))\n      .slice",
+          "lineNumber": 440
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "String(error.stderr ?? error.message ?? \"\")\n      .split(/\\r?\\n/)\n      .filter",
+          "lineNumber": 440
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "String(error.stderr ?? error.message ?? \"\")\n      .split",
+          "lineNumber": 440
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "String",
+          "lineNumber": 440
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "line.trim",
+          "lineNumber": 442
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "secretKeyPattern.test",
+          "lineNumber": 442
+        },
+        {
+          "caller": "runRailwayJson",
+          "callee": "args.join",
+          "lineNumber": 447
+        },
+        {
+          "caller": "loadLiveSources",
+          "callee": "JSON.parse",
+          "lineNumber": 454
+        },
+        {
+          "caller": "loadLiveSources",
+          "callee": "readFileSync",
+          "lineNumber": 454
+        },
+        {
+          "caller": "loadLiveSources",
+          "callee": "path.resolve",
+          "lineNumber": 454
+        },
+        {
+          "caller": "loadLiveSources",
+          "callee": "runRailwayJson",
+          "lineNumber": 457
+        },
+        {
+          "caller": "loadLiveSources",
+          "callee": "runRailwayJson",
+          "lineNumber": 458
+        },
+        {
+          "caller": "main",
+          "callee": "parseArgs",
+          "lineNumber": 481
+        },
+        {
+          "caller": "main",
+          "callee": "console.error",
+          "lineNumber": 483
+        },
+        {
+          "caller": "main",
+          "callee": "path.resolve",
+          "lineNumber": 488
+        },
+        {
+          "caller": "main",
+          "callee": "path.dirname",
+          "lineNumber": 488
+        },
+        {
+          "caller": "main",
+          "callee": "fileURLToPath",
+          "lineNumber": 488
+        },
+        {
+          "caller": "main",
+          "callee": "readExpectedCronConfigs",
+          "lineNumber": 489
+        },
+        {
+          "caller": "main",
+          "callee": "loadLiveSources",
+          "lineNumber": 490
+        },
+        {
+          "caller": "main",
+          "callee": "validateRailwayCronState",
+          "lineNumber": 491
+        },
+        {
+          "caller": "main",
+          "callee": "console.error",
+          "lineNumber": 494
+        },
+        {
+          "caller": "main",
+          "callee": "result.diagnostics.join",
+          "lineNumber": 494
+        },
+        {
+          "caller": "main",
+          "callee": "console.log",
+          "lineNumber": 500
+        },
+        {
+          "caller": "main",
+          "callee": "console.error",
+          "lineNumber": 505
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 22,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/railway-sandbox.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 427,
+      "nonEmptyLines": 362,
+      "functions": [
+        {
+          "name": "readValue",
+          "startLine": 36,
+          "endLine": 42,
+          "params": [
+            "args",
+            "index",
+            "flag"
+          ]
+        },
+        {
+          "name": "parsePositiveInteger",
+          "startLine": 44,
+          "endLine": 55,
+          "params": [
+            "value",
+            "flag"
+          ]
+        },
+        {
+          "name": "parseArgs",
+          "startLine": 57,
+          "endLine": 138,
+          "params": [
+            "argv"
+          ]
+        },
+        {
+          "name": "requireRailwayEnvironment",
+          "startLine": 140,
+          "endLine": 153,
+          "params": []
+        },
+        {
+          "name": "railwayClientOptions",
+          "startLine": 155,
+          "endLine": 160,
+          "params": []
+        },
+        {
+          "name": "normalizeGitHubRepoSlug",
+          "startLine": 162,
+          "endLine": 175,
+          "params": [
+            "remoteUrl"
+          ]
+        },
+        {
+          "name": "currentGitRemoteUrl",
+          "startLine": 177,
+          "endLine": 182,
+          "params": []
+        },
+        {
+          "name": "currentGitRef",
+          "startLine": 184,
+          "endLine": 189,
+          "params": []
+        },
+        {
+          "name": "shellQuote",
+          "startLine": 191,
+          "endLine": 193,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "buildRepoCheckCommand",
+          "startLine": 195,
+          "endLine": 218,
+          "params": []
+        },
+        {
+          "name": "resolveRepoCheckCommand",
+          "startLine": 220,
+          "endLine": 235,
+          "params": [
+            "commandArgs"
+          ]
+        },
+        {
+          "name": "sandboxCreateOptions",
+          "startLine": 237,
+          "endLine": 244,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "githubTokenEnv",
+          "startLine": 246,
+          "endLine": 251,
+          "params": []
+        },
+        {
+          "name": "printJson",
+          "startLine": 253,
+          "endLine": 255,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "printSandbox",
+          "startLine": 257,
+          "endLine": 267,
+          "params": [
+            "sandbox"
+          ]
+        },
+        {
+          "name": "listSandboxes",
+          "startLine": 269,
+          "endLine": 294,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "createSandbox",
+          "startLine": 296,
+          "endLine": 305,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "destroySandbox",
+          "startLine": 307,
+          "endLine": 316,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "runExec",
+          "startLine": 318,
+          "endLine": 356,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "repoCheck",
+          "startLine": 358,
+          "endLine": 389,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "main",
+          "startLine": 391,
+          "endLine": 416,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "UsageError",
+          "startLine": 34,
+          "endLine": 34,
+          "methods": [],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "parseArgs",
+          "line": 57,
+          "isDefault": false
+        },
+        {
+          "name": "normalizeGitHubRepoSlug",
+          "line": 162,
+          "isDefault": false
+        },
+        {
+          "name": "buildRepoCheckCommand",
+          "line": 195,
+          "isDefault": false
+        },
+        {
+          "name": "resolveRepoCheckCommand",
+          "line": 220,
+          "isDefault": false
+        },
+        {
+          "name": "main",
+          "line": 391,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "readValue",
+          "callee": "value.startsWith",
+          "lineNumber": 38
+        },
+        {
+          "caller": "parsePositiveInteger",
+          "callee": "/^\\d+$/.test",
+          "lineNumber": 45
+        },
+        {
+          "caller": "parsePositiveInteger",
+          "callee": "Number",
+          "lineNumber": 49
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "args.slice",
+          "lineNumber": 75
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "readValue",
+          "lineNumber": 100
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "readValue",
+          "lineNumber": 106
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "readValue",
+          "lineNumber": 112
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "parsePositiveInteger",
+          "lineNumber": 118
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "readValue",
+          "lineNumber": 118
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "parsePositiveInteger",
+          "lineNumber": 124
+        },
+        {
+          "caller": "parseArgs",
+          "callee": "readValue",
+          "lineNumber": 124
+        },
+        {
+          "caller": "requireRailwayEnvironment",
+          "callee": "missing.push",
+          "lineNumber": 143
+        },
+        {
+          "caller": "requireRailwayEnvironment",
+          "callee": "missing.push",
+          "lineNumber": 147
+        },
+        {
+          "caller": "requireRailwayEnvironment",
+          "callee": "missing.join",
+          "lineNumber": 151
+        },
+        {
+          "caller": "normalizeGitHubRepoSlug",
+          "callee": "remoteUrl.trim",
+          "lineNumber": 163
+        },
+        {
+          "caller": "normalizeGitHubRepoSlug",
+          "callee": "/^git@github\\.com:([^/]+\\/[^/]+?)(?:\\.git)?$/.exec",
+          "lineNumber": 164
+        },
+        {
+          "caller": "normalizeGitHubRepoSlug",
+          "callee": "/^https:\\/\\/github\\.com\\/([^/]+\\/[^/]+?)(?:\\.git)?$/.exec",
+          "lineNumber": 169
+        },
+        {
+          "caller": "currentGitRemoteUrl",
+          "callee": "execFileSync(\"git\", [\"config\", \"--get\", \"remote.origin.url\"], {\n    encoding: \"utf8\",\n    stdio: [\"ignore\", \"pipe\", \"pipe\"],\n  }).trim",
+          "lineNumber": 178
+        },
+        {
+          "caller": "currentGitRemoteUrl",
+          "callee": "execFileSync",
+          "lineNumber": 178
+        },
+        {
+          "caller": "currentGitRef",
+          "callee": "execFileSync(\"git\", [\"rev-parse\", \"HEAD\"], {\n    encoding: \"utf8\",\n    stdio: [\"ignore\", \"pipe\", \"pipe\"],\n  }).trim",
+          "lineNumber": 185
+        },
+        {
+          "caller": "currentGitRef",
+          "callee": "execFileSync",
+          "lineNumber": 185
+        },
+        {
+          "caller": "shellQuote",
+          "callee": "String(value).replaceAll",
+          "lineNumber": 192
+        },
+        {
+          "caller": "shellQuote",
+          "callee": "String",
+          "lineNumber": 192
+        },
+        {
+          "caller": "buildRepoCheckCommand",
+          "callee": "[\n    \"set -eu\",\n    \"export DEBIAN_FRONTEND=noninteractive\",\n    \"apt-get update\",\n    \"apt-get install -y ca-certificates curl git xz-utils\",\n    'if [ -n \"${GITHUB_TOKEN:-}\" ]; then',\n    '  git clone \"https://x-access-token:$GITHUB_TOKEN@github.com/' +\n      repoSlug +\n      '.git\" family-events',\n    \"else\",\n    '  git clone \"https://github.com/' + repoSlug + '.git\" family-events',\n    \"fi\",\n    \"cd family-events\",\n    \"git checkout \" + shellQuote(ref),\n    \"curl https://mise.run | sh\",\n    'export PATH=\"$HOME/.local/bin:$PATH\"',\n    \"mise trust --yes mise.toml\",\n    \"mise install\",\n    \"corepack enable\",\n    \"pnpm install --frozen-lockfile\",\n    command,\n  ].join",
+          "lineNumber": 196
+        },
+        {
+          "caller": "buildRepoCheckCommand",
+          "callee": "shellQuote",
+          "lineNumber": 209
+        },
+        {
+          "caller": "resolveRepoCheckCommand",
+          "callee": "commandArgs.slice(1).join(\" \").trim",
+          "lineNumber": 226
+        },
+        {
+          "caller": "resolveRepoCheckCommand",
+          "callee": "commandArgs.slice(1).join",
+          "lineNumber": 226
+        },
+        {
+          "caller": "resolveRepoCheckCommand",
+          "callee": "commandArgs.slice",
+          "lineNumber": 226
+        },
+        {
+          "caller": "resolveRepoCheckCommand",
+          "callee": "commandArgs.join(\" \").trim",
+          "lineNumber": 234
+        },
+        {
+          "caller": "resolveRepoCheckCommand",
+          "callee": "commandArgs.join",
+          "lineNumber": 234
+        },
+        {
+          "caller": "sandboxCreateOptions",
+          "callee": "railwayClientOptions",
+          "lineNumber": 239
+        },
+        {
+          "caller": "printJson",
+          "callee": "process.stdout.write",
+          "lineNumber": 254
+        },
+        {
+          "caller": "printJson",
+          "callee": "JSON.stringify",
+          "lineNumber": 254
+        },
+        {
+          "caller": "printSandbox",
+          "callee": "process.stdout.write",
+          "lineNumber": 258
+        },
+        {
+          "caller": "printSandbox",
+          "callee": "[\n      \"id=\" + sandbox.id,\n      \"status=\" + sandbox.status,\n      \"networkIsolation=\" + sandbox.networkIsolation,\n      \"idleTimeoutMinutes=\" + sandbox.idleTimeoutMinutes,\n      \"region=\" + sandbox.region,\n    ].join",
+          "lineNumber": 259
+        },
+        {
+          "caller": "listSandboxes",
+          "callee": "requireRailwayEnvironment",
+          "lineNumber": 270
+        },
+        {
+          "caller": "listSandboxes",
+          "callee": "Sandbox.list",
+          "lineNumber": 271
+        },
+        {
+          "caller": "listSandboxes",
+          "callee": "railwayClientOptions",
+          "lineNumber": 271
+        },
+        {
+          "caller": "listSandboxes",
+          "callee": "printJson",
+          "lineNumber": 273
+        },
+        {
+          "caller": "listSandboxes",
+          "callee": "process.stdout.write",
+          "lineNumber": 278
+        },
+        {
+          "caller": "listSandboxes",
+          "callee": "process.stdout.write",
+          "lineNumber": 283
+        },
+        {
+          "caller": "listSandboxes",
+          "callee": "[\n        sandbox.id,\n        sandbox.status,\n        sandbox.networkIsolation,\n        sandbox.idleTimeoutMinutes ?? \"default\",\n        sandbox.region,\n        sandbox.createdAt,\n      ].join",
+          "lineNumber": 284
+        },
+        {
+          "caller": "createSandbox",
+          "callee": "requireRailwayEnvironment",
+          "lineNumber": 297
+        },
+        {
+          "caller": "createSandbox",
+          "callee": "Sandbox.create",
+          "lineNumber": 298
+        },
+        {
+          "caller": "createSandbox",
+          "callee": "sandboxCreateOptions",
+          "lineNumber": 298
+        },
+        {
+          "caller": "createSandbox",
+          "callee": "printJson",
+          "lineNumber": 300
+        },
+        {
+          "caller": "createSandbox",
+          "callee": "sandbox.toJSON",
+          "lineNumber": 300
+        },
+        {
+          "caller": "createSandbox",
+          "callee": "printSandbox",
+          "lineNumber": 304
+        },
+        {
+          "caller": "destroySandbox",
+          "callee": "requireRailwayEnvironment",
+          "lineNumber": 308
+        },
+        {
+          "caller": "destroySandbox",
+          "callee": "Sandbox.connect",
+          "lineNumber": 313
+        },
+        {
+          "caller": "destroySandbox",
+          "callee": "railwayClientOptions",
+          "lineNumber": 313
+        },
+        {
+          "caller": "destroySandbox",
+          "callee": "sandbox.destroy",
+          "lineNumber": 314
+        },
+        {
+          "caller": "destroySandbox",
+          "callee": "process.stdout.write",
+          "lineNumber": 315
+        },
+        {
+          "caller": "runExec",
+          "callee": "requireRailwayEnvironment",
+          "lineNumber": 319
+        },
+        {
+          "caller": "runExec",
+          "callee": "options.commandArgs.join(\" \").trim",
+          "lineNumber": 320
+        },
+        {
+          "caller": "runExec",
+          "callee": "options.commandArgs.join",
+          "lineNumber": 320
+        },
+        {
+          "caller": "runExec",
+          "callee": "Sandbox.connect",
+          "lineNumber": 328
+        },
+        {
+          "caller": "runExec",
+          "callee": "railwayClientOptions",
+          "lineNumber": 328
+        },
+        {
+          "caller": "runExec",
+          "callee": "Sandbox.create",
+          "lineNumber": 330
+        },
+        {
+          "caller": "runExec",
+          "callee": "sandboxCreateOptions",
+          "lineNumber": 330
+        },
+        {
+          "caller": "runExec",
+          "callee": "printSandbox",
+          "lineNumber": 332
+        },
+        {
+          "caller": "runExec",
+          "callee": "sandbox.exec",
+          "lineNumber": 336
+        },
+        {
+          "caller": "runExec",
+          "callee": "process.stdout.write",
+          "lineNumber": 338
+        },
+        {
+          "caller": "runExec",
+          "callee": "process.stderr.write",
+          "lineNumber": 339
+        },
+        {
+          "caller": "runExec",
+          "callee": "process.stderr.write",
+          "lineNumber": 343
+        },
+        {
+          "caller": "runExec",
+          "callee": "process.stderr.write",
+          "lineNumber": 347
+        },
+        {
+          "caller": "runExec",
+          "callee": "sandbox.destroy",
+          "lineNumber": 353
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "requireRailwayEnvironment",
+          "lineNumber": 359
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "currentGitRemoteUrl",
+          "lineNumber": 360
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "normalizeGitHubRepoSlug",
+          "lineNumber": 361
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "currentGitRef",
+          "lineNumber": 362
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "resolveRepoCheckCommand",
+          "lineNumber": 363
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "Sandbox.create",
+          "lineNumber": 365
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "sandboxCreateOptions",
+          "lineNumber": 365
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "githubTokenEnv",
+          "lineNumber": 365
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "printSandbox",
+          "lineNumber": 366
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "sandbox.exec",
+          "lineNumber": 369
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "buildRepoCheckCommand",
+          "lineNumber": 369
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "process.stdout.write",
+          "lineNumber": 371
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "process.stderr.write",
+          "lineNumber": 372
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "process.stderr.write",
+          "lineNumber": 376
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "process.stderr.write",
+          "lineNumber": 380
+        },
+        {
+          "caller": "repoCheck",
+          "callee": "sandbox.destroy",
+          "lineNumber": 386
+        },
+        {
+          "caller": "main",
+          "callee": "process.argv.slice",
+          "lineNumber": 391
+        },
+        {
+          "caller": "main",
+          "callee": "parseArgs",
+          "lineNumber": 392
+        },
+        {
+          "caller": "main",
+          "callee": "process.stdout.write",
+          "lineNumber": 396
+        },
+        {
+          "caller": "main",
+          "callee": "listSandboxes",
+          "lineNumber": 399
+        },
+        {
+          "caller": "main",
+          "callee": "createSandbox",
+          "lineNumber": 402
+        },
+        {
+          "caller": "main",
+          "callee": "destroySandbox",
+          "lineNumber": 405
+        },
+        {
+          "caller": "main",
+          "callee": "runExec",
+          "lineNumber": 408
+        },
+        {
+          "caller": "main",
+          "callee": "repoCheck",
+          "lineNumber": 411
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 5,
+        "functionCount": 21,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "scripts/sync-url-validation.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 38,
+      "nonEmptyLines": 34,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/verify-edge-fn.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 139,
+      "nonEmptyLines": 119,
+      "functions": [
+        {
+          "name": "requireEnv",
+          "startLine": 9,
+          "endLine": 16,
+          "params": [
+            "name"
+          ]
+        },
+        {
+          "name": "sleep",
+          "startLine": 18,
+          "endLine": 20,
+          "params": [
+            "ms"
+          ]
+        },
+        {
+          "name": "pollForSourceRun",
+          "startLine": 22,
+          "endLine": 46,
+          "params": [
+            "client",
+            "sourceId",
+            "startedAtIso"
+          ]
+        },
+        {
+          "name": "main",
+          "startLine": 48,
+          "endLine": 137,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "requireEnv",
+          "callee": "console.error",
+          "lineNumber": 12
+        },
+        {
+          "caller": "requireEnv",
+          "callee": "process.exit",
+          "lineNumber": 13
+        },
+        {
+          "caller": "sleep",
+          "callee": "setTimeout",
+          "lineNumber": 19
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "Date.now",
+          "lineNumber": 23
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "Date.now",
+          "lineNumber": 25
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "client\n      .from(\"source_runs\")\n      .select(\"id, source_id, status, events_found, events_imported, events_skipped, created_at\")\n      .eq(\"source_id\", sourceId)\n      .gte(\"created_at\", startedAtIso)\n      .order(\"created_at\", { ascending: false })\n      .limit",
+          "lineNumber": 26
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "client\n      .from(\"source_runs\")\n      .select(\"id, source_id, status, events_found, events_imported, events_skipped, created_at\")\n      .eq(\"source_id\", sourceId)\n      .gte(\"created_at\", startedAtIso)\n      .order",
+          "lineNumber": 26
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "client\n      .from(\"source_runs\")\n      .select(\"id, source_id, status, events_found, events_imported, events_skipped, created_at\")\n      .eq(\"source_id\", sourceId)\n      .gte",
+          "lineNumber": 26
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "client\n      .from(\"source_runs\")\n      .select(\"id, source_id, status, events_found, events_imported, events_skipped, created_at\")\n      .eq",
+          "lineNumber": 26
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "client\n      .from(\"source_runs\")\n      .select",
+          "lineNumber": 26
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "client\n      .from",
+          "lineNumber": 26
+        },
+        {
+          "caller": "pollForSourceRun",
+          "callee": "sleep",
+          "lineNumber": 42
+        },
+        {
+          "caller": "main",
+          "callee": "(process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? \"\").replace",
+          "lineNumber": 49
+        },
+        {
+          "caller": "main",
+          "callee": "requireEnv",
+          "lineNumber": 53
+        },
+        {
+          "caller": "main",
+          "callee": "console.error",
+          "lineNumber": 58
+        },
+        {
+          "caller": "main",
+          "callee": "process.exit",
+          "lineNumber": 59
+        },
+        {
+          "caller": "main",
+          "callee": "console.error",
+          "lineNumber": 63
+        },
+        {
+          "caller": "main",
+          "callee": "process.exit",
+          "lineNumber": 64
+        },
+        {
+          "caller": "main",
+          "callee": "new Date().toISOString",
+          "lineNumber": 67
+        },
+        {
+          "caller": "main",
+          "callee": "fetch",
+          "lineNumber": 69
+        },
+        {
+          "caller": "main",
+          "callee": "JSON.stringify",
+          "lineNumber": 75
+        },
+        {
+          "caller": "main",
+          "callee": "invokeResponse.text",
+          "lineNumber": 78
+        },
+        {
+          "caller": "main",
+          "callee": "JSON.parse",
+          "lineNumber": 81
+        },
+        {
+          "caller": "main",
+          "callee": "console.error",
+          "lineNumber": 87
+        },
+        {
+          "caller": "main",
+          "callee": "JSON.stringify",
+          "lineNumber": 88
+        },
+        {
+          "caller": "main",
+          "callee": "process.exit",
+          "lineNumber": 100
+        },
+        {
+          "caller": "main",
+          "callee": "createClient",
+          "lineNumber": 103
+        },
+        {
+          "caller": "main",
+          "callee": "pollForSourceRun",
+          "lineNumber": 107
+        },
+        {
+          "caller": "main",
+          "callee": "console.error",
+          "lineNumber": 109
+        },
+        {
+          "caller": "main",
+          "callee": "JSON.stringify",
+          "lineNumber": 110
+        },
+        {
+          "caller": "main",
+          "callee": "process.exit",
+          "lineNumber": 122
+        },
+        {
+          "caller": "main",
+          "callee": "console.log",
+          "lineNumber": 125
+        },
+        {
+          "caller": "main",
+          "callee": "JSON.stringify",
+          "lineNumber": 126
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/.branches/_current_branch",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/benchmarks/artifacts/p0-003-after.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 453,
+      "nonEmptyLines": 439,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/benchmarks/artifacts/p0-003-before.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 470,
+      "nonEmptyLines": 456,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 386,
+      "nonEmptyLines": 352,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/config.toml",
+      "language": "toml",
+      "fileCategory": "config",
+      "totalLines": 209,
+      "nonEmptyLines": 171,
+      "sections": [
+        {
+          "heading": "api",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "db",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "db.migrations",
+          "level": 2,
+          "line": 14
+        },
+        {
+          "heading": "db.seed",
+          "level": 2,
+          "line": 18
+        },
+        {
+          "heading": "realtime",
+          "level": 1,
+          "line": 24
+        },
+        {
+          "heading": "auth",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "auth.external.apple",
+          "level": 3,
+          "line": 48
+        },
+        {
+          "heading": "auth.external.google",
+          "level": 3,
+          "line": 58
+        },
+        {
+          "heading": "auth.mfa.totp",
+          "level": 3,
+          "line": 66
+        },
+        {
+          "heading": "storage",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "studio",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "inbucket",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "analytics",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "edge_runtime",
+          "level": 1,
+          "line": 86
+        },
+        {
+          "heading": "functions.scrape-source",
+          "level": 2,
+          "line": 91
+        },
+        {
+          "heading": "functions.tag-event",
+          "level": 2,
+          "line": 97
+        },
+        {
+          "heading": "functions.share-og",
+          "level": 2,
+          "line": 102
+        },
+        {
+          "heading": "functions.sitemap",
+          "level": 2,
+          "line": 113
+        },
+        {
+          "heading": "functions.notify-email",
+          "level": 2,
+          "line": 118
+        },
+        {
+          "heading": "functions.process-notification-queue",
+          "level": 2,
+          "line": 123
+        },
+        {
+          "heading": "functions.process-tag-queue",
+          "level": 2,
+          "line": 126
+        },
+        {
+          "heading": "functions.process-source-queue",
+          "level": 2,
+          "line": 129
+        },
+        {
+          "heading": "functions.process-event-review-queue",
+          "level": 2,
+          "line": 132
+        },
+        {
+          "heading": "functions.backfill-event-enrichment",
+          "level": 2,
+          "line": 135
+        },
+        {
+          "heading": "functions.backfill-embeddings",
+          "level": 2,
+          "line": 140
+        },
+        {
+          "heading": "functions.embed-event",
+          "level": 2,
+          "line": 143
+        },
+        {
+          "heading": "functions.generate-parent-tips",
+          "level": 2,
+          "line": 146
+        },
+        {
+          "heading": "functions.cleanup-stale-runs",
+          "level": 2,
+          "line": 151
+        },
+        {
+          "heading": "functions.log-cron-run",
+          "level": 2,
+          "line": 156
+        },
+        {
+          "heading": "functions.admin-run-cron",
+          "level": 2,
+          "line": 161
+        },
+        {
+          "heading": "functions.scrape-due-sources",
+          "level": 2,
+          "line": 166
+        },
+        {
+          "heading": "functions.db-maintenance",
+          "level": 2,
+          "line": 169
+        },
+        {
+          "heading": "functions.send-auth-email",
+          "level": 2,
+          "line": 172
+        },
+        {
+          "heading": "functions.send-push",
+          "level": 2,
+          "line": 177
+        },
+        {
+          "heading": "functions.send-reminders",
+          "level": 2,
+          "line": 180
+        },
+        {
+          "heading": "functions.send-weekly-digest",
+          "level": 2,
+          "line": 183
+        },
+        {
+          "heading": "functions.weather",
+          "level": 2,
+          "line": 188
+        },
+        {
+          "heading": "auth.hook.send_email",
+          "level": 3,
+          "line": 194
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 38
+      }
+    }
+  ]
+}

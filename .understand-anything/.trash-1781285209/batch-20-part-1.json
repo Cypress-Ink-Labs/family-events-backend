@@ -1,0 +1,804 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "type": "table",
+      "name": "20260601000000_schema_baseline.sql",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Consolidated schema baseline consolidating all prior migrations; defines 23 core tables (events, cities, tags, event_sources, user_profiles, invite system, source/tag queues, audit logs, etc.) and 40+ private/public RPC functions including bulk_import_scrape_events, admin CRUD helpers, and search RPCs.",
+      "tags": ["database", "schema-definition", "migration", "infrastructure"],
+      "complexity": "complex",
+      "languageNotes": "Multi-source squash migration combining ~30 earlier migration files; serves as the authoritative schema baseline for production resets."
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:events",
+      "type": "table",
+      "name": "events",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Core events table storing family event records with title, datetime, location, AI tagging status, admin lock fields, and source provenance.",
+      "tags": ["database", "core-table", "events"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:source_scrape_queue",
+      "type": "table",
+      "name": "source_scrape_queue",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Queue table tracking source scraping jobs with status, attempt counts, and retry timing.",
+      "tags": ["database", "queue", "scraping"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_tag_queue",
+      "type": "table",
+      "name": "event_tag_queue",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Queue table tracking AI tagging jobs for individual events with status and retry tracking.",
+      "tags": ["database", "queue", "ai-tagging"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:cities",
+      "type": "table",
+      "name": "cities",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Reference table for supported cities with geographic coordinates, slug, and timezone.",
+      "tags": ["database", "reference-data", "geography"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_sources",
+      "type": "table",
+      "name": "event_sources",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Catalog of event data sources with scrape configuration, auto-approval flags, and processing mode settings.",
+      "tags": ["database", "configuration", "scraping"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:tags",
+      "type": "table",
+      "name": "tags",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Taxonomy of event tags with slug, color, category, and system flag.",
+      "tags": ["database", "reference-data", "taxonomy"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:user_profiles",
+      "type": "table",
+      "name": "user_profiles",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Extended user profile data linked to auth.users with display name and access level.",
+      "tags": ["database", "user-management", "authentication"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:invite_codes",
+      "type": "table",
+      "name": "invite_codes",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Invite code records controlling user registration gating with usage limits and expiry.",
+      "tags": ["database", "authentication", "invite-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:admin_audit_log",
+      "type": "table",
+      "name": "admin_audit_log",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Audit trail for admin operations recording action type, target, before/after state, and performing admin.",
+      "tags": ["database", "auditing", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:source_runs",
+      "type": "table",
+      "name": "source_runs",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Records of each source scrape run with timing, counters, and final status.",
+      "tags": ["database", "scraping", "operations"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000000_schema_baseline.sql:railway_cron_runs",
+      "type": "table",
+      "name": "railway_cron_runs",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Private schema table recording Railway cron job execution history with timing and status.",
+      "tags": ["database", "operations", "cron"],
+      "complexity": "simple"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601000000_schema_baseline.sql:bulk_import_scrape_events",
+      "type": "schema",
+      "name": "bulk_import_scrape_events",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "SECURITY DEFINER RPC that batch-imports scraped events via a single CTE chain, classifying each as insert/update, applying admin_locked_fields, and bulk-enqueuing tag jobs. Returns imported/updated/skipped/enqueued counts.",
+      "tags": ["database", "rpc", "data-pipeline", "scraping"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601000000_schema_baseline.sql:admin_update_event",
+      "type": "schema",
+      "name": "admin_update_event",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Admin RPC for updating event fields with validation, locked-field enforcement, and audit logging.",
+      "tags": ["database", "rpc", "admin", "events"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601000000_schema_baseline.sql:is_enabled_user",
+      "type": "schema",
+      "name": "is_enabled_user",
+      "filePath": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "summary": "Helper function checking if the current authenticated user has enabled access, used in RLS policies.",
+      "tags": ["database", "rpc", "authentication", "rls"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql",
+      "type": "table",
+      "name": "20260601000001_admin_dashboard_presence_track_policy.sql",
+      "filePath": "supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql",
+      "summary": "Adds an RLS policy on realtime.messages allowing admin users to track presence on the dashboard:events channel.",
+      "tags": ["database", "security", "realtime", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "type": "table",
+      "name": "20260601001000_reference_security_and_cron.sql",
+      "filePath": "supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "summary": "Seeds reference data (cities, tags, event sources) and configures security settings and cron job schedules for the production database.",
+      "tags": ["database", "reference-data", "configuration", "migration"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "type": "table",
+      "name": "20260601002000_event_ingestion_admin_foundation.sql",
+      "filePath": "supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "summary": "Establishes core event ingestion RPCs: bulk_import_scrape_events, events_enriched_v2, search_events_v2, admin_events_enriched, and enrichment pipeline helpers (list/update event enrichment, db health snapshot).",
+      "tags": ["database", "rpc", "data-pipeline", "migration"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql:events_enriched_v2",
+      "type": "schema",
+      "name": "events_enriched_v2",
+      "filePath": "supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "summary": "Public RPC returning enriched event rows with joined tags, city, and image data for the client feed, supporting cursor pagination.",
+      "tags": ["database", "rpc", "events", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql:search_events_v2",
+      "type": "schema",
+      "name": "search_events_v2",
+      "filePath": "supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "summary": "Public RPC for full-text and faceted event search with age, price, tag, and keyword filters.",
+      "tags": ["database", "rpc", "search", "events"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+      "type": "table",
+      "name": "20260601003000_maintenance_and_admin_queues.sql",
+      "filePath": "supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+      "summary": "Adds maintenance RPCs (run_daily_maintenance, refresh_timezone_names), queue management functions (delete dead queue entries), and admin event management RPCs (set status, batch delete, create source, set user access).",
+      "tags": ["database", "rpc", "admin", "maintenance"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "type": "table",
+      "name": "20260601004000_llm_review_and_enrichment.sql",
+      "filePath": "supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "summary": "Creates event_llm_review_queue and event_llm_review_traces tables and their associated RPCs for claiming, starting, releasing, and reaping LLM review queue rows; adds bulk processing mode and auto-approve admin helpers.",
+      "tags": ["database", "migration", "ai-review", "queue"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql:event_llm_review_queue",
+      "type": "table",
+      "name": "event_llm_review_queue",
+      "filePath": "supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "summary": "Queue table for AI/LLM review jobs on events, tracking status, provider, model, and retry state.",
+      "tags": ["database", "queue", "ai-review"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql:event_llm_review_traces",
+      "type": "table",
+      "name": "event_llm_review_traces",
+      "filePath": "supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "summary": "Trace records for LLM event review executions storing model decision, confidence, flags, and raw response payload.",
+      "tags": ["database", "observability", "ai-review"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "type": "table",
+      "name": "20260601005000_ai_models_and_cron_drilldown.sql",
+      "filePath": "supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "summary": "Creates approved_ai_models and ai_feature_config tables for AI model governance, adds cron_run_log_entries table with log_cron_run_event/log_railway_cron_run helpers, and railway_cron_run_detail drilldown RPC.",
+      "tags": ["database", "migration", "ai-configuration", "cron"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql:approved_ai_models",
+      "type": "table",
+      "name": "approved_ai_models",
+      "filePath": "supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "summary": "Registry of approved AI models with provider, model ID, and feature flags controlling which models may be used for event review.",
+      "tags": ["database", "ai-configuration", "governance"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql:ai_feature_config",
+      "type": "table",
+      "name": "ai_feature_config",
+      "filePath": "supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "summary": "Per-feature AI configuration settings stored as key-value pairs controlling model selection and pipeline behavior.",
+      "tags": ["database", "ai-configuration", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql:cron_run_log_entries",
+      "type": "table",
+      "name": "cron_run_log_entries",
+      "filePath": "supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "summary": "Private table storing structured log entries for individual cron job run events with severity and metadata.",
+      "tags": ["database", "operations", "cron", "observability"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "type": "table",
+      "name": "20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "filePath": "supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "summary": "Overhauls enrichment pipeline RPCs (list_events_needing_enrichment, parent_tips validation), creates event_image_attributions table with Unsplash/Pexels/Pixabay attribution tracking, and adds image upsert and download tracking RPCs.",
+      "tags": ["database", "migration", "enrichment", "images"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql:event_image_attributions",
+      "type": "table",
+      "name": "event_image_attributions",
+      "filePath": "supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "summary": "Stores image attribution records for events with provider (unsplash/pexels/pixabay), photographer credit, URLs, and download tracking status.",
+      "tags": ["database", "images", "attribution"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601007000_lafayette_new_sources.sql",
+      "type": "table",
+      "name": "20260601007000_lafayette_new_sources.sql",
+      "filePath": "supabase/migrations/20260601007000_lafayette_new_sources.sql",
+      "summary": "Seeds three new Lafayette-area iCal event sources (Lafayette Mom, Hilliard Art Museum, Vermilionville) and fixes the Acadiana Center for the Arts URL.",
+      "tags": ["database", "reference-data", "migration", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601008000_tier3_lafayette_sources.sql",
+      "type": "table",
+      "name": "20260601008000_tier3_lafayette_sources.sql",
+      "filePath": "supabase/migrations/20260601008000_tier3_lafayette_sources.sql",
+      "summary": "Adds tier-3 Lafayette event sources columns (date_window_days, is_active defaults) and seeds additional Lafayette-area sources with ALTER TABLE statements.",
+      "tags": ["database", "reference-data", "migration", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601009000_cron_review_events_allowlist.sql",
+      "type": "table",
+      "name": "20260601009000_cron_review_events_allowlist.sql",
+      "filePath": "supabase/migrations/20260601009000_cron_review_events_allowlist.sql",
+      "summary": "Replaces list_railway_cron_jobs RPC with an allowlist-filtered version that only returns cron jobs matching approved job name patterns.",
+      "tags": ["database", "rpc", "security", "cron"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601010000_admin_events_realtime.sql",
+      "type": "table",
+      "name": "20260601010000_admin_events_realtime.sql",
+      "filePath": "supabase/migrations/20260601010000_admin_events_realtime.sql",
+      "summary": "Adds broadcast_admin_event_changes trigger function for Supabase Realtime and a policy allowing admin users to receive dashboard realtime messages.",
+      "tags": ["database", "realtime", "admin", "triggers"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql",
+      "type": "table",
+      "name": "20260601011000_add_pexels_pixabay_providers.sql",
+      "filePath": "supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql",
+      "summary": "Extends event_image_attributions to support Pexels and Pixabay providers by adding provider-specific nullable columns and adjusting constraints.",
+      "tags": ["database", "migration", "images", "schema-evolution"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601011001_fix_provider_constraint.sql",
+      "type": "table",
+      "name": "20260601011001_fix_provider_constraint.sql",
+      "filePath": "supabase/migrations/20260601011001_fix_provider_constraint.sql",
+      "summary": "Fixes the image attribution provider constraint to correctly allow unsplash, pexels, and pixabay values by dropping and recreating the CHECK constraint.",
+      "tags": ["database", "migration", "bugfix", "schema-evolution"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601012000_disable_invite_gate.sql",
+      "type": "table",
+      "name": "20260601012000_disable_invite_gate.sql",
+      "filePath": "supabase/migrations/20260601012000_disable_invite_gate.sql",
+      "summary": "Replaces the invites_required() function to return false, effectively disabling the invite gate for open registration.",
+      "tags": ["database", "migration", "authentication", "feature-flag"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601013000_reset_invite_gate_guc.sql",
+      "type": "table",
+      "name": "20260601013000_reset_invite_gate_guc.sql",
+      "filePath": "supabase/migrations/20260601013000_reset_invite_gate_guc.sql",
+      "summary": "Resets the invite gate GUC (app.invites_required) configuration parameter to ensure consistent behavior across sessions.",
+      "tags": ["database", "migration", "configuration", "authentication"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601014000_fix_invite_gate_default.sql",
+      "type": "table",
+      "name": "20260601014000_fix_invite_gate_default.sql",
+      "filePath": "supabase/migrations/20260601014000_fix_invite_gate_default.sql",
+      "summary": "Updates invites_required() function default behavior to respect a GUC setting with a safe fallback, fixing the invite gate configuration.",
+      "tags": ["database", "migration", "authentication", "bugfix"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601015000_fix_invite_gate_single_source.sql",
+      "type": "table",
+      "name": "20260601015000_fix_invite_gate_single_source.sql",
+      "filePath": "supabase/migrations/20260601015000_fix_invite_gate_single_source.sql",
+      "summary": "Rewrites handle_new_user and enforce_invited_oauth_signup trigger functions so the invite gate check draws from a single authoritative invites_required() source.",
+      "tags": ["database", "migration", "authentication", "triggers"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+      "type": "table",
+      "name": "20260601016000_anon_access_for_public_browsing.sql",
+      "filePath": "supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+      "summary": "Grants execute permissions on public event-browsing RPCs (events_enriched, search_events, find_similar_events) to the anon role for unauthenticated access.",
+      "tags": ["database", "migration", "security", "public-access"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "type": "table",
+      "name": "20260601017000_event_status_enum_and_validate_checks.sql",
+      "filePath": "supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "summary": "Introduces event status and LLM review enums, updates admin_set_event_status/admin_batch_set_event_status for enum safety, rewrites apply_event_llm_review_decision with full trace recording, and overhauls events_enriched and search_events public RPCs.",
+      "tags": ["database", "migration", "schema-evolution", "rpc"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:events_enriched",
+      "type": "schema",
+      "name": "events_enriched",
+      "filePath": "supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "summary": "Public cursor-paginated RPC returning enriched event rows with optional city, status, user, date range, and event ID filters for client consumption.",
+      "tags": ["database", "rpc", "events", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:search_events",
+      "type": "schema",
+      "name": "search_events",
+      "filePath": "supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "summary": "Public RPC for multi-faceted event search with city, date, age, price, tag, keyword, and status filters plus cursor pagination.",
+      "tags": ["database", "rpc", "search", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:apply_event_llm_review_decision",
+      "type": "schema",
+      "name": "apply_event_llm_review_decision",
+      "filePath": "supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "summary": "Records a completed LLM review decision, persisting trace data and updating event status based on the applied decision.",
+      "tags": ["database", "rpc", "ai-review", "data-pipeline"],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:events",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:source_scrape_queue",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_tag_queue",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:cities",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_sources",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:tags",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:user_profiles",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:invite_codes",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:admin_audit_log",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:source_runs",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:railway_cron_runs",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "schema:supabase/migrations/20260601000000_schema_baseline.sql:bulk_import_scrape_events",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "schema:supabase/migrations/20260601000000_schema_baseline.sql:admin_update_event",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "target": "schema:supabase/migrations/20260601000000_schema_baseline.sql:is_enabled_user",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:cities",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:tags",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_sources",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "target": "schema:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql:events_enriched_v2",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "target": "schema:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql:search_events_v2",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+      "target": "table:supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "target": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql:event_llm_review_queue",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "target": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql:event_llm_review_traces",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "target": "table:supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "target": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql:approved_ai_models",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "target": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql:ai_feature_config",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "target": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql:cron_run_log_entries",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "target": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "target": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql:event_image_attributions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "target": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601007000_lafayette_new_sources.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_sources",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601007000_lafayette_new_sources.sql",
+      "target": "table:supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601008000_tier3_lafayette_sources.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_sources",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601008000_tier3_lafayette_sources.sql",
+      "target": "table:supabase/migrations/20260601007000_lafayette_new_sources.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601009000_cron_review_events_allowlist.sql",
+      "target": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601010000_admin_events_realtime.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:events",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601010000_admin_events_realtime.sql",
+      "target": "table:supabase/migrations/20260601009000_cron_review_events_allowlist.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql",
+      "target": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql:event_image_attributions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601011001_fix_provider_constraint.sql",
+      "target": "table:supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql:event_image_attributions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601011001_fix_provider_constraint.sql",
+      "target": "table:supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601012000_disable_invite_gate.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601013000_reset_invite_gate_guc.sql",
+      "target": "table:supabase/migrations/20260601012000_disable_invite_gate.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601014000_fix_invite_gate_default.sql",
+      "target": "table:supabase/migrations/20260601013000_reset_invite_gate_guc.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601015000_fix_invite_gate_single_source.sql",
+      "target": "table:supabase/migrations/20260601014000_fix_invite_gate_default.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+      "target": "table:supabase/migrations/20260601015000_fix_invite_gate_single_source.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+      "target": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:events_enriched",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:events",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "target": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql:event_llm_review_traces",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "target": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:events_enriched",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "target": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:search_events",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "target": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:apply_event_llm_review_decision",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "target": "table:supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

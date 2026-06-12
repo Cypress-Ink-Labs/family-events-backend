@@ -1,0 +1,26 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/rollbacks/20260601000000_001_schema_down.sql", "language": "sql", "sizeLines": 23, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601000100_002_functions_down.sql", "language": "sql", "sizeLines": 21, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601000300_004_views_and_rpcs_down.sql", "language": "sql", "sizeLines": 8, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601002700_admin_event_lifetime_editing_down.sql", "language": "sql", "sizeLines": 14, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601017000_event_status_enum_and_validate_checks_down.sql", "language": "sql", "sizeLines": 939, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601018000_fix_events_enriched_enum_cast_down.sql", "language": "sql", "sizeLines": 15, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601019000_restore_events_enriched_cursor_signature_down.sql", "language": "sql", "sizeLines": 89, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601020000_event_embeddings_and_similarity_down.sql", "language": "sql", "sizeLines": 82, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601021000_admin_event_decisions_down.sql", "language": "sql", "sizeLines": 258, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601022000_source_auto_reject_and_stats_down.sql", "language": "sql", "sizeLines": 14, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601023000_fix_ai_settings_rpc_grants_down.sql", "language": "sql", "sizeLines": 18, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601024000_admin_retry_dead_tag_queue_down.sql", "language": "sql", "sizeLines": 17, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601025000_baton_rouge_sources_down.sql", "language": "sql", "sizeLines": 69, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql", "language": "sql", "sizeLines": 10, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601027000_user_notification_preferences_down.sql", "language": "sql", "sizeLines": 37, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601028000_search_events_radius_filter_down.sql", "language": "sql", "sizeLines": 117, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601029000_find_similar_events_by_id_down.sql", "language": "sql", "sizeLines": 22, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601030000_push_and_notifications_down.sql", "language": "sql", "sizeLines": 51, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601031000_event_change_notifications_down.sql", "language": "sql", "sizeLines": 29, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601032000_drop_old_search_events_overload_down.sql", "language": "sql", "sizeLines": 121, "fileCategory": "data"}
+  ],
+  "batchImportData": {}
+}

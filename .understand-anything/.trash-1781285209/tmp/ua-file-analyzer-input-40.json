@@ -1,0 +1,31 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/functions/_shared/env_test.ts", "language": "typescript", "sizeLines": 45, "fileCategory": "code"},
+    {"path": "supabase/functions/_shared/env.ts", "language": "typescript", "sizeLines": 51, "fileCategory": "code"},
+    {"path": "supabase/functions/admin-run-cron/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/backfill-embeddings/deno.json", "language": "json", "sizeLines": 7, "fileCategory": "config"},
+    {"path": "supabase/functions/backfill-event-enrichment/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/backfill-event-enrichment/README.md", "language": "markdown", "sizeLines": 70, "fileCategory": "docs"},
+    {"path": "supabase/functions/cleanup-stale-runs/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/db-maintenance/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/embed-event/deno.json", "language": "json", "sizeLines": 7, "fileCategory": "config"},
+    {"path": "supabase/functions/generate-parent-tips/deno.json", "language": "json", "sizeLines": 7, "fileCategory": "config"},
+    {"path": "supabase/functions/log-cron-run/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/notify-email/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/package.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/process-event-review-queue/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/process-notification-queue/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/process-source-queue/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/process-tag-queue/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/scrape-due-sources/deno.json", "language": "json", "sizeLines": 8, "fileCategory": "config"},
+    {"path": "supabase/functions/scrape-source/__fixtures__/atom/entry-content.xml", "language": "xml", "sizeLines": 10, "fileCategory": "config"},
+    {"path": "supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html", "language": "html", "sizeLines": 110, "fileCategory": "markup"},
+    {"path": "supabase/functions/scrape-source/__fixtures__/html/events-page.html", "language": "html", "sizeLines": 38, "fileCategory": "markup"},
+    {"path": "supabase/functions/scrape-source/__fixtures__/ical/folded-tzid.ics", "language": "ics", "sizeLines": 14, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/__fixtures__/ical/hilliard-sample.ics", "language": "ics", "sizeLines": 52, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/__fixtures__/ical/lafayette-mom-sample.ics", "language": "ics", "sizeLines": 46, "fileCategory": "code"}
+  ],
+  "batchImportData": {"supabase/functions/_shared/env_test.ts": ["supabase/functions/_shared/env.ts"], "supabase/functions/_shared/env.ts": [], "supabase/functions/admin-run-cron/deno.json": [], "supabase/functions/backfill-embeddings/deno.json": [], "supabase/functions/backfill-event-enrichment/deno.json": [], "supabase/functions/backfill-event-enrichment/README.md": [], "supabase/functions/cleanup-stale-runs/deno.json": [], "supabase/functions/db-maintenance/deno.json": [], "supabase/functions/deno.json": [], "supabase/functions/embed-event/deno.json": [], "supabase/functions/generate-parent-tips/deno.json": [], "supabase/functions/log-cron-run/deno.json": [], "supabase/functions/notify-email/deno.json": [], "supabase/functions/package.json": [], "supabase/functions/process-event-review-queue/deno.json": [], "supabase/functions/process-notification-queue/deno.json": [], "supabase/functions/process-source-queue/deno.json": [], "supabase/functions/process-tag-queue/deno.json": [], "supabase/functions/scrape-due-sources/deno.json": [], "supabase/functions/scrape-source/__fixtures__/atom/entry-content.xml": [], "supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html": [], "supabase/functions/scrape-source/__fixtures__/html/events-page.html": [], "supabase/functions/scrape-source/__fixtures__/ical/folded-tzid.ics": [], "supabase/functions/scrape-source/__fixtures__/ical/hilliard-sample.ics": [], "supabase/functions/scrape-source/__fixtures__/ical/lafayette-mom-sample.ics": []}
+}

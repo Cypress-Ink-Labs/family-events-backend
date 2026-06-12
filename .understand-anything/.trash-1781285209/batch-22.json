@@ -1,0 +1,97 @@
+{
+  "nodes": [
+    {
+      "id": "config:graphify-out/.graphify_labels.json",
+      "type": "config",
+      "name": ".graphify_labels.json",
+      "filePath": "graphify-out/.graphify_labels.json",
+      "summary": "Graphify community label index mapping numeric community IDs (0–142) to their string labels, used by the graphify analysis tool to annotate the knowledge graph output.",
+      "tags": ["configuration", "data-pipeline", "documentation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:graphify-out/GRAPH_REPORT.md",
+      "type": "document",
+      "name": "GRAPH_REPORT.md",
+      "filePath": "graphify-out/GRAPH_REPORT.md",
+      "summary": "Comprehensive graphify analysis report for the family-events-backend codebase covering 1774 nodes, 3154 edges, and 143 detected communities with community hubs, god nodes, surprising connections, and knowledge gaps as of 2026-06-12.",
+      "tags": ["documentation", "infrastructure", "data-pipeline"],
+      "complexity": "complex",
+      "languageNotes": "Generated markdown report from graphify tool; 134 sections covering community breakdown for all 125 of the 143 detected communities."
+    },
+    {
+      "id": "config:graphify-out/cost.json",
+      "type": "config",
+      "name": "cost.json",
+      "filePath": "graphify-out/cost.json",
+      "summary": "Graphify run cost tracking file recording token usage and file counts per analysis run; shows one run on 2026-06-12 that processed 381 files with zero LLM token cost (pure structural extraction).",
+      "tags": ["configuration", "monitoring", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:graphify-out/graph.html",
+      "type": "file",
+      "name": "graph.html",
+      "filePath": "graphify-out/graph.html",
+      "summary": "Interactive HTML visualization of the graphify knowledge graph, rendering the project's node-edge graph in a browser using embedded JavaScript and the graph.json data source.",
+      "tags": ["documentation", "infrastructure", "data-pipeline"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:graphify-out/graph.json",
+      "type": "config",
+      "name": "graph.json",
+      "filePath": "graphify-out/graph.json",
+      "summary": "Full graphify knowledge graph data file containing 1774 nodes, 3154 directed edges, hyperedges, and community assignments for the entire family-events-backend codebase, produced by graphify v0.8.38.",
+      "tags": ["configuration", "data-pipeline", "infrastructure"],
+      "complexity": "complex",
+      "languageNotes": "51,527-line JSON file in NetworkX node-link format with directed multigraph; nodes start at line 9 and links at line 18315."
+    },
+    {
+      "id": "config:graphify-out/manifest.json",
+      "type": "config",
+      "name": "manifest.json",
+      "filePath": "graphify-out/manifest.json",
+      "summary": "Graphify file manifest cataloging all 381 source files analyzed in the family-events-backend codebase with their absolute paths, used by the graphify tool to track corpus membership and incremental analysis.",
+      "tags": ["configuration", "data-pipeline", "infrastructure"],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:graphify-out/GRAPH_REPORT.md",
+      "target": "config:graphify-out/graph.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:graphify-out/graph.html",
+      "target": "config:graphify-out/graph.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/manifest.json",
+      "target": "config:graphify-out/graph.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/.graphify_labels.json",
+      "target": "config:graphify-out/graph.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cost.json",
+      "target": "config:graphify-out/manifest.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

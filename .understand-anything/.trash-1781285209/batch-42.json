@@ -1,0 +1,120 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/snippets/provision_remote_admin_test_user.sql",
+      "type": "file",
+      "name": "provision_remote_admin_test_user.sql",
+      "filePath": "supabase/snippets/provision_remote_admin_test_user.sql",
+      "summary": "SQL snippet for provisioning an admin test user in a remote Supabase project, inserting auth.users and profiles records for integration testing.",
+      "tags": ["database", "test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tests/fixtures/railway-cron-poc-drift.json",
+      "type": "config",
+      "name": "railway-cron-poc-drift.json",
+      "filePath": "tests/fixtures/railway-cron-poc-drift.json",
+      "summary": "Test fixture containing a Railway GraphQL API response representing a drifted cron configuration state, used to validate drift detection logic.",
+      "tags": ["test", "configuration", "infrastructure"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:tests/fixtures/railway-cron-poc-live.json",
+      "type": "config",
+      "name": "railway-cron-poc-live.json",
+      "filePath": "tests/fixtures/railway-cron-poc-live.json",
+      "summary": "Test fixture containing a Railway GraphQL API response representing live cron configuration state with all services matching expected config.",
+      "tags": ["test", "configuration", "infrastructure"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/guards/cron-runner-boundary.test.mjs",
+      "type": "file",
+      "name": "cron-runner-boundary.test.mjs",
+      "filePath": "tests/guards/cron-runner-boundary.test.mjs",
+      "summary": "Guard test verifying that all cron runner shell scripts have consistent structure and reference the correct edge function names.",
+      "tags": ["test", "ci-cd"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/guards/db-types-script.test.mjs",
+      "type": "file",
+      "name": "db-types-script.test.mjs",
+      "filePath": "tests/guards/db-types-script.test.mjs",
+      "summary": "Guard test verifying that the database type generation script in package.json targets the correct Supabase DB port and matches the CI workflow configuration.",
+      "tags": ["test", "ci-cd", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/guards/deploy-cli-boundary.test.mjs",
+      "type": "file",
+      "name": "deploy-cli-boundary.test.mjs",
+      "filePath": "tests/guards/deploy-cli-boundary.test.mjs",
+      "summary": "Guard test importing and exercising the railway-cron-drift script's exported functions to validate cron state parsing and drift detection boundary conditions.",
+      "tags": ["test", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/guards/migration-rollbacks.test.mjs",
+      "type": "file",
+      "name": "migration-rollbacks.test.mjs",
+      "filePath": "tests/guards/migration-rollbacks.test.mjs",
+      "summary": "Guard test validating that all Supabase migration files have corresponding rollback files and that timestamps follow the expected naming convention.",
+      "tags": ["test", "database"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/guards/supabase-function-auth-config.test.mjs",
+      "type": "file",
+      "name": "supabase-function-auth-config.test.mjs",
+      "filePath": "tests/guards/supabase-function-auth-config.test.mjs",
+      "summary": "Guard test parsing supabase/config.toml to assert that every edge function has an explicit verify_jwt auth setting, preventing accidental open endpoints.",
+      "tags": ["test", "security", "infrastructure"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/guards/deploy-cli-boundary.test.mjs",
+      "target": "file:scripts/railway-cron-drift.mjs",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/guards/deploy-cli-boundary.test.mjs",
+      "target": "file:scripts/railway-cron-drift.mjs",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/guards/cron-runner-boundary.test.mjs",
+      "target": "config:tests/fixtures/railway-cron-poc-drift.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/guards/deploy-cli-boundary.test.mjs",
+      "target": "config:tests/fixtures/railway-cron-poc-drift.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/guards/deploy-cli-boundary.test.mjs",
+      "target": "config:tests/fixtures/railway-cron-poc-live.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/guards/supabase-function-auth-config.test.mjs",
+      "target": "config:supabase/config.toml",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

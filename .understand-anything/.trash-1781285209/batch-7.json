@@ -1,0 +1,859 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/_shared/memory-context.ts",
+      "type": "file",
+      "name": "memory-context.ts",
+      "filePath": "supabase/functions/_shared/memory-context.ts",
+      "summary": "Shared utility that fetches vector-similarity memory context from Supabase (similar event tags and review decisions) and formats them into LLM prompt snippets for use by the event-review and tag-event functions.",
+      "tags": ["utility", "service", "ai-handler", "similarity-search"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/memory-context.ts:isMemoryFeatureEnabled",
+      "type": "function",
+      "name": "isMemoryFeatureEnabled",
+      "filePath": "supabase/functions/_shared/memory-context.ts",
+      "lineRange": [50, 65],
+      "summary": "Queries the ai_feature_config table to determine whether a named memory feature is enabled.",
+      "tags": ["utility", "feature-flag"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/memory-context.ts:fetchSimilarEventTagContext",
+      "type": "function",
+      "name": "fetchSimilarEventTagContext",
+      "filePath": "supabase/functions/_shared/memory-context.ts",
+      "lineRange": [92, 166],
+      "summary": "Performs an embedding similarity RPC call to find previously tagged events, then augments each result with admin correction history from event_tags and admin_event_decisions tables.",
+      "tags": ["utility", "similarity-search", "data-model"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/memory-context.ts:fetchSimilarReviewContext",
+      "type": "function",
+      "name": "fetchSimilarReviewContext",
+      "filePath": "supabase/functions/_shared/memory-context.ts",
+      "lineRange": [170, 268],
+      "summary": "Fetches similar events using vector similarity then enriches each with its current review status and admin status-change decisions to build review memory context.",
+      "tags": ["utility", "similarity-search", "data-model"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/memory-context.ts:formatTagMemoryPrompt",
+      "type": "function",
+      "name": "formatTagMemoryPrompt",
+      "filePath": "supabase/functions/_shared/memory-context.ts",
+      "lineRange": [272, 297],
+      "summary": "Formats a list of similar-event tag contexts into a human-readable prompt section highlighting admin-corrected tags.",
+      "tags": ["utility", "serialization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/memory-context.ts:formatReviewMemoryPrompt",
+      "type": "function",
+      "name": "formatReviewMemoryPrompt",
+      "filePath": "supabase/functions/_shared/memory-context.ts",
+      "lineRange": [299, 319],
+      "summary": "Formats a list of similar-event review contexts into a prompt section summarizing prior LLM and admin review decisions.",
+      "tags": ["utility", "serialization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/memory-context_test.ts",
+      "type": "file",
+      "name": "memory-context_test.ts",
+      "filePath": "supabase/functions/_shared/memory-context_test.ts",
+      "summary": "Unit tests for the memory-context shared utility, covering similarity fetch and prompt formatting functions.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/event-review/config.ts",
+      "type": "file",
+      "name": "config.ts",
+      "filePath": "supabase/functions/event-review/config.ts",
+      "summary": "Resolves the LLM review configuration by reading and validating environment variables and database overrides, applying typed parse helpers for booleans, integers, thresholds, and URLs.",
+      "tags": ["config", "utility", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/event-review/config.ts:resolveLlmReviewConfig",
+      "type": "function",
+      "name": "resolveLlmReviewConfig",
+      "filePath": "supabase/functions/event-review/config.ts",
+      "lineRange": [43, 138],
+      "summary": "Builds the complete LlmReviewConfig object by merging database overrides with environment variables, falling back to safe defaults for each config field.",
+      "tags": ["config", "factory", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/event-review/config_test.ts",
+      "type": "file",
+      "name": "config_test.ts",
+      "filePath": "supabase/functions/event-review/config_test.ts",
+      "summary": "Tests for resolveLlmReviewConfig covering environment variable parsing, database override merging, and fallback defaults.",
+      "tags": ["test", "config"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/event-review/mod.ts",
+      "type": "file",
+      "name": "mod.ts",
+      "filePath": "supabase/functions/event-review/mod.ts",
+      "summary": "Barrel entry point for the event-review function module, re-exporting the public API for consumers.",
+      "tags": ["entry-point", "barrel"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/event-review/normalizer.ts",
+      "type": "file",
+      "name": "normalizer.ts",
+      "filePath": "supabase/functions/event-review/normalizer.ts",
+      "summary": "Normalizes raw event input for LLM review by trimming fields to maximum lengths, deduplicating tags, and mapping venue/location data into a clean ReviewEventInput.",
+      "tags": ["utility", "validation", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/event-review/normalizer.ts:normalizeReviewEventInput",
+      "type": "function",
+      "name": "normalizeReviewEventInput",
+      "filePath": "supabase/functions/event-review/normalizer.ts",
+      "lineRange": [37, 91],
+      "summary": "Maps a raw event record into a sanitized ReviewEventInput by trimming each field to configured character limits and normalizing tag arrays.",
+      "tags": ["utility", "validation", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/event-review/normalizer_test.ts",
+      "type": "file",
+      "name": "normalizer_test.ts",
+      "filePath": "supabase/functions/event-review/normalizer_test.ts",
+      "summary": "Unit tests for normalizeReviewEventInput, verifying field truncation, tag deduplication, and null handling.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/event-review/prompt.ts",
+      "type": "file",
+      "name": "prompt.ts",
+      "filePath": "supabase/functions/event-review/prompt.ts",
+      "summary": "Defines the LLM event moderation prompt including approval/rejection criteria, security rules, and the buildReviewPrompt factory that assembles the full system and user message pair.",
+      "tags": ["utility", "ai-handler", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/event-review/prompt.ts:buildReviewPrompt",
+      "type": "function",
+      "name": "buildReviewPrompt",
+      "filePath": "supabase/functions/event-review/prompt.ts",
+      "lineRange": [49, 105],
+      "summary": "Assembles the full LLM system prompt by composing approval criteria, rejection criteria, flags, security rules, and an optional memory section, then appends the untrusted event JSON payload.",
+      "tags": ["utility", "ai-handler", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/event-review/prompt_test.ts",
+      "type": "file",
+      "name": "prompt_test.ts",
+      "filePath": "supabase/functions/event-review/prompt_test.ts",
+      "summary": "Tests for buildReviewPrompt verifying that the generated prompt contains required sections, security delimiters, and memory context when provided.",
+      "tags": ["test", "ai-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/event-review/provider.ts",
+      "type": "file",
+      "name": "provider.ts",
+      "filePath": "supabase/functions/event-review/provider.ts",
+      "summary": "Implements an OpenAI-compatible LLM provider that sends review prompts over HTTP and returns raw response text, plus a factory for constructing providers from config.",
+      "tags": ["service", "api-handler", "ai-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:supabase/functions/event-review/provider.ts:OpenAiCompatibleReviewProvider",
+      "type": "class",
+      "name": "OpenAiCompatibleReviewProvider",
+      "filePath": "supabase/functions/event-review/provider.ts",
+      "lineRange": [10, 59],
+      "summary": "HTTP client that posts review prompts to an OpenAI-compatible chat completions endpoint and extracts the assistant message content.",
+      "tags": ["service", "api-handler", "ai-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/event-review/reviewer.ts",
+      "type": "file",
+      "name": "reviewer.ts",
+      "filePath": "supabase/functions/event-review/reviewer.ts",
+      "summary": "Orchestrates the full LLM review pipeline for a single event: resolves config, normalizes input, builds prompt, calls the LLM provider, parses/validates the JSON decision, and applies confidence thresholds.",
+      "tags": ["service", "ai-handler", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "type": "function",
+      "name": "reviewEventWithLlm",
+      "filePath": "supabase/functions/event-review/reviewer.ts",
+      "lineRange": [50, 182],
+      "summary": "Coordinates the end-to-end LLM review for one event: resolves config, normalizes input, builds the prompt, invokes the provider with a timeout, parses the JSON response, and returns a structured decision.",
+      "tags": ["service", "ai-handler", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/event-review/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "supabase/functions/event-review/schema.ts",
+      "summary": "Parses and validates raw LLM JSON decision output against the expected schema, sanitizing strings and applying confidence thresholds to escalate low-confidence decisions to admin review.",
+      "tags": ["validation", "serialization", "schema-definition"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/event-review/schema.ts:parseLlmDecisionJson",
+      "type": "function",
+      "name": "parseLlmDecisionJson",
+      "filePath": "supabase/functions/event-review/schema.ts",
+      "lineRange": [47, 108],
+      "summary": "Parses a raw JSON string from the LLM response, validates the decision field against allowed values, normalizes numeric confidence, sanitizes string fields, and rejects unknown keys.",
+      "tags": ["validation", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/event-review/schema.ts:applyConfidenceThreshold",
+      "type": "function",
+      "name": "applyConfidenceThreshold",
+      "filePath": "supabase/functions/event-review/schema.ts",
+      "lineRange": [110, 133],
+      "summary": "Escalates an approve or reject decision to needs_admin_review when confidence falls below the configured threshold or when forcing flags are present.",
+      "tags": ["validation", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/event-review/schema_test.ts",
+      "type": "file",
+      "name": "schema_test.ts",
+      "filePath": "supabase/functions/event-review/schema_test.ts",
+      "summary": "Tests for parseLlmDecisionJson and applyConfidenceThreshold covering valid decisions, malformed JSON, unknown keys, and threshold escalation behavior.",
+      "tags": ["test", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/event-review/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "supabase/functions/event-review/types.ts",
+      "summary": "Defines shared TypeScript types and constants for the event-review module including LLM decision values, decision arrays, review status types, config structures, and provider interfaces.",
+      "tags": ["type-definition", "schema-definition"],
+      "complexity": "moderate",
+      "languageNotes": "Uses const-object as enum pattern and derives union types via keyof for LLM_EVENT_REVIEW_DECISION and LLM_EVENT_REVIEW_STATUS."
+    },
+    {
+      "id": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "type": "file",
+      "name": "worker.ts",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker.ts",
+      "summary": "Core queue-worker logic for the event-review cron: claims rows from event_llm_review_queue, orchestrates LLM review with memory context, applies decisions to events, records traces, and handles retry/dead-letter state transitions.",
+      "tags": ["service", "middleware", "event-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-event-review-queue/lib/worker.ts:processReviewQueueRow",
+      "type": "function",
+      "name": "processReviewQueueRow",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker.ts",
+      "lineRange": [553, 654],
+      "summary": "Processes a single queue row: marks it started, loads the event, checks reviewability, fetches memory, triggers LLM review or fast-path approval, and handles errors with retry/dead logic.",
+      "tags": ["service", "event-handler", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-event-review-queue/lib/worker.ts:processReviewQueueBatch",
+      "type": "function",
+      "name": "processReviewQueueBatch",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker.ts",
+      "lineRange": [656, 726],
+      "summary": "Drives a full batch run: reaps stuck rows, claims a batch, enforces a wall-clock budget, sequentially processes each row, and returns aggregate batch statistics.",
+      "tags": ["service", "event-handler", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-event-review-queue/lib/worker.ts:buildReviewQueueDeps",
+      "type": "function",
+      "name": "buildReviewQueueDeps",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker.ts",
+      "lineRange": [755, 763],
+      "summary": "Factory that constructs the ReviewQueueDeps dependency bundle by loading feature config and resolving LLM review config from Supabase.",
+      "tags": ["factory", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/process-event-review-queue/lib/worker.ts:fetchReviewMemory",
+      "type": "function",
+      "name": "fetchReviewMemory",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker.ts",
+      "lineRange": [450, 501],
+      "summary": "Checks if memory is enabled, retrieves the event's stored embedding, fetches similar review contexts, and formats them into a prompt string for LLM context injection.",
+      "tags": ["service", "ai-handler", "similarity-search"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/process-event-review-queue/lib/worker.ts:reviewAndApplyEvent",
+      "type": "function",
+      "name": "reviewAndApplyEvent",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker.ts",
+      "lineRange": [503, 551],
+      "summary": "Coordinates memory fetch, LLM review invocation (or injected stub), decision application, trace logging, and non-reviewable skip handling for a single event.",
+      "tags": ["service", "ai-handler", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "type": "file",
+      "name": "worker_test.ts",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "summary": "Comprehensive tests for the queue worker using in-memory FakeSupabase and FakeQuery stubs; covers batch processing, row state transitions, retry logic, skip paths, and LLM decision application.",
+      "tags": ["test", "service", "event-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:supabase/functions/process-event-review-queue/lib/worker_test.ts:FakeSupabase",
+      "type": "class",
+      "name": "FakeSupabase",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "lineRange": [48, 153],
+      "summary": "In-memory Supabase client stub for tests, implementing rpc and from with Map-backed state for events, queue, traces, and tagQueue.",
+      "tags": ["test", "factory"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:supabase/functions/process-event-review-queue/lib/worker_test.ts:FakeQuery",
+      "type": "class",
+      "name": "FakeQuery",
+      "filePath": "supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "lineRange": [155, 270],
+      "summary": "Chainable fake query builder for tests, mimicking Supabase's select/update/insert/eq/maybeSingle API with in-memory data resolution.",
+      "tags": ["test", "factory"],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:isMemoryFeatureEnabled",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:fetchSimilarEventTagContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:fetchSimilarReviewContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:formatTagMemoryPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:formatReviewMemoryPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:isMemoryFeatureEnabled",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:fetchSimilarEventTagContext",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:fetchSimilarReviewContext",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:formatTagMemoryPrompt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "function:supabase/functions/_shared/memory-context.ts:formatReviewMemoryPrompt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context_test.ts",
+      "target": "file:supabase/functions/_shared/memory-context.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/memory-context.ts",
+      "target": "file:supabase/functions/_shared/memory-context_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/event-review/config.ts",
+      "target": "file:supabase/functions/event-review/prompt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/config.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/config.ts",
+      "target": "function:supabase/functions/event-review/config.ts:resolveLlmReviewConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/event-review/config.ts",
+      "target": "function:supabase/functions/event-review/config.ts:resolveLlmReviewConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/event-review/config_test.ts",
+      "target": "file:supabase/functions/event-review/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/config.ts",
+      "target": "file:supabase/functions/event-review/config_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/event-review/normalizer.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/normalizer.ts",
+      "target": "function:supabase/functions/event-review/normalizer.ts:normalizeReviewEventInput",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/event-review/normalizer.ts",
+      "target": "function:supabase/functions/event-review/normalizer.ts:normalizeReviewEventInput",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/event-review/normalizer_test.ts",
+      "target": "file:supabase/functions/event-review/normalizer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/normalizer_test.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/normalizer.ts",
+      "target": "file:supabase/functions/event-review/normalizer_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/event-review/prompt.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/prompt.ts",
+      "target": "function:supabase/functions/event-review/prompt.ts:buildReviewPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/event-review/prompt.ts",
+      "target": "function:supabase/functions/event-review/prompt.ts:buildReviewPrompt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/event-review/prompt_test.ts",
+      "target": "file:supabase/functions/event-review/prompt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/prompt.ts",
+      "target": "file:supabase/functions/event-review/prompt_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/event-review/provider.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/provider.ts",
+      "target": "class:supabase/functions/event-review/provider.ts:OpenAiCompatibleReviewProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/event-review/provider.ts",
+      "target": "class:supabase/functions/event-review/provider.ts:OpenAiCompatibleReviewProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "file:supabase/functions/event-review/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "file:supabase/functions/event-review/normalizer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "file:supabase/functions/event-review/prompt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "file:supabase/functions/event-review/provider.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "file:supabase/functions/event-review/schema.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/event-review/reviewer.ts",
+      "target": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "target": "function:supabase/functions/event-review/config.ts:resolveLlmReviewConfig",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "target": "function:supabase/functions/event-review/normalizer.ts:normalizeReviewEventInput",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "target": "function:supabase/functions/event-review/prompt.ts:buildReviewPrompt",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "target": "function:supabase/functions/event-review/schema.ts:parseLlmDecisionJson",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/event-review/reviewer.ts:reviewEventWithLlm",
+      "target": "function:supabase/functions/event-review/schema.ts:applyConfidenceThreshold",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/event-review/schema.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/schema.ts",
+      "target": "function:supabase/functions/event-review/schema.ts:parseLlmDecisionJson",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/event-review/schema.ts",
+      "target": "function:supabase/functions/event-review/schema.ts:applyConfidenceThreshold",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/event-review/schema.ts",
+      "target": "function:supabase/functions/event-review/schema.ts:parseLlmDecisionJson",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/event-review/schema.ts",
+      "target": "function:supabase/functions/event-review/schema.ts:applyConfidenceThreshold",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/event-review/schema_test.ts",
+      "target": "file:supabase/functions/event-review/schema.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/event-review/schema.ts",
+      "target": "file:supabase/functions/event-review/schema_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "file:supabase/functions/_shared/memory-context.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "file:supabase/functions/event-review/mod.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:processReviewQueueRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:processReviewQueueBatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:buildReviewQueueDeps",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:fetchReviewMemory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:reviewAndApplyEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:processReviewQueueRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:processReviewQueueBatch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-event-review-queue/lib/worker.ts:buildReviewQueueDeps",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-event-review-queue/lib/worker.ts:fetchReviewMemory",
+      "target": "function:supabase/functions/_shared/memory-context.ts:isMemoryFeatureEnabled",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-event-review-queue/lib/worker.ts:fetchReviewMemory",
+      "target": "function:supabase/functions/_shared/memory-context.ts:fetchSimilarReviewContext",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-event-review-queue/lib/worker.ts:fetchReviewMemory",
+      "target": "function:supabase/functions/_shared/memory-context.ts:formatReviewMemoryPrompt",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-event-review-queue/lib/worker.ts:buildReviewQueueDeps",
+      "target": "function:supabase/functions/event-review/config.ts:resolveLlmReviewConfig",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "target": "file:supabase/functions/event-review/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "target": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "target": "file:supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "target": "class:supabase/functions/process-event-review-queue/lib/worker_test.ts:FakeSupabase",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/lib/worker_test.ts",
+      "target": "class:supabase/functions/process-event-review-queue/lib/worker_test.ts:FakeQuery",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    }
+  ]
+}

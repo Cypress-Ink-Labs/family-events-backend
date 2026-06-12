@@ -1,0 +1,3396 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 22,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/functions/db-maintenance/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 29,
+      "nonEmptyLines": 28,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/embed-event/handler.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 329,
+      "nonEmptyLines": 282,
+      "functions": [
+        {
+          "name": "buildEmbeddingInput",
+          "startLine": 49,
+          "endLine": 59,
+          "params": [
+            "title",
+            "description"
+          ]
+        },
+        {
+          "name": "generateEmbedding",
+          "startLine": 61,
+          "endLine": 109,
+          "params": [
+            "text",
+            "apiKey",
+            "fetchImpl"
+          ]
+        },
+        {
+          "name": "storeEmbedding",
+          "startLine": 111,
+          "endLine": 133,
+          "params": [
+            "supabase",
+            "eventId",
+            "embedding",
+            "model"
+          ]
+        },
+        {
+          "name": "embedEvent",
+          "startLine": 135,
+          "endLine": 175,
+          "params": [
+            "input",
+            "deps"
+          ]
+        },
+        {
+          "name": "handleEmbedEventRequest",
+          "startLine": 179,
+          "endLine": 220,
+          "params": [
+            "body",
+            "deps"
+          ]
+        },
+        {
+          "name": "jsonResponse",
+          "startLine": 248,
+          "endLine": 253,
+          "params": [
+            "body",
+            "status"
+          ]
+        },
+        {
+          "name": "handleRequest",
+          "startLine": 255,
+          "endLine": 329,
+          "params": [
+            "req"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "EmbedEventRequestError",
+          "startLine": 222,
+          "endLine": 226,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        },
+        {
+          "name": "EmbedEventUpstreamError",
+          "startLine": 228,
+          "endLine": 234,
+          "methods": [
+            "constructor"
+          ],
+          "properties": [
+            "status"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "generateEmbedding",
+          "line": 61,
+          "isDefault": false
+        },
+        {
+          "name": "storeEmbedding",
+          "line": 111,
+          "isDefault": false
+        },
+        {
+          "name": "embedEvent",
+          "line": 135,
+          "isDefault": false
+        },
+        {
+          "name": "handleEmbedEventRequest",
+          "line": 179,
+          "isDefault": false
+        },
+        {
+          "name": "EmbedEventRequestError",
+          "line": 222,
+          "isDefault": false
+        },
+        {
+          "name": "EmbedEventUpstreamError",
+          "line": 228,
+          "isDefault": false
+        },
+        {
+          "name": "handleRequest",
+          "line": 255,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "buildEmbeddingInput",
+          "callee": "title.trim",
+          "lineNumber": 53
+        },
+        {
+          "caller": "buildEmbeddingInput",
+          "callee": "parts.push",
+          "lineNumber": 55
+        },
+        {
+          "caller": "buildEmbeddingInput",
+          "callee": "description.trim",
+          "lineNumber": 55
+        },
+        {
+          "caller": "buildEmbeddingInput",
+          "callee": "parts.join",
+          "lineNumber": 57
+        },
+        {
+          "caller": "buildEmbeddingInput",
+          "callee": "combined.slice",
+          "lineNumber": 58
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "fetchImpl",
+          "lineNumber": 68
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "JSON.stringify",
+          "lineNumber": 74
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 79
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "response.text().catch",
+          "lineNumber": 83
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "response.text",
+          "lineNumber": 83
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "errorBody.slice",
+          "lineNumber": 86
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "response.json",
+          "lineNumber": 91
+        },
+        {
+          "caller": "generateEmbedding",
+          "callee": "Array.isArray",
+          "lineNumber": 94
+        },
+        {
+          "caller": "storeEmbedding",
+          "callee": "embedding.join",
+          "lineNumber": 118
+        },
+        {
+          "caller": "storeEmbedding",
+          "callee": "supabase\n    .from(\"event_embeddings\")\n    .upsert",
+          "lineNumber": 119
+        },
+        {
+          "caller": "storeEmbedding",
+          "callee": "supabase\n    .from",
+          "lineNumber": 119
+        },
+        {
+          "caller": "storeEmbedding",
+          "callee": "new Date().toISOString",
+          "lineNumber": 126
+        },
+        {
+          "caller": "embedEvent",
+          "callee": "Date.now",
+          "lineNumber": 139
+        },
+        {
+          "caller": "embedEvent",
+          "callee": "buildEmbeddingInput",
+          "lineNumber": 140
+        },
+        {
+          "caller": "embedEvent",
+          "callee": "generateEmbedding",
+          "lineNumber": 142
+        },
+        {
+          "caller": "embedEvent",
+          "callee": "storeEmbedding",
+          "lineNumber": 148
+        },
+        {
+          "caller": "embedEvent",
+          "callee": "Date.now",
+          "lineNumber": 155
+        },
+        {
+          "caller": "embedEvent",
+          "callee": "logEdgeEvent",
+          "lineNumber": 157
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "Array.isArray",
+          "lineNumber": 184
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "payload.title.trim",
+          "lineNumber": 191
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "deps.supabase\n      .from(\"events\")\n      .select(\"title, description\")\n      .eq(\"id\", eventId)\n      .maybeSingle",
+          "lineNumber": 202
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "deps.supabase\n      .from(\"events\")\n      .select(\"title, description\")\n      .eq",
+          "lineNumber": 202
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "deps.supabase\n      .from(\"events\")\n      .select",
+          "lineNumber": 202
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "deps.supabase\n      .from",
+          "lineNumber": 202
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "embedEvent",
+          "lineNumber": 213
+        },
+        {
+          "caller": "handleEmbedEventRequest",
+          "callee": "embedEvent",
+          "lineNumber": 219
+        },
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 224
+        },
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 232
+        },
+        {
+          "caller": "jsonResponse",
+          "callee": "JSON.stringify",
+          "lineNumber": 249
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Deno.env.get",
+          "lineNumber": 260
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Deno.env.get",
+          "lineNumber": 261
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Deno.env.get",
+          "lineNumber": 262
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "requireServiceRole",
+          "lineNumber": 264
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jsonResponse",
+          "lineNumber": 266
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jsonResponse",
+          "lineNumber": 270
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jsonResponse",
+          "lineNumber": 274
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "createClient",
+          "lineNumber": 281
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "req.json",
+          "lineNumber": 282
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "handleEmbedEventRequest",
+          "lineNumber": 283
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jsonResponse",
+          "lineNumber": 287
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jsonResponse",
+          "lineNumber": 290
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "captureEdgeException",
+          "lineNumber": 294
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "errorContext",
+          "lineNumber": 296
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "logEdgeEvent",
+          "lineNumber": 298
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "errorContext",
+          "lineNumber": 301
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jsonResponse",
+          "lineNumber": 306
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "captureEdgeException",
+          "lineNumber": 309
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "errorContext",
+          "lineNumber": 311
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "logEdgeEvent",
+          "lineNumber": 313
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "errorContext",
+          "lineNumber": 316
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jsonResponse",
+          "lineNumber": 321
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Deno.env.get",
+          "lineNumber": 324
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 7,
+        "functionCount": 7,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/embed-event/handler_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 296,
+      "nonEmptyLines": 262,
+      "functions": [
+        {
+          "name": "makeFakeEmbedding",
+          "startLine": 12,
+          "endLine": 14,
+          "params": [
+            "dims"
+          ]
+        },
+        {
+          "name": "makeMockFetch",
+          "startLine": 16,
+          "endLine": 32,
+          "params": [
+            "embedding",
+            "promptTokens",
+            "totalTokens"
+          ]
+        },
+        {
+          "name": "makeMockFetchError",
+          "startLine": 34,
+          "endLine": 38,
+          "params": [
+            "status",
+            "body"
+          ]
+        },
+        {
+          "name": "makeMockFetchBadDimensions",
+          "startLine": 40,
+          "endLine": 51,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "FakeSupabase",
+          "startLine": 53,
+          "endLine": 60,
+          "methods": [
+            "from"
+          ],
+          "properties": [
+            "embeddings",
+            "events"
+          ]
+        },
+        {
+          "name": "FakeQuery",
+          "startLine": 62,
+          "endLine": 101,
+          "methods": [
+            "constructor",
+            "select",
+            "eq",
+            "maybeSingle",
+            "upsert"
+          ],
+          "properties": [
+            "supabase",
+            "table",
+            "filters",
+            "_single"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "makeFakeEmbedding",
+          "callee": "Array.from",
+          "lineNumber": 13
+        },
+        {
+          "caller": "makeFakeEmbedding",
+          "callee": "Math.sin",
+          "lineNumber": 13
+        },
+        {
+          "caller": "makeMockFetch",
+          "callee": "makeFakeEmbedding",
+          "lineNumber": 17
+        },
+        {
+          "caller": "makeMockFetch",
+          "callee": "JSON.stringify",
+          "lineNumber": 23
+        },
+        {
+          "caller": "makeMockFetchBadDimensions",
+          "callee": "JSON.stringify",
+          "lineNumber": 43
+        },
+        {
+          "caller": "maybeSingle",
+          "callee": "this.supabase.events.get",
+          "lineNumber": 85
+        },
+        {
+          "caller": "maybeSingle",
+          "callee": "Promise.resolve",
+          "lineNumber": 86
+        },
+        {
+          "caller": "maybeSingle",
+          "callee": "Promise.resolve",
+          "lineNumber": 88
+        },
+        {
+          "caller": "upsert",
+          "callee": "this.supabase.embeddings.set",
+          "lineNumber": 94
+        },
+        {
+          "caller": "upsert",
+          "callee": "Promise.resolve",
+          "lineNumber": 99
+        },
+        {
+          "caller": "mockFetch",
+          "callee": "input.text",
+          "lineNumber": 186
+        },
+        {
+          "caller": "mockFetch",
+          "callee": "JSON.stringify",
+          "lineNumber": 189
+        },
+        {
+          "caller": "mockFetch",
+          "callee": "makeFakeEmbedding",
+          "lineNumber": 190
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 4,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/embed-event/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 4,
+      "nonEmptyLines": 3,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/log-cron-run/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 37,
+      "nonEmptyLines": 33,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/notify-email/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 678,
+      "nonEmptyLines": 626,
+      "functions": [
+        {
+          "name": "readOptionalString",
+          "startLine": 64,
+          "endLine": 76,
+          "params": [
+            "value",
+            "key",
+            "maxLength"
+          ]
+        },
+        {
+          "name": "readNullableString",
+          "startLine": 78,
+          "endLine": 90,
+          "params": [
+            "value",
+            "key",
+            "maxLength"
+          ]
+        },
+        {
+          "name": "assertEmail",
+          "startLine": 92,
+          "endLine": 97,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "parsePayload",
+          "startLine": 99,
+          "endLine": 158,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "wrapEmailShell",
+          "startLine": 177,
+          "endLine": 235,
+          "params": [
+            "{\n  heading,\n  tagline,\n  bodyHtml,\n  footerHtml,\n  appUrl,\n}"
+          ]
+        },
+        {
+          "name": "renderAdminRequest",
+          "startLine": 243,
+          "endLine": 297,
+          "params": [
+            "payload",
+            "adminEmail",
+            "appUrl"
+          ]
+        },
+        {
+          "name": "renderRequestApproved",
+          "startLine": 299,
+          "endLine": 343,
+          "params": [
+            "payload",
+            "appUrl"
+          ]
+        },
+        {
+          "name": "renderRequestRejected",
+          "startLine": 345,
+          "endLine": 373,
+          "params": [
+            "payload",
+            "appUrl"
+          ]
+        },
+        {
+          "name": "renderCommunityEventStatus",
+          "startLine": 375,
+          "endLine": 432,
+          "params": [
+            "payload",
+            "appUrl",
+            "status"
+          ]
+        },
+        {
+          "name": "sendViaResend",
+          "startLine": 434,
+          "endLine": 463,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "sendViaResendTemplate",
+          "startLine": 465,
+          "endLine": 496,
+          "params": [
+            "args"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "readOptionalString",
+          "callee": "raw.trim",
+          "lineNumber": 72
+        },
+        {
+          "caller": "readNullableString",
+          "callee": "raw.trim",
+          "lineNumber": 86
+        },
+        {
+          "caller": "assertEmail",
+          "callee": "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test",
+          "lineNumber": 93
+        },
+        {
+          "caller": "assertEmail",
+          "callee": "value.toLowerCase",
+          "lineNumber": 96
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "isRecord",
+          "lineNumber": 100
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 101
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 106
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "assertEmail",
+          "lineNumber": 107
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 107
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readNullableString",
+          "lineNumber": 108
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "assertEmail",
+          "lineNumber": 115
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 115
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 116
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readOptionalString",
+          "lineNumber": 117
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "assertEmail",
+          "lineNumber": 124
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 124
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "assertEmail",
+          "lineNumber": 131
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 131
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 132
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "assertEmail",
+          "lineNumber": 139
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 139
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 140
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 141
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 142
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readOptionalString",
+          "lineNumber": 143
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "assertEmail",
+          "lineNumber": 150
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 150
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 151
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readString",
+          "lineNumber": 152
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "readOptionalString",
+          "lineNumber": 153
+        },
+        {
+          "caller": "wrapEmailShell",
+          "callee": "appUrl.replace",
+          "lineNumber": 190
+        },
+        {
+          "caller": "wrapEmailShell",
+          "callee": "`\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <meta name=\"color-scheme\" content=\"light\" />\n  <link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@500;600&display=swap\" rel=\"stylesheet\" />\n</head>\n<body style=\"margin:0;padding:0;background:${THEME.bg};font-family:${FONT_SANS};\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:${THEME.bg};\">\n    <tr>\n      <td align=\"center\" style=\"padding:32px 12px;\">\n        <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:${THEME.surface};border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(28,24,40,0.10);\">\n          <!-- Header -->\n          <tr>\n            <td style=\"background:${THEME.violet};background-image:linear-gradient(135deg,${THEME.violet} 0%,${THEME.violetDeep} 100%);padding:36px 40px 32px;\">\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td align=\"left\">\n                    <img src=\"${escapeHtml(logoUrl)}\" width=\"28\" height=\"28\" alt=\"\" style=\"vertical-align:middle;border-radius:7px;display:inline-block;\" />\n                    <span style=\"font-family:${FONT_SANS};font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#F2ECFB;vertical-align:middle;padding-left:10px;\">Family Events</span>\n                  </td>\n                </tr>\n              </table>\n              <div style=\"font-family:${FONT_DISPLAY};font-size:34px;line-height:1.1;font-weight:600;color:#FFFFFF;margin:22px 0 0;\">${escapeHtml(heading)}</div>\n              <div style=\"display:inline-block;margin-top:14px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.25);border-radius:9999px;padding:6px 14px;font-family:${FONT_MONO};font-size:12px;letter-spacing:0.03em;color:#FFFFFF;\">${escapeHtml(tagline)}</div>\n            </td>\n          </tr>\n          <!-- Body -->\n          ${bodyHtml}\n          <!-- Footer -->\n          <tr>\n            <td style=\"background:${THEME.bg};padding:26px 40px;border-top:1px solid ${THEME.border};\">\n              ${footerHtml}\n              <div style=\"font-family:${FONT_MONO};font-size:11px;letter-spacing:0.04em;color:${THEME.textMuted};text-align:center;margin:14px 0 0;opacity:0.7;\">FAMILY EVENTS</div>\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>`.trim",
+          "lineNumber": 191
+        },
+        {
+          "caller": "wrapEmailShell",
+          "callee": "escapeHtml",
+          "lineNumber": 211
+        },
+        {
+          "caller": "wrapEmailShell",
+          "callee": "escapeHtml",
+          "lineNumber": 216
+        },
+        {
+          "caller": "wrapEmailShell",
+          "callee": "escapeHtml",
+          "lineNumber": 217
+        },
+        {
+          "caller": "renderAdminRequest",
+          "callee": "payload.message?.trim",
+          "lineNumber": 248
+        },
+        {
+          "caller": "renderAdminRequest",
+          "callee": "appUrl.replace",
+          "lineNumber": 249
+        },
+        {
+          "caller": "renderAdminRequest",
+          "callee": "escapeHtml",
+          "lineNumber": 260
+        },
+        {
+          "caller": "renderAdminRequest",
+          "callee": "escapeHtml",
+          "lineNumber": 267
+        },
+        {
+          "caller": "renderAdminRequest",
+          "callee": "escapeHtml",
+          "lineNumber": 279
+        },
+        {
+          "caller": "renderAdminRequest",
+          "callee": "wrapEmailShell",
+          "lineNumber": 289
+        },
+        {
+          "caller": "renderRequestApproved",
+          "callee": "(payload.app_url ?? appUrl).replace",
+          "lineNumber": 303
+        },
+        {
+          "caller": "renderRequestApproved",
+          "callee": "escapeHtml",
+          "lineNumber": 313
+        },
+        {
+          "caller": "renderRequestApproved",
+          "callee": "escapeHtml",
+          "lineNumber": 325
+        },
+        {
+          "caller": "renderRequestApproved",
+          "callee": "wrapEmailShell",
+          "lineNumber": 335
+        },
+        {
+          "caller": "renderRequestRejected",
+          "callee": "wrapEmailShell",
+          "lineNumber": 365
+        },
+        {
+          "caller": "renderCommunityEventStatus",
+          "callee": "escapeHtml",
+          "lineNumber": 383
+        },
+        {
+          "caller": "renderCommunityEventStatus",
+          "callee": "escapeHtml",
+          "lineNumber": 384
+        },
+        {
+          "caller": "renderCommunityEventStatus",
+          "callee": "wrapEmailShell",
+          "lineNumber": 424
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "fetch",
+          "lineNumber": 440
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "JSON.stringify",
+          "lineNumber": 446
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 453
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "response.text().catch",
+          "lineNumber": 457
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "response.text",
+          "lineNumber": 457
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "body.slice",
+          "lineNumber": 458
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "response.json().catch",
+          "lineNumber": 461
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "response.json",
+          "lineNumber": 461
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "fetch",
+          "lineNumber": 472
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "JSON.stringify",
+          "lineNumber": 478
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 486
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "response.text().catch",
+          "lineNumber": 490
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "response.text",
+          "lineNumber": 490
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "body.slice",
+          "lineNumber": 491
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "response.json().catch",
+          "lineNumber": 494
+        },
+        {
+          "caller": "sendViaResendTemplate",
+          "callee": "response.json",
+          "lineNumber": 494
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 0,
+        "functionCount": 11,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-event-review-queue/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 25,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-notification-queue/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 349,
+      "nonEmptyLines": 309,
+      "functions": [
+        {
+          "name": "formatEventDate",
+          "startLine": 53,
+          "endLine": 65,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "changeSummary",
+          "startLine": 67,
+          "endLine": 90,
+          "params": [
+            "changeType",
+            "detail"
+          ]
+        },
+        {
+          "name": "sleep",
+          "startLine": 92,
+          "endLine": 94,
+          "params": [
+            "ms"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "formatEventDate",
+          "callee": "new Date(isoDate).toLocaleDateString",
+          "lineNumber": 55
+        },
+        {
+          "caller": "changeSummary",
+          "callee": "formatEventDate",
+          "lineNumber": 74
+        },
+        {
+          "caller": "sleep",
+          "callee": "setTimeout",
+          "lineNumber": 93
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-source-queue/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 89,
+      "nonEmptyLines": 80,
+      "functions": [
+        {
+          "name": "sourceClaimLimit",
+          "startLine": 12,
+          "endLine": 14,
+          "params": []
+        },
+        {
+          "name": "processSourceQueueBatch",
+          "startLine": 16,
+          "endLine": 75,
+          "params": [
+            "supabase"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "processSourceQueueBatch",
+          "line": 16,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "Date.now",
+          "lineNumber": 25
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "reapStuckSourceQueueRows",
+          "lineNumber": 26
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "supabase.rpc",
+          "lineNumber": 28
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "sourceClaimLimit",
+          "lineNumber": 30
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "planSourceQueueClaimHandling",
+          "lineNumber": 35
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "rows.map",
+          "lineNumber": 36
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "Date.now",
+          "lineNumber": 37
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "supabase.rpc",
+          "lineNumber": 41
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "rows.find",
+          "lineNumber": 56
+        },
+        {
+          "caller": "processSourceQueueBatch",
+          "callee": "processSourceQueueRow",
+          "lineNumber": 67
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-tag-queue/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 411,
+      "nonEmptyLines": 386,
+      "functions": [
+        {
+          "name": "fetchEventInputs",
+          "startLine": 56,
+          "endLine": 71,
+          "params": [
+            "supabase",
+            "eventId"
+          ]
+        },
+        {
+          "name": "callTagEvent",
+          "startLine": 73,
+          "endLine": 101,
+          "params": [
+            "supabaseUrl",
+            "serviceRoleKey",
+            "row",
+            "inputs"
+          ]
+        },
+        {
+          "name": "markSuccess",
+          "startLine": 103,
+          "endLine": 116,
+          "params": [
+            "supabase",
+            "rowId"
+          ]
+        },
+        {
+          "name": "markFailureOrDead",
+          "startLine": 118,
+          "endLine": 154,
+          "params": [
+            "supabase",
+            "row",
+            "err"
+          ]
+        },
+        {
+          "name": "processTagQueueBatch",
+          "startLine": 156,
+          "endLine": 398,
+          "params": [
+            "supabase",
+            "supabaseUrl",
+            "serviceRoleKey",
+            "cronContext"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "processTagQueueBatch",
+          "line": 156,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "fetchEventInputs",
+          "callee": "supabase\n    .from(\"events\")\n    .select(\"title, description\")\n    .eq(\"id\", eventId)\n    .maybeSingle",
+          "lineNumber": 60
+        },
+        {
+          "caller": "fetchEventInputs",
+          "callee": "supabase\n    .from(\"events\")\n    .select(\"title, description\")\n    .eq",
+          "lineNumber": 60
+        },
+        {
+          "caller": "fetchEventInputs",
+          "callee": "supabase\n    .from(\"events\")\n    .select",
+          "lineNumber": 60
+        },
+        {
+          "caller": "fetchEventInputs",
+          "callee": "supabase\n    .from",
+          "lineNumber": 60
+        },
+        {
+          "caller": "fetchEventInputs",
+          "callee": "String",
+          "lineNumber": 68
+        },
+        {
+          "caller": "fetchEventInputs",
+          "callee": "String",
+          "lineNumber": 69
+        },
+        {
+          "caller": "callTagEvent",
+          "callee": "invokeFunction",
+          "lineNumber": 79
+        },
+        {
+          "caller": "markSuccess",
+          "callee": "supabase\n    .from(\"event_tag_queue\")\n    .update({\n      status: resolveCompletedTagQueueStatus(),\n      finished_at: new Date().toISOString(),\n      last_error: null,\n    })\n    .eq",
+          "lineNumber": 107
+        },
+        {
+          "caller": "markSuccess",
+          "callee": "supabase\n    .from(\"event_tag_queue\")\n    .update",
+          "lineNumber": 107
+        },
+        {
+          "caller": "markSuccess",
+          "callee": "supabase\n    .from",
+          "lineNumber": 107
+        },
+        {
+          "caller": "markSuccess",
+          "callee": "resolveCompletedTagQueueStatus",
+          "lineNumber": 110
+        },
+        {
+          "caller": "markSuccess",
+          "callee": "new Date().toISOString",
+          "lineNumber": 111
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "errorMessage",
+          "lineNumber": 123
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "supabase\n      .from(\"event_tag_queue\")\n      .update({\n        status: \"dead\",\n        finished_at: new Date().toISOString(),\n        last_error: errMsg.slice(0, 1000),\n      })\n      .eq",
+          "lineNumber": 128
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "supabase\n      .from(\"event_tag_queue\")\n      .update",
+          "lineNumber": 128
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "supabase\n      .from",
+          "lineNumber": 128
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "new Date().toISOString",
+          "lineNumber": 132
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "errMsg.slice",
+          "lineNumber": 133
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "Math.pow",
+          "lineNumber": 141
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "new Date(Date.now() + backoffMs).toISOString",
+          "lineNumber": 142
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "Date.now",
+          "lineNumber": 142
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "supabase\n    .from(\"event_tag_queue\")\n    .update({\n      status: \"pending\",\n      started_at: null,\n      next_attempt_at: nextAttemptAt,\n      last_error: errMsg.slice(0, 1000),\n    })\n    .eq",
+          "lineNumber": 143
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "supabase\n    .from(\"event_tag_queue\")\n    .update",
+          "lineNumber": 143
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "supabase\n    .from",
+          "lineNumber": 143
+        },
+        {
+          "caller": "markFailureOrDead",
+          "callee": "errMsg.slice",
+          "lineNumber": 149
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "Date.now",
+          "lineNumber": 162
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "supabase.rpc",
+          "lineNumber": 173
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "Number",
+          "lineNumber": 177
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "supabase.rpc",
+          "lineNumber": 179
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "Date.now",
+          "lineNumber": 190
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "logCronRunEvent",
+          "lineNumber": 191
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "Date.now",
+          "lineNumber": 207
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "supabase.rpc",
+          "lineNumber": 210
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "Number",
+          "lineNumber": 217
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "fetchEventInputs",
+          "lineNumber": 223
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "markSuccess",
+          "lineNumber": 227
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "logCronRunEvent",
+          "lineNumber": 229
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "Date.now",
+          "lineNumber": 239
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "callTagEvent",
+          "lineNumber": 246
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "markSuccess",
+          "lineNumber": 247
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "logCronRunEvent",
+          "lineNumber": 249
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "Date.now",
+          "lineNumber": 259
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "markFailureOrDead(supabase, activeRow, err).catch",
+          "lineNumber": 266
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "markFailureOrDead",
+          "lineNumber": 266
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "captureEdgeException",
+          "lineNumber": 269
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "errorContext",
+          "lineNumber": 271
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "captureEdgeException",
+          "lineNumber": 284
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "errorContext",
+          "lineNumber": 286
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "logCronRunEvent",
+          "lineNumber": 294
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "errorContext",
+          "lineNumber": 299
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "Date.now",
+          "lineNumber": 304
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "logCronRunEvent",
+          "lineNumber": 313
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "Date.now",
+          "lineNumber": 323
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "errorMessage(err).slice",
+          "lineNumber": 324
+        },
+        {
+          "caller": "processOneRow",
+          "callee": "errorMessage",
+          "lineNumber": 324
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "shouldStopBeforeStartingNextTagRow",
+          "lineNumber": 338
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "Date.now",
+          "lineNumber": 338
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "rows.slice(i).map",
+          "lineNumber": 339
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "rows.slice",
+          "lineNumber": 339
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "supabase.rpc",
+          "lineNumber": 341
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "rows.slice",
+          "lineNumber": 347
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "Promise.all",
+          "lineNumber": 348
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "chunk.map",
+          "lineNumber": 348
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "processOneRow",
+          "lineNumber": 348
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "supabase\n    .from(\"event_tag_queue\")\n    .select(\"id\", { count: \"exact\", head: true })\n    .eq",
+          "lineNumber": 352
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "supabase\n    .from(\"event_tag_queue\")\n    .select",
+          "lineNumber": 352
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "supabase\n    .from",
+          "lineNumber": 352
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "Date.now",
+          "lineNumber": 358
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "logCronRunEvent",
+          "lineNumber": 360
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "supabase.rpc",
+          "lineNumber": 379
+        },
+        {
+          "caller": "processTagQueueBatch",
+          "callee": "logCronRunEvent",
+          "lineNumber": 383
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 1,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-tag-queue/index_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 317,
+      "nonEmptyLines": 269,
+      "functions": [
+        {
+          "name": "row",
+          "startLine": 127,
+          "endLine": 139,
+          "params": [
+            "id",
+            "overrides"
+          ]
+        },
+        {
+          "name": "withFetch",
+          "startLine": 141,
+          "endLine": 152,
+          "params": [
+            "fakeFetch",
+            "fn"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "FakeSupabase",
+          "startLine": 14,
+          "endLine": 64,
+          "methods": [
+            "rpc",
+            "from",
+            "rpcNames"
+          ],
+          "properties": [
+            "reaped",
+            "claimedRows",
+            "startedAttempts",
+            "events",
+            "pendingCount",
+            "rpcCalls",
+            "updates"
+          ]
+        },
+        {
+          "name": "FakeQuery",
+          "startLine": 66,
+          "endLine": 125,
+          "methods": [
+            "constructor",
+            "select",
+            "update",
+            "eq",
+            "maybeSingle",
+            "then",
+            "execute"
+          ],
+          "properties": [
+            "operation",
+            "filters",
+            "payload"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "rpc",
+          "callee": "this.rpcCalls.push",
+          "lineNumber": 24
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 27
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 31
+        },
+        {
+          "caller": "rpc",
+          "callee": "Number",
+          "lineNumber": 35
+        },
+        {
+          "caller": "rpc",
+          "callee": "this.claimedRows.find",
+          "lineNumber": 36
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 37
+        },
+        {
+          "caller": "rpc",
+          "callee": "this.startedAttempts.get",
+          "lineNumber": 40
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 51
+        },
+        {
+          "caller": "rpcNames",
+          "callee": "this.rpcCalls.map",
+          "lineNumber": 62
+        },
+        {
+          "caller": "eq",
+          "callee": "this.filters.set",
+          "lineNumber": 88
+        },
+        {
+          "caller": "maybeSingle",
+          "callee": "this.execute",
+          "lineNumber": 93
+        },
+        {
+          "caller": "then",
+          "callee": "this.execute(false).then",
+          "lineNumber": 100
+        },
+        {
+          "caller": "then",
+          "callee": "this.execute",
+          "lineNumber": 100
+        },
+        {
+          "caller": "execute",
+          "callee": "this.db.events.get",
+          "lineNumber": 105
+        },
+        {
+          "caller": "execute",
+          "callee": "String",
+          "lineNumber": 105
+        },
+        {
+          "caller": "execute",
+          "callee": "this.filters.get",
+          "lineNumber": 105
+        },
+        {
+          "caller": "execute",
+          "callee": "Promise.resolve",
+          "lineNumber": 106
+        },
+        {
+          "caller": "execute",
+          "callee": "Promise.resolve",
+          "lineNumber": 110
+        },
+        {
+          "caller": "execute",
+          "callee": "Number",
+          "lineNumber": 118
+        },
+        {
+          "caller": "execute",
+          "callee": "this.filters.get",
+          "lineNumber": 118
+        },
+        {
+          "caller": "execute",
+          "callee": "this.db.updates.set",
+          "lineNumber": 119
+        },
+        {
+          "caller": "execute",
+          "callee": "Promise.resolve",
+          "lineNumber": 120
+        },
+        {
+          "caller": "withFetch",
+          "callee": "fn",
+          "lineNumber": 148
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-due-sources/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 72,
+      "nonEmptyLines": 65,
+      "functions": [
+        {
+          "name": "normalizeDueScrapePayload",
+          "startLine": 14,
+          "endLine": 21,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "normalizeDueScrapePayload",
+          "line": 14,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "normalizeDueScrapePayload",
+          "callee": "Number",
+          "lineNumber": 18
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 201,
+      "nonEmptyLines": 181,
+      "functions": [
+        {
+          "name": "resolveAllowedOrigin",
+          "startLine": 25,
+          "endLine": 33,
+          "params": [
+            "origin"
+          ]
+        },
+        {
+          "name": "buildCorsHeaders",
+          "startLine": 39,
+          "endLine": 49,
+          "params": [
+            "allowedOrigin"
+          ]
+        },
+        {
+          "name": "dueSourceLimit",
+          "startLine": 51,
+          "endLine": 55,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "Deno.env.get",
+          "lineNumber": 26
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "(configured?.split(\",\") ?? DEFAULT_ALLOWED_ORIGINS)\n    .map((value) => value.trim())\n    .filter",
+          "lineNumber": 27
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "(configured?.split(\",\") ?? DEFAULT_ALLOWED_ORIGINS)\n    .map",
+          "lineNumber": 27
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "configured?.split",
+          "lineNumber": 27
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "value.trim",
+          "lineNumber": 28
+        },
+        {
+          "caller": "resolveAllowedOrigin",
+          "callee": "allowlist.includes",
+          "lineNumber": 32
+        },
+        {
+          "caller": "dueSourceLimit",
+          "callee": "Number",
+          "lineNumber": 52
+        },
+        {
+          "caller": "dueSourceLimit",
+          "callee": "Deno.env.get",
+          "lineNumber": 52
+        },
+        {
+          "caller": "dueSourceLimit",
+          "callee": "Number.isFinite",
+          "lineNumber": 53
+        },
+        {
+          "caller": "dueSourceLimit",
+          "callee": "Math.max",
+          "lineNumber": 54
+        },
+        {
+          "caller": "dueSourceLimit",
+          "callee": "Math.min",
+          "lineNumber": 54
+        },
+        {
+          "caller": "dueSourceLimit",
+          "callee": "Math.floor",
+          "lineNumber": 54
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/source-queue.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 59,
+      "nonEmptyLines": 51,
+      "functions": [
+        {
+          "name": "buildScrapeSourceResponse",
+          "startLine": 13,
+          "endLine": 18,
+          "params": [
+            "results"
+          ]
+        },
+        {
+          "name": "enqueueSourceScrape",
+          "startLine": 20,
+          "endLine": 39,
+          "params": [
+            "supabase",
+            "sourceId",
+            "triggerType"
+          ]
+        },
+        {
+          "name": "kickProcessSourceQueue",
+          "startLine": 41,
+          "endLine": 59,
+          "params": [
+            "supabaseUrl",
+            "serviceRoleKey"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "buildScrapeSourceResponse",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "enqueueSourceScrape",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "kickProcessSourceQueue",
+          "line": 41,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "enqueueSourceScrape",
+          "callee": "supabase\n    .rpc(\"enqueue_source_scrape\", {\n      p_source_id: sourceId,\n      p_trigger_type: triggerType,\n    })\n    .maybeSingle",
+          "lineNumber": 25
+        },
+        {
+          "caller": "enqueueSourceScrape",
+          "callee": "supabase\n    .rpc",
+          "lineNumber": 25
+        },
+        {
+          "caller": "enqueueSourceScrape",
+          "callee": "Number",
+          "lineNumber": 36
+        },
+        {
+          "caller": "kickProcessSourceQueue",
+          "callee": "invokeFunction",
+          "lineNumber": 45
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/source-queue_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 71,
+      "nonEmptyLines": 59,
+      "classes": [
+        {
+          "name": "FakeSupabaseClient",
+          "startLine": 9,
+          "endLine": 20,
+          "methods": [
+            "constructor",
+            "rpc"
+          ],
+          "properties": [
+            "calls"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "rpc",
+          "callee": "this.calls.push",
+          "lineNumber": 15
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 17
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "supabase/functions/send-auth-email/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 368,
+      "nonEmptyLines": 343,
+      "functions": [
+        {
+          "name": "usernameFromUser",
+          "startLine": 57,
+          "endLine": 64,
+          "params": [
+            "user"
+          ]
+        },
+        {
+          "name": "buildVerifyLink",
+          "startLine": 66,
+          "endLine": 78,
+          "params": [
+            "emailData"
+          ]
+        },
+        {
+          "name": "buildActionEmailHtml",
+          "startLine": 97,
+          "endLine": 179,
+          "params": [
+            "{\n  username,\n  intro,\n  actionLabel,\n  actionUrl,\n  heading,\n  tagline,\n}"
+          ]
+        },
+        {
+          "name": "jsonResponse",
+          "startLine": 183,
+          "endLine": 188,
+          "params": [
+            "body",
+            "status"
+          ]
+        },
+        {
+          "name": "sendEmail",
+          "startLine": 190,
+          "endLine": 213,
+          "params": [
+            "apiKey",
+            "body"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "usernameFromUser",
+          "callee": "user.email.split",
+          "lineNumber": 62
+        },
+        {
+          "caller": "buildVerifyLink",
+          "callee": "(Deno.env.get(\"SUPABASE_URL\") ?? emailData.site_url)\n    .replace(/\\/auth\\/v1\\/?$/, \"\")\n    .replace",
+          "lineNumber": 69
+        },
+        {
+          "caller": "buildVerifyLink",
+          "callee": "(Deno.env.get(\"SUPABASE_URL\") ?? emailData.site_url)\n    .replace",
+          "lineNumber": 69
+        },
+        {
+          "caller": "buildVerifyLink",
+          "callee": "Deno.env.get",
+          "lineNumber": 69
+        },
+        {
+          "caller": "buildVerifyLink",
+          "callee": "params.toString",
+          "lineNumber": 77
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "(Deno.env.get(\"APP_URL\") ?? \"https://family-events.up.railway.app\").replace",
+          "lineNumber": 112
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "Deno.env.get",
+          "lineNumber": 112
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "`\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <meta name=\"color-scheme\" content=\"light\" />\n  <link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@500;600&display=swap\" rel=\"stylesheet\" />\n</head>\n<body style=\"margin:0;padding:0;background:${THEME.bg};font-family:${FONT_SANS};\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:${THEME.bg};\">\n    <tr>\n      <td align=\"center\" style=\"padding:32px 12px;\">\n        <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:${THEME.surface};border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(28,24,40,0.10);\">\n          <!-- Header -->\n          <tr>\n            <td style=\"background:${THEME.violet};background-image:linear-gradient(135deg,${THEME.violet} 0%,${THEME.violetDeep} 100%);padding:36px 40px 32px;\">\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td align=\"left\">\n                    <img src=\"${escapeHtml(logoUrl)}\" width=\"28\" height=\"28\" alt=\"\" style=\"vertical-align:middle;border-radius:7px;display:inline-block;\" />\n                    <span style=\"font-family:${FONT_SANS};font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#F2ECFB;vertical-align:middle;padding-left:10px;\">Family Events</span>\n                  </td>\n                </tr>\n              </table>\n              <div style=\"font-family:${FONT_DISPLAY};font-size:34px;line-height:1.1;font-weight:600;color:#FFFFFF;margin:22px 0 0;\">${escapeHtml(displayHeading)}</div>\n              <div style=\"display:inline-block;margin-top:14px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.25);border-radius:9999px;padding:6px 14px;font-family:${FONT_MONO};font-size:12px;letter-spacing:0.03em;color:#FFFFFF;\">${escapeHtml(displayTagline)}</div>\n            </td>\n          </tr>\n          <!-- Body -->\n          <tr>\n            <td style=\"padding:30px 40px 6px;\">\n              <div style=\"font-family:${FONT_DISPLAY};font-size:21px;font-weight:600;color:${THEME.textPrimary};margin:0 0 8px;\">Hi ${escapeHtml(username)},</div>\n              <div style=\"font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0;\">${escapeHtml(intro)}</div>\n            </td>\n          </tr>\n          <!-- CTA -->\n          <tr>\n            <td align=\"center\" style=\"padding:28px 40px 36px;\">\n              <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td style=\"background:${THEME.peach};border-radius:9999px;\">\n                    <a href=\"${escapeHtml(actionUrl)}\" style=\"display:inline-block;font-family:${FONT_SANS};font-size:16px;font-weight:700;color:#FFFFFF;padding:16px 32px;border-radius:9999px;text-decoration:none;\">${escapeHtml(actionLabel)}</a>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          <!-- Footer -->\n          <tr>\n            <td style=\"background:${THEME.bg};padding:26px 40px;border-top:1px solid ${THEME.border};\">\n              <div style=\"font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;\">\n                If you didn't request this, you can safely ignore this email.\n              </div>\n              <div style=\"font-family:${FONT_MONO};font-size:11px;letter-spacing:0.04em;color:${THEME.textMuted};text-align:center;margin:14px 0 0;opacity:0.7;\">FAMILY EVENTS</div>\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>`.trim",
+          "lineNumber": 116
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 136
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 141
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 142
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 148
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 149
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 158
+        },
+        {
+          "caller": "buildActionEmailHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 158
+        },
+        {
+          "caller": "jsonResponse",
+          "callee": "JSON.stringify",
+          "lineNumber": 184
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "fetch",
+          "lineNumber": 196
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "JSON.stringify",
+          "lineNumber": 202
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 203
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "response.text().catch",
+          "lineNumber": 207
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "response.text",
+          "lineNumber": 207
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "text.slice",
+          "lineNumber": 208
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "response.json().catch",
+          "lineNumber": 211
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "response.json",
+          "lineNumber": 211
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/send-push/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 623,
+      "nonEmptyLines": 549,
+      "functions": [
+        {
+          "name": "base64urlEncode",
+          "startLine": 32,
+          "endLine": 38,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "base64urlDecode",
+          "startLine": 41,
+          "endLine": 50,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "toArrayBuffer",
+          "startLine": 52,
+          "endLine": 56,
+          "params": [
+            "bytes"
+          ]
+        },
+        {
+          "name": "buildVapidAuth",
+          "startLine": 59,
+          "endLine": 121,
+          "params": [
+            "endpoint",
+            "vapidPrivateKey",
+            "vapidPublicKey",
+            "subject"
+          ]
+        },
+        {
+          "name": "derToRaw",
+          "startLine": 124,
+          "endLine": 148,
+          "params": [
+            "der"
+          ]
+        },
+        {
+          "name": "encryptPayload",
+          "startLine": 153,
+          "endLine": 271,
+          "params": [
+            "payload",
+            "p256dhKey",
+            "authSecret"
+          ]
+        },
+        {
+          "name": "parsePayload",
+          "startLine": 282,
+          "endLine": 298,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "base64urlEncode",
+          "callee": "String.fromCharCode",
+          "lineNumber": 35
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace(/\\+/g, \"-\").replace(/\\//g, \"_\").replace",
+          "lineNumber": 37
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace(/\\+/g, \"-\").replace",
+          "lineNumber": 37
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace",
+          "lineNumber": 37
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa",
+          "lineNumber": 37
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "input.replace(/-/g, \"+\").replace",
+          "lineNumber": 42
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "input.replace",
+          "lineNumber": 42
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "\"=\".repeat",
+          "lineNumber": 43
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "atob",
+          "lineNumber": 44
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "binary.charCodeAt",
+          "lineNumber": 47
+        },
+        {
+          "caller": "toArrayBuffer",
+          "callee": "copy.set",
+          "lineNumber": 54
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlEncode",
+          "lineNumber": 67
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 68
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "JSON.stringify",
+          "lineNumber": 68
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "Math.floor",
+          "lineNumber": 71
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "Date.now",
+          "lineNumber": 71
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlEncode",
+          "lineNumber": 72
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 73
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "JSON.stringify",
+          "lineNumber": 74
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlDecode",
+          "lineNumber": 85
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlEncode",
+          "lineNumber": 91
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlDecode(vapidPublicKey).slice",
+          "lineNumber": 91
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlDecode",
+          "lineNumber": 91
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlEncode",
+          "lineNumber": 92
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlDecode(vapidPublicKey).slice",
+          "lineNumber": 92
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlDecode",
+          "lineNumber": 92
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 99
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "crypto.subtle.sign",
+          "lineNumber": 107
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 110
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "derToRaw",
+          "lineNumber": 114
+        },
+        {
+          "caller": "buildVapidAuth",
+          "callee": "base64urlEncode",
+          "lineNumber": 115
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "raw.set",
+          "lineNumber": 137
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "der.slice",
+          "lineNumber": 137
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "raw.set",
+          "lineNumber": 145
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "der.slice",
+          "lineNumber": 145
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.generateKey",
+          "lineNumber": 161
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "base64urlDecode",
+          "lineNumber": 168
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 169
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.deriveBits",
+          "lineNumber": 178
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.exportKey",
+          "lineNumber": 186
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.getRandomValues",
+          "lineNumber": 190
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "base64urlDecode",
+          "lineNumber": 193
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "base64urlDecode",
+          "lineNumber": 196
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "encoder.encode",
+          "lineNumber": 198
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 203
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.deriveBits",
+          "lineNumber": 209
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 222
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "encoder.encode",
+          "lineNumber": 225
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.deriveBits",
+          "lineNumber": 226
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "encoder.encode",
+          "lineNumber": 233
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.deriveBits",
+          "lineNumber": 234
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 241
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "encoder.encode",
+          "lineNumber": 246
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "crypto.subtle.encrypt",
+          "lineNumber": 249
+        },
+        {
+          "caller": "encryptPayload",
+          "callee": "new DataView(rsBytes.buffer).setUint32",
+          "lineNumber": 259
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "Array.isArray",
+          "lineNumber": 283
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/send-push/lib/mobile-push.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 267,
+      "nonEmptyLines": 247,
+      "functions": [
+        {
+          "name": "partitionMobileSubscriptions",
+          "startLine": 34,
+          "endLine": 48,
+          "params": [
+            "rows"
+          ]
+        },
+        {
+          "name": "mobileCredentialStatus",
+          "startLine": 50,
+          "endLine": 67,
+          "params": [
+            "credentials"
+          ]
+        },
+        {
+          "name": "buildApnsRequest",
+          "startLine": 69,
+          "endLine": 104,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "buildFcmMessage",
+          "startLine": 106,
+          "endLine": 133,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "base64urlEncode",
+          "startLine": 135,
+          "endLine": 139,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "pemToArrayBuffer",
+          "startLine": 141,
+          "endLine": 150,
+          "params": [
+            "pem"
+          ]
+        },
+        {
+          "name": "derToRawSignature",
+          "startLine": 152,
+          "endLine": 170,
+          "params": [
+            "signature"
+          ]
+        },
+        {
+          "name": "signApnsJwt",
+          "startLine": 172,
+          "endLine": 198,
+          "params": [
+            "credentials"
+          ]
+        },
+        {
+          "name": "parseFcmServiceAccount",
+          "startLine": 200,
+          "endLine": 219,
+          "params": [
+            "raw"
+          ]
+        },
+        {
+          "name": "getFcmAccessToken",
+          "startLine": 221,
+          "endLine": 267,
+          "params": [
+            "credentials"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "partitionMobileSubscriptions",
+          "line": 34,
+          "isDefault": false
+        },
+        {
+          "name": "mobileCredentialStatus",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "buildApnsRequest",
+          "line": 69,
+          "isDefault": false
+        },
+        {
+          "name": "buildFcmMessage",
+          "line": 106,
+          "isDefault": false
+        },
+        {
+          "name": "base64urlEncode",
+          "line": 135,
+          "isDefault": false
+        },
+        {
+          "name": "pemToArrayBuffer",
+          "line": 141,
+          "isDefault": false
+        },
+        {
+          "name": "derToRawSignature",
+          "line": 152,
+          "isDefault": false
+        },
+        {
+          "name": "signApnsJwt",
+          "line": 172,
+          "isDefault": false
+        },
+        {
+          "name": "parseFcmServiceAccount",
+          "line": 200,
+          "isDefault": false
+        },
+        {
+          "name": "getFcmAccessToken",
+          "line": 221,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "partitionMobileSubscriptions",
+          "callee": "apns.push",
+          "lineNumber": 43
+        },
+        {
+          "caller": "partitionMobileSubscriptions",
+          "callee": "fcm.push",
+          "lineNumber": 44
+        },
+        {
+          "caller": "mobileCredentialStatus",
+          "callee": "Boolean",
+          "lineNumber": 55
+        },
+        {
+          "caller": "mobileCredentialStatus",
+          "callee": "Boolean",
+          "lineNumber": 61
+        },
+        {
+          "caller": "buildApnsRequest",
+          "callee": "JSON.stringify",
+          "lineNumber": 93
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "String.fromCharCode",
+          "lineNumber": 137
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace(/\\+/g, \"-\").replace(/\\//g, \"_\").replace",
+          "lineNumber": 138
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace(/\\+/g, \"-\").replace",
+          "lineNumber": 138
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace",
+          "lineNumber": 138
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa",
+          "lineNumber": 138
+        },
+        {
+          "caller": "pemToArrayBuffer",
+          "callee": "pem\n    .replace(/-----BEGIN [^-]+-----/g, \"\")\n    .replace(/-----END [^-]+-----/g, \"\")\n    .replace",
+          "lineNumber": 142
+        },
+        {
+          "caller": "pemToArrayBuffer",
+          "callee": "pem\n    .replace(/-----BEGIN [^-]+-----/g, \"\")\n    .replace",
+          "lineNumber": 142
+        },
+        {
+          "caller": "pemToArrayBuffer",
+          "callee": "pem\n    .replace",
+          "lineNumber": 142
+        },
+        {
+          "caller": "pemToArrayBuffer",
+          "callee": "atob",
+          "lineNumber": 146
+        },
+        {
+          "caller": "pemToArrayBuffer",
+          "callee": "binary.charCodeAt",
+          "lineNumber": 148
+        },
+        {
+          "caller": "derToRawSignature",
+          "callee": "raw.set",
+          "lineNumber": 161
+        },
+        {
+          "caller": "derToRawSignature",
+          "callee": "signature.slice",
+          "lineNumber": 161
+        },
+        {
+          "caller": "derToRawSignature",
+          "callee": "raw.set",
+          "lineNumber": 168
+        },
+        {
+          "caller": "derToRawSignature",
+          "callee": "signature.slice",
+          "lineNumber": 168
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "base64urlEncode",
+          "lineNumber": 173
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 174
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "JSON.stringify",
+          "lineNumber": 174
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "base64urlEncode",
+          "lineNumber": 176
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 177
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "JSON.stringify",
+          "lineNumber": 177
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "Math.floor",
+          "lineNumber": 179
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "Date.now",
+          "lineNumber": 179
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 183
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "pemToArrayBuffer",
+          "lineNumber": 185
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "crypto.subtle.sign",
+          "lineNumber": 191
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 194
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "base64urlEncode",
+          "lineNumber": 197
+        },
+        {
+          "caller": "signApnsJwt",
+          "callee": "derToRawSignature",
+          "lineNumber": 197
+        },
+        {
+          "caller": "parseFcmServiceAccount",
+          "callee": "raw.trim",
+          "lineNumber": 201
+        },
+        {
+          "caller": "parseFcmServiceAccount",
+          "callee": "JSON.parse",
+          "lineNumber": 202
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "Math.floor",
+          "lineNumber": 222
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "Date.now",
+          "lineNumber": 222
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "base64urlEncode",
+          "lineNumber": 223
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "JSON.stringify",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "base64urlEncode",
+          "lineNumber": 226
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 227
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "JSON.stringify",
+          "lineNumber": 227
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 236
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "pemToArrayBuffer",
+          "lineNumber": 238
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "crypto.subtle.sign",
+          "lineNumber": 244
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 247
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "base64urlEncode",
+          "lineNumber": 250
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "fetch",
+          "lineNumber": 251
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "response.json",
+          "lineNumber": 262
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 10,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/send-push/lib/mobile-push_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 74,
+      "nonEmptyLines": 65,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/send-reminders/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 373,
+      "nonEmptyLines": 335,
+      "functions": [
+        {
+          "name": "formatEventDate",
+          "startLine": 40,
+          "endLine": 52,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "sleep",
+          "startLine": 54,
+          "endLine": 56,
+          "params": [
+            "ms"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "formatEventDate",
+          "callee": "new Date(isoDate).toLocaleDateString",
+          "lineNumber": 42
+        },
+        {
+          "caller": "sleep",
+          "callee": "setTimeout",
+          "lineNumber": 55
+        },
+        {
+          "caller": "flattenRows",
+          "callee": "prefs.get",
+          "lineNumber": 173
+        },
+        {
+          "caller": "flattenRows",
+          "callee": "targets.push",
+          "lineNumber": 175
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/send-weekly-digest/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 507,
+      "nonEmptyLines": 452,
+      "functions": [
+        {
+          "name": "firstImageUrl",
+          "startLine": 49,
+          "endLine": 54,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "stripTags",
+          "startLine": 58,
+          "endLine": 60,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "formatPrice",
+          "startLine": 62,
+          "endLine": 66,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "splitDateTime",
+          "startLine": 96,
+          "endLine": 112,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "renderPricePill",
+          "startLine": 114,
+          "endLine": 121,
+          "params": [
+            "event"
+          ]
+        },
+        {
+          "name": "renderEventCardHtml",
+          "startLine": 123,
+          "endLine": 164,
+          "params": [
+            "event",
+            "appUrl"
+          ]
+        },
+        {
+          "name": "renderDigestHtml",
+          "startLine": 170,
+          "endLine": 271,
+          "params": [
+            "user",
+            "events",
+            "appUrl"
+          ]
+        },
+        {
+          "name": "sleep",
+          "startLine": 273,
+          "endLine": 275,
+          "params": [
+            "ms"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "stripTags",
+          "callee": "value.replace(/<[^>]*>/g, \" \").replace(/\\s+/g, \" \").trim",
+          "lineNumber": 59
+        },
+        {
+          "caller": "stripTags",
+          "callee": "value.replace(/<[^>]*>/g, \" \").replace",
+          "lineNumber": 59
+        },
+        {
+          "caller": "stripTags",
+          "callee": "value.replace",
+          "lineNumber": 59
+        },
+        {
+          "caller": "formatPrice",
+          "callee": "Number(event.price).toFixed",
+          "lineNumber": 64
+        },
+        {
+          "caller": "formatPrice",
+          "callee": "Number",
+          "lineNumber": 64
+        },
+        {
+          "caller": "splitDateTime",
+          "callee": "d.toLocaleDateString",
+          "lineNumber": 99
+        },
+        {
+          "caller": "splitDateTime",
+          "callee": "d.toLocaleTimeString",
+          "lineNumber": 104
+        },
+        {
+          "caller": "renderPricePill",
+          "callee": "formatPrice",
+          "lineNumber": 115
+        },
+        {
+          "caller": "renderPricePill",
+          "callee": "escapeHtml",
+          "lineNumber": 120
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "firstImageUrl",
+          "lineNumber": 125
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "stripTags",
+          "lineNumber": 126
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "stripTags",
+          "lineNumber": 127
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "splitDateTime",
+          "lineNumber": 128
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 129
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "(title[0] || \"•\").toUpperCase",
+          "lineNumber": 129
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 132
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "[\n    `<span style=\"font-family:${FONT_MONO};font-size:12px;color:${THEME.textMuted};\">${escapeHtml(date)}${time ? ` · ${escapeHtml(time)}` : \"\"}</span>`,\n    renderPricePill(event),\n  ]\n    .filter(Boolean)\n    .join",
+          "lineNumber": 136
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "[\n    `<span style=\"font-family:${FONT_MONO};font-size:12px;color:${THEME.textMuted};\">${escapeHtml(date)}${time ? ` · ${escapeHtml(time)}` : \"\"}</span>`,\n    renderPricePill(event),\n  ]\n    .filter",
+          "lineNumber": 136
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 137
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 137
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "renderPricePill",
+          "lineNumber": 138
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 151
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 151
+        },
+        {
+          "caller": "renderEventCardHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 155
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 175
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 176
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "String",
+          "lineNumber": 177
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "events.map((e) => renderEventCardHtml(e, appUrl)).join",
+          "lineNumber": 179
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "events.map",
+          "lineNumber": 179
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "renderEventCardHtml",
+          "lineNumber": 179
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "`\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <meta name=\"color-scheme\" content=\"light\" />\n  <meta name=\"supported-color-schemes\" content=\"light\" />\n  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />\n  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />\n  <link href=\"${FONTS_HREF}\" rel=\"stylesheet\" />\n  <style>\n    body { margin:0; padding:0; background:${THEME.bg}; -webkit-font-smoothing:antialiased; }\n    a { text-decoration:none; }\n    @media only screen and (max-width:600px) {\n      .fe-shell { width:100% !important; border-radius:0 !important; }\n      .fe-pad { padding-left:20px !important; padding-right:20px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background:${THEME.bg};font-family:${FONT_SANS};\">\n  <span style=\"display:none;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;mso-hide:all;\">${eventCount} family events this week in ${cityName}</span>\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:${THEME.bg};\">\n    <tr>\n      <td align=\"center\" style=\"padding:32px 12px;\">\n        <table role=\"presentation\" class=\"fe-shell\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:600px;max-width:600px;background:${THEME.surface};border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(28,24,40,0.10);\">\n\n          <!-- Header -->\n          <tr>\n            <td style=\"background:${THEME.violet};background-image:linear-gradient(135deg,${THEME.violet} 0%,${THEME.violetDeep} 100%);padding:36px 40px 32px;\" class=\"fe-pad\">\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td align=\"left\">\n                    <img src=\"${escapeHtml(logoUrl)}\" width=\"28\" height=\"28\" alt=\"\" style=\"vertical-align:middle;border-radius:7px;display:inline-block;\" />\n                    <span style=\"font-family:${FONT_SANS};font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#F2ECFB;vertical-align:middle;padding-left:10px;\">Family Events</span>\n                  </td>\n                </tr>\n              </table>\n              <div style=\"font-family:${FONT_DISPLAY};font-size:34px;line-height:1.1;font-weight:600;color:#FFFFFF;margin:22px 0 0;\">Your Weekly Digest</div>\n              <div style=\"display:inline-block;margin-top:14px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.25);border-radius:9999px;padding:6px 14px;font-family:${FONT_MONO};font-size:12px;letter-spacing:0.03em;color:#FFFFFF;\">${eventCount} ${eventLabel} this week in ${cityName}</div>\n            </td>\n          </tr>\n\n          <!-- Greeting -->\n          <tr>\n            <td style=\"padding:30px 40px 6px;\" class=\"fe-pad\">\n              <div style=\"font-family:${FONT_DISPLAY};font-size:21px;font-weight:600;color:${THEME.textPrimary};margin:0 0 8px;\">Hi ${username},</div>\n              <div style=\"font-family:${FONT_EDITORIAL};font-size:17px;line-height:1.55;color:${THEME.textMuted};margin:0;\">Here are the upcoming family-friendly events near you this week — curated for your neighborhood and ready to add to the weekend plan.</div>\n            </td>\n          </tr>\n\n          <!-- Event cards -->\n          <tr>\n            <td style=\"padding:22px 40px 6px;\" class=\"fe-pad\">\n              ${eventsHtml}\n            </td>\n          </tr>\n\n          <!-- CTA -->\n          <tr>\n            <td align=\"center\" style=\"padding:18px 40px 36px;\" class=\"fe-pad\">\n              <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td style=\"background:${THEME.peach};border-radius:9999px;\">\n                    <a href=\"${escapeHtml(appUrl)}\" style=\"display:inline-block;font-family:${FONT_SANS};font-size:15px;font-weight:700;color:#FFFFFF;padding:14px 30px;border-radius:9999px;\">Browse all events &rarr;</a>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"background:${THEME.bg};padding:26px 40px;border-top:1px solid ${THEME.border};\" class=\"fe-pad\">\n              <div style=\"font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;\">\n                You're receiving this because you enabled digest emails.<br />\n                <a href=\"${escapeHtml(unsubscribeUrl)}\" style=\"color:${THEME.violetDeep};font-weight:500;text-decoration:underline;\">Manage preferences</a>\n              </div>\n              <div style=\"font-family:${FONT_MONO};font-size:11px;letter-spacing:0.04em;color:${THEME.textMuted};text-align:center;margin:14px 0 0;opacity:0.7;\">FAMILY EVENTS · ${cityName}</div>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>`.trim",
+          "lineNumber": 183
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 216
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 247
+        },
+        {
+          "caller": "renderDigestHtml",
+          "callee": "escapeHtml",
+          "lineNumber": 259
+        },
+        {
+          "caller": "sleep",
+          "callee": "setTimeout",
+          "lineNumber": 274
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 0,
+        "functionCount": 8,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/weather/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 134,
+      "nonEmptyLines": 117,
+      "functions": [
+        {
+          "name": "isValidLat",
+          "startLine": 18,
+          "endLine": 21,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "isValidLon",
+          "startLine": 23,
+          "endLine": 26,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "isValidLat",
+          "callee": "Number.isFinite",
+          "lineNumber": 19
+        },
+        {
+          "caller": "isValidLon",
+          "callee": "Number.isFinite",
+          "lineNumber": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "scripts/db/README.md", "language": "markdown", "sizeLines": 24, "fileCategory": "docs"},
+    {"path": "scripts/db/collect-db-evidence.sql", "language": "sql", "sizeLines": 154, "fileCategory": "data"},
+    {"path": "scripts/db/find-missing-end-times.sql", "language": "sql", "sizeLines": 28, "fileCategory": "data"},
+    {"path": "scripts/db/wipe-live-events.sh", "language": "shell", "sizeLines": 111, "fileCategory": "script"}
+  ],
+  "batchImportData": {"scripts/db/README.md": [], "scripts/db/collect-db-evidence.sql": [], "scripts/db/find-missing-end-times.sql": [], "scripts/db/wipe-live-events.sh": []}
+}

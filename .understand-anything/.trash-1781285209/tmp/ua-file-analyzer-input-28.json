@@ -1,0 +1,9 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "infra/railway-cron-drift/cron-services.json", "language": "json", "sizeLines": 90, "fileCategory": "config"},
+    {"path": "infra/railway-cron-drift/main.tf", "language": "terraform", "sizeLines": 299, "fileCategory": "infra"},
+    {"path": "infra/railway-cron-drift/versions.tf", "language": "terraform", "sizeLines": 10, "fileCategory": "infra"}
+  ],
+  "batchImportData": {}
+}

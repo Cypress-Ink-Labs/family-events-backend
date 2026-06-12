@@ -1,0 +1,68 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/rollbacks/20260601033000_community_event_submission_down.sql",
+      "type": "table",
+      "name": "20260601033000_community_event_submission_down.sql",
+      "filePath": "supabase/rollbacks/20260601033000_community_event_submission_down.sql",
+      "summary": "Rollback script that reverts the community event submission feature, removing related tables and submission workflow functions.",
+      "tags": ["database", "migration", "rollback", "schema-definition"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601034000_activate_baton_rouge_sources_down.sql",
+      "type": "table",
+      "name": "20260601034000_activate_baton_rouge_sources_down.sql",
+      "filePath": "supabase/rollbacks/20260601034000_activate_baton_rouge_sources_down.sql",
+      "summary": "Rollback script that deactivates Baton Rouge event sources by reverting the activation status set in the forward migration.",
+      "tags": ["database", "migration", "rollback", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601035000_community_event_status_notification_down.sql",
+      "type": "table",
+      "name": "20260601035000_community_event_status_notification_down.sql",
+      "filePath": "supabase/rollbacks/20260601035000_community_event_status_notification_down.sql",
+      "summary": "Rollback script that removes the notification triggers fired when a community-submitted event changes status.",
+      "tags": ["database", "migration", "rollback", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601036000_admin_user_delete_down.sql",
+      "type": "table",
+      "name": "20260601036000_admin_user_delete_down.sql",
+      "filePath": "supabase/rollbacks/20260601036000_admin_user_delete_down.sql",
+      "summary": "Rollback script that removes the admin user-delete RPC function and associated permission grants.",
+      "tags": ["database", "migration", "rollback", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260610162002_enqueue_source_scrape_rpc_down.sql",
+      "type": "table",
+      "name": "20260610162002_enqueue_source_scrape_rpc_down.sql",
+      "filePath": "supabase/rollbacks/20260610162002_enqueue_source_scrape_rpc_down.sql",
+      "summary": "Rollback script that drops the enqueue_source_scrape RPC used to manually trigger source scraping jobs.",
+      "tags": ["database", "migration", "rollback", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260610170000_admin_events_source_filter_down.sql",
+      "type": "table",
+      "name": "20260610170000_admin_events_source_filter_down.sql",
+      "filePath": "supabase/rollbacks/20260610170000_admin_events_source_filter_down.sql",
+      "summary": "Large rollback script reverting admin event source filtering capabilities, restoring previous versions of admin event list functions without source-filter parameters.",
+      "tags": ["database", "migration", "rollback", "admin"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260610180000_admin_dashboard_stats_down.sql",
+      "type": "table",
+      "name": "20260610180000_admin_dashboard_stats_down.sql",
+      "filePath": "supabase/rollbacks/20260610180000_admin_dashboard_stats_down.sql",
+      "summary": "Rollback script that drops the admin dashboard statistics RPC function.",
+      "tags": ["database", "migration", "rollback", "admin"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": []
+}

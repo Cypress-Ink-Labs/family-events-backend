@@ -1,0 +1,198 @@
+{
+  "nodes": [
+    {
+      "id": "pipeline:.github/workflows/ci.yml",
+      "type": "pipeline",
+      "name": "ci.yml",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "Main CI workflow triggered on pull_request and push to main, running four parallel jobs: secret scanning with TruffleHog and Gitleaks, TypeScript type checking, workspace guard tests, and a DB type-drift guard that spins up a local Supabase instance to detect stale generated types.",
+      "tags": ["ci-cd", "security", "testing", "type-checking", "database"],
+      "complexity": "complex"
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:secret-scan",
+      "type": "pipeline",
+      "name": "secret-scan",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "Scans every commit for leaked credentials using TruffleHog (verified secrets only) and Gitleaks on full git history.",
+      "tags": ["ci-cd", "security", "secret-scanning"],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:check",
+      "type": "pipeline",
+      "name": "check",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "Installs pnpm dependencies and runs the monorepo-wide TypeScript type-check via `pnpm run check`.",
+      "tags": ["ci-cd", "type-checking", "typescript"],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:workspace-guards",
+      "type": "pipeline",
+      "name": "workspace-guards",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "Runs workspace guard tests (`pnpm run workspace:test`) to enforce cross-package invariants.",
+      "tags": ["ci-cd", "testing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:type-drift",
+      "type": "pipeline",
+      "name": "type-drift",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "Starts a local Supabase instance, regenerates TypeScript database types, and fails if the committed `database.types.ts` is stale compared to the live schema.",
+      "tags": ["ci-cd", "database", "type-checking"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "pipeline:.github/workflows/publish-packages.yml",
+      "type": "pipeline",
+      "name": "publish-packages.yml",
+      "filePath": ".github/workflows/publish-packages.yml",
+      "summary": "Publishes the `packages/contracts` package to GitHub Packages (npm registry) when changes are pushed to main under `packages/contracts/src/**` or `.changeset/**`; skips publication idempotently if the version is already published.",
+      "tags": ["ci-cd", "deployment", "npm", "packages"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "step:.github/workflows/publish-packages.yml:publish",
+      "type": "pipeline",
+      "name": "publish",
+      "filePath": ".github/workflows/publish-packages.yml",
+      "summary": "Checks if the current package version is already published to GitHub Packages; if not, runs `pnpm publish` for the contracts package.",
+      "tags": ["ci-cd", "deployment", "npm"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "pipeline:.github/workflows/railway-cron-drift.yml",
+      "type": "pipeline",
+      "name": "railway-cron-drift.yml",
+      "filePath": ".github/workflows/railway-cron-drift.yml",
+      "summary": "Guards against Railway cron schedule drift on pull requests by running Terraform plan against the `infra/railway-cron-drift` config and failing if the live Railway environment diverges from the declared state.",
+      "tags": ["ci-cd", "infrastructure", "deployment", "terraform"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "step:.github/workflows/railway-cron-drift.yml:drift-guard",
+      "type": "pipeline",
+      "name": "drift-guard",
+      "filePath": ".github/workflows/railway-cron-drift.yml",
+      "summary": "Prints Railway cron diagnostics, validates Railway API token, runs `terraform init` and `validate`, then executes `terraform plan` with `--detailed-exitcode` to detect any drift.",
+      "tags": ["ci-cd", "infrastructure", "terraform"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "pipeline:.github/workflows/railway-sandbox-verify.yml",
+      "type": "pipeline",
+      "name": "railway-sandbox-verify.yml",
+      "filePath": ".github/workflows/railway-sandbox-verify.yml",
+      "summary": "Conditionally runs an arbitrary command inside a Railway sandbox environment for PRs labeled `railway-sandbox` or touching Railway-related files, plus supports manual dispatch with configurable command and private-network options.",
+      "tags": ["ci-cd", "deployment", "testing", "infrastructure"],
+      "complexity": "complex"
+    },
+    {
+      "id": "step:.github/workflows/railway-sandbox-verify.yml:evaluate_trigger",
+      "type": "pipeline",
+      "name": "evaluate_trigger",
+      "filePath": ".github/workflows/railway-sandbox-verify.yml",
+      "summary": "Evaluates whether the sandbox verification job should run by checking for the `railway-sandbox` PR label or detecting changes to Railway-related paths.",
+      "tags": ["ci-cd", "deployment"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "step:.github/workflows/railway-sandbox-verify.yml:sandbox-verify",
+      "type": "pipeline",
+      "name": "sandbox-verify",
+      "filePath": ".github/workflows/railway-sandbox-verify.yml",
+      "summary": "Installs dependencies and runs the Railway sandbox repo-check script with the configured command, ref, and optional private-network flag.",
+      "tags": ["ci-cd", "deployment", "testing"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:secret-scan",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:check",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:workspace-guards",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:type-drift",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/publish-packages.yml",
+      "target": "step:.github/workflows/publish-packages.yml:publish",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/railway-cron-drift.yml",
+      "target": "step:.github/workflows/railway-cron-drift.yml:drift-guard",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/railway-sandbox-verify.yml",
+      "target": "step:.github/workflows/railway-sandbox-verify.yml:evaluate_trigger",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/railway-sandbox-verify.yml",
+      "target": "step:.github/workflows/railway-sandbox-verify.yml:sandbox-verify",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/railway-cron-drift.yml",
+      "target": "file:infra/railway-cron-drift",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/railway-cron-drift.yml",
+      "target": "file:scripts/railway-cron-drift.mjs",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/railway-sandbox-verify.yml",
+      "target": "file:scripts/railway-sandbox.mjs",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/publish-packages.yml",
+      "target": "file:packages/contracts",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

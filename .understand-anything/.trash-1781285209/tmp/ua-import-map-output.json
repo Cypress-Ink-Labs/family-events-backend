@@ -1,0 +1,1011 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 515,
+    "filesWithImports": 143,
+    "totalEdges": 343
+  },
+  "importMap": {
+    ".changeset/config.json": [],
+    ".env.example": [],
+    ".github/workflows/ci.yml": [],
+    ".github/workflows/publish-packages.yml": [],
+    ".github/workflows/railway-cron-drift.yml": [],
+    ".github/workflows/railway-sandbox-verify.yml": [],
+    ".gitleaks.toml": [],
+    ".gitleaksignore": [],
+    ".npmrc": [],
+    ".railway/railway.ts": [],
+    ".understand-anything/.understandignore": [],
+    "config/deploy.config.json": [],
+    "cron/_shared/cron-runner.sh": [],
+    "cron/cleanup-stale/.dockerignore": [],
+    "cron/cleanup-stale/cron-runner.sh": [],
+    "cron/cleanup-stale/Dockerfile": [],
+    "cron/cleanup-stale/package.json": [],
+    "cron/db-maintenance/.dockerignore": [],
+    "cron/db-maintenance/cron-runner.sh": [],
+    "cron/db-maintenance/Dockerfile": [],
+    "cron/db-maintenance/package.json": [],
+    "cron/enrich-events/.dockerignore": [],
+    "cron/enrich-events/cron-runner.sh": [],
+    "cron/enrich-events/Dockerfile": [],
+    "cron/enrich-events/package.json": [],
+    "cron/review-events/.dockerignore": [],
+    "cron/review-events/cron-runner.sh": [],
+    "cron/review-events/Dockerfile": [],
+    "cron/review-events/package.json": [],
+    "cron/scrape-sources/.dockerignore": [],
+    "cron/scrape-sources/cron-runner.sh": [],
+    "cron/scrape-sources/Dockerfile": [],
+    "cron/scrape-sources/package.json": [],
+    "cron/send-reminders/.dockerignore": [],
+    "cron/send-reminders/cron-runner.sh": [],
+    "cron/send-reminders/Dockerfile": [],
+    "cron/send-reminders/package.json": [],
+    "cron/tag-queue/.dockerignore": [],
+    "cron/tag-queue/cron-runner.sh": [],
+    "cron/tag-queue/Dockerfile": [],
+    "cron/tag-queue/package.json": [],
+    "cron/weekly-digest/.dockerignore": [],
+    "cron/weekly-digest/cron-runner.sh": [],
+    "cron/weekly-digest/Dockerfile": [],
+    "cron/weekly-digest/package.json": [],
+    "graphify-out/.graphify_labels.json": [],
+    "graphify-out/.graphify_python": [],
+    "graphify-out/.graphify_root": [],
+    "graphify-out/cache/ast/v0.8.38/03bb67a28abc28a43c89c8e27ea17381047f7276274248ad0e7de92a72378bcb.json": [],
+    "graphify-out/cache/ast/v0.8.38/0b06f8f07d51543a32ba5ccea753b6e999ae64f4a5cd5863c92f16f4ffab0ac5.json": [],
+    "graphify-out/cache/ast/v0.8.38/0c0b6e9feb6a3248ab787305d6a754210f0ae5d6f5475888abd57e4cca3cc06b.json": [],
+    "graphify-out/cache/ast/v0.8.38/124c118d06a9af22dd7805c336d3e13dc5e32f453bac41b3e955d7cfce93ff17.json": [],
+    "graphify-out/cache/ast/v0.8.38/1689f6d0863df3cb9bb7dea2b0bc7036d93f15b447297582317bfdb00ac4fd8b.json": [],
+    "graphify-out/cache/ast/v0.8.38/201e9d419f01dc6155829e9e842830028876632be568d870c4153ed83f520c91.json": [],
+    "graphify-out/cache/ast/v0.8.38/20acb370bc6270cf78d4d57bab8497b38618043d7ba8e3f59499170af8e20b45.json": [],
+    "graphify-out/cache/ast/v0.8.38/23523e9a1064a47d6ada4a3ed5109b7f91dbed5d11d12d862eef6b3a33df68b7.json": [],
+    "graphify-out/cache/ast/v0.8.38/3050ece81e8dcb51556bc1ee12d1d4ee16c9ac06be7d9b415a08956d6d5861d2.json": [],
+    "graphify-out/cache/ast/v0.8.38/30f3862740105808106f5235e74db0b3ce42352452d6d0eb821accef491a1b0b.json": [],
+    "graphify-out/cache/ast/v0.8.38/31ac74b7c049766379910fd310a118edfbe7f7715a44d9e942f63f634efc8323.json": [],
+    "graphify-out/cache/ast/v0.8.38/3a4e096f02e392bf473334f3a73434f3dee4a85cc376a87358264c6c8e8d120d.json": [],
+    "graphify-out/cache/ast/v0.8.38/3fbf09b31441d46f5945c864dc79655d17f041c4a01f231ef69aae4811145b07.json": [],
+    "graphify-out/cache/ast/v0.8.38/44dc9125cac8e8e1f27f94f183b4e77552a6111ba81a87fe641cbbf42e739dfc.json": [],
+    "graphify-out/cache/ast/v0.8.38/470ca73ff19cb446722997faa4297be637c5c0d32a4f7e27a64a048f9bffeb13.json": [],
+    "graphify-out/cache/ast/v0.8.38/5a5904379bf55ea6f4ea44f8ce3dee45fb1c0f6df0eac4d5948939f49e199267.json": [],
+    "graphify-out/cache/ast/v0.8.38/61ae7245006dd6669aa262762456b59b3de6a1ec7ad5dcca984f4e1e5df2e02e.json": [],
+    "graphify-out/cache/ast/v0.8.38/652d239c35e865360d3f03b47a010ab60c0af4ce540f907bf4353b7eaad2ac53.json": [],
+    "graphify-out/cache/ast/v0.8.38/667be51c3a02b5ee91a2b915c1ca905ab84f5e3ef673dc1661b0dce7d43124d6.json": [],
+    "graphify-out/cache/ast/v0.8.38/680f9df5614282cdffb905f17c7e15a1c7c938bd69435742bd78bea4d41f0d87.json": [],
+    "graphify-out/cache/ast/v0.8.38/6c514ea83fd5c6ddd85f48f5c63998c84204867597cd47a342559cbdd49b115e.json": [],
+    "graphify-out/cache/ast/v0.8.38/7422c4bbf29c1d929c678057cc699552ebf4533834c6ff75afe2857bfbe594ee.json": [],
+    "graphify-out/cache/ast/v0.8.38/74518c27122d0f5f9ecb39e367d6940aa04972d38c0dc0a4acb1f0276328f45b.json": [],
+    "graphify-out/cache/ast/v0.8.38/748f9c4603050bc221d06638e749d71a25a7c1264c76d6ccb95e288d017dc5cc.json": [],
+    "graphify-out/cache/ast/v0.8.38/74e8c26837ba73cf9b0de8d4e90b97fbc4f16cd93ae96942c007b10b1a301850.json": [],
+    "graphify-out/cache/ast/v0.8.38/753a7b9d4d5551fa9882e6b66171c39f24494536157a88b525e088d065337033.json": [],
+    "graphify-out/cache/ast/v0.8.38/781aacaa51d0dc324cf78a58c5b33a23fe6349a8fc6f08a708a3e48f7035302e.json": [],
+    "graphify-out/cache/ast/v0.8.38/7a62aad5e5b6f6b63cf3fb2a833e1efd627d26be5b6e4cfc6ee8259dab3ce210.json": [],
+    "graphify-out/cache/ast/v0.8.38/7b3215bfceee4aad94200a8613fd14b0ac8ad8e3c4b60652081d52c9faa89e5f.json": [],
+    "graphify-out/cache/ast/v0.8.38/816bc0c2791d4c87910ae48cf46ac31876a943c9c4d8c10f78e722c3a93cf8d6.json": [],
+    "graphify-out/cache/ast/v0.8.38/820baed643d5e325dc8c147174a75bae649061d80e94f02928acd504c3cdca4d.json": [],
+    "graphify-out/cache/ast/v0.8.38/82bc8eb5391a49c23b30ffb34eb70866156b2023fbe795e8336ddb15f0362d46.json": [],
+    "graphify-out/cache/ast/v0.8.38/84da5cf86de7973d0d06d8032b72435b36b52ad37faa3db16e1e2d87bdf5abc9.json": [],
+    "graphify-out/cache/ast/v0.8.38/850003c7a2d90d3ee880fb1d30fedf690c3edda21394855dd8017dc2a4a31ab4.json": [],
+    "graphify-out/cache/ast/v0.8.38/87fe992cc452f0e0be638c4feaaa274f67077266cd581203fc160f87d4c5c47a.json": [],
+    "graphify-out/cache/ast/v0.8.38/8a279000b2f3984bec23e2698fb69366a498e3ea69d0a10925175584e3f0d350.json": [],
+    "graphify-out/cache/ast/v0.8.38/8c8646ff3c7c223d6993499071a1aa1689597998c0561ca01a0c86ee0b42c157.json": [],
+    "graphify-out/cache/ast/v0.8.38/9271a446c52803835a75eef3648df487abdd7d6abc220f8ab2cb81468617a2fc.json": [],
+    "graphify-out/cache/ast/v0.8.38/9797c4140947371d5c15e9a0bfa2617d1d5e6757be54a0e1766e832610433c88.json": [],
+    "graphify-out/cache/ast/v0.8.38/9930e51e3c3bc18a29433eef6256b5558cfa8fac399c7cdf4dbfef08fa479525.json": [],
+    "graphify-out/cache/ast/v0.8.38/9dcc845b172ac7d38a94bc07e5f0ec56d9b09833460ef6da67783e554d24954d.json": [],
+    "graphify-out/cache/ast/v0.8.38/9ddfa6120058c30c494dcf07585aa1038d04611659e60c5ee4f89c045dc5157f.json": [],
+    "graphify-out/cache/ast/v0.8.38/a88b491c7a5aef4c0f687d25b64507b4c901fbaacfc7e606c14d2142e0e6a950.json": [],
+    "graphify-out/cache/ast/v0.8.38/a955456ab57ae8ff0a311690d9a06ef013ef766cc777cb0fae6ce2ad060ab550.json": [],
+    "graphify-out/cache/ast/v0.8.38/a95d002736a6b7dccfeede87782c7ceae0c00b874d175e614c195efa3a59b9cf.json": [],
+    "graphify-out/cache/ast/v0.8.38/aa6be5b5eaf4286f7dc169d7ee09ca370ba1ec7405b179d40335739326bf7028.json": [],
+    "graphify-out/cache/ast/v0.8.38/adbf1710f27a473455ee969ab3f07757f09e348c27ce559719d28f4326df4820.json": [],
+    "graphify-out/cache/ast/v0.8.38/ae8b7919e124af597d8d27b09fcbd4a6b1a185acc52d2cfb334bbdcae50ffe91.json": [],
+    "graphify-out/cache/ast/v0.8.38/b193e4e2931d857816cf783cd5e034c4712ace9f17fdb24b9167a4822dfdff98.json": [],
+    "graphify-out/cache/ast/v0.8.38/b3637acd953df0aaf9c2223dd31a989be735503fce0c2428eb8feece97edbb1a.json": [],
+    "graphify-out/cache/ast/v0.8.38/b560caa71d60af7af490edfa90b3b37bfb76dbdf6f69050f9e5a7074db5aee45.json": [],
+    "graphify-out/cache/ast/v0.8.38/b5a7363853068ea179431e129b7a93182fd407d9639134d029c48f479a6db645.json": [],
+    "graphify-out/cache/ast/v0.8.38/b61d74a4bb7074161240ef2982179711b41fb65afb122683ae039e7be26c0d07.json": [],
+    "graphify-out/cache/ast/v0.8.38/b871b2cbb65e40ae791369bdff099dccb8b6726928d9916d9f7a159f604247f6.json": [],
+    "graphify-out/cache/ast/v0.8.38/bb69757b9a8ea968ca734a3d1fd44b1aeebbd8d462f81b675546fee24777b047.json": [],
+    "graphify-out/cache/ast/v0.8.38/bc898eadbcc474bce0d386cf8c447e5e3cd67ca7c051b4a3fb733f9d8fb06253.json": [],
+    "graphify-out/cache/ast/v0.8.38/c7cb220a70f2c54a2427a4a8095f6ea73863813ba936284a145b0dd13c375b9e.json": [],
+    "graphify-out/cache/ast/v0.8.38/c99b82a8502f3e0d044794162f039db3bef137d6232d962df968cbd95020cabb.json": [],
+    "graphify-out/cache/ast/v0.8.38/ca58b6640fb03ce6888e48d4442e30c9b6b9d78bc34ef0eee4f099d1a28005fe.json": [],
+    "graphify-out/cache/ast/v0.8.38/cbdfe29f0bba41d042c69f1401d8f6339d1abcb91a583c6f78141824d33c959b.json": [],
+    "graphify-out/cache/ast/v0.8.38/d7ce42486fa80e56a6cafa7a44041c0002c5476b2a4760b0910b2fc485584ed7.json": [],
+    "graphify-out/cache/ast/v0.8.38/da1c22ac70ca11db3665ac923e6b97a1773ace689e4d54211680bef76522221c.json": [],
+    "graphify-out/cache/ast/v0.8.38/dd4e5216563515e83c1efcfbdfd4fdea9d8551e061b03a8543e74ec9ec542267.json": [],
+    "graphify-out/cache/ast/v0.8.38/e04a7faf2561d3131a982fda2af89dc11fbce016ae34d6de0d9950246dd712e1.json": [],
+    "graphify-out/cache/ast/v0.8.38/e1e81662888c9330b996b70cbdf04dbc4bbd988fb3ab0abda19fe9452246197b.json": [],
+    "graphify-out/cache/ast/v0.8.38/e9b63853f3f0f358a54dac9105cebf5bd54fa339e987dd1e92b10610c6f4fbd4.json": [],
+    "graphify-out/cache/ast/v0.8.38/ec12e32031324cc3a238741432af76498a1d2a28b4ceabfd99ff02991966796b.json": [],
+    "graphify-out/cache/ast/v0.8.38/ed6c7301a519329ef65b59a45a5481520a0d8c653f9c3ac27cb504eae5e7351b.json": [],
+    "graphify-out/cache/ast/v0.8.38/f303f035a3afc82331917d370737b099bbed20c901d4ee01c08325a9455c4f0a.json": [],
+    "graphify-out/cache/ast/v0.8.38/fb7f5bc24730cdb5e49432d4e0466222419fb17feee87c300c546a32934d0e4f.json": [],
+    "graphify-out/cache/ast/v0.8.38/feea5c57e1fe404739e542ec7f5f2afe25c17911a7cc44f40aabdd29dc82f5d0.json": [],
+    "graphify-out/cache/semantic/31c56e06589b88f479457ea1e15871a1e1366b57f6eb883a1a96e9409c38c8db.json": [],
+    "graphify-out/cache/semantic/32d9f0e187f6c1c525636898421e31b9b1032fc424fa60202295e6a851c55dbf.json": [],
+    "graphify-out/cache/semantic/379fd14f82b1c0dec4b56c81f2513b1c83555ccabc6e7afc96d250a64a4e1b9f.json": [],
+    "graphify-out/cache/semantic/6ed964d0118985b61f7d2b621c0487c085dc57edce621f1db983d119fe262cf7.json": [],
+    "graphify-out/cache/semantic/714278fa9b8cae824c349492ae44feca4839492042a4b072562730b834cedc12.json": [],
+    "graphify-out/cache/semantic/7cc29e1045aeed0f8448e2cf75b1986230f2c7a453ae5811ffd1c26d208d52eb.json": [],
+    "graphify-out/cache/semantic/8881fa7438e799371f7c6aa2c829f8e3b16c6491093399398abc471c12d0692d.json": [],
+    "graphify-out/cache/semantic/99c77bcbcfa3e11597c509de0ed4d83302d4d0534c9ff0bfd29217f82628021f.json": [],
+    "graphify-out/cache/semantic/b04dc56b8f115876fe65ffca5751a081b0afb604e7716a9f67bc655bea5fc36f.json": [],
+    "graphify-out/cache/semantic/b8d787c82fa4e084d5ffec42e6a21677ef502b0a4c131a60465a268368e7fbab.json": [],
+    "graphify-out/cache/semantic/c23fe0b49b31ade5cf0dd7ff16a5b36aad5ba97319138dcc73095c8567c651f1.json": [],
+    "graphify-out/cache/semantic/c444b8d47482fae195561130e45f4fae5c51bf6e35f932b7823dd13ea0b299a3.json": [],
+    "graphify-out/cache/semantic/c48100c1d392d062a2514dffe260cb665b2fb3d3195ef00d7fabd0649db75045.json": [],
+    "graphify-out/cache/semantic/d2997b7bc4387a15f58a2fb862d9ddbe018d409aecf0c7f3ded0923c62cad793.json": [],
+    "graphify-out/cache/semantic/d85b8d897c825f5f162a36071fa8edb0996b3ce26e28f2275d8a2cd9300e3649.json": [],
+    "graphify-out/cache/semantic/e1d51ccb16081a471af115a5c21c6855c79afe55dd1e1b69c62e38f9b63927f9.json": [],
+    "graphify-out/cache/semantic/e6daee632cd9ee457c4758e69df67c9f80f7b7fa0dd1fd5ec1858827a4253517.json": [],
+    "graphify-out/cache/semantic/f99bf23a0847750ddc3d18ca8d1489b8519e9ede90afaf0784fa1370ab2a9268.json": [],
+    "graphify-out/cache/stat-index.json": [],
+    "graphify-out/cost.json": [],
+    "graphify-out/GRAPH_REPORT.md": [],
+    "graphify-out/graph.html": [],
+    "graphify-out/graph.json": [],
+    "graphify-out/manifest.json": [],
+    "infra/railway-cron-drift/.terraform-version": [],
+    "infra/railway-cron-drift/.terraform.lock.hcl": [],
+    "infra/railway-cron-drift/cron-services.json": [],
+    "infra/railway-cron-drift/main.tf": [],
+    "infra/railway-cron-drift/policies/railway-cron-poc-plan.rego": [],
+    "infra/railway-cron-drift/versions.tf": [],
+    "package.json": [],
+    "packages/config-quality/oxfmt.base.json": [],
+    "packages/config-quality/oxlint.base.json": [],
+    "packages/config-quality/package.json": [],
+    "packages/config-typescript/base.json": [],
+    "packages/config-typescript/node.json": [],
+    "packages/config-typescript/package.json": [],
+    "packages/config-typescript/react-vite.json": [],
+    "packages/contracts/CHANGELOG.md": [],
+    "packages/contracts/package.json": [],
+    "packages/contracts/src/.keep": [],
+    "packages/contracts/src/community-event.ts": [],
+    "packages/contracts/src/database-enums.ts": [
+      "packages/contracts/src/database.types.ts"
+    ],
+    "packages/contracts/src/database.types.ts": [],
+    "packages/contracts/src/index.ts": [],
+    "packages/contracts/src/notification-preferences.ts": [
+      "packages/contracts/src/database.types.ts"
+    ],
+    "packages/contracts/src/notifications.ts": [
+      "packages/contracts/src/database.types.ts"
+    ],
+    "packages/contracts/tsconfig.json": [],
+    "packages/contracts/vitest.config.ts": [],
+    "packages/deploy-cli/package.json": [],
+    "packages/deploy-cli/src/cli.ts": [
+      "packages/deploy-cli/src/commands/deploy.ts",
+      "packages/deploy-cli/src/commands/doctor.ts",
+      "packages/deploy-cli/src/commands/rollback-plan.ts",
+      "packages/deploy-cli/src/commands/status.ts",
+      "packages/deploy-cli/src/commands/targets.ts",
+      "packages/deploy-cli/src/commands/validate.ts"
+    ],
+    "packages/deploy-cli/src/commands/deploy.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/types.ts",
+      "packages/deploy-cli/src/ui/interactive.ts",
+      "packages/deploy-cli/src/ui/output.ts",
+      "packages/deploy-cli/src/workflows/deploy-runner.ts"
+    ],
+    "packages/deploy-cli/src/commands/doctor.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/exec.ts"
+    ],
+    "packages/deploy-cli/src/commands/rollback-plan.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/run-artifacts.ts",
+      "packages/deploy-cli/src/workflows/rollback.ts"
+    ],
+    "packages/deploy-cli/src/commands/status.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/exec.ts",
+      "packages/deploy-cli/src/core/target-graph.ts",
+      "packages/deploy-cli/src/providers/railway.ts"
+    ],
+    "packages/deploy-cli/src/commands/targets.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/target-graph.ts",
+      "packages/deploy-cli/src/ui/output.ts"
+    ],
+    "packages/deploy-cli/src/commands/validate.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/exec.ts",
+      "packages/deploy-cli/src/providers/supabase.ts"
+    ],
+    "packages/deploy-cli/src/core/config.ts": [
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/core/errors.ts": [
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/core/exec.ts": [
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/redaction.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/core/logger.ts": [
+      "packages/deploy-cli/src/core/redaction.ts"
+    ],
+    "packages/deploy-cli/src/core/redaction.ts": [],
+    "packages/deploy-cli/src/core/result.ts": [
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/core/run-artifacts.ts": [
+      "packages/deploy-cli/src/core/redaction.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/core/signals.ts": [
+      "packages/deploy-cli/src/core/errors.ts"
+    ],
+    "packages/deploy-cli/src/core/target-graph.ts": [
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/core/types.ts": [],
+    "packages/deploy-cli/src/providers/railway.ts": [
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/exec.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/providers/supabase.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/exec.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/ui/interactive.ts": [
+      "packages/deploy-cli/src/core/target-graph.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/ui/output.ts": [
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/ui/progress.ts": [],
+    "packages/deploy-cli/src/workflows/deploy-runner.ts": [
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/exec.ts",
+      "packages/deploy-cli/src/core/logger.ts",
+      "packages/deploy-cli/src/core/result.ts",
+      "packages/deploy-cli/src/core/run-artifacts.ts",
+      "packages/deploy-cli/src/core/signals.ts",
+      "packages/deploy-cli/src/core/target-graph.ts",
+      "packages/deploy-cli/src/core/types.ts",
+      "packages/deploy-cli/src/providers/railway.ts",
+      "packages/deploy-cli/src/providers/supabase.ts",
+      "packages/deploy-cli/src/ui/progress.ts",
+      "packages/deploy-cli/src/workflows/rollback.ts",
+      "packages/deploy-cli/src/workflows/smoke-checks.ts"
+    ],
+    "packages/deploy-cli/src/workflows/rollback.ts": [
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/src/workflows/smoke-checks.ts": [
+      "packages/deploy-cli/src/core/errors.ts",
+      "packages/deploy-cli/src/core/types.ts",
+      "packages/deploy-cli/src/providers/supabase.ts"
+    ],
+    "packages/deploy-cli/tests/config.test.ts": [
+      "packages/deploy-cli/src/core/config.ts"
+    ],
+    "packages/deploy-cli/tests/deploy-runner.test.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/workflows/deploy-runner.ts"
+    ],
+    "packages/deploy-cli/tests/errors.test.ts": [
+      "packages/deploy-cli/src/core/errors.ts"
+    ],
+    "packages/deploy-cli/tests/railway.test.ts": [
+      "packages/deploy-cli/src/core/types.ts",
+      "packages/deploy-cli/src/providers/railway.ts"
+    ],
+    "packages/deploy-cli/tests/smoke-checks.test.ts": [
+      "packages/deploy-cli/src/core/types.ts",
+      "packages/deploy-cli/src/providers/supabase.ts",
+      "packages/deploy-cli/src/workflows/smoke-checks.ts"
+    ],
+    "packages/deploy-cli/tests/supabase.test.ts": [
+      "packages/deploy-cli/src/core/config.ts",
+      "packages/deploy-cli/src/core/types.ts",
+      "packages/deploy-cli/src/providers/supabase.ts"
+    ],
+    "packages/deploy-cli/tests/target-graph.test.ts": [
+      "packages/deploy-cli/src/core/target-graph.ts",
+      "packages/deploy-cli/src/core/types.ts"
+    ],
+    "packages/deploy-cli/tsconfig.json": [],
+    "packages/email/emails/community-event-status.tsx": [],
+    "packages/email/emails/event-change.tsx": [],
+    "packages/email/emails/event-invite.tsx": [],
+    "packages/email/emails/event-reminder.tsx": [],
+    "packages/email/emails/magic-link.tsx": [],
+    "packages/email/emails/weekly-digest.tsx": [],
+    "packages/email/emails/welcome.tsx": [],
+    "packages/email/package.json": [],
+    "packages/email/scripts/deploy-templates.tsx": [
+      "packages/email/emails/event-change.tsx",
+      "packages/email/emails/event-invite.tsx",
+      "packages/email/emails/event-reminder.tsx",
+      "packages/email/emails/magic-link.tsx",
+      "packages/email/emails/weekly-digest.tsx",
+      "packages/email/emails/welcome.tsx"
+    ],
+    "packages/email/src/index.ts": [],
+    "packages/email/src/templates.ts": [],
+    "packages/email/tsconfig.json": [],
+    "pnpm-workspace.yaml": [],
+    "scripts/check-railway.sh": [],
+    "scripts/db/collect-db-evidence.sql": [],
+    "scripts/db/find-missing-end-times.sql": [],
+    "scripts/db/README.md": [],
+    "scripts/db/wipe-live-events.sh": [],
+    "scripts/deno-install-functions.sh": [],
+    "scripts/deploy.sh": [],
+    "scripts/drain-queues.mjs": [],
+    "scripts/railway-cron-drift.mjs": [],
+    "scripts/railway-sandbox.mjs": [],
+    "scripts/setup-local.sh": [],
+    "scripts/supabase-functions-serve.sh": [],
+    "scripts/supabase.sh": [],
+    "scripts/sync-cron-runner.sh": [],
+    "scripts/sync-url-validation.mjs": [],
+    "scripts/test.sh": [],
+    "scripts/verify-edge-fn.mjs": [],
+    "supabase/.branches/_current_branch": [],
+    "supabase/benchmarks/artifacts/p0-003-after.txt": [],
+    "supabase/benchmarks/artifacts/p0-003-before.txt": [],
+    "supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql": [],
+    "supabase/config.toml": [],
+    "supabase/docs/EMAIL.md": [],
+    "supabase/docs/INVITE_GATE.md": [],
+    "supabase/docs/LOCAL_LLM_TAGGING.md": [],
+    "supabase/docs/PRODUCTION_SETUP.md": [],
+    "supabase/functions/_shared/admin-handler_test.ts": [
+      "supabase/functions/_shared/admin-handler.ts"
+    ],
+    "supabase/functions/_shared/admin-handler.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/http.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/_shared/supabase-client.ts"
+    ],
+    "supabase/functions/_shared/auth_test.ts": [
+      "supabase/functions/_shared/auth.ts"
+    ],
+    "supabase/functions/_shared/auth.ts": [],
+    "supabase/functions/_shared/classification.test.ts": [
+      "supabase/functions/_shared/classification.ts"
+    ],
+    "supabase/functions/_shared/classification.ts": [],
+    "supabase/functions/_shared/cors.ts": [],
+    "supabase/functions/_shared/cron-run-log.ts": [
+      "supabase/functions/_shared/logger.ts"
+    ],
+    "supabase/functions/_shared/env_test.ts": [
+      "supabase/functions/_shared/env.ts"
+    ],
+    "supabase/functions/_shared/env.ts": [],
+    "supabase/functions/_shared/function-invoke_test.ts": [
+      "supabase/functions/_shared/function-invoke.ts"
+    ],
+    "supabase/functions/_shared/function-invoke.ts": [],
+    "supabase/functions/_shared/geocode.test.ts": [
+      "supabase/functions/_shared/geocode.ts"
+    ],
+    "supabase/functions/_shared/geocode.ts": [],
+    "supabase/functions/_shared/guarded-fetch.ts": [
+      "supabase/functions/_shared/url-resolve.ts"
+    ],
+    "supabase/functions/_shared/html_test.ts": [
+      "supabase/functions/_shared/html.ts"
+    ],
+    "supabase/functions/_shared/html.ts": [],
+    "supabase/functions/_shared/http_test.ts": [
+      "supabase/functions/_shared/http.ts"
+    ],
+    "supabase/functions/_shared/http.ts": [],
+    "supabase/functions/_shared/llm-config_test.ts": [
+      "supabase/functions/_shared/llm-config.ts"
+    ],
+    "supabase/functions/_shared/llm-config.ts": [],
+    "supabase/functions/_shared/llm-openai_test.ts": [
+      "supabase/functions/_shared/llm-openai.ts"
+    ],
+    "supabase/functions/_shared/llm-openai.ts": [],
+    "supabase/functions/_shared/logger.ts": [],
+    "supabase/functions/_shared/memory-context_test.ts": [
+      "supabase/functions/_shared/memory-context.ts"
+    ],
+    "supabase/functions/_shared/memory-context.ts": [
+      "supabase/functions/_shared/logger.ts"
+    ],
+    "supabase/functions/_shared/parsing.test.ts": [
+      "supabase/functions/_shared/parsing.ts"
+    ],
+    "supabase/functions/_shared/parsing.ts": [],
+    "supabase/functions/_shared/sentry.ts": [
+      "supabase/functions/_shared/logger.ts"
+    ],
+    "supabase/functions/_shared/service-role-handler.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts"
+    ],
+    "supabase/functions/_shared/stock-images_test.ts": [
+      "supabase/functions/_shared/stock-images.ts"
+    ],
+    "supabase/functions/_shared/stock-images.ts": [],
+    "supabase/functions/_shared/supabase-client.ts": [],
+    "supabase/functions/_shared/unsplash.test.ts": [
+      "supabase/functions/_shared/unsplash.ts"
+    ],
+    "supabase/functions/_shared/unsplash.ts": [],
+    "supabase/functions/_shared/url-resolve.ts": [
+      "supabase/functions/_shared/url-validation.ts"
+    ],
+    "supabase/functions/_shared/url-validation.test.ts": [
+      "supabase/functions/_shared/url-validation.ts"
+    ],
+    "supabase/functions/_shared/url-validation.ts": [],
+    "supabase/functions/_shared/validation_test.ts": [
+      "supabase/functions/_shared/validation.ts"
+    ],
+    "supabase/functions/_shared/validation.ts": [],
+    "supabase/functions/admin-run-cron/deno.json": [],
+    "supabase/functions/admin-run-cron/index.ts": [
+      "supabase/functions/_shared/admin-handler.ts",
+      "supabase/functions/_shared/http.ts",
+      "supabase/functions/_shared/logger.ts"
+    ],
+    "supabase/functions/backfill-embeddings/deno.json": [],
+    "supabase/functions/backfill-embeddings/index_test.ts": [
+      "supabase/functions/backfill-embeddings/index.ts"
+    ],
+    "supabase/functions/backfill-embeddings/index.ts": [
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/service-role-handler.ts",
+      "supabase/functions/embed-event/handler.ts"
+    ],
+    "supabase/functions/backfill-event-enrichment/deno.json": [],
+    "supabase/functions/backfill-event-enrichment/index.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/geocode.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/_shared/stock-images.ts",
+      "supabase/functions/_shared/unsplash.ts",
+      "supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "supabase/functions/scrape-source/lib/enrichment.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts": [
+      "supabase/functions/backfill-event-enrichment/parent-tips-pass.ts"
+    ],
+    "supabase/functions/backfill-event-enrichment/parent-tips-pass.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/function-invoke.ts",
+      "supabase/functions/_shared/logger.ts"
+    ],
+    "supabase/functions/backfill-event-enrichment/README.md": [],
+    "supabase/functions/cleanup-stale-runs/deno.json": [],
+    "supabase/functions/cleanup-stale-runs/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/service-role-handler.ts"
+    ],
+    "supabase/functions/db-maintenance/deno.json": [],
+    "supabase/functions/db-maintenance/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/service-role-handler.ts"
+    ],
+    "supabase/functions/deno.json": [],
+    "supabase/functions/embed-event/deno.json": [],
+    "supabase/functions/embed-event/handler_test.ts": [
+      "supabase/functions/embed-event/handler.ts"
+    ],
+    "supabase/functions/embed-event/handler.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts"
+    ],
+    "supabase/functions/embed-event/index.ts": [
+      "supabase/functions/embed-event/handler.ts"
+    ],
+    "supabase/functions/event-review/config_test.ts": [
+      "supabase/functions/event-review/config.ts"
+    ],
+    "supabase/functions/event-review/config.ts": [
+      "supabase/functions/event-review/prompt.ts",
+      "supabase/functions/event-review/types.ts"
+    ],
+    "supabase/functions/event-review/mod.ts": [],
+    "supabase/functions/event-review/normalizer_test.ts": [
+      "supabase/functions/event-review/normalizer.ts",
+      "supabase/functions/event-review/types.ts"
+    ],
+    "supabase/functions/event-review/normalizer.ts": [
+      "supabase/functions/event-review/types.ts"
+    ],
+    "supabase/functions/event-review/prompt_test.ts": [
+      "supabase/functions/event-review/prompt.ts"
+    ],
+    "supabase/functions/event-review/prompt.ts": [
+      "supabase/functions/event-review/types.ts"
+    ],
+    "supabase/functions/event-review/provider.ts": [
+      "supabase/functions/event-review/types.ts"
+    ],
+    "supabase/functions/event-review/reviewer.ts": [
+      "supabase/functions/event-review/config.ts",
+      "supabase/functions/event-review/normalizer.ts",
+      "supabase/functions/event-review/prompt.ts",
+      "supabase/functions/event-review/provider.ts",
+      "supabase/functions/event-review/schema.ts",
+      "supabase/functions/event-review/types.ts"
+    ],
+    "supabase/functions/event-review/schema_test.ts": [
+      "supabase/functions/event-review/schema.ts"
+    ],
+    "supabase/functions/event-review/schema.ts": [
+      "supabase/functions/event-review/types.ts"
+    ],
+    "supabase/functions/event-review/types.ts": [],
+    "supabase/functions/generate-parent-tips/deno.json": [],
+    "supabase/functions/generate-parent-tips/handler.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/llm-config.ts",
+      "supabase/functions/_shared/llm-openai.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/generate-parent-tips/prompt.ts"
+    ],
+    "supabase/functions/generate-parent-tips/index.ts": [
+      "supabase/functions/generate-parent-tips/handler.ts"
+    ],
+    "supabase/functions/generate-parent-tips/prompt.ts": [],
+    "supabase/functions/log-cron-run/deno.json": [],
+    "supabase/functions/log-cron-run/index.ts": [
+      "supabase/functions/_shared/service-role-handler.ts"
+    ],
+    "supabase/functions/notify-email/deno.json": [],
+    "supabase/functions/notify-email/index.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/html.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/_shared/validation.ts"
+    ],
+    "supabase/functions/package.json": [],
+    "supabase/functions/process-event-review-queue/deno.json": [],
+    "supabase/functions/process-event-review-queue/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/service-role-handler.ts",
+      "supabase/functions/process-event-review-queue/lib/worker.ts"
+    ],
+    "supabase/functions/process-event-review-queue/lib/worker_test.ts": [
+      "supabase/functions/event-review/types.ts",
+      "supabase/functions/process-event-review-queue/lib/worker.ts"
+    ],
+    "supabase/functions/process-event-review-queue/lib/worker.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/memory-context.ts",
+      "supabase/functions/event-review/mod.ts"
+    ],
+    "supabase/functions/process-notification-queue/deno.json": [],
+    "supabase/functions/process-notification-queue/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/service-role-handler.ts"
+    ],
+    "supabase/functions/process-source-queue/deno.json": [],
+    "supabase/functions/process-source-queue/index.ts": [
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/service-role-handler.ts",
+      "supabase/functions/process-source-queue/lib/worker.ts"
+    ],
+    "supabase/functions/process-source-queue/lib/llm-extraction.ts": [
+      "supabase/functions/_shared/llm-config.ts",
+      "supabase/functions/_shared/llm-openai.ts",
+      "supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/process-source-queue/lib/worker_test.ts": [
+      "supabase/functions/process-source-queue/lib/worker.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/index.ts"
+    ],
+    "supabase/functions/process-source-queue/lib/worker.ts": [
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "supabase/functions/scrape-source/lib/process-source.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/index.ts"
+    ],
+    "supabase/functions/process-tag-queue/deno.json": [],
+    "supabase/functions/process-tag-queue/index_test.ts": [
+      "supabase/functions/process-tag-queue/index.ts"
+    ],
+    "supabase/functions/process-tag-queue/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/function-invoke.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/_shared/service-role-handler.ts",
+      "supabase/functions/process-tag-queue/queue-policy.ts"
+    ],
+    "supabase/functions/process-tag-queue/queue-policy_test.ts": [
+      "supabase/functions/process-tag-queue/queue-policy.ts"
+    ],
+    "supabase/functions/process-tag-queue/queue-policy.ts": [
+      "packages/contracts/src/database-enums.ts"
+    ],
+    "supabase/functions/scrape-due-sources/deno.json": [],
+    "supabase/functions/scrape-due-sources/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/service-role-handler.ts",
+      "supabase/functions/scrape-source/lib/source-queue.ts"
+    ],
+    "supabase/functions/scrape-source/__fixtures__/atom/entry-content.xml": [],
+    "supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html": [],
+    "supabase/functions/scrape-source/__fixtures__/html/events-page.html": [],
+    "supabase/functions/scrape-source/__fixtures__/ical/folded-tzid.ics": [],
+    "supabase/functions/scrape-source/__fixtures__/ical/hilliard-sample.ics": [],
+    "supabase/functions/scrape-source/__fixtures__/ical/lafayette-mom-sample.ics": [],
+    "supabase/functions/scrape-source/__fixtures__/ical/online-location-url.ics": [],
+    "supabase/functions/scrape-source/__fixtures__/ical/physical-location.ics": [],
+    "supabase/functions/scrape-source/__fixtures__/ical/rrule.ics": [],
+    "supabase/functions/scrape-source/__fixtures__/ical/vermilionville-sample.ics": [],
+    "supabase/functions/scrape-source/__fixtures__/lcglafayette/events-page.html": [],
+    "supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-api.json": [],
+    "supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-page.html": [],
+    "supabase/functions/scrape-source/__fixtures__/rss/cdata-media.xml": [],
+    "supabase/functions/scrape-source/__fixtures__/rss/dc-date.xml": [],
+    "supabase/functions/scrape-source/deno.json": [],
+    "supabase/functions/scrape-source/index.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/scrape-source/lib/source-queue.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/date_test.ts": [
+      "supabase/functions/scrape-source/lib/date.ts"
+    ],
+    "supabase/functions/scrape-source/lib/date.ts": [],
+    "supabase/functions/scrape-source/lib/enrichment.ts": [
+      "supabase/functions/_shared/guarded-fetch.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/event-processing_test.ts": [
+      "supabase/functions/scrape-source/lib/event-processing.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/event-processing.ts": [
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/extraction-pipeline_test.ts": [
+      "supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/extraction-pipeline.ts": [
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/parser-context.ts": [],
+    "supabase/functions/scrape-source/lib/process-source_test.ts": [
+      "supabase/functions/scrape-source/lib/process-source.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/process-source.ts": [
+      "supabase/functions/_shared/guarded-fetch.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/scrape-source/lib/parser-context.ts",
+      "supabase/functions/scrape-source/lib/schedule.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/schedule.ts": [
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/lib/source-queue_test.ts": [
+      "supabase/functions/scrape-source/lib/source-queue.ts"
+    ],
+    "supabase/functions/scrape-source/lib/source-queue.ts": [
+      "supabase/functions/_shared/function-invoke.ts"
+    ],
+    "supabase/functions/scrape-source/lib/types.ts": [
+      "packages/contracts/src/database-enums.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/_lib/types.ts": [
+      "supabase/functions/scrape-source/lib/parser-context.ts",
+      "supabase/functions/scrape-source/lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/brec_test.ts": [
+      "supabase/functions/scrape-source/parsers/brec.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/brec.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/date.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/downtownlafayette_test.ts": [
+      "supabase/functions/scrape-source/parsers/downtownlafayette.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/downtownlafayette.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/date.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/ical_test.ts": [
+      "supabase/functions/scrape-source/parsers/ical.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts": [
+      "supabase/functions/scrape-source/parsers/ical.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/ical.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/date.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/index_test.ts": [
+      "supabase/functions/scrape-source/parsers/index.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/index.ts": [
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "supabase/functions/scrape-source/parsers/brec.ts",
+      "supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "supabase/functions/scrape-source/parsers/ical.ts",
+      "supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "supabase/functions/scrape-source/parsers/localhop.ts",
+      "supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "supabase/functions/scrape-source/parsers/manual.ts",
+      "supabase/functions/scrape-source/parsers/rss.ts",
+      "supabase/functions/scrape-source/parsers/website.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts": [
+      "supabase/functions/scrape-source/parsers/lcg-lafayette.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/lcg-lafayette.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/scrape-source/lib/date.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/localhop_test.ts": [
+      "supabase/functions/scrape-source/parsers/localhop.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/localhop.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/macaroni-kid_test.ts": [
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/macaroni-kid.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/macaroni-kid.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/manual.ts": [
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/rss_test.ts": [
+      "supabase/functions/scrape-source/parsers/rss.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/rss.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/website_test.ts": [
+      "supabase/functions/scrape-source/parsers/website.ts"
+    ],
+    "supabase/functions/scrape-source/parsers/website.ts": [
+      "supabase/functions/_shared/parsing.ts",
+      "supabase/functions/_shared/url-validation.ts",
+      "supabase/functions/scrape-source/lib/date.ts",
+      "supabase/functions/scrape-source/lib/types.ts",
+      "supabase/functions/scrape-source/parsers/_lib/types.ts"
+    ],
+    "supabase/functions/send-auth-email/deno.json": [],
+    "supabase/functions/send-auth-email/index.ts": [
+      "supabase/functions/_shared/html.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/sentry.ts"
+    ],
+    "supabase/functions/send-push/deno.json": [],
+    "supabase/functions/send-push/index.ts": [
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/service-role-handler.ts",
+      "supabase/functions/send-push/lib/mobile-push.ts"
+    ],
+    "supabase/functions/send-push/lib/mobile-push_test.ts": [
+      "supabase/functions/send-push/lib/mobile-push.ts"
+    ],
+    "supabase/functions/send-push/lib/mobile-push.ts": [],
+    "supabase/functions/send-push/send-push.test.ts": [],
+    "supabase/functions/send-reminders/deno.json": [],
+    "supabase/functions/send-reminders/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/service-role-handler.ts"
+    ],
+    "supabase/functions/send-reminders/send-reminders.test.ts": [],
+    "supabase/functions/send-weekly-digest/deno.json": [],
+    "supabase/functions/send-weekly-digest/index.ts": [
+      "supabase/functions/_shared/cron-run-log.ts",
+      "supabase/functions/_shared/html.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/service-role-handler.ts"
+    ],
+    "supabase/functions/send-weekly-digest/send-weekly-digest.test.ts": [],
+    "supabase/functions/share-og/deno.json": [],
+    "supabase/functions/share-og/index_test.ts": [
+      "supabase/functions/share-og/index.ts"
+    ],
+    "supabase/functions/share-og/index.ts": [
+      "supabase/functions/_shared/html.ts",
+      "supabase/functions/_shared/http.ts",
+      "supabase/functions/_shared/url-validation.ts"
+    ],
+    "supabase/functions/share-og/integration_test.ts": [
+      "supabase/functions/share-og/index.ts"
+    ],
+    "supabase/functions/sitemap/deno.json": [],
+    "supabase/functions/sitemap/index.ts": [],
+    "supabase/functions/tag-event/config_test.ts": [
+      "supabase/functions/tag-event/config.ts"
+    ],
+    "supabase/functions/tag-event/config.ts": [
+      "supabase/functions/_shared/llm-config.ts"
+    ],
+    "supabase/functions/tag-event/deno.json": [],
+    "supabase/functions/tag-event/handler_test.ts": [
+      "supabase/functions/tag-event/handler.ts"
+    ],
+    "supabase/functions/tag-event/handler.ts": [
+      "supabase/functions/_shared/auth.ts",
+      "supabase/functions/_shared/classification.ts",
+      "supabase/functions/_shared/geocode.ts",
+      "supabase/functions/_shared/llm-openai.ts",
+      "supabase/functions/_shared/logger.ts",
+      "supabase/functions/_shared/memory-context.ts",
+      "supabase/functions/_shared/sentry.ts",
+      "supabase/functions/embed-event/handler.ts",
+      "supabase/functions/tag-event/config.ts"
+    ],
+    "supabase/functions/tag-event/index.ts": [
+      "supabase/functions/tag-event/handler.ts"
+    ],
+    "supabase/functions/vitest.config.ts": [],
+    "supabase/functions/weather/deno.json": [],
+    "supabase/functions/weather/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/sentry.ts"
+    ],
+    "supabase/migrations/20260601000000_schema_baseline.sql": [],
+    "supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql": [],
+    "supabase/migrations/20260601001000_reference_security_and_cron.sql": [],
+    "supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql": [],
+    "supabase/migrations/20260601003000_maintenance_and_admin_queues.sql": [],
+    "supabase/migrations/20260601004000_llm_review_and_enrichment.sql": [],
+    "supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql": [],
+    "supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql": [],
+    "supabase/migrations/20260601007000_lafayette_new_sources.sql": [],
+    "supabase/migrations/20260601008000_tier3_lafayette_sources.sql": [],
+    "supabase/migrations/20260601009000_cron_review_events_allowlist.sql": [],
+    "supabase/migrations/20260601010000_admin_events_realtime.sql": [],
+    "supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql": [],
+    "supabase/migrations/20260601011001_fix_provider_constraint.sql": [],
+    "supabase/migrations/20260601012000_disable_invite_gate.sql": [],
+    "supabase/migrations/20260601013000_reset_invite_gate_guc.sql": [],
+    "supabase/migrations/20260601014000_fix_invite_gate_default.sql": [],
+    "supabase/migrations/20260601015000_fix_invite_gate_single_source.sql": [],
+    "supabase/migrations/20260601016000_anon_access_for_public_browsing.sql": [],
+    "supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql": [],
+    "supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql": [],
+    "supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql": [],
+    "supabase/migrations/20260601020000_event_embeddings_and_similarity.sql": [],
+    "supabase/migrations/20260601021000_admin_event_decisions.sql": [],
+    "supabase/migrations/20260601022000_source_auto_reject_and_stats.sql": [],
+    "supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql": [],
+    "supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql": [],
+    "supabase/migrations/20260601025000_baton_rouge_sources.sql": [],
+    "supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql": [],
+    "supabase/migrations/20260601027000_user_notification_preferences.sql": [],
+    "supabase/migrations/20260601028000_search_events_radius_filter.sql": [],
+    "supabase/migrations/20260601029000_find_similar_events_by_id.sql": [],
+    "supabase/migrations/20260601030000_push_and_notifications.sql": [],
+    "supabase/migrations/20260601031000_event_change_notifications.sql": [],
+    "supabase/migrations/20260601032000_drop_old_search_events_overload.sql": [],
+    "supabase/migrations/20260601033000_community_event_submission.sql": [],
+    "supabase/migrations/20260601034000_activate_baton_rouge_sources.sql": [],
+    "supabase/migrations/20260601035000_community_event_status_notification.sql": [],
+    "supabase/migrations/20260601036000_admin_user_delete.sql": [],
+    "supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql": [],
+    "supabase/migrations/20260610170000_admin_events_source_filter.sql": [],
+    "supabase/migrations/20260610180000_admin_dashboard_stats.sql": [],
+    "supabase/rollbacks/20260601000000_001_schema_down.sql": [],
+    "supabase/rollbacks/20260601000100_002_functions_down.sql": [],
+    "supabase/rollbacks/20260601000300_004_views_and_rpcs_down.sql": [],
+    "supabase/rollbacks/20260601002700_admin_event_lifetime_editing_down.sql": [],
+    "supabase/rollbacks/20260601017000_event_status_enum_and_validate_checks_down.sql": [],
+    "supabase/rollbacks/20260601018000_fix_events_enriched_enum_cast_down.sql": [],
+    "supabase/rollbacks/20260601019000_restore_events_enriched_cursor_signature_down.sql": [],
+    "supabase/rollbacks/20260601020000_event_embeddings_and_similarity_down.sql": [],
+    "supabase/rollbacks/20260601021000_admin_event_decisions_down.sql": [],
+    "supabase/rollbacks/20260601022000_source_auto_reject_and_stats_down.sql": [],
+    "supabase/rollbacks/20260601023000_fix_ai_settings_rpc_grants_down.sql": [],
+    "supabase/rollbacks/20260601024000_admin_retry_dead_tag_queue_down.sql": [],
+    "supabase/rollbacks/20260601025000_baton_rouge_sources_down.sql": [],
+    "supabase/rollbacks/20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql": [],
+    "supabase/rollbacks/20260601027000_user_notification_preferences_down.sql": [],
+    "supabase/rollbacks/20260601028000_search_events_radius_filter_down.sql": [],
+    "supabase/rollbacks/20260601029000_find_similar_events_by_id_down.sql": [],
+    "supabase/rollbacks/20260601030000_push_and_notifications_down.sql": [],
+    "supabase/rollbacks/20260601031000_event_change_notifications_down.sql": [],
+    "supabase/rollbacks/20260601032000_drop_old_search_events_overload_down.sql": [],
+    "supabase/rollbacks/20260601033000_community_event_submission_down.sql": [],
+    "supabase/rollbacks/20260601034000_activate_baton_rouge_sources_down.sql": [],
+    "supabase/rollbacks/20260601035000_community_event_status_notification_down.sql": [],
+    "supabase/rollbacks/20260601036000_admin_user_delete_down.sql": [],
+    "supabase/rollbacks/20260610162002_enqueue_source_scrape_rpc_down.sql": [],
+    "supabase/rollbacks/20260610170000_admin_events_source_filter_down.sql": [],
+    "supabase/rollbacks/20260610180000_admin_dashboard_stats_down.sql": [],
+    "supabase/seed.sql": [],
+    "supabase/snippets/add_macaroni_kids_source.sql": [],
+    "supabase/snippets/provision_remote_admin_test_user.sql": [],
+    "supabase/tests/admin_dashboard_stats.sql": [],
+    "supabase/tests/admin_db_health.sql": [],
+    "supabase/tests/admin_events_rpc.sql": [],
+    "supabase/tests/api_surface_hardening.sql": [],
+    "supabase/tests/cron_rpc_security.sql": [],
+    "supabase/tests/cron_toggle.sql": [],
+    "supabase/tests/events_cursor_pagination.sql": [],
+    "supabase/tests/events_enriched_parity.sql": [],
+    "supabase/tests/invite_gate_oauth_signup.sql": [],
+    "supabase/tests/llm_event_review_processing.sql": [],
+    "supabase/tests/reference_data.sql": [],
+    "supabase/tests/rls_access_expiry.sql": [],
+    "supabase/tests/rls_anon_read.sql": [],
+    "supabase/tests/rls_privilege_escalation.sql": [],
+    "supabase/tests/rls_public_events_view.sql": [],
+    "supabase/tests/role_smoke.sql": [],
+    "supabase/tests/trace_retention.sql": [],
+    "tests/fixtures/railway-cron-poc-drift.json": [],
+    "tests/fixtures/railway-cron-poc-live.json": [],
+    "tests/guards/cron-runner-boundary.test.mjs": [],
+    "tests/guards/db-types-script.test.mjs": [],
+    "tests/guards/deploy-cli-boundary.test.mjs": [
+      "scripts/railway-cron-drift.mjs"
+    ],
+    "tests/guards/migration-rollbacks.test.mjs": [],
+    "tests/guards/supabase-function-auth-config.test.mjs": []
+  }
+}

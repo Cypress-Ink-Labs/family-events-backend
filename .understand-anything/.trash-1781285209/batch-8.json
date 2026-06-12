@@ -1,0 +1,600 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/_shared/admin-handler.ts",
+      "type": "file",
+      "name": "admin-handler.ts",
+      "filePath": "supabase/functions/_shared/admin-handler.ts",
+      "summary": "Shared Supabase edge function middleware that enforces admin/service-role authentication, handles CORS, validates HTTP methods, and wraps handlers with structured JSON error reporting and Sentry capture.",
+      "tags": ["middleware", "api-handler", "service", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:supabase/functions/_shared/admin-handler.ts:AdminJsonError",
+      "type": "class",
+      "name": "AdminJsonError",
+      "filePath": "supabase/functions/_shared/admin-handler.ts",
+      "lineRange": [35, 43],
+      "summary": "Custom error class carrying an HTTP status code and message for structured admin JSON error responses.",
+      "tags": ["utility", "validation", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/admin-handler.ts:createAdminJsonHandler",
+      "type": "function",
+      "name": "createAdminJsonHandler",
+      "filePath": "supabase/functions/_shared/admin-handler.ts",
+      "lineRange": [56, 143],
+      "summary": "Factory that returns a Deno Request handler enforcing admin or service-role auth, CORS headers, method allowlists, and unified error handling with optional Sentry capture.",
+      "tags": ["middleware", "factory", "api-handler", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/admin-handler.ts:serveAdminJson",
+      "type": "function",
+      "name": "serveAdminJson",
+      "filePath": "supabase/functions/_shared/admin-handler.ts",
+      "lineRange": [145, 150],
+      "summary": "Convenience wrapper that calls Deno.serve with the handler produced by createAdminJsonHandler.",
+      "tags": ["api-handler", "entry-point", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/admin-handler_test.ts",
+      "type": "file",
+      "name": "admin-handler_test.ts",
+      "filePath": "supabase/functions/_shared/admin-handler_test.ts",
+      "summary": "Unit tests for the admin-handler middleware, covering authentication enforcement, method validation, CORS handling, and error propagation through the handler factory.",
+      "tags": ["test", "middleware", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/http.ts",
+      "type": "file",
+      "name": "http.ts",
+      "filePath": "supabase/functions/_shared/http.ts",
+      "summary": "Shared HTTP utilities for Supabase edge functions providing CORS header construction, JSON response helpers, error JSON responses, and request body parsing.",
+      "tags": ["utility", "middleware", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/http.ts:buildCorsHeaders",
+      "type": "function",
+      "name": "buildCorsHeaders",
+      "filePath": "supabase/functions/_shared/http.ts",
+      "lineRange": [14, 24],
+      "summary": "Builds CORS response headers from configurable options including allowed methods, origins, and headers.",
+      "tags": ["utility", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/http.ts:jsonResponse",
+      "type": "function",
+      "name": "jsonResponse",
+      "filePath": "supabase/functions/_shared/http.ts",
+      "lineRange": [34, 42],
+      "summary": "Creates a JSON HTTP Response with correct content-type header and optional additional init parameters.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/http.ts:errorJson",
+      "type": "function",
+      "name": "errorJson",
+      "filePath": "supabase/functions/_shared/http.ts",
+      "lineRange": [44, 50],
+      "summary": "Produces a JSON error Response with a given HTTP status and error message string.",
+      "tags": ["utility", "api-handler", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/http.ts:parseJsonObject",
+      "type": "function",
+      "name": "parseJsonObject",
+      "filePath": "supabase/functions/_shared/http.ts",
+      "lineRange": [60, 71],
+      "summary": "Parses the JSON body of a Request, validating it is a plain object and not an array.",
+      "tags": ["utility", "validation", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/http_test.ts",
+      "type": "file",
+      "name": "http_test.ts",
+      "filePath": "supabase/functions/_shared/http_test.ts",
+      "summary": "Unit tests for the shared HTTP utility functions, verifying CORS header construction, JSON response formatting, and error response shape.",
+      "tags": ["test", "utility", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/supabase-client.ts",
+      "type": "file",
+      "name": "supabase-client.ts",
+      "filePath": "supabase/functions/_shared/supabase-client.ts",
+      "summary": "Factory module that creates typed Supabase clients: a service-role client for privileged operations and an anon client authenticated by a user JWT from the Authorization header.",
+      "tags": ["service", "utility", "factory"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/supabase-client.ts:createServiceClient",
+      "type": "function",
+      "name": "createServiceClient",
+      "filePath": "supabase/functions/_shared/supabase-client.ts",
+      "lineRange": [3, 8],
+      "summary": "Creates a Supabase client using the service role key for privileged backend operations.",
+      "tags": ["factory", "service", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/supabase-client.ts:createAnonClient",
+      "type": "function",
+      "name": "createAnonClient",
+      "filePath": "supabase/functions/_shared/supabase-client.ts",
+      "lineRange": [10, 21],
+      "summary": "Creates a Supabase client scoped to an anonymous user, injecting the caller's Authorization JWT into the request headers.",
+      "tags": ["factory", "service", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/admin-run-cron/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/admin-run-cron/index.ts",
+      "summary": "Supabase edge function entry point that allows admin/service callers to trigger named cron jobs on demand by proxying the request to a backing cron Docker container via HTTP.",
+      "tags": ["entry-point", "api-handler", "service", "middleware"],
+      "complexity": "moderate",
+      "languageNotes": "Uses the admin-handler factory pattern for auth and CORS, then fans out to an external cron container with fetch."
+    },
+    {
+      "id": "file:supabase/functions/share-og/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/share-og/index.ts",
+      "summary": "Supabase edge function that generates Open Graph HTML pages for shared family events, querying Supabase for event data and rendering server-side HTML with OG meta tags, a preview image, and inline event data for the client app to hydrate.",
+      "tags": ["entry-point", "api-handler", "service", "component"],
+      "complexity": "complex",
+      "languageNotes": "Large function handling progressive fallbacks: no event ID, event not found, and event found with full OG metadata and cache headers."
+    },
+    {
+      "id": "function:supabase/functions/share-og/index.ts:renderHtml",
+      "type": "function",
+      "name": "renderHtml",
+      "filePath": "supabase/functions/share-og/index.ts",
+      "lineRange": [121, 234],
+      "summary": "Renders a complete HTML page string with OG meta tags, Twitter card metadata, and inline JSON event data for the family events share page.",
+      "tags": ["component", "utility", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/share-og/index.ts:handleShareOg",
+      "type": "function",
+      "name": "handleShareOg",
+      "filePath": "supabase/functions/share-og/index.ts",
+      "lineRange": [244, 333],
+      "summary": "Main request handler for the share-og edge function: extracts event ID from the URL, queries Supabase for event data, and returns a rendered HTML response with appropriate cache headers.",
+      "tags": ["api-handler", "entry-point", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/share-og/index.ts:extractEventIdFromRequest",
+      "type": "function",
+      "name": "extractEventIdFromRequest",
+      "filePath": "supabase/functions/share-og/index.ts",
+      "lineRange": [102, 119],
+      "summary": "Extracts and validates a UUID event ID from the request URL, checking query params and path segments.",
+      "tags": ["utility", "validation", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/share-og/index.ts:pickOgImage",
+      "type": "function",
+      "name": "pickOgImage",
+      "filePath": "supabase/functions/share-og/index.ts",
+      "lineRange": [76, 100],
+      "summary": "Selects the best OG image URL from an event's image list, validating URLs against an external URL allowlist and preferring image file extensions.",
+      "tags": ["utility", "validation", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/share-og/index.ts:truncateOgDescription",
+      "type": "function",
+      "name": "truncateOgDescription",
+      "filePath": "supabase/functions/share-og/index.ts",
+      "lineRange": [54, 63],
+      "summary": "Trims and truncates an event description to fit within the OG description character limit, appending ellipsis when truncated.",
+      "tags": ["utility", "serialization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/share-og/index_test.ts",
+      "type": "file",
+      "name": "index_test.ts",
+      "filePath": "supabase/functions/share-og/index_test.ts",
+      "summary": "Unit tests for share-og edge function helpers including OG description truncation, image picking, and event ID extraction logic.",
+      "tags": ["test", "api-handler", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/share-og/integration_test.ts",
+      "type": "file",
+      "name": "integration_test.ts",
+      "filePath": "supabase/functions/share-og/integration_test.ts",
+      "summary": "Integration tests for the share-og edge function handler that exercise full request/response cycles including not-found and found-event scenarios.",
+      "tags": ["test", "api-handler", "service"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "class:supabase/functions/_shared/admin-handler.ts:AdminJsonError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "class:supabase/functions/_shared/admin-handler.ts:AdminJsonError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "function:supabase/functions/_shared/admin-handler.ts:createAdminJsonHandler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "function:supabase/functions/_shared/admin-handler.ts:createAdminJsonHandler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "function:supabase/functions/_shared/admin-handler.ts:serveAdminJson",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "function:supabase/functions/_shared/admin-handler.ts:serveAdminJson",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "file:supabase/functions/_shared/http.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "file:supabase/functions/_shared/supabase-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:supabase/functions/_shared/admin-handler.ts:createAdminJsonHandler",
+      "target": "function:supabase/functions/_shared/http.ts:buildCorsHeaders",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/_shared/admin-handler.ts:createAdminJsonHandler",
+      "target": "function:supabase/functions/_shared/http.ts:errorJson",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/_shared/admin-handler.ts:createAdminJsonHandler",
+      "target": "function:supabase/functions/_shared/http.ts:jsonResponse",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler_test.ts",
+      "target": "file:supabase/functions/_shared/admin-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/admin-handler.ts",
+      "target": "file:supabase/functions/_shared/admin-handler_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:buildCorsHeaders",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:buildCorsHeaders",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:jsonResponse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:jsonResponse",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:errorJson",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:errorJson",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:parseJsonObject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "function:supabase/functions/_shared/http.ts:parseJsonObject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/http_test.ts",
+      "target": "file:supabase/functions/_shared/http.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/http.ts",
+      "target": "file:supabase/functions/_shared/http_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/supabase-client.ts",
+      "target": "function:supabase/functions/_shared/supabase-client.ts:createServiceClient",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/supabase-client.ts",
+      "target": "function:supabase/functions/_shared/supabase-client.ts:createServiceClient",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/supabase-client.ts",
+      "target": "function:supabase/functions/_shared/supabase-client.ts:createAnonClient",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/supabase-client.ts",
+      "target": "function:supabase/functions/_shared/supabase-client.ts:createAnonClient",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/admin-run-cron/index.ts",
+      "target": "file:supabase/functions/_shared/admin-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/admin-run-cron/index.ts",
+      "target": "file:supabase/functions/_shared/http.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/admin-run-cron/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/admin-run-cron/index.ts",
+      "target": "function:supabase/functions/_shared/admin-handler.ts:createAdminJsonHandler",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:renderHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:renderHtml",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:handleShareOg",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:handleShareOg",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:extractEventIdFromRequest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:extractEventIdFromRequest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:pickOgImage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:pickOgImage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:truncateOgDescription",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "function:supabase/functions/share-og/index.ts:truncateOgDescription",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "file:supabase/functions/_shared/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "file:supabase/functions/_shared/http.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:supabase/functions/share-og/index.ts:renderHtml",
+      "target": "file:supabase/functions/_shared/html.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/share-og/index.ts:pickOgImage",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/share-og/index_test.ts",
+      "target": "file:supabase/functions/share-og/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "file:supabase/functions/share-og/index_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/share-og/integration_test.ts",
+      "target": "file:supabase/functions/share-og/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/share-og/index.ts",
+      "target": "file:supabase/functions/share-og/integration_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

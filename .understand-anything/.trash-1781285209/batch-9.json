@@ -1,0 +1,262 @@
+{
+  "nodes": [
+    {
+      "id": "file:packages/email/emails/event-change.tsx",
+      "type": "file",
+      "name": "event-change.tsx",
+      "filePath": "packages/email/emails/event-change.tsx",
+      "summary": "React Email template for notifying recipients about changes to an existing family event, rendering details such as updated date, time, location, and description.",
+      "tags": ["email-template", "component", "notification", "event"],
+      "complexity": "complex",
+      "languageNotes": "React Email component using JSX for server-rendered HTML email output; default export follows React Email conventions."
+    },
+    {
+      "id": "function:packages/email/emails/event-change.tsx:EventChangeEmail",
+      "type": "function",
+      "name": "EventChangeEmail",
+      "filePath": "packages/email/emails/event-change.tsx",
+      "lineRange": [55, 200],
+      "summary": "Default-exported React Email component that renders a full HTML email notifying the recipient of changes to a scheduled event.",
+      "tags": ["component", "email-template", "notification"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/email/emails/event-invite.tsx",
+      "type": "file",
+      "name": "event-invite.tsx",
+      "filePath": "packages/email/emails/event-invite.tsx",
+      "summary": "React Email template for sending event invitations, presenting event details and an RSVP call-to-action to the recipient.",
+      "tags": ["email-template", "component", "invitation", "event"],
+      "complexity": "complex",
+      "languageNotes": "React Email component; default export follows React Email conventions."
+    },
+    {
+      "id": "function:packages/email/emails/event-invite.tsx:EventInviteEmail",
+      "type": "function",
+      "name": "EventInviteEmail",
+      "filePath": "packages/email/emails/event-invite.tsx",
+      "lineRange": [52, 182],
+      "summary": "Default-exported React Email component rendering an event invitation email with event details and RSVP link.",
+      "tags": ["component", "email-template", "invitation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/email/emails/event-reminder.tsx",
+      "type": "file",
+      "name": "event-reminder.tsx",
+      "filePath": "packages/email/emails/event-reminder.tsx",
+      "summary": "React Email template for reminding recipients about an upcoming family event, including date, time, and location details.",
+      "tags": ["email-template", "component", "reminder", "event"],
+      "complexity": "complex",
+      "languageNotes": "React Email component; default export follows React Email conventions."
+    },
+    {
+      "id": "function:packages/email/emails/event-reminder.tsx:EventReminderEmail",
+      "type": "function",
+      "name": "EventReminderEmail",
+      "filePath": "packages/email/emails/event-reminder.tsx",
+      "lineRange": [53, 192],
+      "summary": "Default-exported React Email component that renders an event reminder email with event context and timing information.",
+      "tags": ["component", "email-template", "reminder"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/email/emails/magic-link.tsx",
+      "type": "file",
+      "name": "magic-link.tsx",
+      "filePath": "packages/email/emails/magic-link.tsx",
+      "summary": "React Email template for delivering a passwordless magic-link authentication email to the user.",
+      "tags": ["email-template", "component", "authentication", "magic-link"],
+      "complexity": "moderate",
+      "languageNotes": "React Email component; default export follows React Email conventions."
+    },
+    {
+      "id": "function:packages/email/emails/magic-link.tsx:MagicLinkEmail",
+      "type": "function",
+      "name": "MagicLinkEmail",
+      "filePath": "packages/email/emails/magic-link.tsx",
+      "lineRange": [49, 154],
+      "summary": "Default-exported React Email component that renders a magic-link sign-in email with a prominent action button.",
+      "tags": ["component", "email-template", "authentication"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/email/emails/weekly-digest.tsx",
+      "type": "file",
+      "name": "weekly-digest.tsx",
+      "filePath": "packages/email/emails/weekly-digest.tsx",
+      "summary": "React Email template for a weekly digest summarizing upcoming family events for the recipient.",
+      "tags": ["email-template", "component", "digest", "event"],
+      "complexity": "complex",
+      "languageNotes": "React Email component; default export follows React Email conventions."
+    },
+    {
+      "id": "function:packages/email/emails/weekly-digest.tsx:WeeklyDigestEmail",
+      "type": "function",
+      "name": "WeeklyDigestEmail",
+      "filePath": "packages/email/emails/weekly-digest.tsx",
+      "lineRange": [60, 172],
+      "summary": "Default-exported React Email component rendering a weekly digest listing upcoming events with dates and locations.",
+      "tags": ["component", "email-template", "digest"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/email/emails/welcome.tsx",
+      "type": "file",
+      "name": "welcome.tsx",
+      "filePath": "packages/email/emails/welcome.tsx",
+      "summary": "React Email template for welcoming new users to the family events app, providing onboarding context and next steps.",
+      "tags": ["email-template", "component", "onboarding", "welcome"],
+      "complexity": "complex",
+      "languageNotes": "React Email component; default export follows React Email conventions."
+    },
+    {
+      "id": "function:packages/email/emails/welcome.tsx:WelcomeEmail",
+      "type": "function",
+      "name": "WelcomeEmail",
+      "filePath": "packages/email/emails/welcome.tsx",
+      "lineRange": [49, 191],
+      "summary": "Default-exported React Email component that renders a welcome/onboarding email for newly registered users.",
+      "tags": ["component", "email-template", "onboarding"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/email/scripts/deploy-templates.tsx",
+      "type": "file",
+      "name": "deploy-templates.tsx",
+      "filePath": "packages/email/scripts/deploy-templates.tsx",
+      "summary": "Build and deployment script that renders all React Email templates to HTML and uploads them to Resend for production use.",
+      "tags": ["script", "deployment", "email-template", "build"],
+      "complexity": "moderate",
+      "languageNotes": "Imports all six email template components and iterates over them to render and deploy; uses the Resend API for template management."
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/email/emails/event-change.tsx",
+      "target": "function:packages/email/emails/event-change.tsx:EventChangeEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/email/emails/event-change.tsx",
+      "target": "function:packages/email/emails/event-change.tsx:EventChangeEmail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/email/emails/event-invite.tsx",
+      "target": "function:packages/email/emails/event-invite.tsx:EventInviteEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/email/emails/event-invite.tsx",
+      "target": "function:packages/email/emails/event-invite.tsx:EventInviteEmail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/email/emails/event-reminder.tsx",
+      "target": "function:packages/email/emails/event-reminder.tsx:EventReminderEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/email/emails/event-reminder.tsx",
+      "target": "function:packages/email/emails/event-reminder.tsx:EventReminderEmail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/email/emails/magic-link.tsx",
+      "target": "function:packages/email/emails/magic-link.tsx:MagicLinkEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/email/emails/magic-link.tsx",
+      "target": "function:packages/email/emails/magic-link.tsx:MagicLinkEmail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/email/emails/weekly-digest.tsx",
+      "target": "function:packages/email/emails/weekly-digest.tsx:WeeklyDigestEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/email/emails/weekly-digest.tsx",
+      "target": "function:packages/email/emails/weekly-digest.tsx:WeeklyDigestEmail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/email/emails/welcome.tsx",
+      "target": "function:packages/email/emails/welcome.tsx:WelcomeEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/email/emails/welcome.tsx",
+      "target": "function:packages/email/emails/welcome.tsx:WelcomeEmail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:packages/email/scripts/deploy-templates.tsx",
+      "target": "file:packages/email/emails/event-change.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/email/scripts/deploy-templates.tsx",
+      "target": "file:packages/email/emails/event-invite.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/email/scripts/deploy-templates.tsx",
+      "target": "file:packages/email/emails/event-reminder.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/email/scripts/deploy-templates.tsx",
+      "target": "file:packages/email/emails/magic-link.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/email/scripts/deploy-templates.tsx",
+      "target": "file:packages/email/emails/weekly-digest.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/email/scripts/deploy-templates.tsx",
+      "target": "file:packages/email/emails/welcome.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

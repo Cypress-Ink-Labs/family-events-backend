@@ -1,0 +1,226 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 4,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/docs/EMAIL.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 152,
+      "nonEmptyLines": 115,
+      "sections": [
+        {
+          "heading": "Email Setup",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "What sends what",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "One-time setup",
+          "level": 2,
+          "line": 29
+        },
+        {
+          "heading": "1. Resend account + verified domain",
+          "level": 3,
+          "line": 31
+        },
+        {
+          "heading": "2. Wire Supabase Auth → Resend (Auth-flow emails)",
+          "level": 3,
+          "line": 41
+        },
+        {
+          "heading": "3. Wire `notify-email` (application emails)",
+          "level": 3,
+          "line": 65
+        },
+        {
+          "heading": "4. Apply the wiring migration",
+          "level": 3,
+          "line": 83
+        },
+        {
+          "heading": "Soft-failure behaviour",
+          "level": 2,
+          "line": 95
+        },
+        {
+          "heading": "Verifying email delivery",
+          "level": 2,
+          "line": 111
+        },
+        {
+          "heading": "Customizing email content",
+          "level": 2,
+          "line": 135
+        },
+        {
+          "heading": "Cost notes",
+          "level": 2,
+          "line": 147
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 11
+      }
+    },
+    {
+      "path": "supabase/docs/INVITE_GATE.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 95,
+      "nonEmptyLines": 67,
+      "sections": [
+        {
+          "heading": "Invite Gate",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Affected Functions",
+          "level": 2,
+          "line": 12
+        },
+        {
+          "heading": "Current State",
+          "level": 2,
+          "line": 21
+        },
+        {
+          "heading": "Re-enable Gate (Closed Beta)",
+          "level": 2,
+          "line": 27
+        },
+        {
+          "heading": "Disable Gate (Open Registration)",
+          "level": 2,
+          "line": 44
+        },
+        {
+          "heading": "Verification",
+          "level": 2,
+          "line": 59
+        },
+        {
+          "heading": "Local Development",
+          "level": 2,
+          "line": 73
+        },
+        {
+          "heading": "See Also",
+          "level": 2,
+          "line": 92
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "supabase/docs/LOCAL_LLM_TAGGING.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 107,
+      "nonEmptyLines": 79,
+      "sections": [
+        {
+          "heading": "Local LLM event tagging POC",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Railway service",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Supabase function secrets",
+          "level": 2,
+          "line": 52
+        },
+        {
+          "heading": "Smoke test",
+          "level": 2,
+          "line": 74
+        },
+        {
+          "heading": "POC success criteria",
+          "level": 2,
+          "line": 96
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    },
+    {
+      "path": "supabase/docs/PRODUCTION_SETUP.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 110,
+      "nonEmptyLines": 80,
+      "sections": [
+        {
+          "heading": "Production Setup",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. Push migrations",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "2. Configure scheduled scraping settings",
+          "level": 2,
+          "line": 14
+        },
+        {
+          "heading": "3. Bootstrap the first admin",
+          "level": 2,
+          "line": 31
+        },
+        {
+          "heading": "4. Deploy edge functions",
+          "level": 2,
+          "line": 58
+        },
+        {
+          "heading": "5. Configure email (Resend)",
+          "level": 2,
+          "line": 91
+        },
+        {
+          "heading": "6. Verify",
+          "level": 2,
+          "line": 105
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 7
+      }
+    }
+  ]
+}

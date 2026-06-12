@@ -1,0 +1,1032 @@
+{
+  "nodes": [
+    {
+      "id": "file:packages/deploy-cli/src/cli.ts",
+      "type": "file",
+      "name": "cli.ts",
+      "filePath": "packages/deploy-cli/src/cli.ts",
+      "summary": "Entry point for the deploy CLI that wires up all subcommands (deploy, doctor, rollback-plan, status, targets, validate) into a Commander program.",
+      "tags": ["entry-point", "cli", "command-registration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "type": "file",
+      "name": "deploy.ts",
+      "filePath": "packages/deploy-cli/src/commands/deploy.ts",
+      "summary": "Registers the 'deploy' subcommand with all deployment options, parses concurrency flags, loads config, and delegates execution to the deploy-runner workflow.",
+      "tags": ["api-handler", "command-registration", "deployment"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/commands/deploy.ts:registerDeployCommand",
+      "type": "function",
+      "name": "registerDeployCommand",
+      "filePath": "packages/deploy-cli/src/commands/deploy.ts",
+      "lineRange": [30, 100],
+      "summary": "Registers the deploy command with Commander, parsing all CLI options including concurrency, dry-run, smoke checks, and environment flags, then invoking the deploy runner.",
+      "tags": ["api-handler", "command-registration", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/commands/doctor.ts",
+      "type": "file",
+      "name": "doctor.ts",
+      "filePath": "packages/deploy-cli/src/commands/doctor.ts",
+      "summary": "Registers the 'doctor' command that validates CLI prerequisites (tool availability, Railway authentication) and reports diagnostic results.",
+      "tags": ["api-handler", "command-registration", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/commands/doctor.ts:registerDoctorCommand",
+      "type": "function",
+      "name": "registerDoctorCommand",
+      "filePath": "packages/deploy-cli/src/commands/doctor.ts",
+      "lineRange": [5, 44],
+      "summary": "Registers the doctor subcommand that checks for required executables and Railway auth, reporting pass/fail status for each check.",
+      "tags": ["validation", "command-registration", "diagnostic"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/commands/rollback-plan.ts",
+      "type": "file",
+      "name": "rollback-plan.ts",
+      "filePath": "packages/deploy-cli/src/commands/rollback-plan.ts",
+      "summary": "Registers the 'rollback-plan' command that reads a previous run artifact and outputs rollback guidance instructions.",
+      "tags": ["api-handler", "command-registration", "rollback"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/commands/status.ts",
+      "type": "file",
+      "name": "status.ts",
+      "filePath": "packages/deploy-cli/src/commands/status.ts",
+      "summary": "Registers the 'status' command that queries Railway deployment statuses for specified targets and outputs results as text or JSON.",
+      "tags": ["api-handler", "command-registration", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/commands/targets.ts",
+      "type": "file",
+      "name": "targets.ts",
+      "filePath": "packages/deploy-cli/src/commands/targets.ts",
+      "summary": "Registers the 'targets' command that lists all configured deployment targets from the project config.",
+      "tags": ["api-handler", "command-registration", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/commands/validate.ts",
+      "type": "file",
+      "name": "validate.ts",
+      "filePath": "packages/deploy-cli/src/commands/validate.ts",
+      "summary": "Registers the 'validate' command that checks for Supabase function drift and resolves project refs, reporting any discrepancies.",
+      "tags": ["api-handler", "command-registration", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "file",
+      "name": "config.ts",
+      "filePath": "packages/deploy-cli/src/core/config.ts",
+      "summary": "Loads and validates the deploy CLI configuration from disk using Zod schema, resolves the repository root, and validates cross-target consistency.",
+      "tags": ["config", "validation", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/core/config.ts:repoRootFrom",
+      "type": "function",
+      "name": "repoRootFrom",
+      "filePath": "packages/deploy-cli/src/core/config.ts",
+      "lineRange": [43, 55],
+      "summary": "Walks up the directory tree from a starting path to find the repository root by detecting package.json or deploy config files.",
+      "tags": ["utility", "config", "filesystem"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/core/config.ts:loadConfig",
+      "type": "function",
+      "name": "loadConfig",
+      "filePath": "packages/deploy-cli/src/core/config.ts",
+      "lineRange": [57, 71],
+      "summary": "Reads and Zod-validates the deploy config JSON file from the repository root, throwing on missing or invalid config.",
+      "tags": ["config", "validation", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/core/config.ts:resolveProjectRef",
+      "type": "function",
+      "name": "resolveProjectRef",
+      "filePath": "packages/deploy-cli/src/core/config.ts",
+      "lineRange": [73, 91],
+      "summary": "Resolves the Supabase project reference from environment variable or a local ref file, with priority ordering.",
+      "tags": ["config", "utility", "supabase"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "file",
+      "name": "errors.ts",
+      "filePath": "packages/deploy-cli/src/core/errors.ts",
+      "summary": "Defines the CLI error class hierarchy (CliError, ValidationError, DeployFailureError, AuthError, CancelledError, SmokeError) and helper functions for extracting exit codes and messages.",
+      "tags": ["type-definition", "utility", "error-handling"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/deploy-cli/src/core/errors.ts:CliError",
+      "type": "class",
+      "name": "CliError",
+      "filePath": "packages/deploy-cli/src/core/errors.ts",
+      "lineRange": [3, 11],
+      "summary": "Base error class for the deploy CLI that carries an exit code for process termination.",
+      "tags": ["type-definition", "error-handling"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/exec.ts",
+      "type": "file",
+      "name": "exec.ts",
+      "filePath": "packages/deploy-cli/src/core/exec.ts",
+      "summary": "Provides the ExecaProcessRunner class for executing shell commands with dry-run support, output redaction, and cancellation signal handling.",
+      "tags": ["utility", "service", "process-management"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/deploy-cli/src/core/exec.ts:ExecaProcessRunner",
+      "type": "class",
+      "name": "ExecaProcessRunner",
+      "filePath": "packages/deploy-cli/src/core/exec.ts",
+      "lineRange": [6, 66],
+      "summary": "Process runner that wraps execa to execute shell commands with dry-run mode, abort signal support, streaming output, and automatic sensitive-value redaction.",
+      "tags": ["utility", "process-management", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/logger.ts",
+      "type": "file",
+      "name": "logger.ts",
+      "filePath": "packages/deploy-cli/src/core/logger.ts",
+      "summary": "Creates a structured logger backed by Pino (JSON mode) or colorized console output, with automatic secret redaction for all log messages.",
+      "tags": ["utility", "logging", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/redaction.ts",
+      "type": "file",
+      "name": "redaction.ts",
+      "filePath": "packages/deploy-cli/src/core/redaction.ts",
+      "summary": "Provides string and object redaction utilities that mask Bearer tokens, key=value secrets, and Supabase service keys from log output and artifacts.",
+      "tags": ["utility", "security", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/core/redaction.ts:redact",
+      "type": "function",
+      "name": "redact",
+      "filePath": "packages/deploy-cli/src/core/redaction.ts",
+      "lineRange": [8, 14],
+      "summary": "Replaces sensitive patterns (Bearer tokens, key=value assignments, Supabase secrets) in a string with redacted placeholders.",
+      "tags": ["utility", "security"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/result.ts",
+      "type": "file",
+      "name": "result.ts",
+      "filePath": "packages/deploy-cli/src/core/result.ts",
+      "summary": "Factory functions for creating and finalizing deploy target result objects with status, timing, and metadata fields.",
+      "tags": ["utility", "factory", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/run-artifacts.ts",
+      "type": "file",
+      "name": "run-artifacts.ts",
+      "filePath": "packages/deploy-cli/src/core/run-artifacts.ts",
+      "summary": "Manages deploy run artifacts — generating run IDs and reading/writing redacted result JSON files to disk for rollback and audit purposes.",
+      "tags": ["utility", "data-model", "filesystem"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/signals.ts",
+      "type": "file",
+      "name": "signals.ts",
+      "filePath": "packages/deploy-cli/src/core/signals.ts",
+      "summary": "Creates an AbortController wired to SIGINT and SIGTERM process signals for graceful deploy cancellation.",
+      "tags": ["utility", "event-handler", "process-management"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "type": "file",
+      "name": "target-graph.ts",
+      "filePath": "packages/deploy-cli/src/core/target-graph.ts",
+      "summary": "Resolves, expands, normalizes, and deduplicates deploy targets from config, providing the target graph traversal logic for deploy orchestration.",
+      "tags": ["utility", "service", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/core/target-graph.ts:allTargets",
+      "type": "function",
+      "name": "allTargets",
+      "filePath": "packages/deploy-cli/src/core/target-graph.ts",
+      "lineRange": [4, 31],
+      "summary": "Builds a flat list of all possible deploy targets (Supabase functions and Railway services) from the project config.",
+      "tags": ["utility", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/core/target-graph.ts:resolveTargets",
+      "type": "function",
+      "name": "resolveTargets",
+      "filePath": "packages/deploy-cli/src/core/target-graph.ts",
+      "lineRange": [33, 55],
+      "summary": "Resolves a list of requested target IDs against the known target graph, throwing on unknown targets and deduplicating the result.",
+      "tags": ["utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/core/target-graph.ts:expandTarget",
+      "type": "function",
+      "name": "expandTarget",
+      "filePath": "packages/deploy-cli/src/core/target-graph.ts",
+      "lineRange": [57, 85],
+      "summary": "Expands a composite target (e.g. 'railway:all') into its constituent individual service targets using config ordering.",
+      "tags": ["utility", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "packages/deploy-cli/src/core/types.ts",
+      "summary": "Central TypeScript type definitions for the deploy CLI including deploy config schema (Zod), target kinds, deploy options, run results, and process runner interfaces.",
+      "tags": ["type-definition", "data-model", "config"],
+      "complexity": "moderate",
+      "languageNotes": "Uses Zod for schema validation with z.infer for type extraction, providing both runtime validation and static typing."
+    },
+    {
+      "id": "file:packages/deploy-cli/src/providers/railway.ts",
+      "type": "file",
+      "name": "railway.ts",
+      "filePath": "packages/deploy-cli/src/providers/railway.ts",
+      "summary": "Implements the Railway deployment provider, wrapping the Railway CLI for service deployment, status polling, bootstrap of new services, and environment config application.",
+      "tags": ["service", "deployment", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:packages/deploy-cli/src/providers/railway.ts:RailwayProvider",
+      "type": "class",
+      "name": "RailwayProvider",
+      "filePath": "packages/deploy-cli/src/providers/railway.ts",
+      "lineRange": [17, 173],
+      "summary": "Wraps Railway CLI commands to deploy services, poll status, validate service directories, and bootstrap newly created services with environment variables.",
+      "tags": ["service", "deployment", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "type": "file",
+      "name": "supabase.ts",
+      "filePath": "packages/deploy-cli/src/providers/supabase.ts",
+      "summary": "Implements the Supabase deployment provider, wrapping the Supabase CLI for function deployment, migration runs, project ref resolution, and function drift validation.",
+      "tags": ["service", "deployment", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:packages/deploy-cli/src/providers/supabase.ts:SupabaseProvider",
+      "type": "class",
+      "name": "SupabaseProvider",
+      "filePath": "packages/deploy-cli/src/providers/supabase.ts",
+      "lineRange": [8, 126],
+      "summary": "Wraps Supabase CLI commands for deploying functions, running migrations, resolving project refs, discovering local functions, and validating against remote state.",
+      "tags": ["service", "deployment", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/ui/interactive.ts",
+      "type": "file",
+      "name": "interactive.ts",
+      "filePath": "packages/deploy-cli/src/ui/interactive.ts",
+      "summary": "Provides an interactive checkbox prompt for selecting deploy targets when no specific targets are specified on the CLI.",
+      "tags": ["utility", "component", "ui"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/ui/output.ts",
+      "type": "file",
+      "name": "output.ts",
+      "filePath": "packages/deploy-cli/src/ui/output.ts",
+      "summary": "Formats and prints deploy results, target lists, and smoke check summaries to the console in both human-readable and JSON formats.",
+      "tags": ["utility", "component", "ui"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/ui/progress.ts",
+      "type": "file",
+      "name": "progress.ts",
+      "filePath": "packages/deploy-cli/src/ui/progress.ts",
+      "summary": "Thin wrapper around the 'ora' spinner library for displaying progress indicators during long-running deploy steps.",
+      "tags": ["utility", "component", "ui"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "type": "file",
+      "name": "deploy-runner.ts",
+      "filePath": "packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "summary": "Orchestrates the full deploy workflow — preflight checks, staged deployment of Supabase migrations, functions, and Railway services with concurrency control, rollback guidance collection, and optional smoke checks.",
+      "tags": ["service", "deployment", "workflow"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/workflows/deploy-runner.ts:runDeploy",
+      "type": "function",
+      "name": "runDeploy",
+      "filePath": "packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "lineRange": [22, 181],
+      "summary": "Main deploy orchestrator that resolves targets, runs preflight checks, stages deployments across Supabase and Railway, collects results, and optionally runs post-deploy smoke checks.",
+      "tags": ["service", "deployment", "workflow"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/workflows/deploy-runner.ts:deployStage",
+      "type": "function",
+      "name": "deployStage",
+      "filePath": "packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "lineRange": [183, 242],
+      "summary": "Deploys a batch of targets concurrently up to a concurrency limit, tracking per-target spinners, results, and error handling.",
+      "tags": ["service", "deployment", "workflow"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/workflows/deploy-runner.ts:deployTarget",
+      "type": "function",
+      "name": "deployTarget",
+      "filePath": "packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "lineRange": [283, 310],
+      "summary": "Dispatches a single deploy target to the appropriate provider (Supabase migrations, function, or Railway service).",
+      "tags": ["service", "deployment"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/workflows/rollback.ts",
+      "type": "file",
+      "name": "rollback.ts",
+      "filePath": "packages/deploy-cli/src/workflows/rollback.ts",
+      "summary": "Generates per-target rollback guidance instructions and aggregates them from a set of deploy results for display or artifact storage.",
+      "tags": ["utility", "rollback", "workflow"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "type": "file",
+      "name": "smoke-checks.ts",
+      "filePath": "packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "summary": "Executes post-deploy smoke checks against Supabase edge functions, verifying function registry drift and performing HTTP health probes.",
+      "tags": ["service", "validation", "workflow"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:packages/deploy-cli/src/workflows/smoke-checks.ts:runSmokeChecks",
+      "type": "function",
+      "name": "runSmokeChecks",
+      "filePath": "packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "lineRange": [5, 83],
+      "summary": "Runs post-deploy smoke checks comparing local vs remote function lists and making HTTP health probes to Supabase edge function endpoints.",
+      "tags": ["service", "validation", "workflow"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:packages/deploy-cli/tests/config.test.ts",
+      "type": "file",
+      "name": "config.test.ts",
+      "filePath": "packages/deploy-cli/tests/config.test.ts",
+      "summary": "Unit tests for the deploy CLI config loading and validation logic.",
+      "tags": ["test", "config", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/tests/deploy-runner.test.ts",
+      "type": "file",
+      "name": "deploy-runner.test.ts",
+      "filePath": "packages/deploy-cli/tests/deploy-runner.test.ts",
+      "summary": "Unit tests for the deploy runner workflow, verifying target resolution and deploy orchestration behavior.",
+      "tags": ["test", "deployment", "workflow"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/tests/errors.test.ts",
+      "type": "file",
+      "name": "errors.test.ts",
+      "filePath": "packages/deploy-cli/tests/errors.test.ts",
+      "summary": "Unit tests for CLI error classes and error code/message extraction helpers.",
+      "tags": ["test", "error-handling"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/tests/railway.test.ts",
+      "type": "file",
+      "name": "railway.test.ts",
+      "filePath": "packages/deploy-cli/tests/railway.test.ts",
+      "summary": "Unit tests for the RailwayProvider, using a FakeRunner stub to verify CLI command construction and status parsing.",
+      "tags": ["test", "deployment", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/deploy-cli/tests/smoke-checks.test.ts",
+      "type": "file",
+      "name": "smoke-checks.test.ts",
+      "filePath": "packages/deploy-cli/tests/smoke-checks.test.ts",
+      "summary": "Unit tests for the smoke check workflow, verifying function drift detection and HTTP probe behavior.",
+      "tags": ["test", "validation", "workflow"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/tests/supabase.test.ts",
+      "type": "file",
+      "name": "supabase.test.ts",
+      "filePath": "packages/deploy-cli/tests/supabase.test.ts",
+      "summary": "Unit tests for the SupabaseProvider using a FakeRunner stub to verify CLI command arguments and function deployment logic.",
+      "tags": ["test", "deployment", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/deploy-cli/tests/target-graph.test.ts",
+      "type": "file",
+      "name": "target-graph.test.ts",
+      "filePath": "packages/deploy-cli/tests/target-graph.test.ts",
+      "summary": "Unit tests for target graph resolution, expansion, normalization, and deduplication logic.",
+      "tags": ["test", "data-model", "utility"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/deploy-cli/src/cli.ts",
+      "target": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/cli.ts",
+      "target": "file:packages/deploy-cli/src/commands/doctor.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/cli.ts",
+      "target": "file:packages/deploy-cli/src/commands/rollback-plan.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/cli.ts",
+      "target": "file:packages/deploy-cli/src/commands/status.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/cli.ts",
+      "target": "file:packages/deploy-cli/src/commands/targets.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/cli.ts",
+      "target": "file:packages/deploy-cli/src/commands/validate.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "file:packages/deploy-cli/src/ui/interactive.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "file:packages/deploy-cli/src/ui/output.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/deploy.ts",
+      "target": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/doctor.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/doctor.ts",
+      "target": "file:packages/deploy-cli/src/core/exec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/rollback-plan.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/rollback-plan.ts",
+      "target": "file:packages/deploy-cli/src/core/run-artifacts.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/rollback-plan.ts",
+      "target": "file:packages/deploy-cli/src/workflows/rollback.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/status.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/status.ts",
+      "target": "file:packages/deploy-cli/src/core/exec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/status.ts",
+      "target": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/status.ts",
+      "target": "file:packages/deploy-cli/src/providers/railway.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/targets.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/targets.ts",
+      "target": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/targets.ts",
+      "target": "file:packages/deploy-cli/src/ui/output.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/validate.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/validate.ts",
+      "target": "file:packages/deploy-cli/src/core/exec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/commands/validate.ts",
+      "target": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/config.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/errors.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/exec.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/exec.ts",
+      "target": "file:packages/deploy-cli/src/core/redaction.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/exec.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/logger.ts",
+      "target": "file:packages/deploy-cli/src/core/redaction.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/result.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/run-artifacts.ts",
+      "target": "file:packages/deploy-cli/src/core/redaction.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/run-artifacts.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/signals.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/railway.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/railway.ts",
+      "target": "file:packages/deploy-cli/src/core/exec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/railway.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "target": "file:packages/deploy-cli/src/core/exec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/ui/interactive.ts",
+      "target": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/ui/interactive.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/ui/output.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/exec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/result.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/run-artifacts.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/signals.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/providers/railway.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/ui/progress.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/workflows/rollback.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "target": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/rollback.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "target": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/config.test.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/deploy-runner.test.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/deploy-runner.test.ts",
+      "target": "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/errors.test.ts",
+      "target": "file:packages/deploy-cli/src/core/errors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/railway.test.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/railway.test.ts",
+      "target": "file:packages/deploy-cli/src/providers/railway.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/smoke-checks.test.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/smoke-checks.test.ts",
+      "target": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/smoke-checks.test.ts",
+      "target": "file:packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/supabase.test.ts",
+      "target": "file:packages/deploy-cli/src/core/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/supabase.test.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/supabase.test.ts",
+      "target": "file:packages/deploy-cli/src/providers/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/target-graph.test.ts",
+      "target": "file:packages/deploy-cli/src/core/target-graph.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/deploy-cli/tests/target-graph.test.ts",
+      "target": "file:packages/deploy-cli/src/core/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

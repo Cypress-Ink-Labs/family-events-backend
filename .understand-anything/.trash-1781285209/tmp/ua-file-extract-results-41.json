@@ -1,0 +1,894 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 25,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/ical/online-location-url.ics",
+      "language": "ics",
+      "fileCategory": "code",
+      "totalLines": 11,
+      "nonEmptyLines": 11,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/ical/physical-location.ics",
+      "language": "ics",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 10,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/ical/rrule.ics",
+      "language": "ics",
+      "fileCategory": "code",
+      "totalLines": 11,
+      "nonEmptyLines": 11,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/ical/vermilionville-sample.ics",
+      "language": "ics",
+      "fileCategory": "code",
+      "totalLines": 53,
+      "nonEmptyLines": 53,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/lcglafayette/events-page.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 53,
+      "nonEmptyLines": 53,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-api.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 42,
+      "nonEmptyLines": 42,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-page.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 10,
+      "nonEmptyLines": 10,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/rss/cdata-media.xml",
+      "language": "xml",
+      "fileCategory": "config",
+      "totalLines": 13,
+      "nonEmptyLines": 13,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/rss/dc-date.xml",
+      "language": "xml",
+      "fileCategory": "config",
+      "totalLines": 11,
+      "nonEmptyLines": 11,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 7,
+      "nonEmptyLines": 7,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/send-auth-email/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/send-push/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/send-push/send-push.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 423,
+      "nonEmptyLines": 362,
+      "functions": [
+        {
+          "name": "base64urlEncode",
+          "startLine": 7,
+          "endLine": 13,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "base64urlDecode",
+          "startLine": 15,
+          "endLine": 24,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "derToRaw",
+          "startLine": 26,
+          "endLine": 42,
+          "params": [
+            "der"
+          ]
+        },
+        {
+          "name": "parsePayload",
+          "startLine": 55,
+          "endLine": 71,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "base64urlEncode",
+          "callee": "String.fromCharCode",
+          "lineNumber": 10
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace(/\\+/g, \"-\").replace(/\\//g, \"_\").replace",
+          "lineNumber": 12
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace(/\\+/g, \"-\").replace",
+          "lineNumber": 12
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa(binary).replace",
+          "lineNumber": 12
+        },
+        {
+          "caller": "base64urlEncode",
+          "callee": "btoa",
+          "lineNumber": 12
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "input.replace(/-/g, \"+\").replace",
+          "lineNumber": 16
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "input.replace",
+          "lineNumber": 16
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "\"=\".repeat",
+          "lineNumber": 17
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "atob",
+          "lineNumber": 18
+        },
+        {
+          "caller": "base64urlDecode",
+          "callee": "binary.charCodeAt",
+          "lineNumber": 21
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "raw.set",
+          "lineNumber": 34
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "der.slice",
+          "lineNumber": 34
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "raw.set",
+          "lineNumber": 40
+        },
+        {
+          "caller": "derToRaw",
+          "callee": "der.slice",
+          "lineNumber": 40
+        },
+        {
+          "caller": "parsePayload",
+          "callee": "Array.isArray",
+          "lineNumber": 56
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/send-reminders/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/send-reminders/send-reminders.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 571,
+      "nonEmptyLines": 507,
+      "functions": [
+        {
+          "name": "flattenRows",
+          "startLine": 40,
+          "endLine": 69,
+          "params": [
+            "rows",
+            "reminderType",
+            "prefs"
+          ]
+        },
+        {
+          "name": "formatEventDate",
+          "startLine": 71,
+          "endLine": 83,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "deduplicateTargets",
+          "startLine": 85,
+          "endLine": 93,
+          "params": [
+            "targets"
+          ]
+        },
+        {
+          "name": "changeSummary",
+          "startLine": 484,
+          "endLine": 507,
+          "params": [
+            "changeType",
+            "detail"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "flattenRows",
+          "callee": "prefs.get",
+          "lineNumber": 52
+        },
+        {
+          "caller": "flattenRows",
+          "callee": "targets.push",
+          "lineNumber": 54
+        },
+        {
+          "caller": "formatEventDate",
+          "callee": "new Date(isoDate).toLocaleDateString",
+          "lineNumber": 73
+        },
+        {
+          "caller": "deduplicateTargets",
+          "callee": "targets.filter",
+          "lineNumber": 87
+        },
+        {
+          "caller": "deduplicateTargets",
+          "callee": "seen.has",
+          "lineNumber": 89
+        },
+        {
+          "caller": "deduplicateTargets",
+          "callee": "seen.add",
+          "lineNumber": 90
+        },
+        {
+          "caller": "withVenue",
+          "callee": "formatEventDate",
+          "lineNumber": 378
+        },
+        {
+          "caller": "changeSummary",
+          "callee": "formatEventDate",
+          "lineNumber": 491
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/send-weekly-digest/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 344,
+      "nonEmptyLines": 301,
+      "functions": [
+        {
+          "name": "createMockSupabase",
+          "startLine": 19,
+          "endLine": 80,
+          "params": [
+            "opts"
+          ]
+        },
+        {
+          "name": "buildDigestUsers",
+          "startLine": 90,
+          "endLine": 128,
+          "params": [
+            "prefsRows",
+            "profileRows"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "eq",
+          "callee": "eqCalls.push",
+          "lineNumber": 42
+        },
+        {
+          "caller": "eq",
+          "callee": "queryCalls.push",
+          "lineNumber": 43
+        },
+        {
+          "caller": "eq",
+          "callee": "Promise.resolve",
+          "lineNumber": 44
+        },
+        {
+          "caller": "in",
+          "callee": "queryCalls.push",
+          "lineNumber": 47
+        },
+        {
+          "caller": "in",
+          "callee": "Promise.resolve",
+          "lineNumber": 48
+        },
+        {
+          "caller": "from",
+          "callee": "buildSelectChain",
+          "lineNumber": 57
+        },
+        {
+          "caller": "from",
+          "callee": "buildSelectChain",
+          "lineNumber": 60
+        },
+        {
+          "caller": "from",
+          "callee": "buildSelectChain",
+          "lineNumber": 62
+        },
+        {
+          "caller": "rpc",
+          "callee": "rpcCalls.push",
+          "lineNumber": 65
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 70
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 74
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 77
+        },
+        {
+          "caller": "buildDigestUsers",
+          "callee": "profilesById.set",
+          "lineNumber": 112
+        },
+        {
+          "caller": "buildDigestUsers",
+          "callee": "profilesById.get",
+          "lineNumber": 117
+        },
+        {
+          "caller": "buildDigestUsers",
+          "callee": "digestUsers.push",
+          "lineNumber": 119
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/share-og/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/sitemap/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 7,
+      "nonEmptyLines": 7,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/sitemap/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 158,
+      "nonEmptyLines": 130,
+      "functions": [
+        {
+          "name": "escapeXml",
+          "startLine": 25,
+          "endLine": 32,
+          "params": [
+            "str"
+          ]
+        },
+        {
+          "name": "toW3CDate",
+          "startLine": 34,
+          "endLine": 41,
+          "params": [
+            "iso"
+          ]
+        },
+        {
+          "name": "robotsTxt",
+          "startLine": 45,
+          "endLine": 65,
+          "params": [
+            "origin"
+          ]
+        },
+        {
+          "name": "sitemapXml",
+          "startLine": 75,
+          "endLine": 140,
+          "params": [
+            "origin"
+          ]
+        },
+        {
+          "name": "handleSitemap",
+          "startLine": 144,
+          "endLine": 154,
+          "params": [
+            "req"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "handleSitemap",
+          "line": 144,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "escapeXml",
+          "callee": "str\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll(\"<\", \"&lt;\")\n    .replaceAll(\">\", \"&gt;\")\n    .replaceAll(\"'\", \"&apos;\")\n    .replaceAll",
+          "lineNumber": 26
+        },
+        {
+          "caller": "escapeXml",
+          "callee": "str\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll(\"<\", \"&lt;\")\n    .replaceAll(\">\", \"&gt;\")\n    .replaceAll",
+          "lineNumber": 26
+        },
+        {
+          "caller": "escapeXml",
+          "callee": "str\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll(\"<\", \"&lt;\")\n    .replaceAll",
+          "lineNumber": 26
+        },
+        {
+          "caller": "escapeXml",
+          "callee": "str\n    .replaceAll(\"&\", \"&amp;\")\n    .replaceAll",
+          "lineNumber": 26
+        },
+        {
+          "caller": "escapeXml",
+          "callee": "str\n    .replaceAll",
+          "lineNumber": 26
+        },
+        {
+          "caller": "toW3CDate",
+          "callee": "new Date(iso).toISOString().split",
+          "lineNumber": 37
+        },
+        {
+          "caller": "toW3CDate",
+          "callee": "new Date(iso).toISOString",
+          "lineNumber": 37
+        },
+        {
+          "caller": "toW3CDate",
+          "callee": "new Date().toISOString().split",
+          "lineNumber": 39
+        },
+        {
+          "caller": "toW3CDate",
+          "callee": "new Date().toISOString",
+          "lineNumber": 39
+        },
+        {
+          "caller": "robotsTxt",
+          "callee": "[\n    \"User-agent: *\",\n    \"Allow: /\",\n    \"\",\n    \"# Auth and admin areas\",\n    \"Disallow: /admin\",\n    \"Disallow: /auth/callback\",\n    \"Disallow: /reset-password\",\n    \"\",\n    `Sitemap: ${origin}/sitemap.xml`,\n  ].join",
+          "lineNumber": 46
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "Deno.env.get",
+          "lineNumber": 76
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "Deno.env.get",
+          "lineNumber": 77
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "createClient",
+          "lineNumber": 82
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "supabase\n      .from(\"public_events\")\n      .select(\"id, title, start_datetime\")\n      .order(\"start_datetime\", { ascending: false })\n      .limit",
+          "lineNumber": 86
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "supabase\n      .from(\"public_events\")\n      .select(\"id, title, start_datetime\")\n      .order",
+          "lineNumber": 86
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "supabase\n      .from(\"public_events\")\n      .select",
+          "lineNumber": 86
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "supabase\n      .from",
+          "lineNumber": 86
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "new Date().toISOString().split",
+          "lineNumber": 97
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "new Date().toISOString",
+          "lineNumber": 97
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "urls.push",
+          "lineNumber": 103
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "escapeXml",
+          "lineNumber": 105
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "toW3CDate",
+          "lineNumber": 115
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "urls.push",
+          "lineNumber": 116
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "escapeXml",
+          "lineNumber": 118
+        },
+        {
+          "caller": "sitemapXml",
+          "callee": "[\n    `<?xml version=\"1.0\" encoding=\"UTF-8\"?>`,\n    `<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">`,\n    ...urls,\n    `</urlset>`,\n  ].join",
+          "lineNumber": 126
+        },
+        {
+          "caller": "handleSitemap",
+          "callee": "url.pathname.endsWith",
+          "lineNumber": 149
+        },
+        {
+          "caller": "handleSitemap",
+          "callee": "url.searchParams.get",
+          "lineNumber": 149
+        },
+        {
+          "caller": "handleSitemap",
+          "callee": "robotsTxt",
+          "lineNumber": 150
+        },
+        {
+          "caller": "handleSitemap",
+          "callee": "sitemapXml",
+          "lineNumber": 153
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/tag-event/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/vitest.config.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 9,
+      "nonEmptyLines": 8,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/weather/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/seed.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 163,
+      "nonEmptyLines": 156,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/snippets/add_macaroni_kids_source.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    }
+  ]
+}

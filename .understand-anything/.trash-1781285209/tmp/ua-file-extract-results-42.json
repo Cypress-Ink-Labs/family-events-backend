@@ -1,0 +1,273 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 8,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/snippets/provision_remote_admin_test_user.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 26,
+      "nonEmptyLines": 23,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "tests/fixtures/railway-cron-poc-drift.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 92,
+      "nonEmptyLines": 92,
+      "sections": [
+        {
+          "heading": "data",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "errors",
+          "level": 1,
+          "line": 91
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "tests/fixtures/railway-cron-poc-live.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 227,
+      "nonEmptyLines": 227,
+      "sections": [
+        {
+          "heading": "data",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "errors",
+          "level": 1,
+          "line": 226
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "tests/guards/cron-runner-boundary.test.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 52,
+      "nonEmptyLines": 47,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/guards/db-types-script.test.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 36,
+      "nonEmptyLines": 30,
+      "functions": [
+        {
+          "name": "readPackageScripts",
+          "startLine": 8,
+          "endLine": 10,
+          "params": []
+        },
+        {
+          "name": "readSupabaseDbPort",
+          "startLine": 12,
+          "endLine": 19,
+          "params": []
+        },
+        {
+          "name": "readCiWorkflow",
+          "startLine": 21,
+          "endLine": 23,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "readPackageScripts",
+          "callee": "JSON.parse",
+          "lineNumber": 9
+        },
+        {
+          "caller": "readPackageScripts",
+          "callee": "readFileSync",
+          "lineNumber": 9
+        },
+        {
+          "caller": "readPackageScripts",
+          "callee": "path.join",
+          "lineNumber": 9
+        },
+        {
+          "caller": "readSupabaseDbPort",
+          "callee": "readFileSync",
+          "lineNumber": 13
+        },
+        {
+          "caller": "readSupabaseDbPort",
+          "callee": "path.join",
+          "lineNumber": 13
+        },
+        {
+          "caller": "readSupabaseDbPort",
+          "callee": "/\\[db\\]([\\s\\S]*?)(?:\\n\\[|$)/.exec",
+          "lineNumber": 14
+        },
+        {
+          "caller": "readSupabaseDbPort",
+          "callee": "assert.ok",
+          "lineNumber": 15
+        },
+        {
+          "caller": "readSupabaseDbPort",
+          "callee": "/^port\\s*=\\s*(\\d+)$/m.exec",
+          "lineNumber": 16
+        },
+        {
+          "caller": "readSupabaseDbPort",
+          "callee": "assert.ok",
+          "lineNumber": 17
+        },
+        {
+          "caller": "readCiWorkflow",
+          "callee": "readFileSync",
+          "lineNumber": 22
+        },
+        {
+          "caller": "readCiWorkflow",
+          "callee": "path.join",
+          "lineNumber": 22
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/guards/deploy-cli-boundary.test.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 56,
+      "nonEmptyLines": 49,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/guards/migration-rollbacks.test.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 84,
+      "nonEmptyLines": 74,
+      "functions": [
+        {
+          "name": "timestampOf",
+          "startLine": 40,
+          "endLine": 43,
+          "params": [
+            "filename"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "timestampOf",
+          "callee": "/^(\\d{14})_/.exec",
+          "lineNumber": 41
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/guards/supabase-function-auth-config.test.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 33,
+      "nonEmptyLines": 28,
+      "functions": [
+        {
+          "name": "escapeRegExp",
+          "startLine": 5,
+          "endLine": 7,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "functionBlock",
+          "startLine": 9,
+          "endLine": 14,
+          "params": [
+            "configToml",
+            "functionName"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "escapeRegExp",
+          "callee": "value.replace",
+          "lineNumber": 6
+        },
+        {
+          "caller": "functionBlock",
+          "callee": "String.raw",
+          "lineNumber": 11
+        },
+        {
+          "caller": "functionBlock",
+          "callee": "escapeRegExp",
+          "lineNumber": 11
+        },
+        {
+          "caller": "functionBlock",
+          "callee": "configToml.match",
+          "lineNumber": 13
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    }
+  ]
+}

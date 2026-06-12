@@ -1,0 +1,10 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": ".github/workflows/ci.yml", "language": "yaml", "sizeLines": 114, "fileCategory": "infra"},
+    {"path": ".github/workflows/publish-packages.yml", "language": "yaml", "sizeLines": 54, "fileCategory": "infra"},
+    {"path": ".github/workflows/railway-cron-drift.yml", "language": "yaml", "sizeLines": 56, "fileCategory": "infra"},
+    {"path": ".github/workflows/railway-sandbox-verify.yml", "language": "yaml", "sizeLines": 121, "fileCategory": "infra"}
+  ],
+  "batchImportData": {}
+}

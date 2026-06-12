@@ -1,0 +1,60 @@
+{
+  "nodes": [
+    {
+      "id": "config:.env.example",
+      "type": "config",
+      "name": ".env.example",
+      "filePath": ".env.example",
+      "summary": "Template listing all required environment variables for the monorepo: Supabase connection (URL, anon key, service role key), Resend email API key, Railway deployment token, and GitHub Packages PAT for consuming scoped npm packages.",
+      "tags": ["configuration", "security", "environment", "documentation"],
+      "complexity": "simple",
+      "languageNotes": "Covers three external service integrations: Supabase (database/auth), Resend (email), and Railway (infra/cron)."
+    },
+    {
+      "id": "config:.gitleaks.toml",
+      "type": "config",
+      "name": ".gitleaks.toml",
+      "filePath": ".gitleaks.toml",
+      "summary": "Gitleaks secret-scanning configuration that extends the default ruleset and defines allowlisted paths (e2e fixtures, SQL test files, iOS project files, lockfiles) and regex patterns (hash placeholders, Supabase publishable keys) to suppress known false positives.",
+      "tags": ["configuration", "security", "ci-cd", "secret-scanning"],
+      "complexity": "moderate",
+      "languageNotes": "Uses TOML [extend] and [allowlist] tables; integrates with the gitleaks step in .github/workflows/ci.yml."
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "Root pnpm monorepo package manifest declaring workspace-level scripts for changesets, Railway deployment, Supabase database operations (migrate, type generation, advisors), edge-function serving, and testing; devDependencies include TypeScript, oxlint, vitest, changeset tooling, and the Railway CLI.",
+      "tags": ["configuration", "build-system", "monorepo", "entry-point"],
+      "complexity": "moderate",
+      "languageNotes": "Private monorepo root; uses pnpm filter flags to delegate per-package commands such as deploy-cli and contracts checks."
+    },
+    {
+      "id": "config:pnpm-workspace.yaml",
+      "type": "config",
+      "name": "pnpm-workspace.yaml",
+      "filePath": "pnpm-workspace.yaml",
+      "summary": "pnpm workspace definition declaring the packages/* and supabase/functions directories as workspace members, allowing esbuild native builds while suppressing supabase CLI postinstall, and constraining built-dependency installation to esbuild only.",
+      "tags": ["configuration", "monorepo", "build-system", "dependency-management"],
+      "complexity": "simple",
+      "languageNotes": "allowBuilds and onlyBuiltDependencies together prevent supabase CLI from running postinstall scripts that would conflict with the managed Supabase CLI version."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:.env.example",
+      "target": "config:package.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:pnpm-workspace.yaml",
+      "target": "config:package.json",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

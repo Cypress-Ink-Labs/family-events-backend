@@ -1,0 +1,145 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 3,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "infra/railway-cron-drift/cron-services.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 90,
+      "nonEmptyLines": 90,
+      "sections": [
+        {
+          "heading": "cron-tag-queue",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "cron-scrape-sources",
+          "level": 1,
+          "line": 13
+        },
+        {
+          "heading": "cron-db-maintenance",
+          "level": 1,
+          "line": 24
+        },
+        {
+          "heading": "cron-cleanup-stale",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "cron-enrich-events",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "cron-weekly-digest",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "cron-send-reminders",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "cron-review-events",
+          "level": 1,
+          "line": 79
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "infra/railway-cron-drift/main.tf",
+      "language": "terraform",
+      "fileCategory": "infra",
+      "totalLines": 299,
+      "nonEmptyLines": 271,
+      "definitions": [
+        {
+          "name": "railway_environment_id",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 14,
+          "endLine": 18
+        },
+        {
+          "name": "railway_project_access_token",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 20,
+          "endLine": 25
+        },
+        {
+          "name": "railway_bearer_token",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 27,
+          "endLine": 32
+        },
+        {
+          "name": "railway_fixture_path",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 34,
+          "endLine": 38
+        },
+        {
+          "name": "railway_cron_poc_services",
+          "kind": "output",
+          "fields": [],
+          "startLine": 270,
+          "endLine": 278
+        },
+        {
+          "name": "railway_cron_live_services",
+          "kind": "output",
+          "fields": [],
+          "startLine": 280,
+          "endLine": 299
+        }
+      ],
+      "resources": [
+        {
+          "name": "data.http.railway_environment",
+          "kind": "data.http",
+          "startLine": 246,
+          "endLine": 268
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 6,
+        "resourceCount": 1
+      }
+    },
+    {
+      "path": "infra/railway-cron-drift/versions.tf",
+      "language": "terraform",
+      "fileCategory": "infra",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0,
+        "resourceCount": 0
+      }
+    }
+  ]
+}

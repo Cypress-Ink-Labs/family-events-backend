@@ -1,0 +1,14 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/snippets/provision_remote_admin_test_user.sql", "language": "sql", "sizeLines": 26, "fileCategory": "data"},
+    {"path": "tests/fixtures/railway-cron-poc-drift.json", "language": "json", "sizeLines": 92, "fileCategory": "config"},
+    {"path": "tests/fixtures/railway-cron-poc-live.json", "language": "json", "sizeLines": 227, "fileCategory": "config"},
+    {"path": "tests/guards/cron-runner-boundary.test.mjs", "language": "javascript", "sizeLines": 52, "fileCategory": "code"},
+    {"path": "tests/guards/db-types-script.test.mjs", "language": "javascript", "sizeLines": 36, "fileCategory": "code"},
+    {"path": "tests/guards/deploy-cli-boundary.test.mjs", "language": "javascript", "sizeLines": 56, "fileCategory": "code"},
+    {"path": "tests/guards/migration-rollbacks.test.mjs", "language": "javascript", "sizeLines": 84, "fileCategory": "code"},
+    {"path": "tests/guards/supabase-function-auth-config.test.mjs", "language": "javascript", "sizeLines": 33, "fileCategory": "code"}
+  ],
+  "batchImportData": {"supabase/snippets/provision_remote_admin_test_user.sql": [], "tests/fixtures/railway-cron-poc-drift.json": [], "tests/fixtures/railway-cron-poc-live.json": [], "tests/guards/cron-runner-boundary.test.mjs": [], "tests/guards/db-types-script.test.mjs": [], "tests/guards/deploy-cli-boundary.test.mjs": ["scripts/railway-cron-drift.mjs"], "tests/guards/migration-rollbacks.test.mjs": [], "tests/guards/supabase-function-auth-config.test.mjs": []}
+}

@@ -1,0 +1,1137 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "type": "file",
+      "name": "guarded-fetch.ts",
+      "filePath": "supabase/functions/_shared/guarded-fetch.ts",
+      "summary": "Provides a SSRF-safe HTTP fetch wrapper that resolves the target URL to its public IP before fetching, blocking private/loopback addresses. Exports SsrfRejectedError and guardedFetch for use across edge functions.",
+      "tags": ["utility", "security", "middleware", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:supabase/functions/_shared/guarded-fetch.ts:SsrfRejectedError",
+      "type": "class",
+      "name": "SsrfRejectedError",
+      "filePath": "supabase/functions/_shared/guarded-fetch.ts",
+      "lineRange": [19, 24],
+      "summary": "Custom error class thrown when a fetch attempt is rejected due to SSRF protection — the resolved IP is private or blocked.",
+      "tags": ["error-handling", "security"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/guarded-fetch.ts:guardedFetch",
+      "type": "function",
+      "name": "guardedFetch",
+      "filePath": "supabase/functions/_shared/guarded-fetch.ts",
+      "lineRange": [33, 62],
+      "summary": "SSRF-safe drop-in for the global fetch — resolves the URL's IP via resolveAndCheckPublicIp then performs the actual HTTP request, handling redirects safely.",
+      "tags": ["utility", "security", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/parsing.test.ts",
+      "type": "file",
+      "name": "parsing.test.ts",
+      "filePath": "supabase/functions/_shared/parsing.test.ts",
+      "summary": "Test suite for the shared parsing utility module, covering date parsing, HTML decoding, text normalization, shortcode stripping, price extraction, and dedup key generation.",
+      "tags": ["test", "utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/parsing.ts",
+      "type": "file",
+      "name": "parsing.ts",
+      "filePath": "supabase/functions/_shared/parsing.ts",
+      "summary": "Shared text and date parsing utilities for event ingestion — includes ISO/iCal date parsing, HTML entity decoding, text normalization, shortcode stripping, price extraction, and dedup key generation.",
+      "tags": ["utility", "serialization", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/parsing.ts:parseIcalDate",
+      "type": "function",
+      "name": "parseIcalDate",
+      "filePath": "supabase/functions/_shared/parsing.ts",
+      "lineRange": [16, 51],
+      "summary": "Parses iCal date/datetime strings (YYYYMMDD, YYYYMMDDTHHMMSSZ, and local variants) into ISO 8601 UTC strings.",
+      "tags": ["utility", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/parsing.ts:decodeHtml",
+      "type": "function",
+      "name": "decodeHtml",
+      "filePath": "supabase/functions/_shared/parsing.ts",
+      "lineRange": [53, 96],
+      "summary": "Decodes HTML entities (named, decimal, and hex code points) in a string, handling edge cases for valid Unicode code points.",
+      "tags": ["utility", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/parsing.ts:stripShortcodes",
+      "type": "function",
+      "name": "stripShortcodes",
+      "filePath": "supabase/functions/_shared/parsing.ts",
+      "lineRange": [136, 151],
+      "summary": "Removes WordPress/Divi shortcode tags (including truncated trailing ones) from text while preserving normal prose in brackets.",
+      "tags": ["utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/parsing.ts:extractPrice",
+      "type": "function",
+      "name": "extractPrice",
+      "filePath": "supabase/functions/_shared/parsing.ts",
+      "lineRange": [165, 188],
+      "summary": "Extracts a numeric admission price from event description text using free/paid keyword patterns and dollar-amount regex.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/parsing.ts:dedupKey",
+      "type": "function",
+      "name": "dedupKey",
+      "filePath": "supabase/functions/_shared/parsing.ts",
+      "lineRange": [194, 199],
+      "summary": "Generates a deduplication key for an event from its title, start datetime, and city ID to prevent duplicate ingestion.",
+      "tags": ["utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/url-resolve.ts",
+      "type": "file",
+      "name": "url-resolve.ts",
+      "filePath": "supabase/functions/_shared/url-resolve.ts",
+      "summary": "Provides DNS resolution and IP blocking logic to prevent SSRF attacks — resolves hostnames via Deno DNS and checks resolved IPs against IPv4/IPv6 private range blocklists.",
+      "tags": ["utility", "security", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/url-resolve.ts:resolveAndCheckPublicIp",
+      "type": "function",
+      "name": "resolveAndCheckPublicIp",
+      "filePath": "supabase/functions/_shared/url-resolve.ts",
+      "lineRange": [90, 131],
+      "summary": "Validates and resolves a URL to its public IP(s) via DNS, blocking any resolution to private/loopback/link-local addresses to prevent SSRF.",
+      "tags": ["utility", "security", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/_shared/url-validation.test.ts",
+      "type": "file",
+      "name": "url-validation.test.ts",
+      "filePath": "supabase/functions/_shared/url-validation.test.ts",
+      "summary": "Test suite for the URL validation module, covering external URL validation including IPv4 and IPv6 private address blocking and allowed public address scenarios.",
+      "tags": ["test", "security", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "file",
+      "name": "url-validation.ts",
+      "filePath": "supabase/functions/_shared/url-validation.ts",
+      "summary": "URL validation library that parses and blocks requests to private/internal IPv4 and IPv6 addresses before DNS resolution, providing an early SSRF guard layer.",
+      "tags": ["utility", "security", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/url-validation.ts:validateExternalUrl",
+      "type": "function",
+      "name": "validateExternalUrl",
+      "filePath": "supabase/functions/_shared/url-validation.ts",
+      "lineRange": [8, 45],
+      "summary": "Validates that a URL points to an external (non-private, non-loopback) host by parsing and checking IPv4/IPv6 literals in the URL without DNS resolution.",
+      "tags": ["utility", "security", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "type": "file",
+      "name": "llm-extraction.ts",
+      "filePath": "supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "summary": "Orchestrates LLM-based event extraction from scrape artifacts, resolving the LLM configuration and calling the OpenAI chat completion API with a structured prompt, then parsing the returned JSON events.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/process-source-queue/lib/llm-extraction.ts:extractWithLlm",
+      "type": "function",
+      "name": "extractWithLlm",
+      "filePath": "supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "lineRange": [37, 80],
+      "summary": "Sends a scrape artifact to the LLM with a structured extraction prompt and returns parsed event objects from the completion response.",
+      "tags": ["service", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "type": "file",
+      "name": "worker.ts",
+      "filePath": "supabase/functions/process-source-queue/lib/worker.ts",
+      "summary": "Core worker logic for the process-source-queue edge function — handles queue row lifecycle (claim, start, retry, skip), orchestrates deterministic and LLM extraction phases, and persists results back to Supabase.",
+      "tags": ["service", "event-handler", "api-handler"],
+      "complexity": "complex",
+      "languageNotes": "Dependency-injection pattern via a dependencies parameter enables testability of all Supabase and LLM calls."
+    },
+    {
+      "id": "function:supabase/functions/process-source-queue/lib/worker.ts:processSourceQueueRow",
+      "type": "function",
+      "name": "processSourceQueueRow",
+      "filePath": "supabase/functions/process-source-queue/lib/worker.ts",
+      "lineRange": [469, 519],
+      "summary": "Top-level worker entry point for processing a single source queue row — loads source, runs extraction, imports events, and marks the row succeeded or retries on error.",
+      "tags": ["service", "event-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-source-queue/lib/worker.ts:extractParsedEventsForSource",
+      "type": "function",
+      "name": "extractParsedEventsForSource",
+      "filePath": "supabase/functions/process-source-queue/lib/worker.ts",
+      "lineRange": [349, 467],
+      "summary": "Orchestrates the full extraction pipeline for a source — fetches the scrape artifact, runs deterministic extraction, optionally falls back to LLM extraction, and returns validated parsed events.",
+      "tags": ["service", "event-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-source-queue/lib/worker.ts:runDeterministicExtractionPhase",
+      "type": "function",
+      "name": "runDeterministicExtractionPhase",
+      "filePath": "supabase/functions/process-source-queue/lib/worker.ts",
+      "lineRange": [281, 347],
+      "summary": "Runs the deterministic (parser-based) extraction phase, validates results, persists extraction traces, and determines whether LLM fallback is needed.",
+      "tags": ["service", "event-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-source-queue/lib/worker.ts:handleExtractionFailure",
+      "type": "function",
+      "name": "handleExtractionFailure",
+      "filePath": "supabase/functions/process-source-queue/lib/worker.ts",
+      "lineRange": [204, 228],
+      "summary": "Handles extraction errors by persisting an error trace, marking the run as errored, and scheduling a retry with exponential backoff.",
+      "tags": ["error-handling", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/process-source-queue/lib/worker.ts:createAndLinkSourceRun",
+      "type": "function",
+      "name": "createAndLinkSourceRun",
+      "filePath": "supabase/functions/process-source-queue/lib/worker.ts",
+      "lineRange": [151, 171],
+      "summary": "Creates a source_runs row and links it back to the source_scrape_queue row, returning the new run ID.",
+      "tags": ["service", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/process-source-queue/lib/worker_test.ts",
+      "type": "file",
+      "name": "worker_test.ts",
+      "filePath": "supabase/functions/process-source-queue/lib/worker_test.ts",
+      "summary": "Integration-style test suite for the process-source-queue worker, using fake Supabase clients and injected dependencies to verify queue row lifecycle, extraction orchestration, and retry/skip logic.",
+      "tags": ["test", "service", "event-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "file",
+      "name": "date.ts",
+      "filePath": "supabase/functions/scrape-source/lib/date.ts",
+      "summary": "Date parsing and timezone-aware conversion utilities for the scrape-source function — parses freeform date text, converts wall-clock times to ISO strings using IANA timezone offsets.",
+      "tags": ["utility", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/date.ts:wallClockToIso",
+      "type": "function",
+      "name": "wallClockToIso",
+      "filePath": "supabase/functions/scrape-source/lib/date.ts",
+      "lineRange": [68, 86],
+      "summary": "Converts wall-clock time components (year, month, day, hour, minute, second) plus an IANA timezone to an ISO 8601 UTC string, iterating to resolve DST ambiguities.",
+      "tags": ["utility", "serialization"],
+      "complexity": "moderate",
+      "languageNotes": "Uses Intl.DateTimeFormat.formatToParts to derive the IANA timezone offset without a third-party library."
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/date.ts:dateStampToWallClockIso",
+      "type": "function",
+      "name": "dateStampToWallClockIso",
+      "filePath": "supabase/functions/scrape-source/lib/date.ts",
+      "lineRange": [88, 110],
+      "summary": "Parses a YYYY-MM-DD date stamp combined with hour/minute values and a timezone into an ISO UTC string.",
+      "tags": ["utility", "serialization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/date_test.ts",
+      "type": "file",
+      "name": "date_test.ts",
+      "filePath": "supabase/functions/scrape-source/lib/date_test.ts",
+      "summary": "Minimal test file for the date utility module using inline assert helpers to verify wallClockToIso and related date conversion functions.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "type": "file",
+      "name": "enrichment.ts",
+      "filePath": "supabase/functions/scrape-source/lib/enrichment.ts",
+      "summary": "Event image enrichment and sanitization library — validates candidate image URLs against a host allowlist, checks content type and byte size via SSRF-safe fetches, and returns a filtered list of ingestable images.",
+      "tags": ["service", "validation", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/enrichment.ts:sanitizeImagesForIngest",
+      "type": "function",
+      "name": "sanitizeImagesForIngest",
+      "filePath": "supabase/functions/scrape-source/lib/enrichment.ts",
+      "lineRange": [192, 239],
+      "summary": "Filters image URL candidates from a parsed event — applies host allowlist, content-type checks, byte-size limits, and deduplication, returning only safe ingestable image URLs.",
+      "tags": ["service", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/enrichment.ts:validateImageAtIngest",
+      "type": "function",
+      "name": "validateImageAtIngest",
+      "filePath": "supabase/functions/scrape-source/lib/enrichment.ts",
+      "lineRange": [112, 177],
+      "summary": "Validates a single image URL for ingest — checks allowlisted host, fetches headers via guardedFetch, validates content-type and content-length, and measures actual byte size for oversized images.",
+      "tags": ["validation", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/event-processing.ts",
+      "type": "file",
+      "name": "event-processing.ts",
+      "filePath": "supabase/functions/scrape-source/lib/event-processing.ts",
+      "summary": "Exports a single function resolveProcessingMode that determines whether a source should use deterministic-only or LLM-assisted extraction based on its configuration.",
+      "tags": ["utility", "event-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/event-processing_test.ts",
+      "type": "file",
+      "name": "event-processing_test.ts",
+      "filePath": "supabase/functions/scrape-source/lib/event-processing_test.ts",
+      "summary": "Test suite for the resolveProcessingMode function, verifying correct processing mode selection based on source configuration.",
+      "tags": ["test", "event-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "type": "file",
+      "name": "extraction-pipeline.ts",
+      "filePath": "supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "summary": "Defines the extraction pipeline utilities shared between deterministic and LLM extraction — event validation, LLM JSON response parsing, extraction plan selection, and artifact normalization for LLM input.",
+      "tags": ["utility", "service", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:parseLlmParsedEvents",
+      "type": "function",
+      "name": "parseLlmParsedEvents",
+      "filePath": "supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "lineRange": [27, 80],
+      "summary": "Parses and validates the raw JSON output from an LLM extraction call, normalizing it into a structured array of ParsedEvent objects.",
+      "tags": ["utility", "serialization", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:validateParsedEvents",
+      "type": "function",
+      "name": "validateParsedEvents",
+      "filePath": "supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "lineRange": [16, 25],
+      "summary": "Filters a list of parsed events, retaining only those with a non-empty title and valid start/end datetimes.",
+      "tags": ["validation", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+      "type": "file",
+      "name": "extraction-pipeline_test.ts",
+      "filePath": "supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+      "summary": "Test suite for the extraction pipeline module, covering LLM JSON response parsing and event validation logic.",
+      "tags": ["test", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/parser-context.ts",
+      "type": "file",
+      "name": "parser-context.ts",
+      "filePath": "supabase/functions/scrape-source/lib/parser-context.ts",
+      "summary": "Exports the ParserContext type used to pass shared state (timezone, fetch helpers) into parser implementations across the scrape-source function.",
+      "tags": ["type-definition", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "type": "file",
+      "name": "process-source.ts",
+      "filePath": "supabase/functions/scrape-source/lib/process-source.ts",
+      "summary": "Core source processing logic for the scrape-source edge function — fetches web content, builds parser context, and imports parsed events into Supabase with dedup, image sanitization, and outdoor tag derivation.",
+      "tags": ["service", "api-handler", "data-model"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/process-source.ts:importParsedSourceEvents",
+      "type": "function",
+      "name": "importParsedSourceEvents",
+      "filePath": "supabase/functions/scrape-source/lib/process-source.ts",
+      "lineRange": [171, 460],
+      "summary": "Imports a batch of parsed events into Supabase — resolves timezone and city centroid, prepares event payloads, calls the upsert RPC in batches, and finalizes the source_run with status and counters.",
+      "tags": ["service", "data-model", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/process-source.ts:buildParserContext",
+      "type": "function",
+      "name": "buildParserContext",
+      "filePath": "supabase/functions/scrape-source/lib/process-source.ts",
+      "lineRange": [153, 169],
+      "summary": "Builds a ParserContext from a timezone string, wiring in guardedFetchText for safe HTTP fetches and JSON parsing helpers.",
+      "tags": ["factory", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/process-source.ts:guardedFetchText",
+      "type": "function",
+      "name": "guardedFetchText",
+      "filePath": "supabase/functions/scrape-source/lib/process-source.ts",
+      "lineRange": [132, 151],
+      "summary": "Fetches a URL via guardedFetch with an accept header and timeout, reading the response body up to a configurable byte cap.",
+      "tags": ["utility", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/process-source_test.ts",
+      "type": "file",
+      "name": "process-source_test.ts",
+      "filePath": "supabase/functions/scrape-source/lib/process-source_test.ts",
+      "summary": "Test suite for the process-source module, using a fake Supabase client to verify event import, dedup, and source run status update logic.",
+      "tags": ["test", "service", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/schedule.ts",
+      "type": "file",
+      "name": "schedule.ts",
+      "filePath": "supabase/functions/scrape-source/lib/schedule.ts",
+      "summary": "Scheduling utilities for scrape sources — checks if a source is due for scraping based on its interval and last scraped time, and resolves a city's IANA timezone from Supabase.",
+      "tags": ["utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "supabase/functions/scrape-source/lib/types.ts",
+      "summary": "Shared TypeScript type definitions and interfaces for the scrape-source edge function — defines ParsedEvent, EventSource row shapes, ExtractionMode enum, and related data types.",
+      "tags": ["type-definition", "data-model"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "target": "file:supabase/functions/_shared/url-resolve.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "target": "class:supabase/functions/_shared/guarded-fetch.ts:SsrfRejectedError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "target": "function:supabase/functions/_shared/guarded-fetch.ts:guardedFetch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "target": "class:supabase/functions/_shared/guarded-fetch.ts:SsrfRejectedError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "target": "function:supabase/functions/_shared/guarded-fetch.ts:guardedFetch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/_shared/guarded-fetch.ts:guardedFetch",
+      "target": "function:supabase/functions/_shared/url-resolve.ts:resolveAndCheckPublicIp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.test.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.test.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:parseIcalDate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:decodeHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:stripShortcodes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:extractPrice",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:dedupKey",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:parseIcalDate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:decodeHtml",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:stripShortcodes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:extractPrice",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/parsing.ts",
+      "target": "function:supabase/functions/_shared/parsing.ts:dedupKey",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/url-resolve.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/url-resolve.ts",
+      "target": "function:supabase/functions/_shared/url-resolve.ts:resolveAndCheckPublicIp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/url-resolve.ts",
+      "target": "function:supabase/functions/_shared/url-resolve.ts:resolveAndCheckPublicIp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/_shared/url-resolve.ts:resolveAndCheckPublicIp",
+      "target": "function:supabase/functions/_shared/url-validation.ts:validateExternalUrl",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/url-validation.test.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/url-validation.test.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/url-validation.ts",
+      "target": "function:supabase/functions/_shared/url-validation.ts:validateExternalUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/url-validation.ts",
+      "target": "function:supabase/functions/_shared/url-validation.ts:validateExternalUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "target": "file:supabase/functions/_shared/llm-config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "target": "file:supabase/functions/_shared/llm-openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "target": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/llm-extraction.ts:extractWithLlm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/llm-extraction.ts:extractWithLlm",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-source-queue/lib/llm-extraction.ts:extractWithLlm",
+      "target": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:parseLlmParsedEvents",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-source-queue/lib/llm-extraction.ts:extractWithLlm",
+      "target": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:validateParsedEvents",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "file:supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:processSourceQueueRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:extractParsedEventsForSource",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:runDeterministicExtractionPhase",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:handleExtractionFailure",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:createAndLinkSourceRun",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:processSourceQueueRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:extractParsedEventsForSource",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:createAndLinkSourceRun",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-source-queue/lib/worker.ts:extractParsedEventsForSource",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:runDeterministicExtractionPhase",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-source-queue/lib/worker.ts:extractParsedEventsForSource",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:handleExtractionFailure",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/process-source-queue/lib/worker.ts:processSourceQueueRow",
+      "target": "function:supabase/functions/process-source-queue/lib/worker.ts:extractParsedEventsForSource",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker_test.ts",
+      "target": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/lib/worker_test.ts",
+      "target": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/date_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/date_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/date.ts",
+      "target": "function:supabase/functions/scrape-source/lib/date.ts:wallClockToIso",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/date.ts",
+      "target": "function:supabase/functions/scrape-source/lib/date.ts:dateStampToWallClockIso",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/date.ts",
+      "target": "function:supabase/functions/scrape-source/lib/date.ts:wallClockToIso",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/date.ts",
+      "target": "function:supabase/functions/scrape-source/lib/date.ts:dateStampToWallClockIso",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "target": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "target": "function:supabase/functions/scrape-source/lib/enrichment.ts:sanitizeImagesForIngest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "target": "function:supabase/functions/scrape-source/lib/enrichment.ts:validateImageAtIngest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "target": "function:supabase/functions/scrape-source/lib/enrichment.ts:sanitizeImagesForIngest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/scrape-source/lib/enrichment.ts:sanitizeImagesForIngest",
+      "target": "function:supabase/functions/scrape-source/lib/enrichment.ts:validateImageAtIngest",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/scrape-source/lib/enrichment.ts:validateImageAtIngest",
+      "target": "function:supabase/functions/_shared/guarded-fetch.ts:guardedFetch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/scrape-source/lib/enrichment.ts:validateImageAtIngest",
+      "target": "function:supabase/functions/_shared/url-validation.ts:validateExternalUrl",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/event-processing.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/event-processing_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/event-processing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/event-processing_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/event-processing_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/event-processing.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "target": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:parseLlmParsedEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "target": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:validateParsedEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "target": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:parseLlmParsedEvents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "target": "function:supabase/functions/scrape-source/lib/extraction-pipeline.ts:validateParsedEvents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "file:supabase/functions/_shared/guarded-fetch.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "file:supabase/functions/scrape-source/lib/parser-context.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "file:supabase/functions/scrape-source/lib/schedule.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "function:supabase/functions/scrape-source/lib/process-source.ts:importParsedSourceEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "function:supabase/functions/scrape-source/lib/process-source.ts:buildParserContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "function:supabase/functions/scrape-source/lib/process-source.ts:guardedFetchText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "function:supabase/functions/scrape-source/lib/process-source.ts:importParsedSourceEvents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "target": "function:supabase/functions/scrape-source/lib/process-source.ts:buildParserContext",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/scrape-source/lib/process-source.ts:buildParserContext",
+      "target": "function:supabase/functions/scrape-source/lib/process-source.ts:guardedFetchText",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/scrape-source/lib/process-source.ts:guardedFetchText",
+      "target": "function:supabase/functions/_shared/guarded-fetch.ts:guardedFetch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/process-source_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/process-source.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/schedule.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/types.ts",
+      "target": "file:packages/contracts/src/database-enums.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

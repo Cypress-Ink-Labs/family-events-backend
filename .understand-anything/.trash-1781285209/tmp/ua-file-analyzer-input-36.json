@@ -1,0 +1,13 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/rollbacks/20260601033000_community_event_submission_down.sql", "language": "sql", "sizeLines": 23, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601034000_activate_baton_rouge_sources_down.sql", "language": "sql", "sizeLines": 19, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601035000_community_event_status_notification_down.sql", "language": "sql", "sizeLines": 14, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260601036000_admin_user_delete_down.sql", "language": "sql", "sizeLines": 14, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260610162002_enqueue_source_scrape_rpc_down.sql", "language": "sql", "sizeLines": 14, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260610170000_admin_events_source_filter_down.sql", "language": "sql", "sizeLines": 352, "fileCategory": "data"},
+    {"path": "supabase/rollbacks/20260610180000_admin_dashboard_stats_down.sql", "language": "sql", "sizeLines": 11, "fileCategory": "data"}
+  ],
+  "batchImportData": {}
+}

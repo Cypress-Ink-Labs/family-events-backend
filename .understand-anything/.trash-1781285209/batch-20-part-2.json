@@ -1,0 +1,761 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+      "type": "table",
+      "name": "20260601018000_fix_events_enriched_enum_cast.sql",
+      "filePath": "supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+      "summary": "Drops and recreates events_enriched RPC to fix an enum cast issue that caused runtime errors when filtering by event status.",
+      "tags": ["database", "migration", "bugfix", "rpc"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+      "type": "table",
+      "name": "20260601019000_restore_events_enriched_cursor_signature.sql",
+      "filePath": "supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+      "summary": "Drops and recreates events_enriched RPC to restore the correct cursor-based pagination signature with after_start_datetime and after_id parameters.",
+      "tags": ["database", "migration", "bugfix", "rpc"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "type": "table",
+      "name": "20260601020000_event_embeddings_and_similarity.sql",
+      "filePath": "supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "summary": "Creates event_embeddings table for pgvector storage and adds find_similar_events RPC for cosine-similarity-based event recommendations.",
+      "tags": ["database", "migration", "ai-embeddings", "similarity-search"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql:event_embeddings",
+      "type": "table",
+      "name": "event_embeddings",
+      "filePath": "supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "summary": "Stores pgvector embeddings for events indexed with HNSW for efficient cosine-similarity searches.",
+      "tags": ["database", "ai-embeddings", "vector-search"],
+      "complexity": "simple"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql:find_similar_events",
+      "type": "schema",
+      "name": "find_similar_events",
+      "filePath": "supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "summary": "RPC returning the top-N most similar events to a given query embedding using cosine distance on the event_embeddings table.",
+      "tags": ["database", "rpc", "similarity-search", "ai-embeddings"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "type": "table",
+      "name": "20260601021000_admin_event_decisions.sql",
+      "filePath": "supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "summary": "Creates admin_event_decisions table for persisting admin manual decisions on events and updates admin_update_event RPC to log decisions and respect locked fields.",
+      "tags": ["database", "migration", "admin", "audit"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601021000_admin_event_decisions.sql:admin_event_decisions",
+      "type": "table",
+      "name": "admin_event_decisions",
+      "filePath": "supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "summary": "Records admin manual decisions on events with action type, notes, and admin user reference.",
+      "tags": ["database", "admin", "audit"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "type": "table",
+      "name": "20260601022000_source_auto_reject_and_stats.sql",
+      "filePath": "supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "summary": "Adds should_auto_reject_source and pipeline_learning_stats RPCs to enable data-driven decisions on source auto-rejection thresholds.",
+      "tags": ["database", "migration", "rpc", "analytics"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601022000_source_auto_reject_and_stats.sql:pipeline_learning_stats",
+      "type": "schema",
+      "name": "pipeline_learning_stats",
+      "filePath": "supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "summary": "Returns aggregate LLM review decision statistics per source to inform auto-rejection threshold configuration.",
+      "tags": ["database", "rpc", "analytics", "ai-review"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+      "type": "table",
+      "name": "20260601023000_fix_ai_settings_rpc_grants.sql",
+      "filePath": "supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+      "summary": "Fixes GRANT/REVOKE statements on AI settings RPCs to ensure correct role access for upsert_ai_feature_config and get_approved_ai_models.",
+      "tags": ["database", "migration", "security", "rpc"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+      "type": "table",
+      "name": "20260601024000_admin_retry_dead_tag_queue.sql",
+      "filePath": "supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+      "summary": "Adds admin_retry_dead_tag_queue RPC and updates admin_retry_source_scrape_queue and admin_retry_tag_queue to include dead-queue item retry capability.",
+      "tags": ["database", "migration", "admin", "queue-management"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601025000_baton_rouge_sources.sql",
+      "type": "table",
+      "name": "20260601025000_baton_rouge_sources.sql",
+      "filePath": "supabase/migrations/20260601025000_baton_rouge_sources.sql",
+      "summary": "Seeds additional Baton Rouge event sources with ALTER TABLE and INSERT statements for new city-specific scrapers.",
+      "tags": ["database", "reference-data", "migration", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+      "type": "table",
+      "name": "20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+      "filePath": "supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+      "summary": "Adds missing indexes on admin_event_decisions foreign key columns (event_id, admin_id) to fix unindexed foreign key performance warnings.",
+      "tags": ["database", "migration", "performance", "indexing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601027000_user_notification_preferences.sql",
+      "type": "table",
+      "name": "20260601027000_user_notification_preferences.sql",
+      "filePath": "supabase/migrations/20260601027000_user_notification_preferences.sql",
+      "summary": "Creates user_notification_preferences table and upsert_notification_preferences RPC for managing per-user push and email notification settings.",
+      "tags": ["database", "migration", "notifications", "user-preferences"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601027000_user_notification_preferences.sql:user_notification_preferences",
+      "type": "table",
+      "name": "user_notification_preferences",
+      "filePath": "supabase/migrations/20260601027000_user_notification_preferences.sql",
+      "summary": "Stores per-user notification preference settings including push_enabled, email_enabled, and event change notification flags.",
+      "tags": ["database", "notifications", "user-preferences"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "type": "table",
+      "name": "20260601028000_search_events_radius_filter.sql",
+      "filePath": "supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "summary": "Replaces search_events RPC with a version that adds optional lat/lon/radius_km geospatial filtering using PostGIS earth_distance functions.",
+      "tags": ["database", "migration", "rpc", "geospatial"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601028000_search_events_radius_filter.sql:search_events",
+      "type": "schema",
+      "name": "search_events",
+      "filePath": "supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "summary": "Updated search_events RPC adding lat/lon/radius_km parameters for proximity-based event filtering in addition to existing facet filters.",
+      "tags": ["database", "rpc", "search", "geospatial"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "type": "table",
+      "name": "20260601029000_find_similar_events_by_id.sql",
+      "filePath": "supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "summary": "Adds find_similar_events_by_id RPC that looks up an event's own embedding and delegates to find_similar_events for ID-based similarity queries.",
+      "tags": ["database", "migration", "rpc", "similarity-search"],
+      "complexity": "simple"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601029000_find_similar_events_by_id.sql:find_similar_events_by_id",
+      "type": "schema",
+      "name": "find_similar_events_by_id",
+      "filePath": "supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "summary": "RPC returning events similar to a given event ID by fetching the event's stored embedding and performing cosine similarity search.",
+      "tags": ["database", "rpc", "similarity-search", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601030000_push_and_notifications.sql",
+      "type": "table",
+      "name": "20260601030000_push_and_notifications.sql",
+      "filePath": "supabase/migrations/20260601030000_push_and_notifications.sql",
+      "summary": "Creates push_subscriptions and user_notifications tables with RPCs for registering/unregistering push endpoints, marking notifications read, and capping notification counts per user.",
+      "tags": ["database", "migration", "notifications", "push"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260601030000_push_and_notifications.sql:push_subscriptions",
+      "type": "table",
+      "name": "push_subscriptions",
+      "filePath": "supabase/migrations/20260601030000_push_and_notifications.sql",
+      "summary": "Stores Web Push API subscription endpoints and keys per user device for push notification delivery.",
+      "tags": ["database", "notifications", "push"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601030000_push_and_notifications.sql:user_notifications",
+      "type": "table",
+      "name": "user_notifications",
+      "filePath": "supabase/migrations/20260601030000_push_and_notifications.sql",
+      "summary": "In-app notification records per user with type, payload, and read status for the notification inbox.",
+      "tags": ["database", "notifications", "user-interface"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601031000_event_change_notifications.sql",
+      "type": "table",
+      "name": "20260601031000_event_change_notifications.sql",
+      "filePath": "supabase/migrations/20260601031000_event_change_notifications.sql",
+      "summary": "Creates notification_queue table and notify_event_changes trigger function that enqueues notifications for users who have saved events when those events are updated.",
+      "tags": ["database", "migration", "notifications", "triggers"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601031000_event_change_notifications.sql:notification_queue",
+      "type": "table",
+      "name": "notification_queue",
+      "filePath": "supabase/migrations/20260601031000_event_change_notifications.sql",
+      "summary": "Queue table for outbound notifications to be delivered to users, with service-role RLS and delivery status tracking.",
+      "tags": ["database", "notifications", "queue"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+      "type": "table",
+      "name": "20260601032000_drop_old_search_events_overload.sql",
+      "filePath": "supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+      "summary": "Drops old overloaded signatures of search_events and admin_update_event that were superseded by newer RPC versions.",
+      "tags": ["database", "migration", "schema-evolution", "cleanup"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601033000_community_event_submission.sql",
+      "type": "table",
+      "name": "20260601033000_community_event_submission.sql",
+      "filePath": "supabase/migrations/20260601033000_community_event_submission.sql",
+      "summary": "Adds submit_community_event RPC allowing authenticated users to submit events for admin review, with deduplication and source-specific handling.",
+      "tags": ["database", "migration", "rpc", "community"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601033000_community_event_submission.sql:submit_community_event",
+      "type": "schema",
+      "name": "submit_community_event",
+      "filePath": "supabase/migrations/20260601033000_community_event_submission.sql",
+      "summary": "Public RPC for authenticated users to submit new community events; creates a draft event and enqueues it for admin review.",
+      "tags": ["database", "rpc", "community", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601034000_activate_baton_rouge_sources.sql",
+      "type": "table",
+      "name": "20260601034000_activate_baton_rouge_sources.sql",
+      "filePath": "supabase/migrations/20260601034000_activate_baton_rouge_sources.sql",
+      "summary": "Activates the Baton Rouge event sources (BREC Parks, BREC Kids, City-Parish Calendar, LocalHop) by setting is_active=true.",
+      "tags": ["database", "migration", "configuration", "reference-data"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260601035000_community_event_status_notification.sql",
+      "type": "table",
+      "name": "20260601035000_community_event_status_notification.sql",
+      "filePath": "supabase/migrations/20260601035000_community_event_status_notification.sql",
+      "summary": "Adds notify_community_event_status trigger function that enqueues notifications to event submitters when their community-submitted event status changes.",
+      "tags": ["database", "migration", "notifications", "triggers"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260601036000_admin_user_delete.sql",
+      "type": "table",
+      "name": "20260601036000_admin_user_delete.sql",
+      "filePath": "supabase/migrations/20260601036000_admin_user_delete.sql",
+      "summary": "Adds admin_delete_user RPC enabling admins to fully purge a user account including auth.users, cascading to profiles and associated data.",
+      "tags": ["database", "migration", "admin", "user-management"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "schema:supabase/migrations/20260601036000_admin_user_delete.sql:admin_delete_user",
+      "type": "schema",
+      "name": "admin_delete_user",
+      "filePath": "supabase/migrations/20260601036000_admin_user_delete.sql",
+      "summary": "SECURITY DEFINER RPC allowing admins to delete a user by ID from auth.users with cascading cleanup of profile and associated records.",
+      "tags": ["database", "rpc", "admin", "user-management"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "type": "table",
+      "name": "20260610162002_enqueue_source_scrape_rpc.sql",
+      "filePath": "supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "summary": "Adds enqueue_source_scrape RPC enabling admins to manually trigger a scrape job for a specific source by inserting into the source_scrape_queue.",
+      "tags": ["database", "migration", "rpc", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "schema:supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql:enqueue_source_scrape",
+      "type": "schema",
+      "name": "enqueue_source_scrape",
+      "filePath": "supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "summary": "Admin RPC that enqueues a manual scrape job for a given source ID in the source_scrape_queue table.",
+      "tags": ["database", "rpc", "admin", "scraping"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "type": "table",
+      "name": "20260610170000_admin_events_source_filter.sql",
+      "filePath": "supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "summary": "Replaces admin_events_enriched and admin_event_facets RPCs with versions that add source-based filtering (p_source_id parameter) for the admin event dashboard.",
+      "tags": ["database", "migration", "rpc", "admin"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260610170000_admin_events_source_filter.sql:admin_events_enriched",
+      "type": "schema",
+      "name": "admin_events_enriched",
+      "filePath": "supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "summary": "Admin-facing paginated RPC returning enriched event rows with rich filter support including status, city, source, keyword, LLM review status, and cursor pagination.",
+      "tags": ["database", "rpc", "admin", "events"],
+      "complexity": "complex"
+    },
+    {
+      "id": "schema:supabase/migrations/20260610170000_admin_events_source_filter.sql:admin_event_facets",
+      "type": "schema",
+      "name": "admin_event_facets",
+      "filePath": "supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "summary": "Admin RPC returning aggregate facet counts (status, city, source, LLM review) for the admin event list filter UI.",
+      "tags": ["database", "rpc", "admin", "analytics"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "type": "table",
+      "name": "20260610180000_admin_dashboard_stats.sql",
+      "filePath": "supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "summary": "Adds admin_dashboard_stats RPC returning a single-row snapshot of key operational metrics (event counts by status, queue depths, source counts) for the admin dashboard.",
+      "tags": ["database", "migration", "rpc", "admin"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "schema:supabase/migrations/20260610180000_admin_dashboard_stats.sql:admin_dashboard_stats",
+      "type": "schema",
+      "name": "admin_dashboard_stats",
+      "filePath": "supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "summary": "Returns aggregate dashboard metrics including published/draft/rejected event counts, queue depths, and active source count.",
+      "tags": ["database", "rpc", "admin", "analytics"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "table:supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+      "target": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:events_enriched",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+      "target": "table:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+      "target": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:events_enriched",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+      "target": "table:supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "target": "table:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql:event_embeddings",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "target": "schema:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql:find_similar_events",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "target": "table:supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "target": "table:supabase/migrations/20260601021000_admin_event_decisions.sql:admin_event_decisions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:admin_audit_log",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "target": "table:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "target": "schema:supabase/migrations/20260601022000_source_auto_reject_and_stats.sql:pipeline_learning_stats",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "target": "table:supabase/migrations/20260601004000_llm_review_and_enrichment.sql:event_llm_review_traces",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "target": "table:supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+      "target": "table:supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql:ai_feature_config",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+      "target": "table:supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:source_scrape_queue",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_tag_queue",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+      "target": "table:supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601025000_baton_rouge_sources.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_sources",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601025000_baton_rouge_sources.sql",
+      "target": "table:supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+      "target": "table:supabase/migrations/20260601021000_admin_event_decisions.sql:admin_event_decisions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+      "target": "table:supabase/migrations/20260601025000_baton_rouge_sources.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601027000_user_notification_preferences.sql",
+      "target": "table:supabase/migrations/20260601027000_user_notification_preferences.sql:user_notification_preferences",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601027000_user_notification_preferences.sql",
+      "target": "table:supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "target": "schema:supabase/migrations/20260601028000_search_events_radius_filter.sql:search_events",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "target": "schema:supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql:search_events",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "target": "table:supabase/migrations/20260601027000_user_notification_preferences.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "target": "schema:supabase/migrations/20260601029000_find_similar_events_by_id.sql:find_similar_events_by_id",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "target": "schema:supabase/migrations/20260601020000_event_embeddings_and_similarity.sql:find_similar_events",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "target": "table:supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601030000_push_and_notifications.sql",
+      "target": "table:supabase/migrations/20260601030000_push_and_notifications.sql:push_subscriptions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601030000_push_and_notifications.sql",
+      "target": "table:supabase/migrations/20260601030000_push_and_notifications.sql:user_notifications",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601030000_push_and_notifications.sql",
+      "target": "table:supabase/migrations/20260601027000_user_notification_preferences.sql:user_notification_preferences",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260601030000_push_and_notifications.sql",
+      "target": "table:supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601031000_event_change_notifications.sql",
+      "target": "table:supabase/migrations/20260601031000_event_change_notifications.sql:notification_queue",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601031000_event_change_notifications.sql",
+      "target": "table:supabase/migrations/20260601030000_push_and_notifications.sql:user_notifications",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260601031000_event_change_notifications.sql",
+      "target": "table:supabase/migrations/20260601030000_push_and_notifications.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+      "target": "schema:supabase/migrations/20260601028000_search_events_radius_filter.sql:search_events",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+      "target": "table:supabase/migrations/20260601031000_event_change_notifications.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601033000_community_event_submission.sql",
+      "target": "schema:supabase/migrations/20260601033000_community_event_submission.sql:submit_community_event",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601033000_community_event_submission.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:events",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601033000_community_event_submission.sql",
+      "target": "table:supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601034000_activate_baton_rouge_sources.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:event_sources",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601034000_activate_baton_rouge_sources.sql",
+      "target": "table:supabase/migrations/20260601025000_baton_rouge_sources.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601035000_community_event_status_notification.sql",
+      "target": "table:supabase/migrations/20260601031000_event_change_notifications.sql:notification_queue",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260601035000_community_event_status_notification.sql",
+      "target": "table:supabase/migrations/20260601033000_community_event_submission.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260601036000_admin_user_delete.sql",
+      "target": "schema:supabase/migrations/20260601036000_admin_user_delete.sql:admin_delete_user",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260601036000_admin_user_delete.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:user_profiles",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260601036000_admin_user_delete.sql",
+      "target": "table:supabase/migrations/20260601035000_community_event_status_notification.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "target": "schema:supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql:enqueue_source_scrape",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:source_scrape_queue",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "target": "table:supabase/migrations/20260601036000_admin_user_delete.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "target": "schema:supabase/migrations/20260610170000_admin_events_source_filter.sql:admin_events_enriched",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "target": "schema:supabase/migrations/20260610170000_admin_events_source_filter.sql:admin_event_facets",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "target": "table:supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "table:supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "target": "schema:supabase/migrations/20260610180000_admin_dashboard_stats.sql:admin_dashboard_stats",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "table:supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:events",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "target": "table:supabase/migrations/20260601000000_schema_baseline.sql:source_scrape_queue",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "table:supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "target": "table:supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

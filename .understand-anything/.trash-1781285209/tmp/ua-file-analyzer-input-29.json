@@ -1,0 +1,9 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "packages/config-quality/oxfmt.base.json", "language": "json", "sizeLines": 7, "fileCategory": "config"},
+    {"path": "packages/config-quality/oxlint.base.json", "language": "json", "sizeLines": 19, "fileCategory": "config"},
+    {"path": "packages/config-quality/package.json", "language": "json", "sizeLines": 10, "fileCategory": "config"}
+  ],
+  "batchImportData": {"packages/config-quality/oxfmt.base.json": [], "packages/config-quality/oxlint.base.json": [], "packages/config-quality/package.json": []}
+}

@@ -1,0 +1,901 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 25,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": ".changeset/config.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 16,
+      "nonEmptyLines": 16,
+      "sections": [
+        {
+          "heading": "$schema",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "changelog",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "commit",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "fixed",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "linked",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "access",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "baseBranch",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "updateInternalDependencies",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "ignore",
+          "level": 1,
+          "line": 10
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": ".gitleaksignore",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 7,
+      "metrics": {}
+    },
+    {
+      "path": ".npmrc",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "metrics": {}
+    },
+    {
+      "path": ".railway/railway.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 86,
+      "nonEmptyLines": 77,
+      "functions": [
+        {
+          "name": "cronBuild",
+          "startLine": 11,
+          "endLine": 15,
+          "params": [
+            "rootDirectory"
+          ]
+        },
+        {
+          "name": "cronDeploy",
+          "startLine": 17,
+          "endLine": 20,
+          "params": [
+            "cronSchedule"
+          ]
+        },
+        {
+          "name": "cronService",
+          "startLine": 22,
+          "endLine": 31,
+          "params": [
+            "name",
+            "rootDirectory",
+            "cronSchedule",
+            "env"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "cronService",
+          "callee": "service",
+          "lineNumber": 23
+        },
+        {
+          "caller": "cronService",
+          "callee": "github",
+          "lineNumber": 24
+        },
+        {
+          "caller": "cronService",
+          "callee": "cronBuild",
+          "lineNumber": 25
+        },
+        {
+          "caller": "cronService",
+          "callee": "cronDeploy",
+          "lineNumber": 26
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 31,
+      "nonEmptyLines": 26,
+      "metrics": {}
+    },
+    {
+      "path": "config/deploy.config.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 137,
+      "nonEmptyLines": 137,
+      "sections": [
+        {
+          "heading": "environments",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "supabase",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "railway",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "smoke",
+          "level": 1,
+          "line": 130
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/_shared/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/cleanup-stale/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/cleanup-stale/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/db-maintenance/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/db-maintenance/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/enrich-events/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/enrich-events/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/review-events/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/review-events/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/scrape-sources/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/scrape-sources/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/send-reminders/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/send-reminders/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/tag-queue/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/tag-queue/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "cron/weekly-digest/cron-runner.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 170,
+      "nonEmptyLines": 148,
+      "functions": [
+        {
+          "name": "cleanup",
+          "startLine": 30,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "json_escape",
+          "startLine": 35,
+          "endLine": 41,
+          "params": []
+        },
+        {
+          "name": "emit",
+          "startLine": 43,
+          "endLine": 54,
+          "params": []
+        },
+        {
+          "name": "log_run",
+          "startLine": 58,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "is_enabled",
+          "startLine": 93,
+          "endLine": 125,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "cron/weekly-digest/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "graphify-out/.graphify_python",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "metrics": {}
+    },
+    {
+      "path": "graphify-out/.graphify_root",
+      "language": "unknown",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "metrics": {}
+    }
+  ]
+}

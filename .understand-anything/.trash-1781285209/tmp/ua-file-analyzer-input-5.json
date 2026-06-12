@@ -1,0 +1,27 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/functions/scrape-source/parsers/_lib/types.ts", "language": "typescript", "sizeLines": 19, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/brec.ts", "language": "typescript", "sizeLines": 295, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/brec_test.ts", "language": "typescript", "sizeLines": 136, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/downtownlafayette.ts", "language": "typescript", "sizeLines": 191, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/downtownlafayette_test.ts", "language": "typescript", "sizeLines": 92, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts", "language": "typescript", "sizeLines": 155, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/ical.ts", "language": "typescript", "sizeLines": 211, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/ical_test.ts", "language": "typescript", "sizeLines": 102, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/index.ts", "language": "typescript", "sizeLines": 26, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/index_test.ts", "language": "typescript", "sizeLines": 29, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/lcg-lafayette.ts", "language": "typescript", "sizeLines": 131, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts", "language": "typescript", "sizeLines": 98, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/localhop.ts", "language": "typescript", "sizeLines": 226, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/localhop_test.ts", "language": "typescript", "sizeLines": 55, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/macaroni-kid.ts", "language": "typescript", "sizeLines": 272, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/macaroni-kid_test.ts", "language": "typescript", "sizeLines": 208, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/manual.ts", "language": "typescript", "sizeLines": 15, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/rss.ts", "language": "typescript", "sizeLines": 292, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/rss_test.ts", "language": "typescript", "sizeLines": 62, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/website.ts", "language": "typescript", "sizeLines": 712, "fileCategory": "code"},
+    {"path": "supabase/functions/scrape-source/parsers/website_test.ts", "language": "typescript", "sizeLines": 239, "fileCategory": "code"}
+  ],
+  "batchImportData": {}
+}

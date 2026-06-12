@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "config:cron/cleanup-stale/.dockerignore",
+      "type": "config",
+      "name": ".dockerignore",
+      "filePath": "cron/cleanup-stale/.dockerignore",
+      "summary": "Docker build context exclusion list for the cleanup-stale cron service, preventing unnecessary files from being sent to the Docker daemon.",
+      "tags": ["configuration", "containerization", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:cron/cleanup-stale/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "cron/cleanup-stale/Dockerfile",
+      "summary": "Minimal Alpine-based Docker image for the cleanup-stale cron job, which invokes cron-runner.sh on a schedule to trigger the corresponding Supabase edge function that removes stale records.",
+      "tags": ["containerization", "infrastructure", "deployment", "cron"],
+      "complexity": "simple",
+      "languageNotes": "Uses alpine:3.23 with only curl and ca-certificates added; the entrypoint delegates to a shared cron-runner.sh script parameterized by a CLEANUP_ environment variable."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:cron/cleanup-stale/.dockerignore",
+      "target": "service:cron/cleanup-stale/Dockerfile",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

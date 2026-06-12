@@ -1,0 +1,1033 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/_shared/auth.ts",
+      "type": "file",
+      "name": "auth.ts",
+      "filePath": "supabase/functions/_shared/auth.ts",
+      "summary": "Shared authentication utilities for Supabase edge functions, providing JWT bearer extraction, service-role token validation, and admin/user access control guards.",
+      "tags": ["utility", "middleware", "service", "authentication"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/auth.ts:requireAdminOrService",
+      "type": "function",
+      "name": "requireAdminOrService",
+      "filePath": "supabase/functions/_shared/auth.ts",
+      "lineRange": [84, 150],
+      "summary": "Guards an edge function request by verifying the caller is either a service-role client or an authenticated admin user, querying user_profiles and user_access tables to enforce access.",
+      "tags": ["middleware", "authentication", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/auth.ts:requireServiceRole",
+      "type": "function",
+      "name": "requireServiceRole",
+      "filePath": "supabase/functions/_shared/auth.ts",
+      "lineRange": [156, 165],
+      "summary": "Validates that a request carries a valid service-role bearer token, returning the extracted token or throwing on failure.",
+      "tags": ["middleware", "authentication", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/auth_test.ts",
+      "type": "file",
+      "name": "auth_test.ts",
+      "filePath": "supabase/functions/_shared/auth_test.ts",
+      "summary": "Test suite for the shared auth module, providing mock request, service client, and user client factories to cover token validation and access control scenarios.",
+      "tags": ["test", "authentication"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/_shared/cors.ts",
+      "type": "file",
+      "name": "cors.ts",
+      "filePath": "supabase/functions/_shared/cors.ts",
+      "summary": "CORS helper for Supabase edge functions that resolves allowed origins from environment configuration and builds appropriate response headers.",
+      "tags": ["utility", "middleware", "cors"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/cors.ts:resolveAllowedOrigin",
+      "type": "function",
+      "name": "resolveAllowedOrigin",
+      "filePath": "supabase/functions/_shared/cors.ts",
+      "lineRange": [21, 29],
+      "summary": "Checks an incoming origin against a configurable allowlist derived from the ALLOWED_ORIGINS environment variable.",
+      "tags": ["utility", "cors", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/cors.ts:buildCorsHeaders",
+      "type": "function",
+      "name": "buildCorsHeaders",
+      "filePath": "supabase/functions/_shared/cors.ts",
+      "lineRange": [37, 51],
+      "summary": "Constructs a Headers object with Access-Control-Allow-Origin, Methods, and Headers values for CORS preflight and response handling.",
+      "tags": ["utility", "cors", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "file",
+      "name": "cron-run-log.ts",
+      "filePath": "supabase/functions/_shared/cron-run-log.ts",
+      "summary": "Shared utilities for cron job run logging, extracting run context from request headers and persisting structured log events via a Supabase RPC call.",
+      "tags": ["utility", "service", "event-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/cron-run-log.ts:logCronRunEvent",
+      "type": "function",
+      "name": "logCronRunEvent",
+      "filePath": "supabase/functions/_shared/cron-run-log.ts",
+      "lineRange": [22, 48],
+      "summary": "Logs a structured cron run event to the database via RPC, also emitting the event to the edge logger for observability.",
+      "tags": ["utility", "service", "event-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/function-invoke.ts",
+      "type": "file",
+      "name": "function-invoke.ts",
+      "filePath": "supabase/functions/_shared/function-invoke.ts",
+      "summary": "Utility for invoking other Supabase edge functions via HTTP with service-role authentication, timeout support, and error reporting.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/function-invoke.ts:invokeFunction",
+      "type": "function",
+      "name": "invokeFunction",
+      "filePath": "supabase/functions/_shared/function-invoke.ts",
+      "lineRange": [17, 46],
+      "summary": "Calls a named Supabase edge function with a JSON body, service-role key header, and configurable timeout, returning the response text on success.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/function-invoke_test.ts",
+      "type": "file",
+      "name": "function-invoke_test.ts",
+      "filePath": "supabase/functions/_shared/function-invoke_test.ts",
+      "summary": "Test suite for the invokeFunction utility, covering success and error paths with mocked fetch implementations.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/html.ts",
+      "type": "file",
+      "name": "html.ts",
+      "filePath": "supabase/functions/_shared/html.ts",
+      "summary": "Minimal HTML escaping utility that replaces special characters with their HTML entity equivalents to prevent XSS in email/HTML output.",
+      "tags": ["utility", "serialization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/html_test.ts",
+      "type": "file",
+      "name": "html_test.ts",
+      "filePath": "supabase/functions/_shared/html_test.ts",
+      "summary": "Minimal test suite for the HTML escaping utility.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/logger.ts",
+      "type": "file",
+      "name": "logger.ts",
+      "filePath": "supabase/functions/_shared/logger.ts",
+      "summary": "Structured logging utilities for edge functions including error serialization, PostgREST error detection, and JSON-formatted log event emission at multiple severity levels.",
+      "tags": ["utility", "service", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/logger.ts:logEdgeEvent",
+      "type": "function",
+      "name": "logEdgeEvent",
+      "filePath": "supabase/functions/_shared/logger.ts",
+      "lineRange": [95, 104],
+      "summary": "Emits a structured JSON log line to stdout/stderr with timestamp, level, message, and context fields.",
+      "tags": ["utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/logger.ts:serializeError",
+      "type": "function",
+      "name": "serializeError",
+      "filePath": "supabase/functions/_shared/logger.ts",
+      "lineRange": [25, 73],
+      "summary": "Converts an arbitrary error value into a structured serializable object, handling PostgREST errors, standard Error instances, and plain objects.",
+      "tags": ["utility", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/sentry.ts",
+      "type": "file",
+      "name": "sentry.ts",
+      "filePath": "supabase/functions/_shared/sentry.ts",
+      "summary": "Sentry error reporting integration for Supabase edge functions, initializing the SDK on demand and capturing exceptions with contextual tags.",
+      "tags": ["utility", "service", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/sentry.ts:captureEdgeException",
+      "type": "function",
+      "name": "captureEdgeException",
+      "filePath": "supabase/functions/_shared/sentry.ts",
+      "lineRange": [27, 58],
+      "summary": "Initializes Sentry if not already done, sets contextual scope tags from environment and caller-provided context, then captures and flushes the exception.",
+      "tags": ["utility", "service", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "file",
+      "name": "service-role-handler.ts",
+      "filePath": "supabase/functions/_shared/service-role-handler.ts",
+      "summary": "Framework for building service-role-protected Supabase edge functions, providing a Deno.serve wrapper that authenticates requests, creates the Supabase service client, and handles errors with Sentry reporting.",
+      "tags": ["middleware", "api-handler", "service", "factory"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:supabase/functions/_shared/service-role-handler.ts:ServiceRoleJsonError",
+      "type": "class",
+      "name": "ServiceRoleJsonError",
+      "filePath": "supabase/functions/_shared/service-role-handler.ts",
+      "lineRange": [31, 39],
+      "summary": "Custom error class for structured service-role handler errors carrying an HTTP status code and message.",
+      "tags": ["middleware", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/service-role-handler.ts:serveServiceRoleJson",
+      "type": "function",
+      "name": "serveServiceRoleJson",
+      "filePath": "supabase/functions/_shared/service-role-handler.ts",
+      "lineRange": [52, 101],
+      "summary": "Bootstraps a Deno HTTP server that validates the service-role bearer token, creates a Supabase client, calls the user handler, and returns JSON responses with proper error handling and Sentry capture.",
+      "tags": ["middleware", "api-handler", "factory"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/_shared/stock-images.ts",
+      "type": "file",
+      "name": "stock-images.ts",
+      "filePath": "supabase/functions/_shared/stock-images.ts",
+      "summary": "Multi-provider stock image search library supporting Pexels, Pixabay, and Unsplash, with event-title-based search term derivation and Unsplash download tracking.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "complex",
+      "languageNotes": "Uses a priority-ordered provider queue; falls back across providers until an image is found."
+    },
+    {
+      "id": "function:supabase/functions/_shared/stock-images.ts:findFallbackImage",
+      "type": "function",
+      "name": "findFallbackImage",
+      "filePath": "supabase/functions/_shared/stock-images.ts",
+      "lineRange": [357, 414],
+      "summary": "Orchestrates a multi-provider, multi-query fallback image search by trying derived title terms and event tags across configured Pexels, Pixabay, and Unsplash providers.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/stock-images.ts:searchUnsplash",
+      "type": "function",
+      "name": "searchUnsplash",
+      "filePath": "supabase/functions/_shared/stock-images.ts",
+      "lineRange": [267, 327],
+      "summary": "Queries the Unsplash API for photos matching a search term and returns a normalized image result with attribution metadata.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/stock-images.ts:deriveTitleSearchTerm",
+      "type": "function",
+      "name": "deriveTitleSearchTerm",
+      "filePath": "supabase/functions/_shared/stock-images.ts",
+      "lineRange": [160, 185],
+      "summary": "Derives a clean stock-image search query from a raw event title by stripping venue suffixes, punctuation, and noise words.",
+      "tags": ["utility", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/stock-images_test.ts",
+      "type": "file",
+      "name": "stock-images_test.ts",
+      "filePath": "supabase/functions/_shared/stock-images_test.ts",
+      "summary": "Test suite for the stock-images module, primarily covering the deriveTitleSearchTerm function with a variety of event title inputs.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/unsplash.test.ts",
+      "type": "file",
+      "name": "unsplash.test.ts",
+      "filePath": "supabase/functions/_shared/unsplash.test.ts",
+      "summary": "Comprehensive test suite for the Unsplash integration module covering search, attribution extraction, photo lookup by URL, and download tracking with mocked fetch.",
+      "tags": ["test", "utility", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/_shared/unsplash.ts",
+      "type": "file",
+      "name": "unsplash.ts",
+      "filePath": "supabase/functions/_shared/unsplash.ts",
+      "summary": "Dedicated Unsplash API client providing photo search, CDN URL parsing, attribution extraction, photo lookup by URL, and download tracking for compliance with Unsplash API guidelines.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/unsplash.ts:findFallbackImage",
+      "type": "function",
+      "name": "findFallbackImage",
+      "filePath": "supabase/functions/_shared/unsplash.ts",
+      "lineRange": [231, 295],
+      "summary": "Searches Unsplash for a fallback event image using derived title terms and tag-based queries, returning a normalized result with attribution.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/unsplash.ts:lookupUnsplashPhotoFromUrl",
+      "type": "function",
+      "name": "lookupUnsplashPhotoFromUrl",
+      "filePath": "supabase/functions/_shared/unsplash.ts",
+      "lineRange": [186, 210],
+      "summary": "Resolves a full Unsplash photo record from an existing CDN image URL by extracting the photo ID and calling the Unsplash photos API.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/unsplash.ts:trackUnsplashDownload",
+      "type": "function",
+      "name": "trackUnsplashDownload",
+      "filePath": "supabase/functions/_shared/unsplash.ts",
+      "lineRange": [156, 179],
+      "summary": "Triggers the Unsplash download tracking endpoint for a photo to comply with the Unsplash API attribution requirements.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/validation.ts",
+      "type": "file",
+      "name": "validation.ts",
+      "filePath": "supabase/functions/_shared/validation.ts",
+      "summary": "Input validation utilities for edge function request parsing, providing typed readers for strings, emails, and UUIDs with error throwing on invalid input.",
+      "tags": ["utility", "validation", "middleware"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/validation_test.ts",
+      "type": "file",
+      "name": "validation_test.ts",
+      "filePath": "supabase/functions/_shared/validation_test.ts",
+      "summary": "Test suite for the shared validation utilities covering string, email, and UUID reading and error cases.",
+      "tags": ["test", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/backfill-embeddings/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/backfill-embeddings/index.ts",
+      "summary": "Supabase edge function that iterates events lacking vector embeddings and generates them in batches using the embed-event handler, respecting a configurable time budget.",
+      "tags": ["service", "api-handler", "entry-point"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/backfill-embeddings/index.ts:backfillEmbeddings",
+      "type": "function",
+      "name": "backfillEmbeddings",
+      "filePath": "supabase/functions/backfill-embeddings/index.ts",
+      "lineRange": [71, 163],
+      "summary": "Processes a batch of events without embeddings, calling embedEvent for each and tracking success/failure counts while respecting a wall-clock time limit.",
+      "tags": ["service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/backfill-embeddings/index_test.ts",
+      "type": "file",
+      "name": "index_test.ts",
+      "filePath": "supabase/functions/backfill-embeddings/index_test.ts",
+      "summary": "Test suite for the backfill-embeddings function using in-memory fake Supabase query builder and mocked fetch to validate batching, retry, and time-budget behavior.",
+      "tags": ["test", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/backfill-event-enrichment/index.ts",
+      "summary": "Large edge function that enriches pending events with geocoded coordinates, stock images, Unsplash attribution, and parent tips, running multiple enrichment passes over database rows.",
+      "tags": ["service", "api-handler", "entry-point"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/backfill-event-enrichment/index.ts:enrichOne",
+      "type": "function",
+      "name": "enrichOne",
+      "filePath": "supabase/functions/backfill-event-enrichment/index.ts",
+      "lineRange": [112, 365],
+      "summary": "Performs all enrichment steps for a single event row including geocoding, image search, Unsplash download tracking, and database updates via RPC calls.",
+      "tags": ["service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/backfill-event-enrichment/index.ts:runUnsplashAttributionBackfillPass",
+      "type": "function",
+      "name": "runUnsplashAttributionBackfillPass",
+      "filePath": "supabase/functions/backfill-event-enrichment/index.ts",
+      "lineRange": [425, 492],
+      "summary": "Iterates events with Unsplash images lacking attribution records, resolves attribution via photo URL lookup, and upserts attribution rows.",
+      "tags": ["service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "type": "file",
+      "name": "parent-tips-pass.ts",
+      "filePath": "supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "summary": "Enrichment pass that generates AI parent tips for events by invoking the generate-parent-tips edge function and recording pass results via cron run logging.",
+      "tags": ["service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts:runParentTipsPass",
+      "type": "function",
+      "name": "runParentTipsPass",
+      "filePath": "supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "lineRange": [23, 127],
+      "summary": "Checks if the parent-tips AI feature is enabled, fetches a batch of events needing tips, invokes the generator function for each, and logs success/failure via cron run events.",
+      "tags": ["service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts",
+      "type": "file",
+      "name": "parent-tips-pass_test.ts",
+      "filePath": "supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts",
+      "summary": "Test suite for the parent-tips enrichment pass using a FakeSupabase stub and mocked fetch to verify feature-flag checking, batch processing, and error handling.",
+      "tags": ["test", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/cleanup-stale-runs/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/cleanup-stale-runs/index.ts",
+      "summary": "Edge function entry point that uses the service-role handler to delete stale cron run log entries from the database.",
+      "tags": ["service", "api-handler", "entry-point"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/_shared/auth.ts",
+      "target": "function:supabase/functions/_shared/auth.ts:requireAdminOrService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/auth.ts",
+      "target": "function:supabase/functions/_shared/auth.ts:requireAdminOrService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/auth.ts",
+      "target": "function:supabase/functions/_shared/auth.ts:requireServiceRole",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/auth.ts",
+      "target": "function:supabase/functions/_shared/auth.ts:requireServiceRole",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/auth_test.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/auth_test.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/cors.ts",
+      "target": "function:supabase/functions/_shared/cors.ts:resolveAllowedOrigin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/cors.ts",
+      "target": "function:supabase/functions/_shared/cors.ts:resolveAllowedOrigin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/cors.ts",
+      "target": "function:supabase/functions/_shared/cors.ts:buildCorsHeaders",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/cors.ts",
+      "target": "function:supabase/functions/_shared/cors.ts:buildCorsHeaders",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/cron-run-log.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/cron-run-log.ts",
+      "target": "function:supabase/functions/_shared/cron-run-log.ts:logCronRunEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/cron-run-log.ts",
+      "target": "function:supabase/functions/_shared/cron-run-log.ts:logCronRunEvent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/function-invoke.ts",
+      "target": "function:supabase/functions/_shared/function-invoke.ts:invokeFunction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/function-invoke.ts",
+      "target": "function:supabase/functions/_shared/function-invoke.ts:invokeFunction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/function-invoke_test.ts",
+      "target": "file:supabase/functions/_shared/function-invoke.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/function-invoke_test.ts",
+      "target": "file:supabase/functions/_shared/function-invoke.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/html_test.ts",
+      "target": "file:supabase/functions/_shared/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/html_test.ts",
+      "target": "file:supabase/functions/_shared/html.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/logger.ts",
+      "target": "function:supabase/functions/_shared/logger.ts:logEdgeEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/logger.ts",
+      "target": "function:supabase/functions/_shared/logger.ts:logEdgeEvent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/logger.ts",
+      "target": "function:supabase/functions/_shared/logger.ts:serializeError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/sentry.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/sentry.ts",
+      "target": "function:supabase/functions/_shared/sentry.ts:captureEdgeException",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/sentry.ts",
+      "target": "function:supabase/functions/_shared/sentry.ts:captureEdgeException",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/sentry.ts",
+      "target": "function:supabase/functions/_shared/logger.ts:serializeError",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/service-role-handler.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/service-role-handler.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/service-role-handler.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/service-role-handler.ts",
+      "target": "class:supabase/functions/_shared/service-role-handler.ts:ServiceRoleJsonError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/service-role-handler.ts",
+      "target": "class:supabase/functions/_shared/service-role-handler.ts:ServiceRoleJsonError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/service-role-handler.ts",
+      "target": "function:supabase/functions/_shared/service-role-handler.ts:serveServiceRoleJson",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/service-role-handler.ts",
+      "target": "function:supabase/functions/_shared/service-role-handler.ts:serveServiceRoleJson",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/_shared/service-role-handler.ts:serveServiceRoleJson",
+      "target": "function:supabase/functions/_shared/auth.ts:requireServiceRole",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/_shared/service-role-handler.ts:serveServiceRoleJson",
+      "target": "function:supabase/functions/_shared/sentry.ts:captureEdgeException",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/stock-images.ts",
+      "target": "function:supabase/functions/_shared/stock-images.ts:findFallbackImage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/stock-images.ts",
+      "target": "function:supabase/functions/_shared/stock-images.ts:findFallbackImage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/stock-images.ts",
+      "target": "function:supabase/functions/_shared/stock-images.ts:searchUnsplash",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/stock-images.ts",
+      "target": "function:supabase/functions/_shared/stock-images.ts:deriveTitleSearchTerm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/stock-images.ts",
+      "target": "function:supabase/functions/_shared/stock-images.ts:deriveTitleSearchTerm",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/stock-images_test.ts",
+      "target": "file:supabase/functions/_shared/stock-images.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/stock-images_test.ts",
+      "target": "file:supabase/functions/_shared/stock-images.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.test.ts",
+      "target": "file:supabase/functions/_shared/unsplash.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.test.ts",
+      "target": "file:supabase/functions/_shared/unsplash.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.ts",
+      "target": "function:supabase/functions/_shared/unsplash.ts:findFallbackImage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.ts",
+      "target": "function:supabase/functions/_shared/unsplash.ts:findFallbackImage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.ts",
+      "target": "function:supabase/functions/_shared/unsplash.ts:lookupUnsplashPhotoFromUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.ts",
+      "target": "function:supabase/functions/_shared/unsplash.ts:lookupUnsplashPhotoFromUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.ts",
+      "target": "function:supabase/functions/_shared/unsplash.ts:trackUnsplashDownload",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/unsplash.ts",
+      "target": "function:supabase/functions/_shared/unsplash.ts:trackUnsplashDownload",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/validation.ts",
+      "target": "file:supabase/functions/_shared/validation_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/validation_test.ts",
+      "target": "file:supabase/functions/_shared/validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-embeddings/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-embeddings/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-embeddings/index.ts",
+      "target": "file:supabase/functions/embed-event/handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-embeddings/index.ts",
+      "target": "function:supabase/functions/backfill-embeddings/index.ts:backfillEmbeddings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/backfill-embeddings/index.ts",
+      "target": "function:supabase/functions/backfill-embeddings/index.ts:backfillEmbeddings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/backfill-embeddings/index.ts:backfillEmbeddings",
+      "target": "function:supabase/functions/_shared/logger.ts:logEdgeEvent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/backfill-embeddings/index.ts:backfillEmbeddings",
+      "target": "function:supabase/functions/embed-event/handler.ts:embedEvent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/backfill-embeddings/index_test.ts",
+      "target": "file:supabase/functions/backfill-embeddings/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-embeddings/index_test.ts",
+      "target": "file:supabase/functions/backfill-embeddings/index.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/_shared/geocode.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/_shared/stock-images.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/_shared/unsplash.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/scrape-source/lib/enrichment.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "function:supabase/functions/backfill-event-enrichment/index.ts:enrichOne",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/index.ts",
+      "target": "function:supabase/functions/backfill-event-enrichment/index.ts:runUnsplashAttributionBackfillPass",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "function:supabase/functions/backfill-event-enrichment/index.ts:enrichOne",
+      "target": "function:supabase/functions/_shared/stock-images.ts:findFallbackImage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/backfill-event-enrichment/index.ts:enrichOne",
+      "target": "function:supabase/functions/_shared/unsplash.ts:trackUnsplashDownload",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/backfill-event-enrichment/index.ts:runUnsplashAttributionBackfillPass",
+      "target": "function:supabase/functions/_shared/unsplash.ts:lookupUnsplashPhotoFromUrl",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "target": "file:supabase/functions/_shared/function-invoke.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "target": "function:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts:runParentTipsPass",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "target": "function:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts:runParentTipsPass",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts:runParentTipsPass",
+      "target": "function:supabase/functions/_shared/cron-run-log.ts:logCronRunEvent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts:runParentTipsPass",
+      "target": "function:supabase/functions/_shared/function-invoke.ts:invokeFunction",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts",
+      "target": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts",
+      "target": "file:supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/cleanup-stale-runs/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/cleanup-stale-runs/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

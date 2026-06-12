@@ -1,0 +1,48 @@
+{
+  "nodes": [
+    {
+      "id": "config:infra/railway-cron-drift/cron-services.json",
+      "type": "config",
+      "name": "cron-services.json",
+      "filePath": "infra/railway-cron-drift/cron-services.json",
+      "summary": "Manifest of 8 Railway cron service definitions (cron-tag-queue, cron-scrape-sources, cron-db-maintenance, cron-cleanup-stale, cron-enrich-events, cron-weekly-digest, cron-send-reminders, cron-review-events), each specifying builder, cron schedule, restart policy, and required deployment status used by main.tf for drift validation.",
+      "tags": ["configuration", "infrastructure", "deployment", "schema-definition", "data-pipeline"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "resource:infra/railway-cron-drift/main.tf",
+      "type": "resource",
+      "name": "main.tf",
+      "filePath": "infra/railway-cron-drift/main.tf",
+      "summary": "Terraform module implementing Railway cron drift detection: reads cron-services.json as the expected manifest, optionally fetches live Railway service metadata via GraphQL, computes field-level diagnostics for each cron service, and enforces correctness via output preconditions used by GitHub Actions and Spacelift.",
+      "tags": ["infrastructure", "deployment", "ci-cd", "monitoring", "security"],
+      "complexity": "complex",
+      "languageNotes": "Uses Terraform output preconditions (>=1.5.0 feature) as the enforcement gate — plan fails with human-readable diagnostics when live Railway state drifts from the cron-services.json manifest."
+    },
+    {
+      "id": "resource:infra/railway-cron-drift/versions.tf",
+      "type": "resource",
+      "name": "versions.tf",
+      "filePath": "infra/railway-cron-drift/versions.tf",
+      "summary": "Declares Terraform version constraint (>=1.5.0) and pins the hashicorp/http provider (~>3.5) used by main.tf for Railway GraphQL calls.",
+      "tags": ["infrastructure", "configuration", "build-system"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "resource:infra/railway-cron-drift/main.tf",
+      "target": "config:infra/railway-cron-drift/cron-services.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "resource:infra/railway-cron-drift/versions.tf",
+      "target": "resource:infra/railway-cron-drift/main.tf",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

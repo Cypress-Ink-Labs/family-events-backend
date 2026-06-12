@@ -1,0 +1,245 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 17,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/tests/admin_dashboard_stats.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 185,
+      "nonEmptyLines": 155,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/admin_db_health.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 152,
+      "nonEmptyLines": 127,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/admin_events_rpc.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 492,
+      "nonEmptyLines": 411,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/api_surface_hardening.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 25,
+      "nonEmptyLines": 22,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/cron_rpc_security.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 258,
+      "nonEmptyLines": 221,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/cron_toggle.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 189,
+      "nonEmptyLines": 156,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/events_cursor_pagination.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 369,
+      "nonEmptyLines": 318,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/events_enriched_parity.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 400,
+      "nonEmptyLines": 357,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/invite_gate_oauth_signup.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 389,
+      "nonEmptyLines": 333,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/llm_event_review_processing.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 360,
+      "nonEmptyLines": 318,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/reference_data.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 130,
+      "nonEmptyLines": 112,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/rls_access_expiry.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 162,
+      "nonEmptyLines": 139,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/rls_anon_read.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 163,
+      "nonEmptyLines": 143,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/rls_privilege_escalation.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 151,
+      "nonEmptyLines": 130,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/rls_public_events_view.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 294,
+      "nonEmptyLines": 267,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/role_smoke.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 205,
+      "nonEmptyLines": 175,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/tests/trace_retention.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 122,
+      "nonEmptyLines": 102,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    }
+  ]
+}

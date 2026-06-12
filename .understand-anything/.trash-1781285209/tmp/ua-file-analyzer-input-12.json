@@ -1,0 +1,8 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "cron/db-maintenance/.dockerignore", "language": "unknown", "sizeLines": 4, "fileCategory": "infra"},
+    {"path": "cron/db-maintenance/Dockerfile", "language": "dockerfile", "sizeLines": 5, "fileCategory": "infra"}
+  ],
+  "batchImportData": {}
+}

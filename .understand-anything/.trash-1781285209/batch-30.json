@@ -1,0 +1,57 @@
+{
+  "nodes": [
+    {
+      "id": "config:packages/config-typescript/base.json",
+      "type": "config",
+      "name": "base.json",
+      "filePath": "packages/config-typescript/base.json",
+      "summary": "Base TypeScript compiler configuration for the monorepo enabling strict mode, ESNext modules with bundler resolution, verbatimModuleSyntax, noEmit, and strict unused-variable checking targeting ES2023.",
+      "tags": ["configuration", "typescript", "build-system"],
+      "complexity": "simple",
+      "languageNotes": "Uses erasableSyntaxOnly and verbatimModuleSyntax — modern strict TypeScript settings that disallow runtime-emitted type constructs."
+    },
+    {
+      "id": "config:packages/config-typescript/node.json",
+      "type": "config",
+      "name": "node.json",
+      "filePath": "packages/config-typescript/node.json",
+      "summary": "Node.js-specific TypeScript configuration extending the base config, adding ES2023 lib and @types/node type definitions for server-side packages.",
+      "tags": ["configuration", "typescript", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:packages/config-typescript/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "packages/config-typescript/package.json",
+      "summary": "Package manifest for the shared TypeScript configuration package (@cypress-ink-labs/config-typescript), exporting base, node, and react-vite tsconfig presets via the exports map.",
+      "tags": ["configuration", "package-manifest", "typescript", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:packages/config-typescript/react-vite.json",
+      "type": "config",
+      "name": "react-vite.json",
+      "filePath": "packages/config-typescript/react-vite.json",
+      "summary": "React + Vite TypeScript configuration extending the base config, adding DOM libs, Vite client types, and react-jsx transform for frontend packages.",
+      "tags": ["configuration", "typescript", "build-system"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:packages/config-typescript/node.json",
+      "target": "config:packages/config-typescript/base.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:packages/config-typescript/react-vite.json",
+      "target": "config:packages/config-typescript/base.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

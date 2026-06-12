@@ -1,0 +1,47 @@
+{
+  "nodes": [
+    {
+      "id": "document:packages/contracts/CHANGELOG.md",
+      "type": "document",
+      "name": "CHANGELOG.md",
+      "filePath": "packages/contracts/CHANGELOG.md",
+      "summary": "Release changelog for the @family-events/contracts package, currently tracking version 0.0.2 with patch changes.",
+      "tags": ["documentation", "changelog"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:packages/contracts/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "packages/contracts/package.json",
+      "summary": "Package manifest for @cypress-ink-labs/contracts v0.0.3, a published npm package exporting TypeScript types generated from the family-events Supabase schema with GitHub Package Registry publishing config.",
+      "tags": ["configuration", "package-manifest", "schema-definition"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:packages/contracts/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "packages/contracts/tsconfig.json",
+      "summary": "TypeScript configuration for the contracts package, extending the shared node preset and including all src files.",
+      "tags": ["configuration", "typescript", "build-system"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:packages/contracts/tsconfig.json",
+      "target": "config:packages/config-typescript/node.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:packages/contracts/CHANGELOG.md",
+      "target": "config:packages/contracts/package.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

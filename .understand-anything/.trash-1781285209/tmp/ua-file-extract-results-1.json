@@ -1,0 +1,3637 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 32,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "packages/deploy-cli/src/cli.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 40,
+      "nonEmptyLines": 35,
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/commands/deploy.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 113,
+      "nonEmptyLines": 107,
+      "functions": [
+        {
+          "name": "registerDeployCommand",
+          "startLine": 30,
+          "endLine": 100,
+          "params": [
+            "program"
+          ]
+        },
+        {
+          "name": "collect",
+          "startLine": 102,
+          "endLine": 104,
+          "params": [
+            "value",
+            "previous"
+          ]
+        },
+        {
+          "name": "parseConcurrency",
+          "startLine": 106,
+          "endLine": 113,
+          "params": [
+            "value",
+            "label",
+            "fallback"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "registerDeployCommand",
+          "line": 30,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option(\"--verbose\", \"verbose output\")\n    .option(\"--debug\", \"debug output\")\n    .option(\"--no-color\", \"disable color\")\n    .option(\"--no-poll\", \"do not poll Railway deployment status\")\n    .option(\"--poll-timeout <seconds>\", \"override Railway poll timeout\")\n    .option(\"--smoke\", \"run post-deploy smoke checks\")\n    .option(\"--allow-prod-smoke\", \"allow production smoke probes that require service keys\")\n    .action",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option(\"--verbose\", \"verbose output\")\n    .option(\"--debug\", \"debug output\")\n    .option(\"--no-color\", \"disable color\")\n    .option(\"--no-poll\", \"do not poll Railway deployment status\")\n    .option(\"--poll-timeout <seconds>\", \"override Railway poll timeout\")\n    .option(\"--smoke\", \"run post-deploy smoke checks\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option(\"--verbose\", \"verbose output\")\n    .option(\"--debug\", \"debug output\")\n    .option(\"--no-color\", \"disable color\")\n    .option(\"--no-poll\", \"do not poll Railway deployment status\")\n    .option(\"--poll-timeout <seconds>\", \"override Railway poll timeout\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option(\"--verbose\", \"verbose output\")\n    .option(\"--debug\", \"debug output\")\n    .option(\"--no-color\", \"disable color\")\n    .option(\"--no-poll\", \"do not poll Railway deployment status\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option(\"--verbose\", \"verbose output\")\n    .option(\"--debug\", \"debug output\")\n    .option(\"--no-color\", \"disable color\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option(\"--verbose\", \"verbose output\")\n    .option(\"--debug\", \"debug output\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option(\"--verbose\", \"verbose output\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option(\"--railway-concurrency <n>\", \"Railway service deploy concurrency\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option(\"--function-concurrency <n>\", \"Supabase function deploy concurrency\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option(\"--concurrency <n>\", \"set both Supabase function and Railway service concurrency\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option(\"--show-output\", \"show full provider command output instead of spinner-only progress\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option(\"--json\", \"emit JSON\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option(\"--interactive\", \"force interactive picker\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option(\"--yes\", \"skip confirmation prompts\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option(\"--dry-run\", \"print and record the deploy plan without provider mutations\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option(\"--target <id>\", \"target id\", collect, [])\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--all\", \"deploy all configured targets\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument(\"[targets...]\", \"target ids\")\n    .option",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command(\"deploy\")\n    .argument",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "program\n    .command",
+          "lineNumber": 31
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "repoRootFrom",
+          "lineNumber": 54
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "loadConfig",
+          "lineNumber": 55
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "requestedTargets.push",
+          "lineNumber": 58
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "pickTargets",
+          "lineNumber": 58
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "parseConcurrency",
+          "lineNumber": 70
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "parseConcurrency",
+          "lineNumber": 75
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "Number.parseInt",
+          "lineNumber": 84
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "runDeploy",
+          "lineNumber": 89
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "printDeployResult",
+          "lineNumber": 90
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "console.error",
+          "lineNumber": 93
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "JSON.stringify",
+          "lineNumber": 93
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "messageFor",
+          "lineNumber": 93
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "exitCodeFor",
+          "lineNumber": 93
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "console.error",
+          "lineNumber": 95
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "messageFor",
+          "lineNumber": 95
+        },
+        {
+          "caller": "registerDeployCommand",
+          "callee": "exitCodeFor",
+          "lineNumber": 97
+        },
+        {
+          "caller": "parseConcurrency",
+          "callee": "Number.parseInt",
+          "lineNumber": 108
+        },
+        {
+          "caller": "parseConcurrency",
+          "callee": "Number.isInteger",
+          "lineNumber": 109
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 1,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/commands/doctor.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 44,
+      "nonEmptyLines": 43,
+      "functions": [
+        {
+          "name": "registerDoctorCommand",
+          "startLine": 5,
+          "endLine": 44,
+          "params": [
+            "program"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "registerDoctorCommand",
+          "line": 5,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "program\n    .command(\"doctor\")\n    .option(\"--json\", \"emit JSON\")\n    .action",
+          "lineNumber": 6
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "program\n    .command(\"doctor\")\n    .option",
+          "lineNumber": 6
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "program\n    .command",
+          "lineNumber": 6
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "repoRootFrom",
+          "lineNumber": 10
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "loadConfig",
+          "lineNumber": 11
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "requireExecutable",
+          "lineNumber": 16
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "checks.push",
+          "lineNumber": 17
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "checks.push",
+          "lineNumber": 19
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "String",
+          "lineNumber": 22
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "requireRailwayAuth",
+          "lineNumber": 27
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "checks.push",
+          "lineNumber": 28
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "checks.push",
+          "lineNumber": 30
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "String",
+          "lineNumber": 33
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "console.log",
+          "lineNumber": 36
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "JSON.stringify",
+          "lineNumber": 36
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "console.log",
+          "lineNumber": 39
+        },
+        {
+          "caller": "registerDoctorCommand",
+          "callee": "checks.some",
+          "lineNumber": 42
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/commands/rollback-plan.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 18,
+      "nonEmptyLines": 17,
+      "functions": [
+        {
+          "name": "registerRollbackPlanCommand",
+          "startLine": 6,
+          "endLine": 18,
+          "params": [
+            "program"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "registerRollbackPlanCommand",
+          "line": 6,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "program\n    .command(\"rollback-plan\")\n    .requiredOption(\"--run <run-id>\", \"run artifact id\")\n    .option(\"--json\", \"emit JSON\")\n    .action",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "program\n    .command(\"rollback-plan\")\n    .requiredOption(\"--run <run-id>\", \"run artifact id\")\n    .option",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "program\n    .command(\"rollback-plan\")\n    .requiredOption",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "program\n    .command",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "repoRootFrom",
+          "lineNumber": 12
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "readRunArtifact",
+          "lineNumber": 13
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "collectRollbackGuidance",
+          "lineNumber": 14
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "console.log",
+          "lineNumber": 15
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "JSON.stringify",
+          "lineNumber": 15
+        },
+        {
+          "caller": "registerRollbackPlanCommand",
+          "callee": "console.log",
+          "lineNumber": 16
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/commands/status.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 26,
+      "functions": [
+        {
+          "name": "registerStatusCommand",
+          "startLine": 7,
+          "endLine": 27,
+          "params": [
+            "program"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "registerStatusCommand",
+          "line": 7,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "registerStatusCommand",
+          "callee": "program\n    .command(\"status\")\n    .argument(\"[targets...]\", \"Railway target ids\")\n    .option(\"--json\", \"emit JSON\")\n    .action",
+          "lineNumber": 8
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "program\n    .command(\"status\")\n    .argument(\"[targets...]\", \"Railway target ids\")\n    .option",
+          "lineNumber": 8
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "program\n    .command(\"status\")\n    .argument",
+          "lineNumber": 8
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "program\n    .command",
+          "lineNumber": 8
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "repoRootFrom",
+          "lineNumber": 13
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "loadConfig",
+          "lineNumber": 14
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "targets.map",
+          "lineNumber": 18
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "normalizeTargetId(target).replace",
+          "lineNumber": 18
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "normalizeTargetId",
+          "lineNumber": 18
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "statuses.push",
+          "lineNumber": 22
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "railway.status",
+          "lineNumber": 22
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "console.log",
+          "lineNumber": 24
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "JSON.stringify",
+          "lineNumber": 24
+        },
+        {
+          "caller": "registerStatusCommand",
+          "callee": "console.log",
+          "lineNumber": 25
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/commands/targets.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 14,
+      "nonEmptyLines": 13,
+      "functions": [
+        {
+          "name": "registerTargetsCommand",
+          "startLine": 6,
+          "endLine": 14,
+          "params": [
+            "program"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "registerTargetsCommand",
+          "line": 6,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "registerTargetsCommand",
+          "callee": "program\n    .command(\"targets\")\n    .option(\"--json\", \"emit JSON\")\n    .action",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerTargetsCommand",
+          "callee": "program\n    .command(\"targets\")\n    .option",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerTargetsCommand",
+          "callee": "program\n    .command",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerTargetsCommand",
+          "callee": "repoRootFrom",
+          "lineNumber": 11
+        },
+        {
+          "caller": "registerTargetsCommand",
+          "callee": "printTargets",
+          "lineNumber": 12
+        },
+        {
+          "caller": "registerTargetsCommand",
+          "callee": "allTargets",
+          "lineNumber": 12
+        },
+        {
+          "caller": "registerTargetsCommand",
+          "callee": "loadConfig",
+          "lineNumber": 12
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/commands/validate.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 20,
+      "nonEmptyLines": 19,
+      "functions": [
+        {
+          "name": "registerValidateCommand",
+          "startLine": 6,
+          "endLine": 20,
+          "params": [
+            "program"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "registerValidateCommand",
+          "line": 6,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "registerValidateCommand",
+          "callee": "program\n    .command(\"validate\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option(\"--json\", \"emit JSON\")\n    .action",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "program\n    .command(\"validate\")\n    .option(\"--env <env>\", \"deployment environment\", \"production\")\n    .option",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "program\n    .command(\"validate\")\n    .option",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "program\n    .command",
+          "lineNumber": 7
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "repoRootFrom",
+          "lineNumber": 12
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "loadConfig",
+          "lineNumber": 13
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "supabase.validateFunctionDrift",
+          "lineNumber": 15
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "supabase.resolveProjectRef",
+          "lineNumber": 16
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "console.log",
+          "lineNumber": 17
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "JSON.stringify",
+          "lineNumber": 17
+        },
+        {
+          "caller": "registerValidateCommand",
+          "callee": "console.log",
+          "lineNumber": 18
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/config.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 107,
+      "nonEmptyLines": 95,
+      "functions": [
+        {
+          "name": "repoRootFrom",
+          "startLine": 43,
+          "endLine": 55,
+          "params": [
+            "startDir"
+          ]
+        },
+        {
+          "name": "loadConfig",
+          "startLine": 57,
+          "endLine": 71,
+          "params": [
+            "rootDir"
+          ]
+        },
+        {
+          "name": "resolveProjectRef",
+          "startLine": 73,
+          "endLine": 91,
+          "params": [
+            "rootDir",
+            "config",
+            "env"
+          ]
+        },
+        {
+          "name": "validateConfigConsistency",
+          "startLine": 93,
+          "endLine": 107,
+          "params": [
+            "config"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "repoRootFrom",
+          "line": 43,
+          "isDefault": false
+        },
+        {
+          "name": "loadConfig",
+          "line": 57,
+          "isDefault": false
+        },
+        {
+          "name": "resolveProjectRef",
+          "line": 73,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "repoRootFrom",
+          "callee": "process.cwd",
+          "lineNumber": 43
+        },
+        {
+          "caller": "repoRootFrom",
+          "callee": "path.resolve",
+          "lineNumber": 44
+        },
+        {
+          "caller": "repoRootFrom",
+          "callee": "path.dirname",
+          "lineNumber": 45
+        },
+        {
+          "caller": "repoRootFrom",
+          "callee": "existsSync",
+          "lineNumber": 47
+        },
+        {
+          "caller": "repoRootFrom",
+          "callee": "path.join",
+          "lineNumber": 47
+        },
+        {
+          "caller": "repoRootFrom",
+          "callee": "existsSync",
+          "lineNumber": 48
+        },
+        {
+          "caller": "repoRootFrom",
+          "callee": "path.join",
+          "lineNumber": 48
+        },
+        {
+          "caller": "repoRootFrom",
+          "callee": "path.dirname",
+          "lineNumber": 52
+        },
+        {
+          "caller": "loadConfig",
+          "callee": "path.join",
+          "lineNumber": 58
+        },
+        {
+          "caller": "loadConfig",
+          "callee": "existsSync",
+          "lineNumber": 59
+        },
+        {
+          "caller": "loadConfig",
+          "callee": "JSON.parse",
+          "lineNumber": 63
+        },
+        {
+          "caller": "loadConfig",
+          "callee": "readFileSync",
+          "lineNumber": 63
+        },
+        {
+          "caller": "loadConfig",
+          "callee": "deployConfigSchema.safeParse",
+          "lineNumber": 64
+        },
+        {
+          "caller": "loadConfig",
+          "callee": "z.prettifyError",
+          "lineNumber": 66
+        },
+        {
+          "caller": "loadConfig",
+          "callee": "validateConfigConsistency",
+          "lineNumber": 69
+        },
+        {
+          "caller": "resolveProjectRef",
+          "callee": "fromEnv.trim",
+          "lineNumber": 80
+        },
+        {
+          "caller": "resolveProjectRef",
+          "callee": "fromEnv.trim",
+          "lineNumber": 81
+        },
+        {
+          "caller": "resolveProjectRef",
+          "callee": "path.join",
+          "lineNumber": 84
+        },
+        {
+          "caller": "resolveProjectRef",
+          "callee": "existsSync",
+          "lineNumber": 85
+        },
+        {
+          "caller": "resolveProjectRef",
+          "callee": "readFileSync(refPath, \"utf8\").trim",
+          "lineNumber": 86
+        },
+        {
+          "caller": "resolveProjectRef",
+          "callee": "readFileSync",
+          "lineNumber": 86
+        },
+        {
+          "caller": "validateConfigConsistency",
+          "callee": "functionNames.has",
+          "lineNumber": 96
+        },
+        {
+          "caller": "validateConfigConsistency",
+          "callee": "config.railway.services.map",
+          "lineNumber": 101
+        },
+        {
+          "caller": "validateConfigConsistency",
+          "callee": "services.has",
+          "lineNumber": 103
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 3,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/errors.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 60,
+      "nonEmptyLines": 51,
+      "functions": [
+        {
+          "name": "exitCodeFor",
+          "startLine": 48,
+          "endLine": 53,
+          "params": [
+            "error"
+          ]
+        },
+        {
+          "name": "messageFor",
+          "startLine": 55,
+          "endLine": 60,
+          "params": [
+            "error"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "CliError",
+          "startLine": 3,
+          "endLine": 11,
+          "methods": [
+            "constructor"
+          ],
+          "properties": [
+            "exitCode"
+          ]
+        },
+        {
+          "name": "ValidationError",
+          "startLine": 13,
+          "endLine": 18,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        },
+        {
+          "name": "DeployFailureError",
+          "startLine": 20,
+          "endLine": 25,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        },
+        {
+          "name": "AuthError",
+          "startLine": 27,
+          "endLine": 32,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        },
+        {
+          "name": "CancelledError",
+          "startLine": 34,
+          "endLine": 39,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        },
+        {
+          "name": "SmokeError",
+          "startLine": 41,
+          "endLine": 46,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "CliError",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "ValidationError",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "DeployFailureError",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "AuthError",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "CancelledError",
+          "line": 34,
+          "isDefault": false
+        },
+        {
+          "name": "SmokeError",
+          "line": 41,
+          "isDefault": false
+        },
+        {
+          "name": "exitCodeFor",
+          "line": 48,
+          "isDefault": false
+        },
+        {
+          "name": "messageFor",
+          "line": 55,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 7
+        },
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 15
+        },
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 22
+        },
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 29
+        },
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 36
+        },
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 43
+        },
+        {
+          "caller": "messageFor",
+          "callee": "String",
+          "lineNumber": 59
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 8,
+        "functionCount": 2,
+        "classCount": 6
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/exec.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 80,
+      "nonEmptyLines": 73,
+      "functions": [
+        {
+          "name": "requireExecutable",
+          "startLine": 68,
+          "endLine": 73,
+          "params": [
+            "runner",
+            "executable"
+          ]
+        },
+        {
+          "name": "requireRailwayAuth",
+          "startLine": 75,
+          "endLine": 80,
+          "params": [
+            "runner"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ExecaProcessRunner",
+          "startLine": 6,
+          "endLine": 66,
+          "methods": [
+            "constructor",
+            "run"
+          ],
+          "properties": [
+            "records",
+            "rootDir",
+            "dryRun",
+            "cancelSignal",
+            "streamOutput"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "ExecaProcessRunner",
+          "line": 6,
+          "isDefault": false
+        },
+        {
+          "name": "requireExecutable",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "requireRailwayAuth",
+          "line": 75,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "run",
+          "callee": "this.records.push",
+          "lineNumber": 27
+        },
+        {
+          "caller": "run",
+          "callee": "execa",
+          "lineNumber": 36
+        },
+        {
+          "caller": "run",
+          "callee": "redact",
+          "lineNumber": 48
+        },
+        {
+          "caller": "run",
+          "callee": "redact",
+          "lineNumber": 49
+        },
+        {
+          "caller": "run",
+          "callee": "args.join",
+          "lineNumber": 53
+        },
+        {
+          "caller": "requireExecutable",
+          "callee": "runner.run",
+          "lineNumber": 69
+        },
+        {
+          "caller": "requireRailwayAuth",
+          "callee": "runner.run",
+          "lineNumber": 76
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/logger.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 40,
+      "nonEmptyLines": 37,
+      "functions": [
+        {
+          "name": "createLogger",
+          "startLine": 13,
+          "endLine": 40,
+          "params": [
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "createLogger",
+          "line": 13,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "createLogger",
+          "callee": "pino",
+          "lineNumber": 20
+        },
+        {
+          "caller": "createLogger",
+          "callee": "logger.info",
+          "lineNumber": 22
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 22
+        },
+        {
+          "caller": "createLogger",
+          "callee": "logger.warn",
+          "lineNumber": 23
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 23
+        },
+        {
+          "caller": "createLogger",
+          "callee": "logger.error",
+          "lineNumber": 24
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 24
+        },
+        {
+          "caller": "createLogger",
+          "callee": "logger.debug",
+          "lineNumber": 25
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 25
+        },
+        {
+          "caller": "createLogger",
+          "callee": "logger.info",
+          "lineNumber": 26
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 26
+        },
+        {
+          "caller": "createLogger",
+          "callee": "console.log",
+          "lineNumber": 32
+        },
+        {
+          "caller": "createLogger",
+          "callee": "colorize.cyan",
+          "lineNumber": 32
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 32
+        },
+        {
+          "caller": "createLogger",
+          "callee": "console.warn",
+          "lineNumber": 33
+        },
+        {
+          "caller": "createLogger",
+          "callee": "colorize.yellow",
+          "lineNumber": 33
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 33
+        },
+        {
+          "caller": "createLogger",
+          "callee": "console.error",
+          "lineNumber": 34
+        },
+        {
+          "caller": "createLogger",
+          "callee": "colorize.red",
+          "lineNumber": 34
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 34
+        },
+        {
+          "caller": "createLogger",
+          "callee": "console.log",
+          "lineNumber": 36
+        },
+        {
+          "caller": "createLogger",
+          "callee": "colorize.gray",
+          "lineNumber": 36
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 36
+        },
+        {
+          "caller": "createLogger",
+          "callee": "console.log",
+          "lineNumber": 38
+        },
+        {
+          "caller": "createLogger",
+          "callee": "colorize.green",
+          "lineNumber": 38
+        },
+        {
+          "caller": "createLogger",
+          "callee": "redact",
+          "lineNumber": 38
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/redaction.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 32,
+      "nonEmptyLines": 30,
+      "functions": [
+        {
+          "name": "redact",
+          "startLine": 8,
+          "endLine": 14,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "redactObject",
+          "startLine": 16,
+          "endLine": 32,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "redact",
+          "line": 8,
+          "isDefault": false
+        },
+        {
+          "name": "redactObject",
+          "line": 16,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "redact",
+          "callee": "value\n    .replace(bearerPattern, \"Bearer [REDACTED]\")\n    .replace(assignmentPattern, \"$1=[REDACTED]\")\n    .replace(supabaseSecretPattern, \"[REDACTED_SUPABASE_SECRET]\")\n    .replace",
+          "lineNumber": 9
+        },
+        {
+          "caller": "redact",
+          "callee": "value\n    .replace(bearerPattern, \"Bearer [REDACTED]\")\n    .replace(assignmentPattern, \"$1=[REDACTED]\")\n    .replace",
+          "lineNumber": 9
+        },
+        {
+          "caller": "redact",
+          "callee": "value\n    .replace(bearerPattern, \"Bearer [REDACTED]\")\n    .replace",
+          "lineNumber": 9
+        },
+        {
+          "caller": "redact",
+          "callee": "value\n    .replace",
+          "lineNumber": 9
+        },
+        {
+          "caller": "redactObject",
+          "callee": "redact",
+          "lineNumber": 18
+        },
+        {
+          "caller": "redactObject",
+          "callee": "Array.isArray",
+          "lineNumber": 20
+        },
+        {
+          "caller": "redactObject",
+          "callee": "value.map",
+          "lineNumber": 21
+        },
+        {
+          "caller": "redactObject",
+          "callee": "redactObject",
+          "lineNumber": 21
+        },
+        {
+          "caller": "redactObject",
+          "callee": "Object.fromEntries",
+          "lineNumber": 24
+        },
+        {
+          "caller": "redactObject",
+          "callee": "Object.entries(value).map",
+          "lineNumber": 25
+        },
+        {
+          "caller": "redactObject",
+          "callee": "Object.entries",
+          "lineNumber": 25
+        },
+        {
+          "caller": "redactObject",
+          "callee": "secretNamePattern.test",
+          "lineNumber": 27
+        },
+        {
+          "caller": "redactObject",
+          "callee": "redactObject",
+          "lineNumber": 27
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/result.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 25,
+      "nonEmptyLines": 23,
+      "functions": [
+        {
+          "name": "createTargetResult",
+          "startLine": 3,
+          "endLine": 12,
+          "params": [
+            "targetId",
+            "startedAt"
+          ]
+        },
+        {
+          "name": "finishTarget",
+          "startLine": 14,
+          "endLine": 25,
+          "params": [
+            "result",
+            "status",
+            "fields"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "createTargetResult",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "finishTarget",
+          "line": 14,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "createTargetResult",
+          "callee": "new Date().toISOString",
+          "lineNumber": 4
+        },
+        {
+          "caller": "createTargetResult",
+          "callee": "startedAt.toISOString",
+          "lineNumber": 8
+        },
+        {
+          "caller": "finishTarget",
+          "callee": "new Date().toISOString",
+          "lineNumber": 23
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/run-artifacts.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 26,
+      "nonEmptyLines": 23,
+      "functions": [
+        {
+          "name": "createRunId",
+          "startLine": 6,
+          "endLine": 13,
+          "params": [
+            "date"
+          ]
+        },
+        {
+          "name": "writeRunArtifact",
+          "startLine": 15,
+          "endLine": 21,
+          "params": [
+            "rootDir",
+            "result"
+          ]
+        },
+        {
+          "name": "readRunArtifact",
+          "startLine": 23,
+          "endLine": 26,
+          "params": [
+            "rootDir",
+            "runId"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "createRunId",
+          "line": 6,
+          "isDefault": false
+        },
+        {
+          "name": "writeRunArtifact",
+          "line": 15,
+          "isDefault": false
+        },
+        {
+          "name": "readRunArtifact",
+          "line": 23,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "createRunId",
+          "callee": "date\n    .toISOString()\n    .replace(/[-:]/g, \"\")\n    .replace",
+          "lineNumber": 7
+        },
+        {
+          "caller": "createRunId",
+          "callee": "date\n    .toISOString()\n    .replace",
+          "lineNumber": 7
+        },
+        {
+          "caller": "createRunId",
+          "callee": "date\n    .toISOString",
+          "lineNumber": 7
+        },
+        {
+          "caller": "createRunId",
+          "callee": "Math.random().toString(36).slice",
+          "lineNumber": 11
+        },
+        {
+          "caller": "createRunId",
+          "callee": "Math.random().toString",
+          "lineNumber": 11
+        },
+        {
+          "caller": "createRunId",
+          "callee": "Math.random",
+          "lineNumber": 11
+        },
+        {
+          "caller": "writeRunArtifact",
+          "callee": "path.join",
+          "lineNumber": 16
+        },
+        {
+          "caller": "writeRunArtifact",
+          "callee": "mkdirSync",
+          "lineNumber": 17
+        },
+        {
+          "caller": "writeRunArtifact",
+          "callee": "path.join",
+          "lineNumber": 18
+        },
+        {
+          "caller": "writeRunArtifact",
+          "callee": "writeFileSync",
+          "lineNumber": 19
+        },
+        {
+          "caller": "writeRunArtifact",
+          "callee": "JSON.stringify",
+          "lineNumber": 19
+        },
+        {
+          "caller": "writeRunArtifact",
+          "callee": "redactObject",
+          "lineNumber": 19
+        },
+        {
+          "caller": "readRunArtifact",
+          "callee": "path.join",
+          "lineNumber": 24
+        },
+        {
+          "caller": "readRunArtifact",
+          "callee": "JSON.parse",
+          "lineNumber": 25
+        },
+        {
+          "caller": "readRunArtifact",
+          "callee": "readFileSync",
+          "lineNumber": 25
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/signals.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 9,
+      "nonEmptyLines": 8,
+      "functions": [
+        {
+          "name": "createAbortController",
+          "startLine": 3,
+          "endLine": 9,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "createAbortController",
+          "line": 3,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "abort",
+          "callee": "controller.abort",
+          "lineNumber": 5
+        },
+        {
+          "caller": "createAbortController",
+          "callee": "process.once",
+          "lineNumber": 6
+        },
+        {
+          "caller": "createAbortController",
+          "callee": "process.once",
+          "lineNumber": 7
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/target-graph.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 113,
+      "nonEmptyLines": 104,
+      "functions": [
+        {
+          "name": "allTargets",
+          "startLine": 4,
+          "endLine": 31,
+          "params": [
+            "config"
+          ]
+        },
+        {
+          "name": "resolveTargets",
+          "startLine": 33,
+          "endLine": 55,
+          "params": [
+            "config",
+            "requested",
+            "all"
+          ]
+        },
+        {
+          "name": "expandTarget",
+          "startLine": 57,
+          "endLine": 85,
+          "params": [
+            "config",
+            "target"
+          ]
+        },
+        {
+          "name": "normalizeTargetId",
+          "startLine": 87,
+          "endLine": 93,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "dedupeTargets",
+          "startLine": 95,
+          "endLine": 113,
+          "params": [
+            "targets"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "allTargets",
+          "line": 4,
+          "isDefault": false
+        },
+        {
+          "name": "resolveTargets",
+          "line": 33,
+          "isDefault": false
+        },
+        {
+          "name": "expandTarget",
+          "line": 57,
+          "isDefault": false
+        },
+        {
+          "name": "normalizeTargetId",
+          "line": 87,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "allTargets",
+          "callee": "config.supabase.functions.map",
+          "lineNumber": 12
+        },
+        {
+          "caller": "allTargets",
+          "callee": "config.railway.services.map",
+          "lineNumber": 24
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "allTargets(config).map",
+          "lineNumber": 38
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "allTargets",
+          "lineNumber": 38
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "byId.get",
+          "lineNumber": 40
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "byId.get",
+          "lineNumber": 40
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "byId.get",
+          "lineNumber": 40
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "requested.map",
+          "lineNumber": 41
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "byId.get",
+          "lineNumber": 41
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "normalizeTargetId",
+          "lineNumber": 41
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "requested.map(normalizeTargetId).filter",
+          "lineNumber": 43
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "requested.map",
+          "lineNumber": 43
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "byId.has",
+          "lineNumber": 43
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "missing.join",
+          "lineNumber": 45
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "dedupeTargets",
+          "lineNumber": 48
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "selected.filter",
+          "lineNumber": 49
+        },
+        {
+          "caller": "resolveTargets",
+          "callee": "Boolean",
+          "lineNumber": 49
+        },
+        {
+          "caller": "expandTarget",
+          "callee": "config.supabase.functions.map",
+          "lineNumber": 59
+        },
+        {
+          "caller": "expandTarget",
+          "callee": "config.railway.allOrder.map",
+          "lineNumber": 67
+        },
+        {
+          "caller": "expandTarget",
+          "callee": "config.railway.allOrder\n      .filter((name) => name !== \"web\")\n      .map",
+          "lineNumber": 75
+        },
+        {
+          "caller": "expandTarget",
+          "callee": "config.railway.allOrder\n      .filter",
+          "lineNumber": 75
+        },
+        {
+          "caller": "normalizeTargetId",
+          "callee": "input.trim",
+          "lineNumber": 88
+        },
+        {
+          "caller": "normalizeTargetId",
+          "callee": "value.startsWith",
+          "lineNumber": 89
+        },
+        {
+          "caller": "normalizeTargetId",
+          "callee": "value.startsWith",
+          "lineNumber": 89
+        },
+        {
+          "caller": "dedupeTargets",
+          "callee": "targets.some",
+          "lineNumber": 96
+        },
+        {
+          "caller": "dedupeTargets",
+          "callee": "targets.some",
+          "lineNumber": 97
+        },
+        {
+          "caller": "dedupeTargets",
+          "callee": "targets.some",
+          "lineNumber": 98
+        },
+        {
+          "caller": "dedupeTargets",
+          "callee": "seen.has",
+          "lineNumber": 107
+        },
+        {
+          "caller": "dedupeTargets",
+          "callee": "seen.add",
+          "lineNumber": 108
+        },
+        {
+          "caller": "dedupeTargets",
+          "callee": "output.push",
+          "lineNumber": 109
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 4,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/core/types.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 130,
+      "nonEmptyLines": 113,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/providers/railway.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 208,
+      "nonEmptyLines": 187,
+      "functions": [
+        {
+          "name": "parseRailwayStatus",
+          "startLine": 175,
+          "endLine": 190,
+          "params": [
+            "raw"
+          ]
+        },
+        {
+          "name": "findStatus",
+          "startLine": 192,
+          "endLine": 201,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "extractServiceNames",
+          "startLine": 203,
+          "endLine": 208,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "RailwayProvider",
+          "startLine": 17,
+          "endLine": 173,
+          "methods": [
+            "constructor",
+            "preflight",
+            "applyConfig",
+            "serviceConfig",
+            "serviceExists",
+            "deployService",
+            "status",
+            "pollStatus",
+            "validateServiceDirectory",
+            "bootstrapCreatedService"
+          ],
+          "properties": [
+            "rootDir",
+            "config",
+            "runner"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "RailwayProvider",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "parseRailwayStatus",
+          "line": 175,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "preflight",
+          "callee": "requireExecutable",
+          "lineNumber": 29
+        },
+        {
+          "caller": "preflight",
+          "callee": "requireRailwayAuth",
+          "lineNumber": 30
+        },
+        {
+          "caller": "applyConfig",
+          "callee": "this.runner.run",
+          "lineNumber": 34
+        },
+        {
+          "caller": "serviceConfig",
+          "callee": "this.config.railway.services.find",
+          "lineNumber": 38
+        },
+        {
+          "caller": "serviceExists",
+          "callee": "this.runner.run",
+          "lineNumber": 46
+        },
+        {
+          "caller": "serviceExists",
+          "callee": "result.stdout.trim",
+          "lineNumber": 49
+        },
+        {
+          "caller": "serviceExists",
+          "callee": "JSON.parse",
+          "lineNumber": 52
+        },
+        {
+          "caller": "serviceExists",
+          "callee": "extractServiceNames(parsed).includes",
+          "lineNumber": 53
+        },
+        {
+          "caller": "serviceExists",
+          "callee": "extractServiceNames",
+          "lineNumber": 53
+        },
+        {
+          "caller": "deployService",
+          "callee": "this.serviceConfig",
+          "lineNumber": 60
+        },
+        {
+          "caller": "deployService",
+          "callee": "this.validateServiceDirectory",
+          "lineNumber": 61
+        },
+        {
+          "caller": "deployService",
+          "callee": "this.serviceExists",
+          "lineNumber": 63
+        },
+        {
+          "caller": "deployService",
+          "callee": "this.runner.run",
+          "lineNumber": 69
+        },
+        {
+          "caller": "deployService",
+          "callee": "this.bootstrapCreatedService",
+          "lineNumber": 70
+        },
+        {
+          "caller": "deployService",
+          "callee": "this.runner.run",
+          "lineNumber": 73
+        },
+        {
+          "caller": "deployService",
+          "callee": "this.pollStatus",
+          "lineNumber": 75
+        },
+        {
+          "caller": "status",
+          "callee": "this.runner.run",
+          "lineNumber": 84
+        },
+        {
+          "caller": "status",
+          "callee": "result.stdout.trim",
+          "lineNumber": 92
+        },
+        {
+          "caller": "status",
+          "callee": "parseRailwayStatus",
+          "lineNumber": 95
+        },
+        {
+          "caller": "pollStatus",
+          "callee": "this.status",
+          "lineNumber": 103
+        },
+        {
+          "caller": "pollStatus",
+          "callee": "setTimeout",
+          "lineNumber": 109
+        },
+        {
+          "caller": "pollStatus",
+          "callee": "this.status",
+          "lineNumber": 113
+        },
+        {
+          "caller": "validateServiceDirectory",
+          "callee": "existsSync",
+          "lineNumber": 120
+        },
+        {
+          "caller": "validateServiceDirectory",
+          "callee": "path.join",
+          "lineNumber": 120
+        },
+        {
+          "caller": "bootstrapCreatedService",
+          "callee": "this.runner.run",
+          "lineNumber": 130
+        },
+        {
+          "caller": "bootstrapCreatedService",
+          "callee": "result.stdout.trim",
+          "lineNumber": 137
+        },
+        {
+          "caller": "bootstrapCreatedService",
+          "callee": "JSON.parse",
+          "lineNumber": 140
+        },
+        {
+          "caller": "bootstrapCreatedService",
+          "callee": "this.runner.run",
+          "lineNumber": 144
+        },
+        {
+          "caller": "bootstrapCreatedService",
+          "callee": "sourceUrl.replace",
+          "lineNumber": 158
+        },
+        {
+          "caller": "bootstrapCreatedService",
+          "callee": "this.runner.run",
+          "lineNumber": 162
+        },
+        {
+          "caller": "parseRailwayStatus",
+          "callee": "JSON.parse",
+          "lineNumber": 176
+        },
+        {
+          "caller": "parseRailwayStatus",
+          "callee": "findStatus",
+          "lineNumber": 177
+        },
+        {
+          "caller": "findStatus",
+          "callee": "findStatus",
+          "lineNumber": 195
+        },
+        {
+          "caller": "findStatus",
+          "callee": "findStatus",
+          "lineNumber": 196
+        },
+        {
+          "caller": "findStatus",
+          "callee": "Array.isArray",
+          "lineNumber": 197
+        },
+        {
+          "caller": "findStatus",
+          "callee": "findStatus",
+          "lineNumber": 198
+        },
+        {
+          "caller": "extractServiceNames",
+          "callee": "Array.isArray",
+          "lineNumber": 204
+        },
+        {
+          "caller": "extractServiceNames",
+          "callee": "value\n    .map((item) => (typeof item === \"object\" && item && \"name\" in item ? String(item.name) : \"\"))\n    .filter",
+          "lineNumber": 205
+        },
+        {
+          "caller": "extractServiceNames",
+          "callee": "value\n    .map",
+          "lineNumber": 205
+        },
+        {
+          "caller": "extractServiceNames",
+          "callee": "String",
+          "lineNumber": 206
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 2,
+        "functionCount": 3,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/providers/supabase.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 126,
+      "nonEmptyLines": 114,
+      "classes": [
+        {
+          "name": "SupabaseProvider",
+          "startLine": 8,
+          "endLine": 126,
+          "methods": [
+            "constructor",
+            "preflight",
+            "resolveProjectRef",
+            "discoverFunctions",
+            "validateFunctionDrift",
+            "deployMigrations",
+            "deployFunction",
+            "listRemoteFunctions",
+            "functionDeployArgs",
+            "assertKnownFunction",
+            "supabaseCommand"
+          ],
+          "properties": [
+            "rootDir",
+            "config",
+            "runner"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SupabaseProvider",
+          "line": 8,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "preflight",
+          "callee": "requireExecutable",
+          "lineNumber": 20
+        },
+        {
+          "caller": "preflight",
+          "callee": "this.supabaseCommand",
+          "lineNumber": 20
+        },
+        {
+          "caller": "resolveProjectRef",
+          "callee": "resolveProjectRef",
+          "lineNumber": 24
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "path.join",
+          "lineNumber": 34
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "readdirSync(functionsDir, { withFileTypes: true })\n      .filter((entry) => entry.isDirectory())\n      .map((entry) => entry.name)\n      .filter((name) => name !== \"_shared\" && name !== \"node_modules\")\n      .filter((name) => existsSync(path.join(functionsDir, name, \"index.ts\")))\n      .sort",
+          "lineNumber": 35
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "readdirSync(functionsDir, { withFileTypes: true })\n      .filter((entry) => entry.isDirectory())\n      .map((entry) => entry.name)\n      .filter((name) => name !== \"_shared\" && name !== \"node_modules\")\n      .filter",
+          "lineNumber": 35
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "readdirSync(functionsDir, { withFileTypes: true })\n      .filter((entry) => entry.isDirectory())\n      .map((entry) => entry.name)\n      .filter",
+          "lineNumber": 35
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "readdirSync(functionsDir, { withFileTypes: true })\n      .filter((entry) => entry.isDirectory())\n      .map",
+          "lineNumber": 35
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "readdirSync(functionsDir, { withFileTypes: true })\n      .filter",
+          "lineNumber": 35
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "readdirSync",
+          "lineNumber": 35
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "entry.isDirectory",
+          "lineNumber": 36
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "existsSync",
+          "lineNumber": 39
+        },
+        {
+          "caller": "discoverFunctions",
+          "callee": "path.join",
+          "lineNumber": 39
+        },
+        {
+          "caller": "validateFunctionDrift",
+          "callee": "this.discoverFunctions",
+          "lineNumber": 44
+        },
+        {
+          "caller": "validateFunctionDrift",
+          "callee": "[...this.config.supabase.functions].sort",
+          "lineNumber": 45
+        },
+        {
+          "caller": "validateFunctionDrift",
+          "callee": "discovered.join",
+          "lineNumber": 46
+        },
+        {
+          "caller": "validateFunctionDrift",
+          "callee": "expected.join",
+          "lineNumber": 46
+        },
+        {
+          "caller": "validateFunctionDrift",
+          "callee": "expected.join",
+          "lineNumber": 48
+        },
+        {
+          "caller": "validateFunctionDrift",
+          "callee": "discovered.join",
+          "lineNumber": 48
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.runner.run",
+          "lineNumber": 54
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.supabaseCommand",
+          "lineNumber": 54
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.runner.run",
+          "lineNumber": 57
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.supabaseCommand",
+          "lineNumber": 57
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.runner.run",
+          "lineNumber": 60
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.supabaseCommand",
+          "lineNumber": 61
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.runner.run",
+          "lineNumber": 67
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "this.supabaseCommand",
+          "lineNumber": 68
+        },
+        {
+          "caller": "deployMigrations",
+          "callee": "/(^|\\s)ERROR:|Try rerunning the command/.test",
+          "lineNumber": 76
+        },
+        {
+          "caller": "deployFunction",
+          "callee": "this.assertKnownFunction",
+          "lineNumber": 83
+        },
+        {
+          "caller": "deployFunction",
+          "callee": "this.resolveProjectRef",
+          "lineNumber": 84
+        },
+        {
+          "caller": "deployFunction",
+          "callee": "this.config.supabase.noVerifyJwtFunctions.includes",
+          "lineNumber": 86
+        },
+        {
+          "caller": "deployFunction",
+          "callee": "args.push",
+          "lineNumber": 87
+        },
+        {
+          "caller": "deployFunction",
+          "callee": "this.runner.run",
+          "lineNumber": 89
+        },
+        {
+          "caller": "deployFunction",
+          "callee": "this.supabaseCommand",
+          "lineNumber": 89
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "this.runner.run",
+          "lineNumber": 93
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "this.supabaseCommand",
+          "lineNumber": 93
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "result.stdout.trim",
+          "lineNumber": 96
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "JSON.parse",
+          "lineNumber": 99
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "Array.isArray",
+          "lineNumber": 100
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "parsed\n      .map((item) => (typeof item === \"object\" && item && \"name\" in item ? String(item.name) : \"\"))\n      .filter(Boolean)\n      .sort",
+          "lineNumber": 103
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "parsed\n      .map((item) => (typeof item === \"object\" && item && \"name\" in item ? String(item.name) : \"\"))\n      .filter",
+          "lineNumber": 103
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "parsed\n      .map",
+          "lineNumber": 103
+        },
+        {
+          "caller": "listRemoteFunctions",
+          "callee": "String",
+          "lineNumber": 104
+        },
+        {
+          "caller": "functionDeployArgs",
+          "callee": "this.resolveProjectRef",
+          "lineNumber": 110
+        },
+        {
+          "caller": "functionDeployArgs",
+          "callee": "this.config.supabase.noVerifyJwtFunctions.includes",
+          "lineNumber": 111
+        },
+        {
+          "caller": "functionDeployArgs",
+          "callee": "args.push",
+          "lineNumber": 112
+        },
+        {
+          "caller": "assertKnownFunction",
+          "callee": "this.config.supabase.functions.includes",
+          "lineNumber": 118
+        },
+        {
+          "caller": "supabaseCommand",
+          "callee": "path.join",
+          "lineNumber": 124
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/ui/interactive.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 19,
+      "nonEmptyLines": 18,
+      "functions": [
+        {
+          "name": "pickTargets",
+          "startLine": 5,
+          "endLine": 19,
+          "params": [
+            "config"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "pickTargets",
+          "line": 5,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "pickTargets",
+          "callee": "allTargets(config).filter",
+          "lineNumber": 6
+        },
+        {
+          "caller": "pickTargets",
+          "callee": "allTargets",
+          "lineNumber": 6
+        },
+        {
+          "caller": "pickTargets",
+          "callee": "[\"supabase:migrations\", \"supabase:functions:all\", \"railway:all\", \"railway:service\"].includes",
+          "lineNumber": 7
+        },
+        {
+          "caller": "pickTargets",
+          "callee": "checkbox",
+          "lineNumber": 11
+        },
+        {
+          "caller": "pickTargets",
+          "callee": "targets.map",
+          "lineNumber": 13
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/ui/output.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 34,
+      "nonEmptyLines": 30,
+      "functions": [
+        {
+          "name": "printTargets",
+          "startLine": 3,
+          "endLine": 11,
+          "params": [
+            "targets",
+            "json"
+          ]
+        },
+        {
+          "name": "printDeployResult",
+          "startLine": 13,
+          "endLine": 28,
+          "params": [
+            "result",
+            "json"
+          ]
+        },
+        {
+          "name": "printSmoke",
+          "startLine": 30,
+          "endLine": 34,
+          "params": [
+            "smoke"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "printTargets",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "printDeployResult",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "printSmoke",
+          "line": 30,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "printTargets",
+          "callee": "console.log",
+          "lineNumber": 5
+        },
+        {
+          "caller": "printTargets",
+          "callee": "JSON.stringify",
+          "lineNumber": 5
+        },
+        {
+          "caller": "printTargets",
+          "callee": "console.log",
+          "lineNumber": 9
+        },
+        {
+          "caller": "printDeployResult",
+          "callee": "console.log",
+          "lineNumber": 15
+        },
+        {
+          "caller": "printDeployResult",
+          "callee": "JSON.stringify",
+          "lineNumber": 15
+        },
+        {
+          "caller": "printDeployResult",
+          "callee": "console.log",
+          "lineNumber": 19
+        },
+        {
+          "caller": "printDeployResult",
+          "callee": "console.log",
+          "lineNumber": 21
+        },
+        {
+          "caller": "printDeployResult",
+          "callee": "console.log",
+          "lineNumber": 24
+        },
+        {
+          "caller": "printDeployResult",
+          "callee": "console.log",
+          "lineNumber": 25
+        },
+        {
+          "caller": "printDeployResult",
+          "callee": "printSmoke",
+          "lineNumber": 27
+        },
+        {
+          "caller": "printSmoke",
+          "callee": "console.log",
+          "lineNumber": 32
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/ui/progress.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 7,
+      "nonEmptyLines": 6,
+      "functions": [
+        {
+          "name": "createSpinner",
+          "startLine": 3,
+          "endLine": 7,
+          "params": [
+            "message",
+            "enabled"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "createSpinner",
+          "line": 3,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "createSpinner",
+          "callee": "ora(message).start",
+          "lineNumber": 6
+        },
+        {
+          "caller": "createSpinner",
+          "callee": "ora",
+          "lineNumber": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 330,
+      "nonEmptyLines": 306,
+      "functions": [
+        {
+          "name": "runDeploy",
+          "startLine": 22,
+          "endLine": 181,
+          "params": [
+            "rootDir",
+            "config",
+            "options"
+          ]
+        },
+        {
+          "name": "deployStage",
+          "startLine": 183,
+          "endLine": 242,
+          "params": [
+            "label",
+            "targets",
+            "concurrency",
+            "rootDir",
+            "config",
+            "options",
+            "signal",
+            "results",
+            "logger"
+          ]
+        },
+        {
+          "name": "indexedTargets",
+          "startLine": 246,
+          "endLine": 250,
+          "params": [
+            "targets",
+            "kind"
+          ]
+        },
+        {
+          "name": "hasSelectedBootstrapDependency",
+          "startLine": 252,
+          "endLine": 261,
+          "params": [
+            "target",
+            "selected",
+            "config"
+          ]
+        },
+        {
+          "name": "mapLimit",
+          "startLine": 263,
+          "endLine": 277,
+          "params": [
+            "items",
+            "concurrency",
+            "worker"
+          ]
+        },
+        {
+          "name": "compactResults",
+          "startLine": 279,
+          "endLine": 281,
+          "params": [
+            "results"
+          ]
+        },
+        {
+          "name": "deployTarget",
+          "startLine": 283,
+          "endLine": 310,
+          "params": [
+            "target",
+            "options",
+            "supabase",
+            "railway"
+          ]
+        },
+        {
+          "name": "baseResult",
+          "startLine": 312,
+          "endLine": 321,
+          "params": [
+            "targetId"
+          ]
+        },
+        {
+          "name": "writeAndReturn",
+          "startLine": 323,
+          "endLine": 326,
+          "params": [
+            "rootDir",
+            "result"
+          ]
+        },
+        {
+          "name": "useSpinner",
+          "startLine": 328,
+          "endLine": 330,
+          "params": [
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "runDeploy",
+          "line": 22,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "runDeploy",
+          "callee": "createLogger",
+          "lineNumber": 27
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "createRunId",
+          "lineNumber": 29
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "createAbortController",
+          "lineNumber": 30
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "resolveTargets",
+          "lineNumber": 39
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "selected.flatMap",
+          "lineNumber": 40
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "expandTarget",
+          "lineNumber": 40
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "expanded.map",
+          "lineNumber": 44
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "finishTarget",
+          "lineNumber": 45
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "baseResult",
+          "lineNumber": 45
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "rollbackGuidance",
+          "lineNumber": 45
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "writeAndReturn",
+          "lineNumber": 47
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "startedAt.toISOString",
+          "lineNumber": 51
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "new Date().toISOString",
+          "lineNumber": 52
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "expanded.some",
+          "lineNumber": 58
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "target.kind.startsWith",
+          "lineNumber": 58
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "createSpinner",
+          "lineNumber": 59
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "useSpinner",
+          "lineNumber": 59
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "supabase.preflight",
+          "lineNumber": 61
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "supabase.validateFunctionDrift",
+          "lineNumber": 62
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "supabase.resolveProjectRef",
+          "lineNumber": 63
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "spinner?.succeed",
+          "lineNumber": 64
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "spinner?.fail",
+          "lineNumber": 66
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "expanded.some",
+          "lineNumber": 70
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "target.kind.startsWith",
+          "lineNumber": 70
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "createSpinner",
+          "lineNumber": 71
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "useSpinner",
+          "lineNumber": 71
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "railway.preflight",
+          "lineNumber": 73
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "spinner?.succeed",
+          "lineNumber": 74
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "spinner?.fail",
+          "lineNumber": 76
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "expanded.some",
+          "lineNumber": 81
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "target.kind.startsWith",
+          "lineNumber": 81
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "createSpinner",
+          "lineNumber": 82
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "useSpinner",
+          "lineNumber": 82
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "railway.applyConfig",
+          "lineNumber": 84
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "spinner?.succeed",
+          "lineNumber": 85
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "spinner?.fail",
+          "lineNumber": 87
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "expanded.forEach",
+          "lineNumber": 92
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "baseResult",
+          "lineNumber": 93
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "deployStage",
+          "lineNumber": 96
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "indexedTargets",
+          "lineNumber": 98
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "deployStage",
+          "lineNumber": 107
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "indexedTargets",
+          "lineNumber": 109
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "indexedTargets",
+          "lineNumber": 118
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "railwayTargets.filter",
+          "lineNumber": 119
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "hasSelectedBootstrapDependency",
+          "lineNumber": 120
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "railwayTargets.filter",
+          "lineNumber": 122
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "hasSelectedBootstrapDependency",
+          "lineNumber": 123
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "deployStage",
+          "lineNumber": 126
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "deployStage",
+          "lineNumber": 137
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "runSmokeChecks",
+          "lineNumber": 152
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "runSmokeChecks(config, supabase).catch",
+          "lineNumber": 155
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "runSmokeChecks",
+          "lineNumber": 155
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "writeAndReturn",
+          "lineNumber": 162
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "startedAt.toISOString",
+          "lineNumber": 166
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "new Date().toISOString",
+          "lineNumber": 167
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "compactResults",
+          "lineNumber": 168
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "results.some",
+          "lineNumber": 172
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "results.filter",
+          "lineNumber": 174
+        },
+        {
+          "caller": "runDeploy",
+          "callee": "smoke.some",
+          "lineNumber": 177
+        },
+        {
+          "caller": "deployStage",
+          "callee": "createSpinner",
+          "lineNumber": 197
+        },
+        {
+          "caller": "deployStage",
+          "callee": "useSpinner",
+          "lineNumber": 199
+        },
+        {
+          "caller": "deployStage",
+          "callee": "mapLimit",
+          "lineNumber": 202
+        },
+        {
+          "caller": "deployStage",
+          "callee": "logger.info",
+          "lineNumber": 204
+        },
+        {
+          "caller": "deployStage",
+          "callee": "createSpinner",
+          "lineNumber": 206
+        },
+        {
+          "caller": "deployStage",
+          "callee": "useSpinner",
+          "lineNumber": 206
+        },
+        {
+          "caller": "deployStage",
+          "callee": "baseResult",
+          "lineNumber": 215
+        },
+        {
+          "caller": "deployStage",
+          "callee": "deployTarget",
+          "lineNumber": 218
+        },
+        {
+          "caller": "deployStage",
+          "callee": "targetSpinner?.succeed",
+          "lineNumber": 219
+        },
+        {
+          "caller": "deployStage",
+          "callee": "finishTarget",
+          "lineNumber": 220
+        },
+        {
+          "caller": "deployStage",
+          "callee": "rollbackGuidance",
+          "lineNumber": 222
+        },
+        {
+          "caller": "deployStage",
+          "callee": "logger.success",
+          "lineNumber": 224
+        },
+        {
+          "caller": "deployStage",
+          "callee": "targetSpinner?.fail",
+          "lineNumber": 226
+        },
+        {
+          "caller": "deployStage",
+          "callee": "finishTarget",
+          "lineNumber": 227
+        },
+        {
+          "caller": "deployStage",
+          "callee": "messageFor",
+          "lineNumber": 229
+        },
+        {
+          "caller": "deployStage",
+          "callee": "rollbackGuidance",
+          "lineNumber": 230
+        },
+        {
+          "caller": "deployStage",
+          "callee": "logger.warn",
+          "lineNumber": 232
+        },
+        {
+          "caller": "deployStage",
+          "callee": "messageFor",
+          "lineNumber": 232
+        },
+        {
+          "caller": "deployStage",
+          "callee": "targets.filter",
+          "lineNumber": 236
+        },
+        {
+          "caller": "deployStage",
+          "callee": "spinner?.fail",
+          "lineNumber": 238
+        },
+        {
+          "caller": "deployStage",
+          "callee": "spinner?.succeed",
+          "lineNumber": 240
+        },
+        {
+          "caller": "indexedTargets",
+          "callee": "targets\n    .map((target, index) => ({ target, index }))\n    .filter",
+          "lineNumber": 247
+        },
+        {
+          "caller": "indexedTargets",
+          "callee": "targets\n    .map",
+          "lineNumber": 247
+        },
+        {
+          "caller": "hasSelectedBootstrapDependency",
+          "callee": "config.railway.services.find",
+          "lineNumber": 258
+        },
+        {
+          "caller": "hasSelectedBootstrapDependency",
+          "callee": "selected.some",
+          "lineNumber": 260
+        },
+        {
+          "caller": "mapLimit",
+          "callee": "Array.from",
+          "lineNumber": 269
+        },
+        {
+          "caller": "mapLimit",
+          "callee": "Math.min",
+          "lineNumber": 269
+        },
+        {
+          "caller": "mapLimit",
+          "callee": "worker",
+          "lineNumber": 273
+        },
+        {
+          "caller": "mapLimit",
+          "callee": "Promise.all",
+          "lineNumber": 276
+        },
+        {
+          "caller": "compactResults",
+          "callee": "results.filter",
+          "lineNumber": 280
+        },
+        {
+          "caller": "compactResults",
+          "callee": "Boolean",
+          "lineNumber": 280
+        },
+        {
+          "caller": "deployTarget",
+          "callee": "supabase.deployMigrations",
+          "lineNumber": 291
+        },
+        {
+          "caller": "deployTarget",
+          "callee": "supabase.deployFunction",
+          "lineNumber": 295
+        },
+        {
+          "caller": "deployTarget",
+          "callee": "railway.deployService",
+          "lineNumber": 299
+        },
+        {
+          "caller": "baseResult",
+          "callee": "new Date().toISOString",
+          "lineNumber": 313
+        },
+        {
+          "caller": "writeAndReturn",
+          "callee": "writeRunArtifact",
+          "lineNumber": 324
+        }
+      ],
+      "metrics": {
+        "importCount": 13,
+        "exportCount": 1,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/workflows/rollback.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 30,
+      "nonEmptyLines": 25,
+      "functions": [
+        {
+          "name": "rollbackGuidance",
+          "startLine": 3,
+          "endLine": 26,
+          "params": [
+            "target"
+          ]
+        },
+        {
+          "name": "collectRollbackGuidance",
+          "startLine": 28,
+          "endLine": 30,
+          "params": [
+            "results"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "rollbackGuidance",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "collectRollbackGuidance",
+          "line": 28,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "collectRollbackGuidance",
+          "callee": "results.flatMap",
+          "lineNumber": 29
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/src/workflows/smoke-checks.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 83,
+      "nonEmptyLines": 78,
+      "functions": [
+        {
+          "name": "runSmokeChecks",
+          "startLine": 5,
+          "endLine": 83,
+          "params": [
+            "config",
+            "supabase"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "runSmokeChecks",
+          "line": 5,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "runSmokeChecks",
+          "callee": "supabase.discoverFunctions",
+          "lineNumber": 13
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "supabase.listRemoteFunctions",
+          "lineNumber": 14
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "filesystem.join",
+          "lineNumber": 15
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "remote.join",
+          "lineNumber": 15
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.push",
+          "lineNumber": 16
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "filesystem.join",
+          "lineNumber": 19
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "remote.join",
+          "lineNumber": 19
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.push",
+          "lineNumber": 22
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.push",
+          "lineNumber": 29
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "String",
+          "lineNumber": 32
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "fetch",
+          "lineNumber": 41
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "JSON.stringify",
+          "lineNumber": 48
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.push",
+          "lineNumber": 51
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.push",
+          "lineNumber": 57
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "response.text",
+          "lineNumber": 60
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.push",
+          "lineNumber": 64
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "String",
+          "lineNumber": 67
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.push",
+          "lineNumber": 71
+        },
+        {
+          "caller": "runSmokeChecks",
+          "callee": "results.some",
+          "lineNumber": 78
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tests/config.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 13,
+      "nonEmptyLines": 12,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tests/deploy-runner.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 32,
+      "nonEmptyLines": 31,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tests/errors.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 19,
+      "nonEmptyLines": 18,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tests/railway.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 59,
+      "nonEmptyLines": 51,
+      "classes": [
+        {
+          "name": "FakeRunner",
+          "startLine": 5,
+          "endLine": 12,
+          "methods": [
+            "run"
+          ],
+          "properties": [
+            "records"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "run",
+          "callee": "this.records.push",
+          "lineNumber": 9
+        },
+        {
+          "caller": "run",
+          "callee": "process.cwd",
+          "lineNumber": 9
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tests/smoke-checks.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 37,
+      "nonEmptyLines": 34,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tests/supabase.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 31,
+      "nonEmptyLines": 28,
+      "classes": [
+        {
+          "name": "FakeRunner",
+          "startLine": 6,
+          "endLine": 12,
+          "methods": [
+            "run"
+          ],
+          "properties": [
+            "records"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "run",
+          "callee": "this.records.push",
+          "lineNumber": 9
+        },
+        {
+          "caller": "run",
+          "callee": "repoRootFrom",
+          "lineNumber": 9
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "packages/deploy-cli/tests/target-graph.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 40,
+      "nonEmptyLines": 36,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/tests/admin_dashboard_stats.sql",
+      "type": "table",
+      "name": "admin_dashboard_stats.sql",
+      "filePath": "supabase/tests/admin_dashboard_stats.sql",
+      "summary": "pgTAP-style SQL test verifying that the public.admin_dashboard_stats() RPC is inaccessible to anon and non-admin roles, returns a non-null JSONB object for enabled admins, and includes required keys such as total_events, dead_letters, and generated_at.",
+      "tags": ["test", "security", "database", "api-schema", "documentation"],
+      "complexity": "moderate",
+      "languageNotes": "Uses SET LOCAL ROLE / RESET ROLE pattern to impersonate roles inside DO blocks, then asserts exceptions or result shapes directly without pgTAP framework."
+    },
+    {
+      "id": "table:supabase/tests/admin_db_health.sql",
+      "type": "table",
+      "name": "admin_db_health.sql",
+      "filePath": "supabase/tests/admin_db_health.sql",
+      "summary": "pgTAP-style SQL test verifying that public.admin_db_health_snapshot() is blocked for anon and non-admin roles, returns a valid JSONB object for enabled admins, and contains the expected keys including tag_queue_by_status and snapshot_at.",
+      "tags": ["test", "security", "database", "monitoring"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/admin_events_rpc.sql",
+      "type": "table",
+      "name": "admin_events_rpc.sql",
+      "filePath": "supabase/tests/admin_events_rpc.sql",
+      "summary": "Comprehensive SQL test for admin event RPCs (admin_events_enriched, admin_event_facets) verifying that non-admin, anon, and expired-admin callers are denied access while active admins can call these functions and receive correctly shaped results.",
+      "tags": ["test", "security", "api-handler", "database"],
+      "complexity": "complex",
+      "languageNotes": "Fixtures three user types — admin, regular user, and expired admin — to cover all access-control branches for both RPC functions."
+    },
+    {
+      "id": "table:supabase/tests/api_surface_hardening.sql",
+      "type": "table",
+      "name": "api_surface_hardening.sql",
+      "filePath": "supabase/tests/api_surface_hardening.sql",
+      "summary": "Minimal SQL guard test asserting that pg_graphql is not installed and that the anon role holds no INSERT, UPDATE, DELETE, or other mutation grants on any public schema table.",
+      "tags": ["test", "security", "api-schema", "database"],
+      "complexity": "simple",
+      "languageNotes": "Checks information_schema.role_table_grants; intentionally very small to serve as a fast smoke guard for the API surface."
+    },
+    {
+      "id": "table:supabase/tests/cron_rpc_security.sql",
+      "type": "table",
+      "name": "cron_rpc_security.sql",
+      "filePath": "supabase/tests/cron_rpc_security.sql",
+      "summary": "SQL test verifying that cron management RPCs (admin_list_railway_cron_jobs and related write functions) are restricted to enabled admins for reads and service_role for writes, blocking non-admin authenticated users and anon.",
+      "tags": ["test", "security", "database", "ci-cd"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/cron_toggle.sql",
+      "type": "table",
+      "name": "cron_toggle.sql",
+      "filePath": "supabase/tests/cron_toggle.sql",
+      "summary": "SQL test verifying the cron enable/disable lifecycle: anon cannot call is_cron_enabled, service_role can, non-admin authenticated users cannot call admin_set_cron_enabled, and enabled admins can toggle a cron label off and back on.",
+      "tags": ["test", "security", "database", "monitoring"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/events_cursor_pagination.sql",
+      "type": "table",
+      "name": "events_cursor_pagination.sql",
+      "filePath": "supabase/tests/events_cursor_pagination.sql",
+      "summary": "SQL test covering seven cursor-pagination scenarios for events_enriched and search_events RPCs, including first/second page correctness, city filter, date range filter, same-datetime tie-breaking by UUID, anon path returning false for personalization fields, and keyword search.",
+      "tags": ["test", "database", "api-handler", "validation"],
+      "complexity": "complex",
+      "languageNotes": "Seeds six published events with controlled datetimes and tie conditions to exercise the (start_datetime, id) ASC cursor composite key deterministically."
+    },
+    {
+      "id": "table:supabase/tests/events_enriched_parity.sql",
+      "type": "table",
+      "name": "events_enriched_parity.sql",
+      "filePath": "supabase/tests/events_enriched_parity.sql",
+      "summary": "SQL test asserting behavioral parity of the events_enriched RPC across anon and authenticated paths, covering is_favorited/is_in_calendar flags, zero-rating vs rated aggregates, alphabetically ordered tags JSONB array, draft event exclusion, and city filter scoping.",
+      "tags": ["test", "database", "api-handler", "validation"],
+      "complexity": "complex",
+      "languageNotes": "Uses a single transaction fixture with multiple published events, one draft, ratings, favorites, and calendar entries to cover all parity dimensions in one pass."
+    },
+    {
+      "id": "table:supabase/tests/invite_gate_oauth_signup.sql",
+      "type": "table",
+      "name": "invite_gate_oauth_signup.sql",
+      "filePath": "supabase/tests/invite_gate_oauth_signup.sql",
+      "summary": "SQL test verifying the closed-beta invite gate blocks uninvited Google/Apple OAuth signups when app.settings.require_invite is enabled, while allowing pre-invited email addresses and passing through when the gate is disabled.",
+      "tags": ["test", "security", "database", "validation"],
+      "complexity": "complex",
+      "languageNotes": "Simulates auth.users inserts with raw_app_meta_data provider fields to replicate real OAuth flows inside a transaction test."
+    },
+    {
+      "id": "table:supabase/tests/llm_event_review_processing.sql",
+      "type": "table",
+      "name": "llm_event_review_processing.sql",
+      "filePath": "supabase/tests/llm_event_review_processing.sql",
+      "summary": "SQL test exercising the LLM event review pipeline: verifies default processing_mode is manual_review, tests manual/auto/LLM source processing modes, and validates that admin_events_enriched filters correctly by llm_review_status and llm_review_decision.",
+      "tags": ["test", "database", "api-handler", "data-pipeline"],
+      "complexity": "complex",
+      "languageNotes": "Covers the event_processing_mode enum and llm_event_review_status/llm_event_review_decision columns introduced for the AI-assisted review workflow."
+    },
+    {
+      "id": "table:supabase/tests/reference_data.sql",
+      "type": "table",
+      "name": "reference_data.sql",
+      "filePath": "supabase/tests/reference_data.sql",
+      "summary": "SQL smoke test verifying that the production-reset migration baseline includes the expected seed event sources (BREC Parks, Louisiana Philharmonic, Macaroni Kid) and that removed legacy sources and required maintenance RPCs and cron jobs are present or absent as intended.",
+      "tags": ["test", "database", "migration", "data-pipeline"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/rls_access_expiry.sql",
+      "type": "table",
+      "name": "rls_access_expiry.sql",
+      "filePath": "supabase/tests/rls_access_expiry.sql",
+      "summary": "SQL test verifying that access_expires_at is honored by is_enabled_user() and is_admin() helpers, blocking both regular users and admins whose access has expired even when is_enabled is true.",
+      "tags": ["test", "security", "database", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/rls_anon_read.sql",
+      "type": "table",
+      "name": "rls_anon_read.sql",
+      "filePath": "supabase/tests/rls_anon_read.sql",
+      "summary": "SQL test verifying the anonymous read boundary: anon can see published events via public_events view, can read published raw events rows, is blocked from draft events, can see active cities, and cannot see inactive cities.",
+      "tags": ["test", "security", "database", "api-schema"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/rls_privilege_escalation.sql",
+      "type": "table",
+      "name": "rls_privilege_escalation.sql",
+      "filePath": "supabase/tests/rls_privilege_escalation.sql",
+      "summary": "SQL test verifying three independent layers of defense against user_profiles.role privilege escalation: REVOKE on the role column, a trigger that blocks self-promotion, and the RLS WITH CHECK policy.",
+      "tags": ["test", "security", "database", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/rls_public_events_view.sql",
+      "type": "table",
+      "name": "rls_public_events_view.sql",
+      "filePath": "supabase/tests/rls_public_events_view.sql",
+      "summary": "SQL integration test for the RLS security boundary around public event previews, verifying anon visibility of published content, child-table (event_tags, ratings, comments) inheritance of the public_events boundary, and plan_events_for_user RPC user-ID enforcement.",
+      "tags": ["test", "security", "database", "api-handler"],
+      "complexity": "complex",
+      "languageNotes": "Fixtures both published and draft events with symmetric child rows to enable side-by-side assertion of anon visibility rules."
+    },
+    {
+      "id": "table:supabase/tests/role_smoke.sql",
+      "type": "table",
+      "name": "role_smoke.sql",
+      "filePath": "supabase/tests/role_smoke.sql",
+      "summary": "Broad role smoke test covering 14 assertions across anon, authenticated, and service_role; verifies correct SELECT grants on public views and tables, correct RPC accessibility (events_enriched, search_events, is_cron_enabled), and that anon is blocked from cron RPCs.",
+      "tags": ["test", "security", "database", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/tests/trace_retention.sql",
+      "type": "table",
+      "name": "trace_retention.sql",
+      "filePath": "supabase/tests/trace_retention.sql",
+      "summary": "SQL test verifying that private.run_daily_maintenance() prunes rows older than 90 days from event_ai_traces and source_extraction_traces while leaving recent rows intact.",
+      "tags": ["test", "database", "data-pipeline", "monitoring"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "config:cron/scrape-sources/.dockerignore",
+      "type": "config",
+      "name": ".dockerignore",
+      "filePath": "cron/scrape-sources/.dockerignore",
+      "summary": "Docker build context exclusion list for the scrape-sources cron service, preventing unnecessary files from being sent to the Docker daemon.",
+      "tags": ["configuration", "containerization", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:cron/scrape-sources/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "cron/scrape-sources/Dockerfile",
+      "summary": "Minimal Alpine-based Docker image for the scrape-sources cron job, which invokes cron-runner.sh on a schedule to trigger the Supabase edge function that scrapes external sources for new family event data.",
+      "tags": ["containerization", "infrastructure", "deployment", "cron"],
+      "complexity": "simple",
+      "languageNotes": "Uses alpine:3.23 with only curl and ca-certificates added; the entrypoint delegates to a shared cron-runner.sh script parameterized by a SCRAPE_D environment variable."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:cron/scrape-sources/.dockerignore",
+      "target": "service:cron/scrape-sources/Dockerfile",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

@@ -1,0 +1,3435 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "graphify-out/.graphify_labels.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 1,
+      "nonEmptyLines": 1,
+      "sections": [
+        {
+          "heading": "0",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "2",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "3",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "4",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "5",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "6",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "7",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "8",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "9",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "10",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "11",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "12",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "13",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "14",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "15",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "16",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "17",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "18",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "19",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "20",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "21",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "22",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "23",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "24",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "25",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "26",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "27",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "28",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "29",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "30",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "31",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "32",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "33",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "34",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "35",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "36",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "37",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "38",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "39",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "40",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "41",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "42",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "43",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "44",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "45",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "46",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "47",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "48",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "49",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "50",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "51",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "52",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "53",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "54",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "55",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "56",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "57",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "58",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "59",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "60",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "61",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "62",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "63",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "64",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "65",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "66",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "67",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "68",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "69",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "70",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "71",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "72",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "73",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "74",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "75",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "76",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "77",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "78",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "79",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "80",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "81",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "82",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "83",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "84",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "85",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "86",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "87",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "88",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "89",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "90",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "91",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "92",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "93",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "94",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "95",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "96",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "97",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "98",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "99",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "100",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "101",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "102",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "103",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "104",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "105",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "106",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "107",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "108",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "109",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "110",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "111",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "112",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "113",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "114",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "115",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "116",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "117",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "118",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "119",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "120",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "121",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "122",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "123",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "124",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "125",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "126",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "127",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "128",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "129",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "130",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "131",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "132",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "133",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "134",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "135",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "136",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "137",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "138",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "139",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "140",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "141",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "142",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 143
+      }
+    },
+    {
+      "path": "graphify-out/GRAPH_REPORT.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 702,
+      "nonEmptyLines": 568,
+      "sections": [
+        {
+          "heading": "Graph Report - .  (2026-06-12)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Corpus Check",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Summary",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Community Hubs (Navigation)",
+          "level": 2,
+          "line": 12
+        },
+        {
+          "heading": "God Nodes (most connected - your core abstractions)",
+          "level": 2,
+          "line": 155
+        },
+        {
+          "heading": "Surprising Connections (you probably didn't know these)",
+          "level": 2,
+          "line": 167
+        },
+        {
+          "heading": "Import Cycles",
+          "level": 2,
+          "line": 179
+        },
+        {
+          "heading": "Hyperedges (group relationships)",
+          "level": 2,
+          "line": 182
+        },
+        {
+          "heading": "Communities (143 total, 18 thin omitted)",
+          "level": 2,
+          "line": 187
+        },
+        {
+          "heading": "Community 0 - \"LLM Extraction Pipeline\"",
+          "level": 3,
+          "line": 189
+        },
+        {
+          "heading": "Community 1 - \"Scrape Source Edge Function\"",
+          "level": 3,
+          "line": 193
+        },
+        {
+          "heading": "Community 2 - \"Event Processing Pipeline\"",
+          "level": 3,
+          "line": 197
+        },
+        {
+          "heading": "Community 3 - \"Admin Cron Handler\"",
+          "level": 3,
+          "line": 201
+        },
+        {
+          "heading": "Community 4 - \"Deploy CLI Doctor\"",
+          "level": 3,
+          "line": 205
+        },
+        {
+          "heading": "Community 5 - \"Root Package Config\"",
+          "level": 3,
+          "line": 209
+        },
+        {
+          "heading": "Community 6 - \"Rollback and Logging\"",
+          "level": 3,
+          "line": 213
+        },
+        {
+          "heading": "Community 7 - \"LLM Tag Event Handler\"",
+          "level": 3,
+          "line": 217
+        },
+        {
+          "heading": "Community 8 - \"Event Normalizer\"",
+          "level": 3,
+          "line": 221
+        },
+        {
+          "heading": "Community 9 - \"Website HTML Parser\"",
+          "level": 3,
+          "line": 225
+        },
+        {
+          "heading": "Community 10 - \"LLM Event Review Queue\"",
+          "level": 3,
+          "line": 229
+        },
+        {
+          "heading": "Community 11 - \"Parent Tips Generator\"",
+          "level": 3,
+          "line": 233
+        },
+        {
+          "heading": "Community 12 - \"Embedding Backfill\"",
+          "level": 3,
+          "line": 237
+        },
+        {
+          "heading": "Community 13 - \"Deploy CLI Package\"",
+          "level": 3,
+          "line": 241
+        },
+        {
+          "heading": "Community 14 - \"Mobile Push Notifications\"",
+          "level": 3,
+          "line": 245
+        },
+        {
+          "heading": "Community 15 - \"Parser Context and Types\"",
+          "level": 3,
+          "line": 249
+        },
+        {
+          "heading": "Community 16 - \"Invite Gate RLS/RPC\"",
+          "level": 3,
+          "line": 253
+        },
+        {
+          "heading": "Community 17 - \"Railway Cron Drift Guard\"",
+          "level": 3,
+          "line": 257
+        },
+        {
+          "heading": "Community 18 - \"Parent Tips Pass\"",
+          "level": 3,
+          "line": 261
+        },
+        {
+          "heading": "Community 19 - \"iCal Parser\"",
+          "level": 3,
+          "line": 265
+        },
+        {
+          "heading": "Community 20 - \"Railway Sandbox Management\"",
+          "level": 3,
+          "line": 269
+        },
+        {
+          "heading": "Community 21 - \"React Email Package\"",
+          "level": 3,
+          "line": 273
+        },
+        {
+          "heading": "Community 22 - \"Email Templates\"",
+          "level": 3,
+          "line": 277
+        },
+        {
+          "heading": "Community 23 - \"Process Source Handler\"",
+          "level": 3,
+          "line": 281
+        },
+        {
+          "heading": "Community 24 - \"Event Enrichment Images\"",
+          "level": 3,
+          "line": 285
+        },
+        {
+          "heading": "Community 25 - \"Quality/TS Config Package\"",
+          "level": 3,
+          "line": 289
+        },
+        {
+          "heading": "Community 26 - \"LLM Config Resolution\"",
+          "level": 3,
+          "line": 293
+        },
+        {
+          "heading": "Community 27 - \"Event Notification Emails\"",
+          "level": 3,
+          "line": 297
+        },
+        {
+          "heading": "Community 28 - \"Date Utilities\"",
+          "level": 3,
+          "line": 301
+        },
+        {
+          "heading": "Community 29 - \"Stock Image Fallback\"",
+          "level": 3,
+          "line": 305
+        },
+        {
+          "heading": "Community 30 - \"Unsplash Attribution Backfill\"",
+          "level": 3,
+          "line": 309
+        },
+        {
+          "heading": "Community 31 - \"Error Types\"",
+          "level": 3,
+          "line": 313
+        },
+        {
+          "heading": "Community 32 - \"Source Queue\"",
+          "level": 3,
+          "line": 317
+        },
+        {
+          "heading": "Community 33 - \"RSS Parser\"",
+          "level": 3,
+          "line": 321
+        },
+        {
+          "heading": "Community 34 - \"Tag Event Index\"",
+          "level": 3,
+          "line": 325
+        },
+        {
+          "heading": "Community 35 - \"Deploy Command\"",
+          "level": 3,
+          "line": 329
+        },
+        {
+          "heading": "Community 36 - \"Event Index Tests\"",
+          "level": 3,
+          "line": 333
+        },
+        {
+          "heading": "Community 37 - \"TypeScript Base Config\"",
+          "level": 3,
+          "line": 337
+        },
+        {
+          "heading": "Community 38 - \"Digest Event Tests\"",
+          "level": 3,
+          "line": 341
+        },
+        {
+          "heading": "Community 39 - \"Railway Service Config\"",
+          "level": 3,
+          "line": 345
+        },
+        {
+          "heading": "Community 40 - \"Macaroni Kid Parser\"",
+          "level": 3,
+          "line": 349
+        },
+        {
+          "heading": "Community 41 - \"LLM Review Decision Types\"",
+          "level": 3,
+          "line": 353
+        },
+        {
+          "heading": "Community 42 - \"Attribution Backfill Function\"",
+          "level": 3,
+          "line": 357
+        },
+        {
+          "heading": "Community 43 - \"Deploy Supabase Provider\"",
+          "level": 3,
+          "line": 361
+        },
+        {
+          "heading": "Community 44 - \"BREC Article Parser\"",
+          "level": 3,
+          "line": 365
+        },
+        {
+          "heading": "Community 45 - \"LocalHop Address Lookup\"",
+          "level": 3,
+          "line": 369
+        },
+        {
+          "heading": "Community 46 - \"Weekly Digest Handler\"",
+          "level": 3,
+          "line": 373
+        },
+        {
+          "heading": "Community 47 - \"Deploy Target Graph\"",
+          "level": 3,
+          "line": 377
+        },
+        {
+          "heading": "Community 48 - \"Admin Review Memory Context\"",
+          "level": 3,
+          "line": 381
+        },
+        {
+          "heading": "Community 49 - \"Event Tag Classification\"",
+          "level": 3,
+          "line": 385
+        },
+        {
+          "heading": "Community 50 - \"Tag Event Handler Tests\"",
+          "level": 3,
+          "line": 389
+        },
+        {
+          "heading": "Community 52 - \"DB Performance Benchmarks\"",
+          "level": 3,
+          "line": 393
+        },
+        {
+          "heading": "Community 53 - \"Changeset Config\"",
+          "level": 3,
+          "line": 397
+        },
+        {
+          "heading": "Community 54 - \"Config Parser Utilities\"",
+          "level": 3,
+          "line": 401
+        },
+        {
+          "heading": "Community 55 - \"OpenAI Review Provider\"",
+          "level": 3,
+          "line": 405
+        },
+        {
+          "heading": "Community 56 - \"OpenAI Chat Completion\"",
+          "level": 3,
+          "line": 409
+        },
+        {
+          "heading": "Community 57 - \"URL/IP Validation\"",
+          "level": 3,
+          "line": 413
+        },
+        {
+          "heading": "Community 58 - \"TS Config Package Exports\"",
+          "level": 3,
+          "line": 417
+        },
+        {
+          "heading": "Community 59 - \"Admin Review Prompt\"",
+          "level": 3,
+          "line": 421
+        },
+        {
+          "heading": "Community 61 - \"Drain Queues Script\"",
+          "level": 3,
+          "line": 425
+        },
+        {
+          "heading": "Community 62 - \"Environment Variables\"",
+          "level": 3,
+          "line": 429
+        },
+        {
+          "heading": "Community 63 - \"Nominatim Geocoder\"",
+          "level": 3,
+          "line": 433
+        },
+        {
+          "heading": "Community 64 - \"Lint Config Package\"",
+          "level": 3,
+          "line": 437
+        },
+        {
+          "heading": "Community 65 - \"Send Reminders Tests\"",
+          "level": 3,
+          "line": 441
+        },
+        {
+          "heading": "Community 66 - \"CORS Headers\"",
+          "level": 3,
+          "line": 445
+        },
+        {
+          "heading": "Community 67 - \"Edge Logger\"",
+          "level": 3,
+          "line": 449
+        },
+        {
+          "heading": "Community 68 - \"Sitemap Handler\"",
+          "level": 3,
+          "line": 453
+        },
+        {
+          "heading": "Community 69 - \"Enrichment Backfill Docs\"",
+          "level": 3,
+          "line": 457
+        },
+        {
+          "heading": "Community 70 - \"Cron Runner Shell Script (1)\"",
+          "level": 3,
+          "line": 461
+        },
+        {
+          "heading": "Community 71 - \"CI/CD and Contracts Package\"",
+          "level": 3,
+          "line": 465
+        },
+        {
+          "heading": "Community 72 - \"Cron Runner Shell Script (2)\"",
+          "level": 3,
+          "line": 469
+        },
+        {
+          "heading": "Community 73 - \"React TSConfig\"",
+          "level": 3,
+          "line": 473
+        },
+        {
+          "heading": "Community 74 - \"Cron Runner Shell Script (3)\"",
+          "level": 3,
+          "line": 477
+        },
+        {
+          "heading": "Community 75 - \"Cron Runner Shell Script (4)\"",
+          "level": 3,
+          "line": 481
+        },
+        {
+          "heading": "Community 76 - \"Cron Runner Shell Script (5)\"",
+          "level": 3,
+          "line": 485
+        },
+        {
+          "heading": "Community 77 - \"Cron Runner Shell Script (6)\"",
+          "level": 3,
+          "line": 489
+        },
+        {
+          "heading": "Community 78 - \"Cron Runner Shell Script (7)\"",
+          "level": 3,
+          "line": 493
+        },
+        {
+          "heading": "Community 79 - \"Cron Runner Shell Script (8)\"",
+          "level": 3,
+          "line": 497
+        },
+        {
+          "heading": "Community 80 - \"Cron Runner Script Docs\"",
+          "level": 3,
+          "line": 501
+        },
+        {
+          "heading": "Community 81 - \"Deno Edge Function Config (1)\"",
+          "level": 3,
+          "line": 505
+        },
+        {
+          "heading": "Community 82 - \"Deno Edge Function Config (2)\"",
+          "level": 3,
+          "line": 509
+        },
+        {
+          "heading": "Community 83 - \"Deno Edge Function Config (3)\"",
+          "level": 3,
+          "line": 513
+        },
+        {
+          "heading": "Community 84 - \"React Vite TSConfig\"",
+          "level": 3,
+          "line": 517
+        },
+        {
+          "heading": "Community 85 - \"TS Path Config (1)\"",
+          "level": 3,
+          "line": 521
+        },
+        {
+          "heading": "Community 86 - \"Deno Edge Function Config (4)\"",
+          "level": 3,
+          "line": 525
+        },
+        {
+          "heading": "Community 87 - \"TS Path Config (2)\"",
+          "level": 3,
+          "line": 529
+        },
+        {
+          "heading": "Community 89 - \"Deno Edge Function Config (5)\"",
+          "level": 3,
+          "line": 533
+        },
+        {
+          "heading": "Community 90 - \"Root Scripts Package\"",
+          "level": 3,
+          "line": 537
+        },
+        {
+          "heading": "Community 91 - \"Migration Rollback Tests\"",
+          "level": 3,
+          "line": 541
+        },
+        {
+          "heading": "Community 92 - \"Deno Edge Function Config (6)\"",
+          "level": 3,
+          "line": 545
+        },
+        {
+          "heading": "Community 93 - \"Deno Edge Function Config (7)\"",
+          "level": 3,
+          "line": 549
+        },
+        {
+          "heading": "Community 94 - \"Deno Edge Function Config (8)\"",
+          "level": 3,
+          "line": 553
+        },
+        {
+          "heading": "Community 95 - \"Deno Edge Function Config (9)\"",
+          "level": 3,
+          "line": 557
+        },
+        {
+          "heading": "Community 96 - \"Deno Edge Function Config (10)\"",
+          "level": 3,
+          "line": 561
+        },
+        {
+          "heading": "Community 97 - \"Deno Edge Function Config (11)\"",
+          "level": 3,
+          "line": 565
+        },
+        {
+          "heading": "Community 98 - \"Deno Edge Function Config (12)\"",
+          "level": 3,
+          "line": 569
+        },
+        {
+          "heading": "Community 99 - \"Railway Health Check Script\"",
+          "level": 3,
+          "line": 573
+        },
+        {
+          "heading": "Community 100 - \"URL Validation Sync Script\"",
+          "level": 3,
+          "line": 577
+        },
+        {
+          "heading": "Community 101 - \"Deno Edge Function Config (13)\"",
+          "level": 3,
+          "line": 581
+        },
+        {
+          "heading": "Community 102 - \"Deno Edge Function Config (14)\"",
+          "level": 3,
+          "line": 585
+        },
+        {
+          "heading": "Community 104 - \"Deno Edge Function Config (15)\"",
+          "level": 3,
+          "line": 589
+        },
+        {
+          "heading": "Community 105 - \"Deno Edge Function Config (16)\"",
+          "level": 3,
+          "line": 593
+        },
+        {
+          "heading": "Community 106 - \"Deno Edge Function Config (17)\"",
+          "level": 3,
+          "line": 597
+        },
+        {
+          "heading": "Community 107 - \"Deno Edge Function Config (18)\"",
+          "level": 3,
+          "line": 601
+        },
+        {
+          "heading": "Community 108 - \"Deno Supabase Config (1)\"",
+          "level": 3,
+          "line": 605
+        },
+        {
+          "heading": "Community 109 - \"Internal Package Metadata (1)\"",
+          "level": 3,
+          "line": 609
+        },
+        {
+          "heading": "Community 110 - \"Node TSConfig\"",
+          "level": 3,
+          "line": 613
+        },
+        {
+          "heading": "Community 111 - \"Internal Package Metadata (2)\"",
+          "level": 3,
+          "line": 617
+        },
+        {
+          "heading": "Community 112 - \"Deno Supabase Config (2)\"",
+          "level": 3,
+          "line": 621
+        },
+        {
+          "heading": "Community 113 - \"Internal Package Metadata (3)\"",
+          "level": 3,
+          "line": 625
+        },
+        {
+          "heading": "Community 114 - \"Deno Supabase Config (3)\"",
+          "level": 3,
+          "line": 629
+        },
+        {
+          "heading": "Community 116 - \"Railway Cron Build\"",
+          "level": 3,
+          "line": 633
+        },
+        {
+          "heading": "Community 117 - \"Internal Package Metadata (4)\"",
+          "level": 3,
+          "line": 637
+        },
+        {
+          "heading": "Community 118 - \"Deno DOM Config\"",
+          "level": 3,
+          "line": 641
+        },
+        {
+          "heading": "Community 119 - \"Internal Package Metadata (5)\"",
+          "level": 3,
+          "line": 645
+        },
+        {
+          "heading": "Community 120 - \"Local Setup Script\"",
+          "level": 3,
+          "line": 649
+        },
+        {
+          "heading": "Community 121 - \"Edge Function Verify Script\"",
+          "level": 3,
+          "line": 653
+        },
+        {
+          "heading": "Community 122 - \"Internal Package Metadata (6)\"",
+          "level": 3,
+          "line": 657
+        },
+        {
+          "heading": "Community 124 - \"Deno Supabase Config (4)\"",
+          "level": 3,
+          "line": 661
+        },
+        {
+          "heading": "Community 125 - \"Internal Package Metadata (7)\"",
+          "level": 3,
+          "line": 665
+        },
+        {
+          "heading": "Community 126 - \"Internal Package Metadata (8)\"",
+          "level": 3,
+          "line": 669
+        },
+        {
+          "heading": "Community 127 - \"Cron Runner Boundary Tests\"",
+          "level": 3,
+          "line": 673
+        },
+        {
+          "heading": "Community 129 - \"Deno Node Modules Config\"",
+          "level": 3,
+          "line": 677
+        },
+        {
+          "heading": "Knowledge Gaps",
+          "level": 2,
+          "line": 681
+        },
+        {
+          "heading": "Suggested Questions",
+          "level": 2,
+          "line": 686
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 134
+      }
+    },
+    {
+      "path": "graphify-out/cost.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 12,
+      "nonEmptyLines": 12,
+      "sections": [
+        {
+          "heading": "runs",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "total_input_tokens",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "total_output_tokens",
+          "level": 1,
+          "line": 11
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "graphify-out/graph.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 307,
+      "nonEmptyLines": 293,
+      "metrics": {}
+    },
+    {
+      "path": "graphify-out/graph.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 51528,
+      "nonEmptyLines": 51528,
+      "sections": [
+        {
+          "heading": "directed",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "multigraph",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "graph",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "nodes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "links",
+          "level": 1,
+          "line": 18315
+        },
+        {
+          "heading": "hyperedges",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "built_at_commit",
+          "level": 1,
+          "line": 51527
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 7
+      }
+    },
+    {
+      "path": "graphify-out/manifest.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 1907,
+      "nonEmptyLines": 1907,
+      "sections": [
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.changeset/config.json",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.railway/railway.ts",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/config/deploy.config.json",
+          "level": 1,
+          "line": 12
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/_shared/cron-runner.sh",
+          "level": 1,
+          "line": 17
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/cleanup-stale/cron-runner.sh",
+          "level": 1,
+          "line": 22
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/cleanup-stale/package.json",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/db-maintenance/cron-runner.sh",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/db-maintenance/package.json",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/enrich-events/cron-runner.sh",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/enrich-events/package.json",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/review-events/cron-runner.sh",
+          "level": 1,
+          "line": 52
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/review-events/package.json",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/scrape-sources/cron-runner.sh",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/scrape-sources/package.json",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/send-reminders/cron-runner.sh",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/send-reminders/package.json",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/tag-queue/cron-runner.sh",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/tag-queue/package.json",
+          "level": 1,
+          "line": 87
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/weekly-digest/cron-runner.sh",
+          "level": 1,
+          "line": 92
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/weekly-digest/package.json",
+          "level": 1,
+          "line": 97
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/.terraform.lock.hcl",
+          "level": 1,
+          "line": 102
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/cron-services.json",
+          "level": 1,
+          "line": 107
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/main.tf",
+          "level": 1,
+          "line": 112
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/versions.tf",
+          "level": 1,
+          "line": 117
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/package.json",
+          "level": 1,
+          "line": 122
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/oxfmt.base.json",
+          "level": 1,
+          "line": 127
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/oxlint.base.json",
+          "level": 1,
+          "line": 132
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/package.json",
+          "level": 1,
+          "line": 137
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/base.json",
+          "level": 1,
+          "line": 142
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/node.json",
+          "level": 1,
+          "line": 147
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/package.json",
+          "level": 1,
+          "line": 152
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/react-vite.json",
+          "level": 1,
+          "line": 157
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/package.json",
+          "level": 1,
+          "line": 162
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/community-event.ts",
+          "level": 1,
+          "line": 167
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/database-enums.ts",
+          "level": 1,
+          "line": 172
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/database.types.ts",
+          "level": 1,
+          "line": 177
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/index.ts",
+          "level": 1,
+          "line": 182
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/notification-preferences.ts",
+          "level": 1,
+          "line": 187
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/notifications.ts",
+          "level": 1,
+          "line": 192
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/tsconfig.json",
+          "level": 1,
+          "line": 197
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/vitest.config.ts",
+          "level": 1,
+          "line": 202
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/package.json",
+          "level": 1,
+          "line": 207
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/cli.ts",
+          "level": 1,
+          "line": 212
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/deploy.ts",
+          "level": 1,
+          "line": 217
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/doctor.ts",
+          "level": 1,
+          "line": 222
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/rollback-plan.ts",
+          "level": 1,
+          "line": 227
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/status.ts",
+          "level": 1,
+          "line": 232
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/targets.ts",
+          "level": 1,
+          "line": 237
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/validate.ts",
+          "level": 1,
+          "line": 242
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/config.ts",
+          "level": 1,
+          "line": 247
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/errors.ts",
+          "level": 1,
+          "line": 252
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/exec.ts",
+          "level": 1,
+          "line": 257
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/logger.ts",
+          "level": 1,
+          "line": 262
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/redaction.ts",
+          "level": 1,
+          "line": 267
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/result.ts",
+          "level": 1,
+          "line": 272
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/run-artifacts.ts",
+          "level": 1,
+          "line": 277
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/signals.ts",
+          "level": 1,
+          "line": 282
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/target-graph.ts",
+          "level": 1,
+          "line": 287
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/types.ts",
+          "level": 1,
+          "line": 292
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/providers/railway.ts",
+          "level": 1,
+          "line": 297
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/providers/supabase.ts",
+          "level": 1,
+          "line": 302
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/interactive.ts",
+          "level": 1,
+          "line": 307
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/output.ts",
+          "level": 1,
+          "line": 312
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/progress.ts",
+          "level": 1,
+          "line": 317
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/deploy-runner.ts",
+          "level": 1,
+          "line": 322
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/rollback.ts",
+          "level": 1,
+          "line": 327
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/smoke-checks.ts",
+          "level": 1,
+          "line": 332
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/config.test.ts",
+          "level": 1,
+          "line": 337
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/deploy-runner.test.ts",
+          "level": 1,
+          "line": 342
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/errors.test.ts",
+          "level": 1,
+          "line": 347
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/railway.test.ts",
+          "level": 1,
+          "line": 352
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/smoke-checks.test.ts",
+          "level": 1,
+          "line": 357
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/supabase.test.ts",
+          "level": 1,
+          "line": 362
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/target-graph.test.ts",
+          "level": 1,
+          "line": 367
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tsconfig.json",
+          "level": 1,
+          "line": 372
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/community-event-status.tsx",
+          "level": 1,
+          "line": 377
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-change.tsx",
+          "level": 1,
+          "line": 382
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-invite.tsx",
+          "level": 1,
+          "line": 387
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-reminder.tsx",
+          "level": 1,
+          "line": 392
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/magic-link.tsx",
+          "level": 1,
+          "line": 397
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/weekly-digest.tsx",
+          "level": 1,
+          "line": 402
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/welcome.tsx",
+          "level": 1,
+          "line": 407
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/package.json",
+          "level": 1,
+          "line": 412
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/scripts/deploy-templates.tsx",
+          "level": 1,
+          "line": 417
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/src/index.ts",
+          "level": 1,
+          "line": 422
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/src/templates.ts",
+          "level": 1,
+          "line": 427
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/tsconfig.json",
+          "level": 1,
+          "line": 432
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/check-railway.sh",
+          "level": 1,
+          "line": 437
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/collect-db-evidence.sql",
+          "level": 1,
+          "line": 442
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/find-missing-end-times.sql",
+          "level": 1,
+          "line": 447
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/wipe-live-events.sh",
+          "level": 1,
+          "line": 452
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/deno-install-functions.sh",
+          "level": 1,
+          "line": 457
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/deploy.sh",
+          "level": 1,
+          "line": 462
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/drain-queues.mjs",
+          "level": 1,
+          "line": 467
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/railway-cron-drift.mjs",
+          "level": 1,
+          "line": 472
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/railway-sandbox.mjs",
+          "level": 1,
+          "line": 477
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/setup-local.sh",
+          "level": 1,
+          "line": 482
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/supabase-functions-serve.sh",
+          "level": 1,
+          "line": 487
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/supabase.sh",
+          "level": 1,
+          "line": 492
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/sync-cron-runner.sh",
+          "level": 1,
+          "line": 497
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/sync-url-validation.mjs",
+          "level": 1,
+          "line": 502
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/test.sh",
+          "level": 1,
+          "line": 507
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/verify-edge-fn.mjs",
+          "level": 1,
+          "line": 512
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql",
+          "level": 1,
+          "line": 517
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/admin-handler.ts",
+          "level": 1,
+          "line": 522
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/admin-handler_test.ts",
+          "level": 1,
+          "line": 527
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/auth.ts",
+          "level": 1,
+          "line": 532
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/auth_test.ts",
+          "level": 1,
+          "line": 537
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/classification.test.ts",
+          "level": 1,
+          "line": 542
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/classification.ts",
+          "level": 1,
+          "line": 547
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/cors.ts",
+          "level": 1,
+          "line": 552
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/cron-run-log.ts",
+          "level": 1,
+          "line": 557
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/env.ts",
+          "level": 1,
+          "line": 562
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/env_test.ts",
+          "level": 1,
+          "line": 567
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/function-invoke.ts",
+          "level": 1,
+          "line": 572
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/function-invoke_test.ts",
+          "level": 1,
+          "line": 577
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/geocode.test.ts",
+          "level": 1,
+          "line": 582
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/geocode.ts",
+          "level": 1,
+          "line": 587
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/guarded-fetch.ts",
+          "level": 1,
+          "line": 592
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/html.ts",
+          "level": 1,
+          "line": 597
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/html_test.ts",
+          "level": 1,
+          "line": 602
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/http.ts",
+          "level": 1,
+          "line": 607
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/http_test.ts",
+          "level": 1,
+          "line": 612
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-config.ts",
+          "level": 1,
+          "line": 617
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-config_test.ts",
+          "level": 1,
+          "line": 622
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-openai.ts",
+          "level": 1,
+          "line": 627
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-openai_test.ts",
+          "level": 1,
+          "line": 632
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/logger.ts",
+          "level": 1,
+          "line": 637
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/memory-context.ts",
+          "level": 1,
+          "line": 642
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/memory-context_test.ts",
+          "level": 1,
+          "line": 647
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/parsing.test.ts",
+          "level": 1,
+          "line": 652
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/parsing.ts",
+          "level": 1,
+          "line": 657
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/sentry.ts",
+          "level": 1,
+          "line": 662
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/service-role-handler.ts",
+          "level": 1,
+          "line": 667
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/stock-images.ts",
+          "level": 1,
+          "line": 672
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/stock-images_test.ts",
+          "level": 1,
+          "line": 677
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/supabase-client.ts",
+          "level": 1,
+          "line": 682
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/unsplash.test.ts",
+          "level": 1,
+          "line": 687
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/unsplash.ts",
+          "level": 1,
+          "line": 692
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-resolve.ts",
+          "level": 1,
+          "line": 697
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-validation.test.ts",
+          "level": 1,
+          "line": 702
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-validation.ts",
+          "level": 1,
+          "line": 707
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/validation.ts",
+          "level": 1,
+          "line": 712
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/validation_test.ts",
+          "level": 1,
+          "line": 717
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/admin-run-cron/deno.json",
+          "level": 1,
+          "line": 722
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/admin-run-cron/index.ts",
+          "level": 1,
+          "line": 727
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/deno.json",
+          "level": 1,
+          "line": 732
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/index.ts",
+          "level": 1,
+          "line": 737
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/index_test.ts",
+          "level": 1,
+          "line": 742
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/deno.json",
+          "level": 1,
+          "line": 747
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/index.ts",
+          "level": 1,
+          "line": 752
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/parent-tips-pass.ts",
+          "level": 1,
+          "line": 757
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts",
+          "level": 1,
+          "line": 762
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/cleanup-stale-runs/deno.json",
+          "level": 1,
+          "line": 767
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/cleanup-stale-runs/index.ts",
+          "level": 1,
+          "line": 772
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/db-maintenance/deno.json",
+          "level": 1,
+          "line": 777
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/db-maintenance/index.ts",
+          "level": 1,
+          "line": 782
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/deno.json",
+          "level": 1,
+          "line": 787
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/deno.json",
+          "level": 1,
+          "line": 792
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/handler.ts",
+          "level": 1,
+          "line": 797
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/handler_test.ts",
+          "level": 1,
+          "line": 802
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/index.ts",
+          "level": 1,
+          "line": 807
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/config.ts",
+          "level": 1,
+          "line": 812
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/config_test.ts",
+          "level": 1,
+          "line": 817
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/mod.ts",
+          "level": 1,
+          "line": 822
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/normalizer.ts",
+          "level": 1,
+          "line": 827
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/normalizer_test.ts",
+          "level": 1,
+          "line": 832
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/prompt.ts",
+          "level": 1,
+          "line": 837
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/prompt_test.ts",
+          "level": 1,
+          "line": 842
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/provider.ts",
+          "level": 1,
+          "line": 847
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/reviewer.ts",
+          "level": 1,
+          "line": 852
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/schema.ts",
+          "level": 1,
+          "line": 857
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/schema_test.ts",
+          "level": 1,
+          "line": 862
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/types.ts",
+          "level": 1,
+          "line": 867
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/deno.json",
+          "level": 1,
+          "line": 872
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/handler.ts",
+          "level": 1,
+          "line": 877
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/index.ts",
+          "level": 1,
+          "line": 882
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/prompt.ts",
+          "level": 1,
+          "line": 887
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/log-cron-run/deno.json",
+          "level": 1,
+          "line": 892
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/log-cron-run/index.ts",
+          "level": 1,
+          "line": 897
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/notify-email/deno.json",
+          "level": 1,
+          "line": 902
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/notify-email/index.ts",
+          "level": 1,
+          "line": 907
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/package.json",
+          "level": 1,
+          "line": 912
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/deno.json",
+          "level": 1,
+          "line": 917
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/index.ts",
+          "level": 1,
+          "line": 922
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/lib/worker.ts",
+          "level": 1,
+          "line": 927
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/lib/worker_test.ts",
+          "level": 1,
+          "line": 932
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-notification-queue/deno.json",
+          "level": 1,
+          "line": 937
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-notification-queue/index.ts",
+          "level": 1,
+          "line": 942
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/deno.json",
+          "level": 1,
+          "line": 947
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/index.ts",
+          "level": 1,
+          "line": 952
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/llm-extraction.ts",
+          "level": 1,
+          "line": 957
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/worker.ts",
+          "level": 1,
+          "line": 962
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/worker_test.ts",
+          "level": 1,
+          "line": 967
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/deno.json",
+          "level": 1,
+          "line": 972
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/index.ts",
+          "level": 1,
+          "line": 977
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/index_test.ts",
+          "level": 1,
+          "line": 982
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/queue-policy.ts",
+          "level": 1,
+          "line": 987
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/queue-policy_test.ts",
+          "level": 1,
+          "line": 992
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-due-sources/deno.json",
+          "level": 1,
+          "line": 997
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-due-sources/index.ts",
+          "level": 1,
+          "line": 1002
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-api.json",
+          "level": 1,
+          "line": 1007
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/deno.json",
+          "level": 1,
+          "line": 1012
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/index.ts",
+          "level": 1,
+          "line": 1017
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/date.ts",
+          "level": 1,
+          "line": 1022
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/date_test.ts",
+          "level": 1,
+          "line": 1027
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/enrichment.ts",
+          "level": 1,
+          "line": 1032
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/event-processing.ts",
+          "level": 1,
+          "line": 1037
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/event-processing_test.ts",
+          "level": 1,
+          "line": 1042
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+          "level": 1,
+          "line": 1047
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+          "level": 1,
+          "line": 1052
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/parser-context.ts",
+          "level": 1,
+          "line": 1057
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/process-source.ts",
+          "level": 1,
+          "line": 1062
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/process-source_test.ts",
+          "level": 1,
+          "line": 1067
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/schedule.ts",
+          "level": 1,
+          "line": 1072
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/source-queue.ts",
+          "level": 1,
+          "line": 1077
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/source-queue_test.ts",
+          "level": 1,
+          "line": 1082
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/types.ts",
+          "level": 1,
+          "line": 1087
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/_lib/types.ts",
+          "level": 1,
+          "line": 1092
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/brec.ts",
+          "level": 1,
+          "line": 1097
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/brec_test.ts",
+          "level": 1,
+          "line": 1102
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+          "level": 1,
+          "line": 1107
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/downtownlafayette_test.ts",
+          "level": 1,
+          "line": 1112
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts",
+          "level": 1,
+          "line": 1117
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical.ts",
+          "level": 1,
+          "line": 1122
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical_test.ts",
+          "level": 1,
+          "line": 1127
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/index.ts",
+          "level": 1,
+          "line": 1132
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/index_test.ts",
+          "level": 1,
+          "line": 1137
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+          "level": 1,
+          "line": 1142
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts",
+          "level": 1,
+          "line": 1147
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/localhop.ts",
+          "level": 1,
+          "line": 1152
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/localhop_test.ts",
+          "level": 1,
+          "line": 1157
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+          "level": 1,
+          "line": 1162
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/macaroni-kid_test.ts",
+          "level": 1,
+          "line": 1167
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/manual.ts",
+          "level": 1,
+          "line": 1172
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/rss.ts",
+          "level": 1,
+          "line": 1177
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/rss_test.ts",
+          "level": 1,
+          "line": 1182
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/website.ts",
+          "level": 1,
+          "line": 1187
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/website_test.ts",
+          "level": 1,
+          "line": 1192
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-auth-email/deno.json",
+          "level": 1,
+          "line": 1197
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-auth-email/index.ts",
+          "level": 1,
+          "line": 1202
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/deno.json",
+          "level": 1,
+          "line": 1207
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/index.ts",
+          "level": 1,
+          "line": 1212
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/lib/mobile-push.ts",
+          "level": 1,
+          "line": 1217
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/lib/mobile-push_test.ts",
+          "level": 1,
+          "line": 1222
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/send-push.test.ts",
+          "level": 1,
+          "line": 1227
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/deno.json",
+          "level": 1,
+          "line": 1232
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/index.ts",
+          "level": 1,
+          "line": 1237
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/send-reminders.test.ts",
+          "level": 1,
+          "line": 1242
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/deno.json",
+          "level": 1,
+          "line": 1247
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/index.ts",
+          "level": 1,
+          "line": 1252
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+          "level": 1,
+          "line": 1257
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/deno.json",
+          "level": 1,
+          "line": 1262
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/index.ts",
+          "level": 1,
+          "line": 1267
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/index_test.ts",
+          "level": 1,
+          "line": 1272
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/integration_test.ts",
+          "level": 1,
+          "line": 1277
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/sitemap/deno.json",
+          "level": 1,
+          "line": 1282
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/sitemap/index.ts",
+          "level": 1,
+          "line": 1287
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/config.ts",
+          "level": 1,
+          "line": 1292
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/config_test.ts",
+          "level": 1,
+          "line": 1297
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/deno.json",
+          "level": 1,
+          "line": 1302
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/handler.ts",
+          "level": 1,
+          "line": 1307
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/handler_test.ts",
+          "level": 1,
+          "line": 1312
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/index.ts",
+          "level": 1,
+          "line": 1317
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/vitest.config.ts",
+          "level": 1,
+          "line": 1322
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/weather/deno.json",
+          "level": 1,
+          "line": 1327
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/weather/index.ts",
+          "level": 1,
+          "line": 1332
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601000000_schema_baseline.sql",
+          "level": 1,
+          "line": 1337
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql",
+          "level": 1,
+          "line": 1342
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601001000_reference_security_and_cron.sql",
+          "level": 1,
+          "line": 1347
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+          "level": 1,
+          "line": 1352
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+          "level": 1,
+          "line": 1357
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+          "level": 1,
+          "line": 1362
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+          "level": 1,
+          "line": 1367
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+          "level": 1,
+          "line": 1372
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601007000_lafayette_new_sources.sql",
+          "level": 1,
+          "line": 1377
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601008000_tier3_lafayette_sources.sql",
+          "level": 1,
+          "line": 1382
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601009000_cron_review_events_allowlist.sql",
+          "level": 1,
+          "line": 1387
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601010000_admin_events_realtime.sql",
+          "level": 1,
+          "line": 1392
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql",
+          "level": 1,
+          "line": 1397
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601011001_fix_provider_constraint.sql",
+          "level": 1,
+          "line": 1402
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601012000_disable_invite_gate.sql",
+          "level": 1,
+          "line": 1407
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601013000_reset_invite_gate_guc.sql",
+          "level": 1,
+          "line": 1412
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601014000_fix_invite_gate_default.sql",
+          "level": 1,
+          "line": 1417
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601015000_fix_invite_gate_single_source.sql",
+          "level": 1,
+          "line": 1422
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+          "level": 1,
+          "line": 1427
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+          "level": 1,
+          "line": 1432
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+          "level": 1,
+          "line": 1437
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+          "level": 1,
+          "line": 1442
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+          "level": 1,
+          "line": 1447
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601021000_admin_event_decisions.sql",
+          "level": 1,
+          "line": 1452
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+          "level": 1,
+          "line": 1457
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+          "level": 1,
+          "line": 1462
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+          "level": 1,
+          "line": 1467
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601025000_baton_rouge_sources.sql",
+          "level": 1,
+          "line": 1472
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+          "level": 1,
+          "line": 1477
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601027000_user_notification_preferences.sql",
+          "level": 1,
+          "line": 1482
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601028000_search_events_radius_filter.sql",
+          "level": 1,
+          "line": 1487
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+          "level": 1,
+          "line": 1492
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601030000_push_and_notifications.sql",
+          "level": 1,
+          "line": 1497
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601031000_event_change_notifications.sql",
+          "level": 1,
+          "line": 1502
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+          "level": 1,
+          "line": 1507
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601033000_community_event_submission.sql",
+          "level": 1,
+          "line": 1512
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601034000_activate_baton_rouge_sources.sql",
+          "level": 1,
+          "line": 1517
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601035000_community_event_status_notification.sql",
+          "level": 1,
+          "line": 1522
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601036000_admin_user_delete.sql",
+          "level": 1,
+          "line": 1527
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+          "level": 1,
+          "line": 1532
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610170000_admin_events_source_filter.sql",
+          "level": 1,
+          "line": 1537
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+          "level": 1,
+          "line": 1542
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000000_001_schema_down.sql",
+          "level": 1,
+          "line": 1547
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000100_002_functions_down.sql",
+          "level": 1,
+          "line": 1552
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000300_004_views_and_rpcs_down.sql",
+          "level": 1,
+          "line": 1557
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601002700_admin_event_lifetime_editing_down.sql",
+          "level": 1,
+          "line": 1562
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601017000_event_status_enum_and_validate_checks_down.sql",
+          "level": 1,
+          "line": 1567
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601018000_fix_events_enriched_enum_cast_down.sql",
+          "level": 1,
+          "line": 1572
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601019000_restore_events_enriched_cursor_signature_down.sql",
+          "level": 1,
+          "line": 1577
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601020000_event_embeddings_and_similarity_down.sql",
+          "level": 1,
+          "line": 1582
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601021000_admin_event_decisions_down.sql",
+          "level": 1,
+          "line": 1587
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601022000_source_auto_reject_and_stats_down.sql",
+          "level": 1,
+          "line": 1592
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601023000_fix_ai_settings_rpc_grants_down.sql",
+          "level": 1,
+          "line": 1597
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601024000_admin_retry_dead_tag_queue_down.sql",
+          "level": 1,
+          "line": 1602
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601025000_baton_rouge_sources_down.sql",
+          "level": 1,
+          "line": 1607
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql",
+          "level": 1,
+          "line": 1612
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601027000_user_notification_preferences_down.sql",
+          "level": 1,
+          "line": 1617
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601028000_search_events_radius_filter_down.sql",
+          "level": 1,
+          "line": 1622
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601029000_find_similar_events_by_id_down.sql",
+          "level": 1,
+          "line": 1627
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601030000_push_and_notifications_down.sql",
+          "level": 1,
+          "line": 1632
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601031000_event_change_notifications_down.sql",
+          "level": 1,
+          "line": 1637
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601032000_drop_old_search_events_overload_down.sql",
+          "level": 1,
+          "line": 1642
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601033000_community_event_submission_down.sql",
+          "level": 1,
+          "line": 1647
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601034000_activate_baton_rouge_sources_down.sql",
+          "level": 1,
+          "line": 1652
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601035000_community_event_status_notification_down.sql",
+          "level": 1,
+          "line": 1657
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601036000_admin_user_delete_down.sql",
+          "level": 1,
+          "line": 1662
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610162002_enqueue_source_scrape_rpc_down.sql",
+          "level": 1,
+          "line": 1667
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610170000_admin_events_source_filter_down.sql",
+          "level": 1,
+          "line": 1672
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610180000_admin_dashboard_stats_down.sql",
+          "level": 1,
+          "line": 1677
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/seed.sql",
+          "level": 1,
+          "line": 1682
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/snippets/add_macaroni_kids_source.sql",
+          "level": 1,
+          "line": 1687
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/snippets/provision_remote_admin_test_user.sql",
+          "level": 1,
+          "line": 1692
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_dashboard_stats.sql",
+          "level": 1,
+          "line": 1697
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_db_health.sql",
+          "level": 1,
+          "line": 1702
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_events_rpc.sql",
+          "level": 1,
+          "line": 1707
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/api_surface_hardening.sql",
+          "level": 1,
+          "line": 1712
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/cron_rpc_security.sql",
+          "level": 1,
+          "line": 1717
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/cron_toggle.sql",
+          "level": 1,
+          "line": 1722
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/events_cursor_pagination.sql",
+          "level": 1,
+          "line": 1727
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/events_enriched_parity.sql",
+          "level": 1,
+          "line": 1732
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/invite_gate_oauth_signup.sql",
+          "level": 1,
+          "line": 1737
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/llm_event_review_processing.sql",
+          "level": 1,
+          "line": 1742
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/reference_data.sql",
+          "level": 1,
+          "line": 1747
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_access_expiry.sql",
+          "level": 1,
+          "line": 1752
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_anon_read.sql",
+          "level": 1,
+          "line": 1757
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_privilege_escalation.sql",
+          "level": 1,
+          "line": 1762
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_public_events_view.sql",
+          "level": 1,
+          "line": 1767
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/role_smoke.sql",
+          "level": 1,
+          "line": 1772
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/trace_retention.sql",
+          "level": 1,
+          "line": 1777
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/fixtures/railway-cron-poc-drift.json",
+          "level": 1,
+          "line": 1782
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/fixtures/railway-cron-poc-live.json",
+          "level": 1,
+          "line": 1787
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/cron-runner-boundary.test.mjs",
+          "level": 1,
+          "line": 1792
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/db-types-script.test.mjs",
+          "level": 1,
+          "line": 1797
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/deploy-cli-boundary.test.mjs",
+          "level": 1,
+          "line": 1802
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/migration-rollbacks.test.mjs",
+          "level": 1,
+          "line": 1807
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/supabase-function-auth-config.test.mjs",
+          "level": 1,
+          "line": 1812
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/ci.yml",
+          "level": 1,
+          "line": 1817
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/publish-packages.yml",
+          "level": 1,
+          "line": 1822
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/railway-cron-drift.yml",
+          "level": 1,
+          "line": 1827
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/railway-sandbox-verify.yml",
+          "level": 1,
+          "line": 1832
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/CHANGELOG.md",
+          "level": 1,
+          "line": 1837
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/pnpm-workspace.yaml",
+          "level": 1,
+          "line": 1842
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/README.md",
+          "level": 1,
+          "line": 1847
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/artifacts/p0-003-after.txt",
+          "level": 1,
+          "line": 1852
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/artifacts/p0-003-before.txt",
+          "level": 1,
+          "line": 1857
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/EMAIL.md",
+          "level": 1,
+          "line": 1862
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/INVITE_GATE.md",
+          "level": 1,
+          "line": 1867
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/LOCAL_LLM_TAGGING.md",
+          "level": 1,
+          "line": 1872
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/PRODUCTION_SETUP.md",
+          "level": 1,
+          "line": 1877
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/README.md",
+          "level": 1,
+          "line": 1882
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html",
+          "level": 1,
+          "line": 1887
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/html/events-page.html",
+          "level": 1,
+          "line": 1892
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/lcglafayette/events-page.html",
+          "level": 1,
+          "line": 1897
+        },
+        {
+          "heading": "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-page.html",
+          "level": 1,
+          "line": 1902
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 381
+      }
+    }
+  ]
+}

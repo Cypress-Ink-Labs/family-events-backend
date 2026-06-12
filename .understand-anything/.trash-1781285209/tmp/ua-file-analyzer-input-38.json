@@ -1,0 +1,31 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": ".changeset/config.json", "language": "json", "sizeLines": 16, "fileCategory": "config"},
+    {"path": ".gitleaksignore", "language": "unknown", "sizeLines": 8, "fileCategory": "code"},
+    {"path": ".npmrc", "language": "unknown", "sizeLines": 10, "fileCategory": "code"},
+    {"path": ".railway/railway.ts", "language": "typescript", "sizeLines": 86, "fileCategory": "code"},
+    {"path": ".understand-anything/.understandignore", "language": "unknown", "sizeLines": 31, "fileCategory": "code"},
+    {"path": "config/deploy.config.json", "language": "json", "sizeLines": 137, "fileCategory": "config"},
+    {"path": "cron/_shared/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/cleanup-stale/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/cleanup-stale/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "cron/db-maintenance/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/db-maintenance/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "cron/enrich-events/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/enrich-events/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "cron/review-events/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/review-events/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "cron/scrape-sources/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/scrape-sources/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "cron/send-reminders/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/send-reminders/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "cron/tag-queue/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/tag-queue/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "cron/weekly-digest/cron-runner.sh", "language": "shell", "sizeLines": 170, "fileCategory": "script"},
+    {"path": "cron/weekly-digest/package.json", "language": "json", "sizeLines": 6, "fileCategory": "config"},
+    {"path": "graphify-out/.graphify_python", "language": "unknown", "sizeLines": 0, "fileCategory": "code"},
+    {"path": "graphify-out/.graphify_root", "language": "unknown", "sizeLines": 1, "fileCategory": "code"}
+  ],
+  "batchImportData": {".changeset/config.json": [], ".gitleaksignore": [], ".npmrc": [], ".railway/railway.ts": [], ".understand-anything/.understandignore": [], "config/deploy.config.json": [], "cron/_shared/cron-runner.sh": [], "cron/cleanup-stale/cron-runner.sh": [], "cron/cleanup-stale/package.json": [], "cron/db-maintenance/cron-runner.sh": [], "cron/db-maintenance/package.json": [], "cron/enrich-events/cron-runner.sh": [], "cron/enrich-events/package.json": [], "cron/review-events/cron-runner.sh": [], "cron/review-events/package.json": [], "cron/scrape-sources/cron-runner.sh": [], "cron/scrape-sources/package.json": [], "cron/send-reminders/cron-runner.sh": [], "cron/send-reminders/package.json": [], "cron/tag-queue/cron-runner.sh": [], "cron/tag-queue/package.json": [], "cron/weekly-digest/cron-runner.sh": [], "cron/weekly-digest/package.json": [], "graphify-out/.graphify_python": [], "graphify-out/.graphify_root": []}
+}

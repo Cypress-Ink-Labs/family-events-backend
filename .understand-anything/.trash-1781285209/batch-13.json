@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "config:cron/enrich-events/.dockerignore",
+      "type": "config",
+      "name": ".dockerignore",
+      "filePath": "cron/enrich-events/.dockerignore",
+      "summary": "Docker build context exclusion list for the enrich-events cron service, preventing unnecessary files from being sent to the Docker daemon.",
+      "tags": ["configuration", "containerization", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:cron/enrich-events/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "cron/enrich-events/Dockerfile",
+      "summary": "Minimal Alpine-based Docker image for the enrich-events cron job, which invokes cron-runner.sh on a schedule to trigger the Supabase edge function that backfills or enriches event records with additional metadata.",
+      "tags": ["containerization", "infrastructure", "deployment", "cron"],
+      "complexity": "simple",
+      "languageNotes": "Uses alpine:3.23 with only curl and ca-certificates added; the entrypoint delegates to a shared cron-runner.sh script parameterized by a BACKFILL environment variable."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:cron/enrich-events/.dockerignore",
+      "target": "service:cron/enrich-events/Dockerfile",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

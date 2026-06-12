@@ -1,0 +1,186 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/rollbacks/20260601000000_001_schema_down.sql",
+      "type": "table",
+      "name": "20260601000000_001_schema_down.sql",
+      "filePath": "supabase/rollbacks/20260601000000_001_schema_down.sql",
+      "summary": "Rollback script for the initial schema migration that drops core tables and extensions established in the base schema.",
+      "tags": ["database", "migration", "rollback", "schema-definition"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601000100_002_functions_down.sql",
+      "type": "table",
+      "name": "20260601000100_002_functions_down.sql",
+      "filePath": "supabase/rollbacks/20260601000100_002_functions_down.sql",
+      "summary": "Rollback script that drops the core database functions introduced by the 002_functions migration.",
+      "tags": ["database", "migration", "rollback", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601000300_004_views_and_rpcs_down.sql",
+      "type": "table",
+      "name": "20260601000300_004_views_and_rpcs_down.sql",
+      "filePath": "supabase/rollbacks/20260601000300_004_views_and_rpcs_down.sql",
+      "summary": "Rollback script that drops the views and RPC functions introduced by migration 004.",
+      "tags": ["database", "migration", "rollback", "api-schema"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601002700_admin_event_lifetime_editing_down.sql",
+      "type": "table",
+      "name": "20260601002700_admin_event_lifetime_editing_down.sql",
+      "filePath": "supabase/rollbacks/20260601002700_admin_event_lifetime_editing_down.sql",
+      "summary": "Rollback script that reverts admin event lifetime-editing capabilities, removing associated functions or policy changes.",
+      "tags": ["database", "migration", "rollback", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601017000_event_status_enum_and_validate_checks_down.sql",
+      "type": "table",
+      "name": "20260601017000_event_status_enum_and_validate_checks_down.sql",
+      "filePath": "supabase/rollbacks/20260601017000_event_status_enum_and_validate_checks_down.sql",
+      "summary": "Large rollback script reversing event status enum definitions, validation check constraints, and multiple indexes on the events table.",
+      "tags": ["database", "migration", "rollback", "schema-definition"],
+      "complexity": "complex",
+      "languageNotes": "Drops six named indexes (events_local_date_published_idx, events_published_city_start_datetime_idx, events_published_feed_idx, events_published_local_date_city_idx, events_published_start_id_idx) and a public view definition alongside enum and check constraint removals."
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601018000_fix_events_enriched_enum_cast_down.sql",
+      "type": "table",
+      "name": "20260601018000_fix_events_enriched_enum_cast_down.sql",
+      "filePath": "supabase/rollbacks/20260601018000_fix_events_enriched_enum_cast_down.sql",
+      "summary": "Rollback script that reverts the enum cast fix applied to the events_enriched view or function.",
+      "tags": ["database", "migration", "rollback", "schema-definition"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601019000_restore_events_enriched_cursor_signature_down.sql",
+      "type": "table",
+      "name": "20260601019000_restore_events_enriched_cursor_signature_down.sql",
+      "filePath": "supabase/rollbacks/20260601019000_restore_events_enriched_cursor_signature_down.sql",
+      "summary": "Rollback script that reverts the cursor-pagination signature change on the events_enriched RPC function.",
+      "tags": ["database", "migration", "rollback", "api-schema"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601020000_event_embeddings_and_similarity_down.sql",
+      "type": "table",
+      "name": "20260601020000_event_embeddings_and_similarity_down.sql",
+      "filePath": "supabase/rollbacks/20260601020000_event_embeddings_and_similarity_down.sql",
+      "summary": "Rollback script that drops event embedding columns and similarity-search functions added for vector-based event discovery.",
+      "tags": ["database", "migration", "rollback", "ai"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601021000_admin_event_decisions_down.sql",
+      "type": "table",
+      "name": "20260601021000_admin_event_decisions_down.sql",
+      "filePath": "supabase/rollbacks/20260601021000_admin_event_decisions_down.sql",
+      "summary": "Comprehensive rollback script reverting the admin event decisions system including tables, functions, triggers, and RLS policies.",
+      "tags": ["database", "migration", "rollback", "admin"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601022000_source_auto_reject_and_stats_down.sql",
+      "type": "table",
+      "name": "20260601022000_source_auto_reject_and_stats_down.sql",
+      "filePath": "supabase/rollbacks/20260601022000_source_auto_reject_and_stats_down.sql",
+      "summary": "Rollback script that removes source auto-reject logic and associated statistics tracking functions.",
+      "tags": ["database", "migration", "rollback", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601023000_fix_ai_settings_rpc_grants_down.sql",
+      "type": "table",
+      "name": "20260601023000_fix_ai_settings_rpc_grants_down.sql",
+      "filePath": "supabase/rollbacks/20260601023000_fix_ai_settings_rpc_grants_down.sql",
+      "summary": "Rollback script that reverts permission grants on AI settings RPC functions.",
+      "tags": ["database", "migration", "rollback", "security"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601024000_admin_retry_dead_tag_queue_down.sql",
+      "type": "table",
+      "name": "20260601024000_admin_retry_dead_tag_queue_down.sql",
+      "filePath": "supabase/rollbacks/20260601024000_admin_retry_dead_tag_queue_down.sql",
+      "summary": "Rollback script that removes the admin function for retrying dead entries in the tag queue.",
+      "tags": ["database", "migration", "rollback", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601025000_baton_rouge_sources_down.sql",
+      "type": "table",
+      "name": "20260601025000_baton_rouge_sources_down.sql",
+      "filePath": "supabase/rollbacks/20260601025000_baton_rouge_sources_down.sql",
+      "summary": "Rollback script that removes Baton Rouge event source seed data and any associated configuration rows.",
+      "tags": ["database", "migration", "rollback", "data-pipeline"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql",
+      "type": "table",
+      "name": "20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql",
+      "filePath": "supabase/rollbacks/20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql",
+      "summary": "Rollback script that drops the index added to cover the unindexed foreign key on the admin_event_decisions table.",
+      "tags": ["database", "migration", "rollback", "schema-definition"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601027000_user_notification_preferences_down.sql",
+      "type": "table",
+      "name": "20260601027000_user_notification_preferences_down.sql",
+      "filePath": "supabase/rollbacks/20260601027000_user_notification_preferences_down.sql",
+      "summary": "Rollback script that drops the user_notification_preferences table and related RPC functions.",
+      "tags": ["database", "migration", "rollback", "schema-definition"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601028000_search_events_radius_filter_down.sql",
+      "type": "table",
+      "name": "20260601028000_search_events_radius_filter_down.sql",
+      "filePath": "supabase/rollbacks/20260601028000_search_events_radius_filter_down.sql",
+      "summary": "Rollback script that reverts the radius-based geo-filter added to the search_events RPC function.",
+      "tags": ["database", "migration", "rollback", "api-schema"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601029000_find_similar_events_by_id_down.sql",
+      "type": "table",
+      "name": "20260601029000_find_similar_events_by_id_down.sql",
+      "filePath": "supabase/rollbacks/20260601029000_find_similar_events_by_id_down.sql",
+      "summary": "Rollback script that drops the find_similar_events_by_id RPC used for vector-similarity-based event recommendations.",
+      "tags": ["database", "migration", "rollback", "ai"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601030000_push_and_notifications_down.sql",
+      "type": "table",
+      "name": "20260601030000_push_and_notifications_down.sql",
+      "filePath": "supabase/rollbacks/20260601030000_push_and_notifications_down.sql",
+      "summary": "Rollback script that removes push notification infrastructure including device token tables and notification dispatch functions.",
+      "tags": ["database", "migration", "rollback", "schema-definition"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601031000_event_change_notifications_down.sql",
+      "type": "table",
+      "name": "20260601031000_event_change_notifications_down.sql",
+      "filePath": "supabase/rollbacks/20260601031000_event_change_notifications_down.sql",
+      "summary": "Rollback script that drops the triggers and functions responsible for sending notifications when event details change.",
+      "tags": ["database", "migration", "rollback", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/rollbacks/20260601032000_drop_old_search_events_overload_down.sql",
+      "type": "table",
+      "name": "20260601032000_drop_old_search_events_overload_down.sql",
+      "filePath": "supabase/rollbacks/20260601032000_drop_old_search_events_overload_down.sql",
+      "summary": "Rollback script that restores the old search_events function overload that was removed by the forward migration.",
+      "tags": ["database", "migration", "rollback", "api-schema"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": []
+}

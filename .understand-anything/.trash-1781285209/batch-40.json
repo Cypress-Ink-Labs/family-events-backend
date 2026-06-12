@@ -1,0 +1,393 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/_shared/env_test.ts",
+      "type": "file",
+      "name": "env_test.ts",
+      "filePath": "supabase/functions/_shared/env_test.ts",
+      "summary": "Unit tests for the shared env utility module, verifying correct parsing and error handling of environment variable helpers.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/env.ts",
+      "type": "file",
+      "name": "env.ts",
+      "filePath": "supabase/functions/_shared/env.ts",
+      "summary": "Shared utility providing typed environment variable accessors (optional, required, int, bool, url) used across all Supabase edge functions.",
+      "tags": ["utility", "service", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/env.ts:optionalEnv",
+      "type": "function",
+      "name": "optionalEnv",
+      "filePath": "supabase/functions/_shared/env.ts",
+      "lineRange": [3, 8],
+      "summary": "Returns a trimmed environment variable value or undefined if not set.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/env.ts:requiredEnv",
+      "type": "function",
+      "name": "requiredEnv",
+      "filePath": "supabase/functions/_shared/env.ts",
+      "lineRange": [10, 19],
+      "summary": "Returns a required environment variable value, throwing an error if not set.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/env.ts:intEnv",
+      "type": "function",
+      "name": "intEnv",
+      "filePath": "supabase/functions/_shared/env.ts",
+      "lineRange": [21, 31],
+      "summary": "Parses an environment variable as an integer, returning a fallback value if unset or invalid.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/env.ts:boolEnv",
+      "type": "function",
+      "name": "boolEnv",
+      "filePath": "supabase/functions/_shared/env.ts",
+      "lineRange": [33, 42],
+      "summary": "Parses an environment variable as a boolean ('true'/'false'), returning a fallback if unset.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/env.ts:urlEnv",
+      "type": "function",
+      "name": "urlEnv",
+      "filePath": "supabase/functions/_shared/env.ts",
+      "lineRange": [44, 51],
+      "summary": "Returns an environment variable expected to hold a URL, with an optional fallback value.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/admin-run-cron/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/admin-run-cron/deno.json",
+      "summary": "Deno configuration for the admin-run-cron edge function specifying import map and node_modules resolution.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/backfill-embeddings/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/backfill-embeddings/deno.json",
+      "summary": "Deno configuration for the backfill-embeddings edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/backfill-event-enrichment/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/backfill-event-enrichment/deno.json",
+      "summary": "Deno configuration for the backfill-event-enrichment edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:supabase/functions/backfill-event-enrichment/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "supabase/functions/backfill-event-enrichment/README.md",
+      "summary": "Developer documentation for the backfill-event-enrichment function covering environment setup, processing logic, Unsplash image attribution requirements, and local development workflow.",
+      "tags": ["documentation", "infrastructure"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:supabase/functions/cleanup-stale-runs/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/cleanup-stale-runs/deno.json",
+      "summary": "Deno configuration for the cleanup-stale-runs edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/db-maintenance/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/db-maintenance/deno.json",
+      "summary": "Deno configuration for the db-maintenance edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/deno.json",
+      "summary": "Root Deno configuration for all Supabase edge functions, providing shared import maps and workspace-level settings.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/embed-event/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/embed-event/deno.json",
+      "summary": "Deno configuration for the embed-event edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/generate-parent-tips/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/generate-parent-tips/deno.json",
+      "summary": "Deno configuration for the generate-parent-tips edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/log-cron-run/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/log-cron-run/deno.json",
+      "summary": "Deno configuration for the log-cron-run edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/notify-email/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/notify-email/deno.json",
+      "summary": "Deno configuration for the notify-email edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "supabase/functions/package.json",
+      "summary": "Package manifest for the supabase/functions workspace providing test scripts for running edge function unit tests.",
+      "tags": ["configuration", "package-manager", "test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/process-event-review-queue/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/process-event-review-queue/deno.json",
+      "summary": "Deno configuration for the process-event-review-queue edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/process-notification-queue/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/process-notification-queue/deno.json",
+      "summary": "Deno configuration for the process-notification-queue edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/process-source-queue/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/process-source-queue/deno.json",
+      "summary": "Deno configuration for the process-source-queue edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/process-tag-queue/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/process-tag-queue/deno.json",
+      "summary": "Deno configuration for the process-tag-queue edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/scrape-due-sources/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/scrape-due-sources/deno.json",
+      "summary": "Deno configuration for the scrape-due-sources edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/scrape-source/__fixtures__/atom/entry-content.xml",
+      "type": "config",
+      "name": "entry-content.xml",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/atom/entry-content.xml",
+      "summary": "Atom feed XML fixture used in scrape-source tests to validate Atom entry content parsing.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html",
+      "type": "file",
+      "name": "events-page.html",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html",
+      "summary": "HTML fixture capturing a real Downtown Lafayette events page used to test the HTML scraper's event extraction logic.",
+      "tags": ["test", "markup"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/html/events-page.html",
+      "type": "file",
+      "name": "events-page.html",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/html/events-page.html",
+      "summary": "Generic HTML events page fixture used in scrape-source unit tests for HTML extraction.",
+      "tags": ["test", "markup"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/ical/folded-tzid.ics",
+      "type": "file",
+      "name": "folded-tzid.ics",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/ical/folded-tzid.ics",
+      "summary": "iCalendar fixture containing a folded TZID line to test the parser's line-unfolding and timezone ID extraction.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/ical/hilliard-sample.ics",
+      "type": "file",
+      "name": "hilliard-sample.ics",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/ical/hilliard-sample.ics",
+      "summary": "Real-world iCalendar sample from Hilliard used to test multi-event iCal parsing and field extraction.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/ical/lafayette-mom-sample.ics",
+      "type": "file",
+      "name": "lafayette-mom-sample.ics",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/ical/lafayette-mom-sample.ics",
+      "summary": "iCalendar sample from Lafayette Mom used in scrape-source tests covering event title, description, and date parsing.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/_shared/env_test.ts",
+      "target": "file:supabase/functions/_shared/env.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/env_test.ts",
+      "target": "file:supabase/functions/_shared/env.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:optionalEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:requiredEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:intEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:boolEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:urlEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:optionalEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:requiredEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:intEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:boolEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/env.ts",
+      "target": "function:supabase/functions/_shared/env.ts:urlEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "config:supabase/functions/deno.json",
+      "target": "config:supabase/functions/admin-run-cron/deno.json",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:supabase/functions/deno.json",
+      "target": "config:supabase/functions/backfill-embeddings/deno.json",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:supabase/functions/deno.json",
+      "target": "config:supabase/functions/backfill-event-enrichment/deno.json",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:supabase/functions/backfill-event-enrichment/README.md",
+      "target": "config:supabase/functions/backfill-event-enrichment/deno.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

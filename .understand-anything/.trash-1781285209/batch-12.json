@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "config:cron/db-maintenance/.dockerignore",
+      "type": "config",
+      "name": ".dockerignore",
+      "filePath": "cron/db-maintenance/.dockerignore",
+      "summary": "Docker build context exclusion list for the db-maintenance cron service, preventing unnecessary files from being sent to the Docker daemon.",
+      "tags": ["configuration", "containerization", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:cron/db-maintenance/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "cron/db-maintenance/Dockerfile",
+      "summary": "Minimal Alpine-based Docker image for the db-maintenance cron job, which invokes cron-runner.sh on a schedule to trigger the Supabase edge function responsible for routine database maintenance tasks.",
+      "tags": ["containerization", "infrastructure", "deployment", "cron"],
+      "complexity": "simple",
+      "languageNotes": "Uses alpine:3.23 with only curl and ca-certificates added; the entrypoint delegates to a shared cron-runner.sh script parameterized by a DB_MAINT environment variable."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:cron/db-maintenance/.dockerignore",
+      "target": "service:cron/db-maintenance/Dockerfile",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

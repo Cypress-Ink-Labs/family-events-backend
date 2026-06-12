@@ -1,0 +1,2473 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 42,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/migrations/20260601000000_schema_baseline.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 6920,
+      "nonEmptyLines": 4449,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "title",
+            "description",
+            "start_datetime",
+            "end_datetime",
+            "timezone",
+            "venue_name",
+            "address",
+            "city_id",
+            "latitude",
+            "longitude",
+            "age_min",
+            "age_max",
+            "price",
+            "is_free",
+            "source_url",
+            "source_name",
+            "source_id",
+            "images",
+            "status",
+            "ai_confidence",
+            "ai_tag_provider",
+            "recurrence_info",
+            "is_featured",
+            "is_outdoor",
+            "view_count",
+            "search_vector",
+            "admin_locked_fields",
+            "admin_last_edited_at",
+            "admin_last_edited_by",
+            "created_at",
+            "updated_at",
+            "ai_tag_model",
+            "ai_tag_status"
+          ],
+          "startLine": 1541,
+          "endLine": 1584
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "source_id",
+            "source_run_id",
+            "status",
+            "trigger_type",
+            "attempt_count",
+            "enqueued_at",
+            "started_at",
+            "finished_at",
+            "next_attempt_at",
+            "last_error",
+            "skip_reason"
+          ],
+          "startLine": 2388,
+          "endLine": 2402
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_id",
+            "source_run_id",
+            "trigger_type",
+            "enqueued_at",
+            "next_attempt_at",
+            "started_at",
+            "finished_at",
+            "attempt_count",
+            "last_error",
+            "status"
+          ],
+          "startLine": 2436,
+          "endLine": 2449
+        },
+        {
+          "name": "private",
+          "kind": "table",
+          "fields": [
+            "id",
+            "label",
+            "status",
+            "http_status",
+            "duration_s",
+            "body",
+            "ran_at"
+          ],
+          "startLine": 4265,
+          "endLine": 4274
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "admin_user_id",
+            "action",
+            "target_type",
+            "target_id",
+            "metadata",
+            "created_at"
+          ],
+          "startLine": 4307,
+          "endLine": 4315
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "name",
+            "state",
+            "country",
+            "slug",
+            "is_active",
+            "latitude",
+            "longitude",
+            "timezone",
+            "created_at"
+          ],
+          "startLine": 4321,
+          "endLine": 4332
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "event_id",
+            "body",
+            "is_approved",
+            "is_flagged",
+            "created_at",
+            "updated_at"
+          ],
+          "startLine": 4338,
+          "endLine": 4348
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_id",
+            "source_run_id",
+            "trigger_type",
+            "provider",
+            "model",
+            "status",
+            "input_title",
+            "input_description",
+            "available_tag_slugs",
+            "predicted_tags",
+            "predicted_fields",
+            "reasoning_summary",
+            "fallback_reason",
+            "processing_ms",
+            "created_at"
+          ],
+          "startLine": 4356,
+          "endLine": 4376
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "event_id",
+            "score",
+            "created_at"
+          ],
+          "startLine": 4382,
+          "endLine": 4389
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "name",
+            "url",
+            "source_type",
+            "city_id",
+            "is_active",
+            "scrape_interval_hours",
+            "last_scraped_at",
+            "last_status",
+            "error_count",
+            "notes",
+            "created_at",
+            "updated_at",
+            "auto_approve",
+            "date_window_days",
+            "extraction_mode"
+          ],
+          "startLine": 4406,
+          "endLine": 4425
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "event_id",
+            "tag_id",
+            "confidence",
+            "is_manual_override",
+            "created_at"
+          ],
+          "startLine": 4456,
+          "endLine": 4462
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "event_id",
+            "created_at"
+          ],
+          "startLine": 4468,
+          "endLine": 4473
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "max_uses",
+            "used_count",
+            "expires_at",
+            "notes",
+            "created_by",
+            "created_at",
+            "code_hash",
+            "id",
+            "revoked_at"
+          ],
+          "startLine": 4479,
+          "endLine": 4492
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "email_hash",
+            "attempted_at",
+            "succeeded"
+          ],
+          "startLine": 4510,
+          "endLine": 4515
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "email_hash",
+            "attempted_at",
+            "succeeded"
+          ],
+          "startLine": 4534,
+          "endLine": 4539
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "email",
+            "message",
+            "status",
+            "invite_code_id",
+            "admin_notes",
+            "created_at",
+            "reviewed_at",
+            "reviewed_by"
+          ],
+          "startLine": 4558,
+          "endLine": 4571
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "email",
+            "invite_code",
+            "expires_at",
+            "claimed_by",
+            "claimed_at",
+            "created_at"
+          ],
+          "startLine": 4585,
+          "endLine": 4592
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "event_id",
+            "signal_type",
+            "weight",
+            "created_at"
+          ],
+          "startLine": 4628,
+          "endLine": 4636
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "source_queue_id",
+            "source_run_id",
+            "source_id",
+            "extraction_mode",
+            "extractor",
+            "provider",
+            "model",
+            "status",
+            "input_bytes",
+            "parsed_event_count",
+            "fallback_reason",
+            "latency_ms",
+            "reasoning_summary",
+            "error",
+            "created_at"
+          ],
+          "startLine": 4642,
+          "endLine": 4661
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "source_id",
+            "started_at",
+            "completed_at",
+            "status",
+            "events_found",
+            "events_imported",
+            "events_skipped",
+            "error_log",
+            "created_at"
+          ],
+          "startLine": 4680,
+          "endLine": 4692
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "name",
+            "slug",
+            "color",
+            "category",
+            "is_system",
+            "created_at"
+          ],
+          "startLine": 4724,
+          "endLine": 4732
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "user_id",
+            "is_enabled",
+            "access_expires_at",
+            "enabled_at",
+            "disabled_at",
+            "disabled_reason",
+            "created_at",
+            "updated_at"
+          ],
+          "startLine": 4753,
+          "endLine": 4762
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "event_id",
+            "added_at",
+            "notes"
+          ],
+          "startLine": 4770,
+          "endLine": 4776
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "email",
+            "display_name",
+            "avatar_url",
+            "role",
+            "city_preference_id",
+            "child_name",
+            "child_age",
+            "created_at",
+            "updated_at"
+          ],
+          "startLine": 4782,
+          "endLine": 4794
+        },
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 4395,
+          "endLine": 4395
+        },
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 4442,
+          "endLine": 4442
+        },
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 4600,
+          "endLine": 4600
+        },
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 4709,
+          "endLine": 4709
+        },
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 4738,
+          "endLine": 4738
+        },
+        {
+          "name": "event_llm_review_queue_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 184,
+          "endLine": 184
+        },
+        {
+          "name": "event_llm_review_queue_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 187,
+          "endLine": 187
+        },
+        {
+          "name": "event_llm_review_traces_queue_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 193,
+          "endLine": 193
+        },
+        {
+          "name": "event_llm_review_traces_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 196,
+          "endLine": 196
+        },
+        {
+          "name": "event_llm_review_traces_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 199,
+          "endLine": 199
+        },
+        {
+          "name": "invite_request_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 206,
+          "endLine": 206
+        },
+        {
+          "name": "invite_redemption_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 211,
+          "endLine": 211
+        },
+        {
+          "name": "recommendation_signals_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 216,
+          "endLine": 216
+        },
+        {
+          "name": "event_ai_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 221,
+          "endLine": 221
+        },
+        {
+          "name": "source_extraction_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 226,
+          "endLine": 226
+        },
+        {
+          "name": "source_runs_running_started_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 231,
+          "endLine": 231
+        },
+        {
+          "name": "events_needing_enrichment_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 237,
+          "endLine": 237
+        },
+        {
+          "name": "event_llm_review_queue_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 533,
+          "endLine": 533
+        },
+        {
+          "name": "event_llm_review_queue_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 537,
+          "endLine": 537
+        },
+        {
+          "name": "event_llm_review_traces_queue_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 567,
+          "endLine": 567
+        },
+        {
+          "name": "event_llm_review_traces_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 571,
+          "endLine": 571
+        },
+        {
+          "name": "event_llm_review_traces_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 575,
+          "endLine": 575
+        },
+        {
+          "name": "event_ai_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 612,
+          "endLine": 612
+        },
+        {
+          "name": "events_needing_enrichment_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 617,
+          "endLine": 617
+        },
+        {
+          "name": "invite_redemption_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 628,
+          "endLine": 628
+        },
+        {
+          "name": "invite_request_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 633,
+          "endLine": 633
+        },
+        {
+          "name": "recommendation_signals_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 638,
+          "endLine": 638
+        },
+        {
+          "name": "source_extraction_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 643,
+          "endLine": 643
+        },
+        {
+          "name": "source_runs_running_started_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 648,
+          "endLine": 648
+        },
+        {
+          "name": "source_runs_started_at_idx1",
+          "kind": "index",
+          "fields": [],
+          "startLine": 652,
+          "endLine": 652
+        },
+        {
+          "name": "source_scrape_queue_finished_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 657,
+          "endLine": 657
+        },
+        {
+          "name": "event_llm_review_queue_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 789,
+          "endLine": 789
+        },
+        {
+          "name": "event_llm_review_queue_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 793,
+          "endLine": 793
+        },
+        {
+          "name": "event_llm_review_traces_queue_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 823,
+          "endLine": 823
+        },
+        {
+          "name": "event_llm_review_traces_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 827,
+          "endLine": 827
+        },
+        {
+          "name": "event_llm_review_traces_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 831,
+          "endLine": 831
+        },
+        {
+          "name": "event_ai_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 844,
+          "endLine": 844
+        },
+        {
+          "name": "events_needing_enrichment_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 849,
+          "endLine": 849
+        },
+        {
+          "name": "invite_redemption_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 860,
+          "endLine": 860
+        },
+        {
+          "name": "invite_request_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 865,
+          "endLine": 865
+        },
+        {
+          "name": "recommendation_signals_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 870,
+          "endLine": 870
+        },
+        {
+          "name": "source_extraction_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 875,
+          "endLine": 875
+        },
+        {
+          "name": "source_runs_running_started_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 880,
+          "endLine": 880
+        },
+        {
+          "name": "source_runs_started_at_idx1",
+          "kind": "index",
+          "fields": [],
+          "startLine": 884,
+          "endLine": 884
+        },
+        {
+          "name": "source_scrape_queue_finished_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 889,
+          "endLine": 889
+        },
+        {
+          "name": "event_llm_review_queue_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1049,
+          "endLine": 1049
+        },
+        {
+          "name": "event_llm_review_queue_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1053,
+          "endLine": 1053
+        },
+        {
+          "name": "event_llm_review_traces_queue_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1083,
+          "endLine": 1083
+        },
+        {
+          "name": "event_llm_review_traces_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1087,
+          "endLine": 1087
+        },
+        {
+          "name": "event_llm_review_traces_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1091,
+          "endLine": 1091
+        },
+        {
+          "name": "event_ai_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1104,
+          "endLine": 1104
+        },
+        {
+          "name": "events_needing_enrichment_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1109,
+          "endLine": 1109
+        },
+        {
+          "name": "invite_redemption_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1120,
+          "endLine": 1120
+        },
+        {
+          "name": "invite_request_attempts_attempted_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1125,
+          "endLine": 1125
+        },
+        {
+          "name": "recommendation_signals_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1130,
+          "endLine": 1130
+        },
+        {
+          "name": "source_extraction_traces_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1135,
+          "endLine": 1135
+        },
+        {
+          "name": "source_runs_running_started_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1140,
+          "endLine": 1140
+        },
+        {
+          "name": "source_runs_started_at_idx1",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1144,
+          "endLine": 1144
+        },
+        {
+          "name": "source_scrape_queue_finished_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1149,
+          "endLine": 1149
+        },
+        {
+          "name": "railway_cron_runs_label_ran_at",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4962,
+          "endLine": 4962
+        },
+        {
+          "name": "timezone_names_cache_name_uidx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4966,
+          "endLine": 4966
+        },
+        {
+          "name": "admin_audit_log_admin_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4970,
+          "endLine": 4970
+        },
+        {
+          "name": "admin_audit_log_metadata_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4974,
+          "endLine": 4974
+        },
+        {
+          "name": "comments_approved_event_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4978,
+          "endLine": 4978
+        },
+        {
+          "name": "comments_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4982,
+          "endLine": 4982
+        },
+        {
+          "name": "comments_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4986,
+          "endLine": 4986
+        },
+        {
+          "name": "event_ai_traces_event_id_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4990,
+          "endLine": 4990
+        },
+        {
+          "name": "event_ai_traces_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4994,
+          "endLine": 4994
+        },
+        {
+          "name": "event_sources_city_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 4998,
+          "endLine": 4998
+        },
+        {
+          "name": "event_tag_queue_claimable_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5002,
+          "endLine": 5002
+        },
+        {
+          "name": "event_tag_queue_event_active_uniq",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5006,
+          "endLine": 5006
+        },
+        {
+          "name": "event_tag_queue_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5010,
+          "endLine": 5010
+        },
+        {
+          "name": "event_tag_queue_status_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5014,
+          "endLine": 5014
+        },
+        {
+          "name": "event_tags_tag_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5018,
+          "endLine": 5018
+        },
+        {
+          "name": "events_admin_last_edited_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5022,
+          "endLine": 5022
+        },
+        {
+          "name": "events_admin_last_edited_by_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5026,
+          "endLine": 5026
+        },
+        {
+          "name": "events_city_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5030,
+          "endLine": 5030
+        },
+        {
+          "name": "events_city_id_start_datetime_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5034,
+          "endLine": 5034
+        },
+        {
+          "name": "events_is_featured_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5038,
+          "endLine": 5038
+        },
+        {
+          "name": "events_local_date_published_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5042,
+          "endLine": 5042
+        },
+        {
+          "name": "events_published_city_start_datetime_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5053,
+          "endLine": 5053
+        },
+        {
+          "name": "events_search_vector_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5057,
+          "endLine": 5057
+        },
+        {
+          "name": "events_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5061,
+          "endLine": 5061
+        },
+        {
+          "name": "events_source_id_source_url_uniq",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5065,
+          "endLine": 5065
+        },
+        {
+          "name": "events_start_datetime_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5073,
+          "endLine": 5073
+        },
+        {
+          "name": "events_status_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5077,
+          "endLine": 5077
+        },
+        {
+          "name": "events_status_start_datetime_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5081,
+          "endLine": 5081
+        },
+        {
+          "name": "favorites_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5085,
+          "endLine": 5085
+        },
+        {
+          "name": "favorites_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5089,
+          "endLine": 5089
+        },
+        {
+          "name": "idx_events_ai_tag_provider",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5093,
+          "endLine": 5093
+        },
+        {
+          "name": "idx_events_ai_tag_status",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5097,
+          "endLine": 5097
+        },
+        {
+          "name": "invite_codes_created_by_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5101,
+          "endLine": 5101
+        },
+        {
+          "name": "invite_redemption_attempts_email_hash_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5105,
+          "endLine": 5105
+        },
+        {
+          "name": "invite_request_attempts_email_hash_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5109,
+          "endLine": 5109
+        },
+        {
+          "name": "invite_requests_email_pending_uniq",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5113,
+          "endLine": 5113
+        },
+        {
+          "name": "invite_requests_invite_code_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5117,
+          "endLine": 5117
+        },
+        {
+          "name": "invite_requests_reviewed_by_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5121,
+          "endLine": 5121
+        },
+        {
+          "name": "invite_requests_status_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5125,
+          "endLine": 5125
+        },
+        {
+          "name": "pending_invite_claims_claimed_by_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5129,
+          "endLine": 5129
+        },
+        {
+          "name": "pending_invite_claims_invite_code_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5133,
+          "endLine": 5133
+        },
+        {
+          "name": "ratings_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5137,
+          "endLine": 5137
+        },
+        {
+          "name": "recommendation_signals_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5141,
+          "endLine": 5141
+        },
+        {
+          "name": "recommendation_signals_user_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5145,
+          "endLine": 5145
+        },
+        {
+          "name": "recommendation_signals_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5149,
+          "endLine": 5149
+        },
+        {
+          "name": "source_extraction_traces_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5153,
+          "endLine": 5153
+        },
+        {
+          "name": "source_extraction_traces_source_queue_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5157,
+          "endLine": 5157
+        },
+        {
+          "name": "source_extraction_traces_source_run_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5161,
+          "endLine": 5161
+        },
+        {
+          "name": "source_runs_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5165,
+          "endLine": 5165
+        },
+        {
+          "name": "source_scrape_queue_claimable_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5169,
+          "endLine": 5169
+        },
+        {
+          "name": "source_scrape_queue_source_active_uniq",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5173,
+          "endLine": 5173
+        },
+        {
+          "name": "source_scrape_queue_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5177,
+          "endLine": 5177
+        },
+        {
+          "name": "source_scrape_queue_status_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5181,
+          "endLine": 5181
+        },
+        {
+          "name": "user_calendar_events_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5185,
+          "endLine": 5185
+        },
+        {
+          "name": "user_calendar_events_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5189,
+          "endLine": 5189
+        },
+        {
+          "name": "user_profiles_city_preference_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 5193,
+          "endLine": 5193
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 139
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 11,
+      "nonEmptyLines": 10,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601001000_reference_security_and_cron.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 713,
+      "nonEmptyLines": 638,
+      "definitions": [
+        {
+          "name": "private",
+          "kind": "table",
+          "fields": [
+            "label",
+            "enabled",
+            "updated_at"
+          ],
+          "startLine": 545,
+          "endLine": 549
+        },
+        {
+          "name": "events_published_feed_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 482,
+          "endLine": 482
+        },
+        {
+          "name": "events_admin_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 486,
+          "endLine": 486
+        },
+        {
+          "name": "events_admin_status_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 489,
+          "endLine": 489
+        },
+        {
+          "name": "events_published_local_date_city_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 492,
+          "endLine": 492
+        },
+        {
+          "name": "event_tag_queue_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 496,
+          "endLine": 496
+        },
+        {
+          "name": "source_scrape_queue_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 499,
+          "endLine": 499
+        },
+        {
+          "name": "source_runs_started_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 503,
+          "endLine": 503
+        },
+        {
+          "name": "source_runs_source_error_started_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 506,
+          "endLine": 506
+        },
+        {
+          "name": "event_sources_active_last_scraped_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 510,
+          "endLine": 510
+        },
+        {
+          "name": "admin_audit_log_target_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 514,
+          "endLine": 514
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 11
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 1082,
+      "nonEmptyLines": 974,
+      "definitions": [
+        {
+          "name": "events_published_start_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 264,
+          "endLine": 264
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 1
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601003000_maintenance_and_admin_queues.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 1224,
+      "nonEmptyLines": 1054,
+      "definitions": [
+        {
+          "name": "event_tag_queue_finished_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 20,
+          "endLine": 20
+        },
+        {
+          "name": "events_admin_city_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 244,
+          "endLine": 244
+        },
+        {
+          "name": "events_admin_status_city_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 247,
+          "endLine": 247
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 3
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601004000_llm_review_and_enrichment.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 2469,
+      "nonEmptyLines": 2247,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_id",
+            "source_id",
+            "source_run_id",
+            "trigger_type",
+            "status",
+            "attempt_count",
+            "max_attempts",
+            "enqueued_at",
+            "started_at",
+            "finished_at",
+            "next_attempt_at",
+            "last_error",
+            "created_at",
+            "updated_at"
+          ],
+          "startLine": 168,
+          "endLine": 184
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_id",
+            "queue_id",
+            "source_id",
+            "source_run_id",
+            "provider",
+            "model",
+            "prompt_version",
+            "status",
+            "model_decision",
+            "applied_decision",
+            "confidence",
+            "reason",
+            "flags",
+            "suggested_category",
+            "normalized_title",
+            "raw_response",
+            "error_code",
+            "error_message",
+            "input_snapshot",
+            "processing_ms",
+            "created_at"
+          ],
+          "startLine": 200,
+          "endLine": 223
+        },
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 249,
+          "endLine": 249
+        },
+        {
+          "name": "event_sources_processing_mode_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 101,
+          "endLine": 101
+        },
+        {
+          "name": "events_llm_review_status_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 158,
+          "endLine": 158
+        },
+        {
+          "name": "events_llm_review_decision_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 161,
+          "endLine": 161
+        },
+        {
+          "name": "event_llm_review_queue_active_event_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 189,
+          "endLine": 189
+        },
+        {
+          "name": "event_llm_review_queue_claim_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 193,
+          "endLine": 193
+        },
+        {
+          "name": "event_llm_review_queue_event_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 197,
+          "endLine": 197
+        },
+        {
+          "name": "event_llm_review_traces_event_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 242,
+          "endLine": 242
+        },
+        {
+          "name": "event_llm_review_traces_status_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 245,
+          "endLine": 245
+        },
+        {
+          "name": "events_enrichment_attempt_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 2171,
+          "endLine": 2171
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 12
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 719,
+      "nonEmptyLines": 634,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "provider",
+            "display_name",
+            "description",
+            "cost_tier",
+            "is_enabled"
+          ],
+          "startLine": 7,
+          "endLine": 15
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "feature",
+            "model_id",
+            "enabled",
+            "updated_at",
+            "updated_by"
+          ],
+          "startLine": 48,
+          "endLine": 55
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "provider",
+            "display_name",
+            "description",
+            "cost_tier",
+            "is_enabled"
+          ],
+          "startLine": 211,
+          "endLine": 219
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "feature",
+            "model_id",
+            "enabled",
+            "updated_at",
+            "updated_by"
+          ],
+          "startLine": 251,
+          "endLine": 258
+        },
+        {
+          "name": "private",
+          "kind": "table",
+          "fields": [
+            "id",
+            "run_key",
+            "label",
+            "provider",
+            "level",
+            "message",
+            "metadata",
+            "sequence",
+            "created_at"
+          ],
+          "startLine": 445,
+          "endLine": 455
+        },
+        {
+          "name": "railway_cron_runs_run_key_key",
+          "kind": "index",
+          "fields": [],
+          "startLine": 442,
+          "endLine": 442
+        },
+        {
+          "name": "cron_run_log_entries_run_key_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 459,
+          "endLine": 459
+        },
+        {
+          "name": "cron_run_log_entries_label_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 462,
+          "endLine": 462
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 8
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 2400,
+      "nonEmptyLines": 2205,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_id",
+            "image_url",
+            "provider",
+            "matched_tag",
+            "unsplash_photo_id",
+            "unsplash_photographer_name",
+            "unsplash_photographer_username",
+            "unsplash_photographer_profile_url",
+            "unsplash_photo_url",
+            "unsplash_download_location",
+            "download_tracked_at",
+            "download_tracking_status",
+            "download_tracking_attempts",
+            "download_tracking_last_error",
+            "download_tracking_next_attempt_at",
+            "created_at",
+            "updated_at"
+          ],
+          "startLine": 974,
+          "endLine": 994
+        },
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 1663,
+          "endLine": 1663
+        },
+        {
+          "name": "ai_feature_config_model_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 309,
+          "endLine": 309
+        },
+        {
+          "name": "ai_feature_config_updated_by_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 312,
+          "endLine": 312
+        },
+        {
+          "name": "event_image_attributions_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 996,
+          "endLine": 996
+        },
+        {
+          "name": "event_image_attributions_pending_tracking_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 998,
+          "endLine": 998
+        },
+        {
+          "name": "event_llm_review_queue_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1641,
+          "endLine": 1641
+        },
+        {
+          "name": "event_llm_review_queue_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1644,
+          "endLine": 1644
+        },
+        {
+          "name": "event_llm_review_traces_queue_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1647,
+          "endLine": 1647
+        },
+        {
+          "name": "event_llm_review_traces_source_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1650,
+          "endLine": 1650
+        },
+        {
+          "name": "event_llm_review_traces_source_run_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 1653,
+          "endLine": 1653
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 11
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601007000_lafayette_new_sources.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 80,
+      "nonEmptyLines": 78,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601008000_tier3_lafayette_sources.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 75,
+      "nonEmptyLines": 72,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601009000_cron_review_events_allowlist.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 59,
+      "nonEmptyLines": 54,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601010000_admin_events_realtime.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 38,
+      "nonEmptyLines": 33,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 77,
+      "nonEmptyLines": 67,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601011001_fix_provider_constraint.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 91,
+      "nonEmptyLines": 79,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601012000_disable_invite_gate.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 34,
+      "nonEmptyLines": 32,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601013000_reset_invite_gate_guc.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 32,
+      "nonEmptyLines": 30,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601014000_fix_invite_gate_default.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 26,
+      "nonEmptyLines": 24,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601015000_fix_invite_gate_single_source.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 137,
+      "nonEmptyLines": 120,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601016000_anon_access_for_public_browsing.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 51,
+      "nonEmptyLines": 46,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 968,
+      "nonEmptyLines": 893,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "view",
+          "fields": [],
+          "startLine": 105,
+          "endLine": 105
+        },
+        {
+          "name": "events_local_date_published_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 89,
+          "endLine": 89
+        },
+        {
+          "name": "events_published_city_start_datetime_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 92,
+          "endLine": 92
+        },
+        {
+          "name": "events_published_feed_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 95,
+          "endLine": 95
+        },
+        {
+          "name": "events_published_local_date_city_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 98,
+          "endLine": 98
+        },
+        {
+          "name": "events_published_start_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 101,
+          "endLine": 101
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 6
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 90,
+      "nonEmptyLines": 88,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 138,
+      "nonEmptyLines": 135,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601020000_event_embeddings_and_similarity.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 216,
+      "nonEmptyLines": 191,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_id",
+            "embedding",
+            "model",
+            "created_at"
+          ],
+          "startLine": 16,
+          "endLine": 23
+        },
+        {
+          "name": "event_embeddings_embedding_hnsw_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 59,
+          "endLine": 59
+        },
+        {
+          "name": "event_embeddings_event_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 65,
+          "endLine": 65
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 3
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601021000_admin_event_decisions.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 377,
+      "nonEmptyLines": 336,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_id",
+            "admin_user_id",
+            "decision_type",
+            "old_status",
+            "new_status",
+            "old_tags",
+            "source_name"
+          ],
+          "startLine": 18,
+          "endLine": 31
+        },
+        {
+          "name": "admin_event_decisions_event_id_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 40,
+          "endLine": 40
+        },
+        {
+          "name": "admin_event_decisions_created_at_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 44,
+          "endLine": 44
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 3
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601022000_source_auto_reject_and_stats.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 175,
+      "nonEmptyLines": 161,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 36,
+      "nonEmptyLines": 31,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 147,
+      "nonEmptyLines": 119,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601025000_baton_rouge_sources.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 124,
+      "nonEmptyLines": 121,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 34,
+      "nonEmptyLines": 30,
+      "definitions": [
+        {
+          "name": "admin_event_decisions_admin_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 26,
+          "endLine": 26
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 1
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601027000_user_notification_preferences.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 143,
+      "nonEmptyLines": 124,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "reminder_email",
+            "reminder_push",
+            "change_email",
+            "change_push",
+            "digest_email",
+            "digest_push",
+            "created_at",
+            "updated_at"
+          ],
+          "startLine": 13,
+          "endLine": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 1
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601028000_search_events_radius_filter.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 113,
+      "nonEmptyLines": 112,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601029000_find_similar_events_by_id.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 85,
+      "nonEmptyLines": 78,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601030000_push_and_notifications.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 331,
+      "nonEmptyLines": 279,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "platform",
+            "endpoint",
+            "updated_at"
+          ],
+          "startLine": 15,
+          "endLine": 39
+        },
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "type",
+            "title",
+            "body",
+            "event_id",
+            "read_at",
+            "created_at"
+          ],
+          "startLine": 81,
+          "endLine": 90
+        },
+        {
+          "name": "push_subscriptions_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 45,
+          "endLine": 45
+        },
+        {
+          "name": "user_notifications_user_created_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 96,
+          "endLine": 96
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 4
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601031000_event_change_notifications.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 148,
+      "nonEmptyLines": 127,
+      "definitions": [
+        {
+          "name": "public",
+          "kind": "table",
+          "fields": [
+            "id",
+            "user_id",
+            "event_id",
+            "change_type",
+            "change_detail",
+            "processed",
+            "created_at",
+            "processed_at"
+          ],
+          "startLine": 17,
+          "endLine": 28
+        },
+        {
+          "name": "notification_queue_dedup_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 39,
+          "endLine": 39
+        },
+        {
+          "name": "notification_queue_pending_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 43,
+          "endLine": 43
+        },
+        {
+          "name": "notification_queue_user_id_idx",
+          "kind": "index",
+          "fields": [],
+          "startLine": 47,
+          "endLine": 47
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 4
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601032000_drop_old_search_events_overload.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 34,
+      "nonEmptyLines": 32,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601033000_community_event_submission.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 141,
+      "nonEmptyLines": 130,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601034000_activate_baton_rouge_sources.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 12,
+      "nonEmptyLines": 11,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601035000_community_event_status_notification.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 101,
+      "nonEmptyLines": 90,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260601036000_admin_user_delete.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 76,
+      "nonEmptyLines": 64,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 64,
+      "nonEmptyLines": 57,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260610170000_admin_events_source_filter.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 371,
+      "nonEmptyLines": 359,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "supabase/migrations/20260610180000_admin_dashboard_stats.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 94,
+      "nonEmptyLines": 87,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    }
+  ]
+}

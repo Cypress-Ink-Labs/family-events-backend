@@ -1,0 +1,319 @@
+{
+  "nodes": [
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/03bb67a28abc28a43c89c8e27ea17381047f7276274248ad0e7de92a72378bcb.json",
+      "type": "config",
+      "name": "03bb67a28abc28a43c89c8e27ea17381047f7276274248ad0e7de92a72378bcb.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/03bb67a28abc28a43c89c8e27ea17381047f7276274248ad0e7de92a72378bcb.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/0b06f8f07d51543a32ba5ccea753b6e999ae64f4a5cd5863c92f16f4ffab0ac5.json",
+      "type": "config",
+      "name": "0b06f8f07d51543a32ba5ccea753b6e999ae64f4a5cd5863c92f16f4ffab0ac5.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/0b06f8f07d51543a32ba5ccea753b6e999ae64f4a5cd5863c92f16f4ffab0ac5.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/0c0b6e9feb6a3248ab787305d6a754210f0ae5d6f5475888abd57e4cca3cc06b.json",
+      "type": "config",
+      "name": "0c0b6e9feb6a3248ab787305d6a754210f0ae5d6f5475888abd57e4cca3cc06b.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/0c0b6e9feb6a3248ab787305d6a754210f0ae5d6f5475888abd57e4cca3cc06b.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/124c118d06a9af22dd7805c336d3e13dc5e32f453bac41b3e955d7cfce93ff17.json",
+      "type": "config",
+      "name": "124c118d06a9af22dd7805c336d3e13dc5e32f453bac41b3e955d7cfce93ff17.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/124c118d06a9af22dd7805c336d3e13dc5e32f453bac41b3e955d7cfce93ff17.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/1689f6d0863df3cb9bb7dea2b0bc7036d93f15b447297582317bfdb00ac4fd8b.json",
+      "type": "config",
+      "name": "1689f6d0863df3cb9bb7dea2b0bc7036d93f15b447297582317bfdb00ac4fd8b.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/1689f6d0863df3cb9bb7dea2b0bc7036d93f15b447297582317bfdb00ac4fd8b.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/201e9d419f01dc6155829e9e842830028876632be568d870c4153ed83f520c91.json",
+      "type": "config",
+      "name": "201e9d419f01dc6155829e9e842830028876632be568d870c4153ed83f520c91.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/201e9d419f01dc6155829e9e842830028876632be568d870c4153ed83f520c91.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/20acb370bc6270cf78d4d57bab8497b38618043d7ba8e3f59499170af8e20b45.json",
+      "type": "config",
+      "name": "20acb370bc6270cf78d4d57bab8497b38618043d7ba8e3f59499170af8e20b45.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/20acb370bc6270cf78d4d57bab8497b38618043d7ba8e3f59499170af8e20b45.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/23523e9a1064a47d6ada4a3ed5109b7f91dbed5d11d12d862eef6b3a33df68b7.json",
+      "type": "config",
+      "name": "23523e9a1064a47d6ada4a3ed5109b7f91dbed5d11d12d862eef6b3a33df68b7.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/23523e9a1064a47d6ada4a3ed5109b7f91dbed5d11d12d862eef6b3a33df68b7.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/3050ece81e8dcb51556bc1ee12d1d4ee16c9ac06be7d9b415a08956d6d5861d2.json",
+      "type": "config",
+      "name": "3050ece81e8dcb51556bc1ee12d1d4ee16c9ac06be7d9b415a08956d6d5861d2.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/3050ece81e8dcb51556bc1ee12d1d4ee16c9ac06be7d9b415a08956d6d5861d2.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/30f3862740105808106f5235e74db0b3ce42352452d6d0eb821accef491a1b0b.json",
+      "type": "config",
+      "name": "30f3862740105808106f5235e74db0b3ce42352452d6d0eb821accef491a1b0b.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/30f3862740105808106f5235e74db0b3ce42352452d6d0eb821accef491a1b0b.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/31ac74b7c049766379910fd310a118edfbe7f7715a44d9e942f63f634efc8323.json",
+      "type": "config",
+      "name": "31ac74b7c049766379910fd310a118edfbe7f7715a44d9e942f63f634efc8323.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/31ac74b7c049766379910fd310a118edfbe7f7715a44d9e942f63f634efc8323.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/3a4e096f02e392bf473334f3a73434f3dee4a85cc376a87358264c6c8e8d120d.json",
+      "type": "config",
+      "name": "3a4e096f02e392bf473334f3a73434f3dee4a85cc376a87358264c6c8e8d120d.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/3a4e096f02e392bf473334f3a73434f3dee4a85cc376a87358264c6c8e8d120d.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/3fbf09b31441d46f5945c864dc79655d17f041c4a01f231ef69aae4811145b07.json",
+      "type": "config",
+      "name": "3fbf09b31441d46f5945c864dc79655d17f041c4a01f231ef69aae4811145b07.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/3fbf09b31441d46f5945c864dc79655d17f041c4a01f231ef69aae4811145b07.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/44dc9125cac8e8e1f27f94f183b4e77552a6111ba81a87fe641cbbf42e739dfc.json",
+      "type": "config",
+      "name": "44dc9125cac8e8e1f27f94f183b4e77552a6111ba81a87fe641cbbf42e739dfc.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/44dc9125cac8e8e1f27f94f183b4e77552a6111ba81a87fe641cbbf42e739dfc.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/470ca73ff19cb446722997faa4297be637c5c0d32a4f7e27a64a048f9bffeb13.json",
+      "type": "config",
+      "name": "470ca73ff19cb446722997faa4297be637c5c0d32a4f7e27a64a048f9bffeb13.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/470ca73ff19cb446722997faa4297be637c5c0d32a4f7e27a64a048f9bffeb13.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/5a5904379bf55ea6f4ea44f8ce3dee45fb1c0f6df0eac4d5948939f49e199267.json",
+      "type": "config",
+      "name": "5a5904379bf55ea6f4ea44f8ce3dee45fb1c0f6df0eac4d5948939f49e199267.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/5a5904379bf55ea6f4ea44f8ce3dee45fb1c0f6df0eac4d5948939f49e199267.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/61ae7245006dd6669aa262762456b59b3de6a1ec7ad5dcca984f4e1e5df2e02e.json",
+      "type": "config",
+      "name": "61ae7245006dd6669aa262762456b59b3de6a1ec7ad5dcca984f4e1e5df2e02e.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/61ae7245006dd6669aa262762456b59b3de6a1ec7ad5dcca984f4e1e5df2e02e.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/652d239c35e865360d3f03b47a010ab60c0af4ce540f907bf4353b7eaad2ac53.json",
+      "type": "config",
+      "name": "652d239c35e865360d3f03b47a010ab60c0af4ce540f907bf4353b7eaad2ac53.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/652d239c35e865360d3f03b47a010ab60c0af4ce540f907bf4353b7eaad2ac53.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/667be51c3a02b5ee91a2b915c1ca905ab84f5e3ef673dc1661b0dce7d43124d6.json",
+      "type": "config",
+      "name": "667be51c3a02b5ee91a2b915c1ca905ab84f5e3ef673dc1661b0dce7d43124d6.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/667be51c3a02b5ee91a2b915c1ca905ab84f5e3ef673dc1661b0dce7d43124d6.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:graphify-out/cache/ast/v0.8.38/680f9df5614282cdffb905f17c7e15a1c7c938bd69435742bd78bea4d41f0d87.json",
+      "type": "config",
+      "name": "680f9df5614282cdffb905f17c7e15a1c7c938bd69435742bd78bea4d41f0d87.json",
+      "filePath": "graphify-out/cache/ast/v0.8.38/680f9df5614282cdffb905f17c7e15a1c7c938bd69435742bd78bea4d41f0d87.json",
+      "summary": "Graphify AST cache entry (v0.8.38) storing parsed syntax tree data for a project source file, keyed by content hash.",
+      "tags": ["cache", "ast", "graphify", "data-pipeline"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/03bb67a28abc28a43c89c8e27ea17381047f7276274248ad0e7de92a72378bcb.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/0b06f8f07d51543a32ba5ccea753b6e999ae64f4a5cd5863c92f16f4ffab0ac5.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/0b06f8f07d51543a32ba5ccea753b6e999ae64f4a5cd5863c92f16f4ffab0ac5.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/0c0b6e9feb6a3248ab787305d6a754210f0ae5d6f5475888abd57e4cca3cc06b.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/0c0b6e9feb6a3248ab787305d6a754210f0ae5d6f5475888abd57e4cca3cc06b.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/124c118d06a9af22dd7805c336d3e13dc5e32f453bac41b3e955d7cfce93ff17.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/124c118d06a9af22dd7805c336d3e13dc5e32f453bac41b3e955d7cfce93ff17.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/1689f6d0863df3cb9bb7dea2b0bc7036d93f15b447297582317bfdb00ac4fd8b.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/1689f6d0863df3cb9bb7dea2b0bc7036d93f15b447297582317bfdb00ac4fd8b.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/201e9d419f01dc6155829e9e842830028876632be568d870c4153ed83f520c91.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/201e9d419f01dc6155829e9e842830028876632be568d870c4153ed83f520c91.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/20acb370bc6270cf78d4d57bab8497b38618043d7ba8e3f59499170af8e20b45.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/20acb370bc6270cf78d4d57bab8497b38618043d7ba8e3f59499170af8e20b45.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/23523e9a1064a47d6ada4a3ed5109b7f91dbed5d11d12d862eef6b3a33df68b7.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/23523e9a1064a47d6ada4a3ed5109b7f91dbed5d11d12d862eef6b3a33df68b7.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/3050ece81e8dcb51556bc1ee12d1d4ee16c9ac06be7d9b415a08956d6d5861d2.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/3050ece81e8dcb51556bc1ee12d1d4ee16c9ac06be7d9b415a08956d6d5861d2.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/30f3862740105808106f5235e74db0b3ce42352452d6d0eb821accef491a1b0b.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/30f3862740105808106f5235e74db0b3ce42352452d6d0eb821accef491a1b0b.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/31ac74b7c049766379910fd310a118edfbe7f7715a44d9e942f63f634efc8323.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/31ac74b7c049766379910fd310a118edfbe7f7715a44d9e942f63f634efc8323.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/3a4e096f02e392bf473334f3a73434f3dee4a85cc376a87358264c6c8e8d120d.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/3a4e096f02e392bf473334f3a73434f3dee4a85cc376a87358264c6c8e8d120d.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/3fbf09b31441d46f5945c864dc79655d17f041c4a01f231ef69aae4811145b07.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/3fbf09b31441d46f5945c864dc79655d17f041c4a01f231ef69aae4811145b07.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/44dc9125cac8e8e1f27f94f183b4e77552a6111ba81a87fe641cbbf42e739dfc.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/44dc9125cac8e8e1f27f94f183b4e77552a6111ba81a87fe641cbbf42e739dfc.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/470ca73ff19cb446722997faa4297be637c5c0d32a4f7e27a64a048f9bffeb13.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/470ca73ff19cb446722997faa4297be637c5c0d32a4f7e27a64a048f9bffeb13.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/5a5904379bf55ea6f4ea44f8ce3dee45fb1c0f6df0eac4d5948939f49e199267.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/5a5904379bf55ea6f4ea44f8ce3dee45fb1c0f6df0eac4d5948939f49e199267.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/61ae7245006dd6669aa262762456b59b3de6a1ec7ad5dcca984f4e1e5df2e02e.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/61ae7245006dd6669aa262762456b59b3de6a1ec7ad5dcca984f4e1e5df2e02e.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/652d239c35e865360d3f03b47a010ab60c0af4ce540f907bf4353b7eaad2ac53.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/652d239c35e865360d3f03b47a010ab60c0af4ce540f907bf4353b7eaad2ac53.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/667be51c3a02b5ee91a2b915c1ca905ab84f5e3ef673dc1661b0dce7d43124d6.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:graphify-out/cache/ast/v0.8.38/667be51c3a02b5ee91a2b915c1ca905ab84f5e3ef673dc1661b0dce7d43124d6.json",
+      "target": "config:graphify-out/cache/ast/v0.8.38/680f9df5614282cdffb905f17c7e15a1c7c938bd69435742bd78bea4d41f0d87.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

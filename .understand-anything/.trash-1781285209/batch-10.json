@@ -1,0 +1,175 @@
+{
+  "nodes": [
+    {
+      "id": "file:packages/contracts/src/database-enums.ts",
+      "type": "file",
+      "name": "database-enums.ts",
+      "filePath": "packages/contracts/src/database-enums.ts",
+      "summary": "Exports typed enum constants and derived TypeScript types for database enumerations such as LLM review statuses/decisions, event processing modes, and queue statuses, sourced from the Supabase-generated database types.",
+      "tags": ["type-definition", "schema-definition", "utility", "contracts"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/contracts/src/database.types.ts",
+      "type": "file",
+      "name": "database.types.ts",
+      "filePath": "packages/contracts/src/database.types.ts",
+      "summary": "Auto-generated Supabase type definitions covering all public schema tables, enums, functions, and composite types for the family-events database; serves as the canonical type source for the entire monorepo.",
+      "tags": ["type-definition", "schema-definition", "data-model", "contracts"],
+      "complexity": "complex",
+      "languageNotes": "Generated file — 3500+ lines of TypeScript utility types (Tables, Enums, Functions helpers) derived from the Supabase introspection output."
+    },
+    {
+      "id": "file:packages/contracts/src/notification-preferences.ts",
+      "type": "file",
+      "name": "notification-preferences.ts",
+      "filePath": "packages/contracts/src/notification-preferences.ts",
+      "summary": "Defines the notification-preferences contract: field-name constants, default preference values, domain and RPC parameter types, and a converter function for mapping app-level preferences to the upsert RPC parameter shape.",
+      "tags": ["type-definition", "contracts", "utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:packages/contracts/src/notification-preferences.ts:toUpsertParams",
+      "type": "function",
+      "name": "toUpsertParams",
+      "filePath": "packages/contracts/src/notification-preferences.ts",
+      "lineRange": [61, 72],
+      "summary": "Converts an app-level NotificationPreferences object to the p_-prefixed parameter shape required by the upsert_notification_preferences Supabase RPC.",
+      "tags": ["utility", "serialization", "contracts"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/contracts/src/notifications.ts",
+      "type": "file",
+      "name": "notifications.ts",
+      "filePath": "packages/contracts/src/notifications.ts",
+      "summary": "Exports notification type/platform enums, row types for user_notifications and push_subscriptions tables, domain interfaces for notification center items and push subscriptions, and RPC parameter types for marking-read and subscription registration.",
+      "tags": ["type-definition", "contracts", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "type": "file",
+      "name": "queue-policy.ts",
+      "filePath": "supabase/functions/process-tag-queue/queue-policy.ts",
+      "summary": "Provides pure policy functions for the process-tag-queue edge function: resolving the completed queue status and deciding whether to stop processing before the next row to stay within the time budget.",
+      "tags": ["utility", "service", "event-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/process-tag-queue/queue-policy.ts:resolveCompletedTagQueueStatus",
+      "type": "function",
+      "name": "resolveCompletedTagQueueStatus",
+      "filePath": "supabase/functions/process-tag-queue/queue-policy.ts",
+      "lineRange": [3, 5],
+      "summary": "Returns the fixed completed status value ('succeeded') for a finished tag-queue row.",
+      "tags": ["utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/process-tag-queue/queue-policy.ts:shouldStopBeforeStartingNextTagRow",
+      "type": "function",
+      "name": "shouldStopBeforeStartingNextTagRow",
+      "filePath": "supabase/functions/process-tag-queue/queue-policy.ts",
+      "lineRange": [7, 12],
+      "summary": "Determines whether the queue processor should stop before taking on the next item, returning true when elapsed time is within 5 seconds of the allowed budget.",
+      "tags": ["utility", "service", "event-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/process-tag-queue/queue-policy_test.ts",
+      "type": "file",
+      "name": "queue-policy_test.ts",
+      "filePath": "supabase/functions/process-tag-queue/queue-policy_test.ts",
+      "summary": "Deno unit tests for queue-policy.ts, verifying that resolveCompletedTagQueueStatus always returns 'succeeded' and that shouldStopBeforeStartingNextTagRow correctly gates on the 5-second budget window.",
+      "tags": ["test"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:packages/contracts/src/database-enums.ts",
+      "target": "file:packages/contracts/src/database.types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/contracts/src/notification-preferences.ts",
+      "target": "file:packages/contracts/src/database.types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/contracts/src/notifications.ts",
+      "target": "file:packages/contracts/src/database.types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "target": "file:packages/contracts/src/database-enums.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/queue-policy_test.ts",
+      "target": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:packages/contracts/src/notification-preferences.ts",
+      "target": "function:packages/contracts/src/notification-preferences.ts:toUpsertParams",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:packages/contracts/src/notification-preferences.ts",
+      "target": "function:packages/contracts/src/notification-preferences.ts:toUpsertParams",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "target": "function:supabase/functions/process-tag-queue/queue-policy.ts:resolveCompletedTagQueueStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "target": "function:supabase/functions/process-tag-queue/queue-policy.ts:resolveCompletedTagQueueStatus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "target": "function:supabase/functions/process-tag-queue/queue-policy.ts:shouldStopBeforeStartingNextTagRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "target": "function:supabase/functions/process-tag-queue/queue-policy.ts:shouldStopBeforeStartingNextTagRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "target": "file:supabase/functions/process-tag-queue/queue-policy_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

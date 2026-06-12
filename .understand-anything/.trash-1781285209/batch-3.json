@@ -1,0 +1,1123 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/db-maintenance/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/db-maintenance/index.ts",
+      "summary": "Supabase edge function that performs scheduled database maintenance tasks, logging cron run context via the shared cron-run-log helper.",
+      "tags": ["api-handler", "service", "cron"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/embed-event/handler.ts",
+      "type": "file",
+      "name": "handler.ts",
+      "filePath": "supabase/functions/embed-event/handler.ts",
+      "summary": "Core handler for the embed-event edge function: generates vector embeddings for event text using an external API and stores them in the event_embeddings table, with full error handling and Sentry reporting.",
+      "tags": ["api-handler", "service", "embedding", "event-handler"],
+      "complexity": "complex",
+      "languageNotes": "Deno edge function using dependency injection pattern (deps object) for testability."
+    },
+    {
+      "id": "function:supabase/functions/embed-event/handler.ts:generateEmbedding",
+      "type": "function",
+      "name": "generateEmbedding",
+      "filePath": "supabase/functions/embed-event/handler.ts",
+      "lineRange": [61, 109],
+      "summary": "Calls an external embedding API to generate a vector embedding for the given text, with timeout and error handling.",
+      "tags": ["api-handler", "embedding", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/embed-event/handler.ts:storeEmbedding",
+      "type": "function",
+      "name": "storeEmbedding",
+      "filePath": "supabase/functions/embed-event/handler.ts",
+      "lineRange": [111, 133],
+      "summary": "Upserts a computed event embedding vector into the event_embeddings table via Supabase client.",
+      "tags": ["data-model", "embedding", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/embed-event/handler.ts:embedEvent",
+      "type": "function",
+      "name": "embedEvent",
+      "filePath": "supabase/functions/embed-event/handler.ts",
+      "lineRange": [135, 175],
+      "summary": "Orchestrates the full embed-event pipeline: builds the embedding input, calls generateEmbedding, then storeEmbedding, and logs the result.",
+      "tags": ["api-handler", "embedding", "event-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/embed-event/handler.ts:handleEmbedEventRequest",
+      "type": "function",
+      "name": "handleEmbedEventRequest",
+      "filePath": "supabase/functions/embed-event/handler.ts",
+      "lineRange": [179, 220],
+      "summary": "Validates and dispatches an embed-event request body, fetching event data from the database and invoking embedEvent for each event ID.",
+      "tags": ["api-handler", "validation", "embedding"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/embed-event/handler.ts:handleRequest",
+      "type": "function",
+      "name": "handleRequest",
+      "filePath": "supabase/functions/embed-event/handler.ts",
+      "lineRange": [255, 329],
+      "summary": "HTTP entry point for the embed-event function: authenticates the request, parses the body, and dispatches to handleEmbedEventRequest with error handling and Sentry capture.",
+      "tags": ["api-handler", "entry-point", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/embed-event/handler_test.ts",
+      "type": "file",
+      "name": "handler_test.ts",
+      "filePath": "supabase/functions/embed-event/handler_test.ts",
+      "summary": "Unit tests for embed-event handler functions, using fake Supabase and fetch implementations to verify embedding generation, storage, and error paths.",
+      "tags": ["test", "embedding", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/embed-event/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/embed-event/index.ts",
+      "summary": "Entry point for the embed-event Supabase edge function; delegates all handling to handler.ts.",
+      "tags": ["entry-point", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/log-cron-run/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/log-cron-run/index.ts",
+      "summary": "Supabase edge function that records cron run events to the database using the shared service-role handler.",
+      "tags": ["api-handler", "service", "cron"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/notify-email/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/notify-email/index.ts",
+      "summary": "Supabase edge function that sends transactional notification emails (admin requests, approvals, rejections, community event status) via the Resend API with inline HTML email templates.",
+      "tags": ["api-handler", "service", "email", "event-handler"],
+      "complexity": "complex",
+      "languageNotes": "Contains full inline HTML email templates with styled components rather than a separate template engine."
+    },
+    {
+      "id": "function:supabase/functions/notify-email/index.ts:parsePayload",
+      "type": "function",
+      "name": "parsePayload",
+      "filePath": "supabase/functions/notify-email/index.ts",
+      "lineRange": [99, 158],
+      "summary": "Parses and validates incoming notification email request payloads, dispatching on notification type and enforcing required fields.",
+      "tags": ["validation", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/notify-email/index.ts:wrapEmailShell",
+      "type": "function",
+      "name": "wrapEmailShell",
+      "filePath": "supabase/functions/notify-email/index.ts",
+      "lineRange": [177, 235],
+      "summary": "Renders the shared HTML email wrapper (header, body slot, footer) used by all notification email templates.",
+      "tags": ["utility", "email", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/notify-email/index.ts:sendViaResend",
+      "type": "function",
+      "name": "sendViaResend",
+      "filePath": "supabase/functions/notify-email/index.ts",
+      "lineRange": [434, 463],
+      "summary": "Sends an HTML email via the Resend API with timeout and error handling.",
+      "tags": ["api-handler", "email", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/process-event-review-queue/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/process-event-review-queue/index.ts",
+      "summary": "Supabase edge function entry point that processes the event review queue batch by delegating to the worker library with cron run logging.",
+      "tags": ["api-handler", "service", "cron"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/process-notification-queue/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/process-notification-queue/index.ts",
+      "summary": "Supabase edge function that dequeues and dispatches pending user notifications, formatting event date strings and change summaries for inclusion in messages.",
+      "tags": ["api-handler", "service", "event-handler"],
+      "complexity": "complex",
+      "languageNotes": "Includes inline date formatting and change-summary helpers rather than importing them from shared utilities."
+    },
+    {
+      "id": "file:supabase/functions/process-source-queue/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/process-source-queue/index.ts",
+      "summary": "Supabase edge function that claims and processes a batch of source-queue rows, coordinating reaping of stuck rows and invoking per-row workers.",
+      "tags": ["api-handler", "service", "cron"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/process-source-queue/index.ts:processSourceQueueBatch",
+      "type": "function",
+      "name": "processSourceQueueBatch",
+      "filePath": "supabase/functions/process-source-queue/index.ts",
+      "lineRange": [16, 75],
+      "summary": "Claims a batch of source-queue rows, reaps stuck entries, and dispatches each claimed row to processSourceQueueRow for scraping.",
+      "tags": ["service", "api-handler", "cron"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/process-tag-queue/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/process-tag-queue/index.ts",
+      "summary": "Supabase edge function that processes the event-tagging queue: claims rows, fetches event inputs, invokes the tag-event function, and handles per-row success/failure with exponential backoff.",
+      "tags": ["api-handler", "service", "cron"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-tag-queue/index.ts:processTagQueueBatch",
+      "type": "function",
+      "name": "processTagQueueBatch",
+      "filePath": "supabase/functions/process-tag-queue/index.ts",
+      "lineRange": [156, 398],
+      "summary": "Claims tag-queue rows and processes them in parallel chunks, managing timeout budgets, early stopping, and per-row tagging via callTagEvent.",
+      "tags": ["service", "api-handler", "cron"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/process-tag-queue/index.ts:markFailureOrDead",
+      "type": "function",
+      "name": "markFailureOrDead",
+      "filePath": "supabase/functions/process-tag-queue/index.ts",
+      "lineRange": [118, 154],
+      "summary": "Updates a tag-queue row to dead or pending-with-backoff depending on retry count, computing exponential backoff delay.",
+      "tags": ["service", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/process-tag-queue/index_test.ts",
+      "type": "file",
+      "name": "index_test.ts",
+      "filePath": "supabase/functions/process-tag-queue/index_test.ts",
+      "summary": "Integration-style tests for processTagQueueBatch using fake Supabase and fetch implementations to verify queue claiming, per-row tagging, retry, and dead-letter logic.",
+      "tags": ["test", "cron", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-due-sources/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/scrape-due-sources/index.ts",
+      "summary": "Supabase edge function that finds due scrape sources and enqueues them for processing, with payload normalization and cron run logging.",
+      "tags": ["api-handler", "service", "cron"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/scrape-source/index.ts",
+      "summary": "Supabase edge function that scrapes a single event source, with CORS handling, authentication, source queue integration, and Sentry error capture.",
+      "tags": ["api-handler", "service", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "type": "file",
+      "name": "source-queue.ts",
+      "filePath": "supabase/functions/scrape-source/lib/source-queue.ts",
+      "summary": "Utility library for interacting with the source-scrape queue: enqueuing scrapes, building response objects, and kicking the process-source-queue function.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/source-queue.ts:enqueueSourceScrape",
+      "type": "function",
+      "name": "enqueueSourceScrape",
+      "filePath": "supabase/functions/scrape-source/lib/source-queue.ts",
+      "lineRange": [20, 39],
+      "summary": "Calls the enqueue_source_scrape Supabase RPC to add a source to the scrape queue with a given trigger type.",
+      "tags": ["utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/lib/source-queue.ts:kickProcessSourceQueue",
+      "type": "function",
+      "name": "kickProcessSourceQueue",
+      "filePath": "supabase/functions/scrape-source/lib/source-queue.ts",
+      "lineRange": [41, 59],
+      "summary": "Invokes the process-source-queue edge function to immediately trigger queue processing after a scrape is enqueued.",
+      "tags": ["utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/lib/source-queue_test.ts",
+      "type": "file",
+      "name": "source-queue_test.ts",
+      "filePath": "supabase/functions/scrape-source/lib/source-queue_test.ts",
+      "summary": "Unit tests for source-queue utilities, using a fake Supabase client to verify enqueueSourceScrape behavior.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/send-auth-email/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/send-auth-email/index.ts",
+      "summary": "Supabase edge function that sends authentication emails (verify email, magic link, password reset) via the Resend API with branded HTML templates.",
+      "tags": ["api-handler", "service", "email"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-auth-email/index.ts:buildActionEmailHtml",
+      "type": "function",
+      "name": "buildActionEmailHtml",
+      "filePath": "supabase/functions/send-auth-email/index.ts",
+      "lineRange": [97, 179],
+      "summary": "Renders a complete action-oriented auth email HTML document with branded header, greeting, CTA button, and footer.",
+      "tags": ["utility", "email", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/send-auth-email/index.ts:sendEmail",
+      "type": "function",
+      "name": "sendEmail",
+      "filePath": "supabase/functions/send-auth-email/index.ts",
+      "lineRange": [190, 213],
+      "summary": "Posts an email send request to the Resend API with timeout and structured error handling.",
+      "tags": ["api-handler", "email", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/send-push/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/send-push/index.ts",
+      "summary": "Supabase edge function that sends web push notifications using VAPID authentication and payload encryption, and dispatches mobile (APNs/FCM) push notifications for subscribed users.",
+      "tags": ["api-handler", "service", "event-handler"],
+      "complexity": "complex",
+      "languageNotes": "Implements full Web Push Protocol encryption (RFC 8291) including ECDH key agreement and AES-GCM payload encryption using the WebCrypto API."
+    },
+    {
+      "id": "function:supabase/functions/send-push/index.ts:buildVapidAuth",
+      "type": "function",
+      "name": "buildVapidAuth",
+      "filePath": "supabase/functions/send-push/index.ts",
+      "lineRange": [59, 121],
+      "summary": "Builds the VAPID Authorization header for web push by creating a signed JWT using the ECDSA private key.",
+      "tags": ["utility", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-push/index.ts:encryptPayload",
+      "type": "function",
+      "name": "encryptPayload",
+      "filePath": "supabase/functions/send-push/index.ts",
+      "lineRange": [153, 271],
+      "summary": "Encrypts a push notification payload using the RFC 8291 Web Push encryption scheme (ECDH + HKDF + AES-128-GCM).",
+      "tags": ["utility", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "type": "file",
+      "name": "mobile-push.ts",
+      "filePath": "supabase/functions/send-push/lib/mobile-push.ts",
+      "summary": "Library for sending mobile push notifications via Apple APNs (JWT-authenticated) and Firebase FCM (service account OAuth), including credential validation and payload builders.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "complex",
+      "languageNotes": "Implements APNs JWT signing and FCM OAuth2 token acquisition using the WebCrypto API directly (no third-party library)."
+    },
+    {
+      "id": "function:supabase/functions/send-push/lib/mobile-push.ts:signApnsJwt",
+      "type": "function",
+      "name": "signApnsJwt",
+      "filePath": "supabase/functions/send-push/lib/mobile-push.ts",
+      "lineRange": [172, 198],
+      "summary": "Creates a signed JWT for Apple Push Notification Service authentication using ECDSA P-256.",
+      "tags": ["utility", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/send-push/lib/mobile-push.ts:getFcmAccessToken",
+      "type": "function",
+      "name": "getFcmAccessToken",
+      "filePath": "supabase/functions/send-push/lib/mobile-push.ts",
+      "lineRange": [221, 267],
+      "summary": "Obtains a Firebase Cloud Messaging OAuth2 access token by creating and signing a service-account JWT, then exchanging it with the Google token endpoint.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-push/lib/mobile-push.ts:partitionMobileSubscriptions",
+      "type": "function",
+      "name": "partitionMobileSubscriptions",
+      "filePath": "supabase/functions/send-push/lib/mobile-push.ts",
+      "lineRange": [34, 48],
+      "summary": "Splits a list of mobile push subscription rows into separate APNs and FCM buckets by platform type.",
+      "tags": ["utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/send-push/lib/mobile-push_test.ts",
+      "type": "file",
+      "name": "mobile-push_test.ts",
+      "filePath": "supabase/functions/send-push/lib/mobile-push_test.ts",
+      "summary": "Unit tests for mobile-push library functions, verifying partitioning, credential status, and request building helpers.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/send-reminders/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/send-reminders/index.ts",
+      "summary": "Supabase edge function that sends scheduled event reminder notifications to subscribed users, with date formatting and row flattening helpers.",
+      "tags": ["api-handler", "service", "cron"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/send-weekly-digest/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/send-weekly-digest/index.ts",
+      "summary": "Supabase edge function that sends weekly digest emails to opted-in users, rendering a branded HTML email with event cards and dispatching via Resend.",
+      "tags": ["api-handler", "service", "email"],
+      "complexity": "complex",
+      "languageNotes": "Contains a full inline HTML email digest template with responsive layout and event card components."
+    },
+    {
+      "id": "function:supabase/functions/send-weekly-digest/index.ts:renderDigestHtml",
+      "type": "function",
+      "name": "renderDigestHtml",
+      "filePath": "supabase/functions/send-weekly-digest/index.ts",
+      "lineRange": [170, 271],
+      "summary": "Renders the full weekly digest HTML email document for a user, embedding event cards, greeting, CTA, and footer.",
+      "tags": ["utility", "email", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-weekly-digest/index.ts:renderEventCardHtml",
+      "type": "function",
+      "name": "renderEventCardHtml",
+      "filePath": "supabase/functions/send-weekly-digest/index.ts",
+      "lineRange": [123, 164],
+      "summary": "Renders an individual event card HTML snippet for inclusion in the weekly digest email.",
+      "tags": ["utility", "email"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/weather/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/weather/index.ts",
+      "summary": "Supabase edge function that proxies weather data requests to the Open-Meteo API with CORS handling, coordinate validation, and Sentry error reporting.",
+      "tags": ["api-handler", "service", "middleware"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/db-maintenance/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/db-maintenance/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler_test.ts",
+      "target": "file:supabase/functions/embed-event/handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/embed-event/index.ts",
+      "target": "file:supabase/functions/embed-event/handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/log-cron-run/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "file:supabase/functions/_shared/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "file:supabase/functions/_shared/validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-event-review-queue/index.ts",
+      "target": "file:supabase/functions/process-event-review-queue/lib/worker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-notification-queue/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-notification-queue/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-notification-queue/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/index.ts",
+      "target": "file:supabase/functions/process-source-queue/lib/worker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "file:supabase/functions/_shared/function-invoke.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "file:supabase/functions/process-tag-queue/queue-policy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index_test.ts",
+      "target": "file:supabase/functions/process-tag-queue/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-due-sources/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-due-sources/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-due-sources/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-due-sources/index.ts",
+      "target": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/index.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/index.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/index.ts",
+      "target": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/index.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "target": "file:supabase/functions/_shared/function-invoke.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-auth-email/index.ts",
+      "target": "file:supabase/functions/_shared/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-auth-email/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-auth-email/index.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-push/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-push/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-push/index.ts",
+      "target": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push_test.ts",
+      "target": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-reminders/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-reminders/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-reminders/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/index.ts",
+      "target": "file:supabase/functions/_shared/cron-run-log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/index.ts",
+      "target": "file:supabase/functions/_shared/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/index.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/index.ts",
+      "target": "file:supabase/functions/_shared/service-role-handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/weather/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/weather/index.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:generateEmbedding",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:storeEmbedding",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:embedEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:handleEmbedEventRequest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:handleRequest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:generateEmbedding",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:storeEmbedding",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:embedEvent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:handleEmbedEventRequest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:handleRequest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:handleRequest",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/embed-event/index.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:handleRequest",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/embed-event/handler_test.ts",
+      "target": "file:supabase/functions/embed-event/handler.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "function:supabase/functions/notify-email/index.ts:parsePayload",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "function:supabase/functions/notify-email/index.ts:wrapEmailShell",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/notify-email/index.ts",
+      "target": "function:supabase/functions/notify-email/index.ts:sendViaResend",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/index.ts",
+      "target": "function:supabase/functions/process-source-queue/index.ts:processSourceQueueBatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-source-queue/index.ts",
+      "target": "function:supabase/functions/process-source-queue/index.ts:processSourceQueueBatch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "function:supabase/functions/process-tag-queue/index.ts:processTagQueueBatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "function:supabase/functions/process-tag-queue/index.ts:markFailureOrDead",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "function:supabase/functions/process-tag-queue/index.ts:processTagQueueBatch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index_test.ts",
+      "target": "file:supabase/functions/process-tag-queue/index.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "target": "function:supabase/functions/scrape-source/lib/source-queue.ts:enqueueSourceScrape",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "target": "function:supabase/functions/scrape-source/lib/source-queue.ts:kickProcessSourceQueue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "target": "function:supabase/functions/scrape-source/lib/source-queue.ts:enqueueSourceScrape",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "target": "function:supabase/functions/scrape-source/lib/source-queue.ts:kickProcessSourceQueue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/send-auth-email/index.ts",
+      "target": "function:supabase/functions/send-auth-email/index.ts:buildActionEmailHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-auth-email/index.ts",
+      "target": "function:supabase/functions/send-auth-email/index.ts:sendEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-push/index.ts",
+      "target": "function:supabase/functions/send-push/index.ts:buildVapidAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-push/index.ts",
+      "target": "function:supabase/functions/send-push/index.ts:encryptPayload",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "target": "function:supabase/functions/send-push/lib/mobile-push.ts:signApnsJwt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "target": "function:supabase/functions/send-push/lib/mobile-push.ts:getFcmAccessToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "target": "function:supabase/functions/send-push/lib/mobile-push.ts:partitionMobileSubscriptions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "target": "function:supabase/functions/send-push/lib/mobile-push.ts:signApnsJwt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "target": "function:supabase/functions/send-push/lib/mobile-push.ts:getFcmAccessToken",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "target": "function:supabase/functions/send-push/lib/mobile-push.ts:partitionMobileSubscriptions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/send-push/lib/mobile-push_test.ts",
+      "target": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/send-push/index.ts",
+      "target": "file:supabase/functions/send-push/lib/mobile-push.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/index.ts",
+      "target": "function:supabase/functions/send-weekly-digest/index.ts:renderDigestHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/index.ts",
+      "target": "function:supabase/functions/send-weekly-digest/index.ts:renderEventCardHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/process-tag-queue/index.ts",
+      "target": "function:supabase/functions/embed-event/handler.ts:handleRequest",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/lib/source-queue.ts",
+      "target": "function:supabase/functions/scrape-source/lib/source-queue.ts:kickProcessSourceQueue",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

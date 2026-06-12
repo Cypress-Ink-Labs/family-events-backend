@@ -1,0 +1,31 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "graphify-out/cache/stat-index.json", "language": "json", "sizeLines": 0, "fileCategory": "config"},
+    {"path": "infra/railway-cron-drift/.terraform-version", "language": "unknown", "sizeLines": 1, "fileCategory": "code"},
+    {"path": "infra/railway-cron-drift/.terraform.lock.hcl", "language": "hcl", "sizeLines": 23, "fileCategory": "code"},
+    {"path": "infra/railway-cron-drift/policies/railway-cron-poc-plan.rego", "language": "rego", "sizeLines": 18, "fileCategory": "code"},
+    {"path": "packages/contracts/src/.keep", "language": "unknown", "sizeLines": 0, "fileCategory": "code"},
+    {"path": "packages/contracts/src/community-event.ts", "language": "typescript", "sizeLines": 20, "fileCategory": "code"},
+    {"path": "packages/contracts/src/index.ts", "language": "typescript", "sizeLines": 50, "fileCategory": "code"},
+    {"path": "packages/contracts/vitest.config.ts", "language": "typescript", "sizeLines": 9, "fileCategory": "code"},
+    {"path": "packages/deploy-cli/package.json", "language": "json", "sizeLines": 33, "fileCategory": "config"},
+    {"path": "packages/deploy-cli/tsconfig.json", "language": "json", "sizeLines": 7, "fileCategory": "config"},
+    {"path": "packages/email/emails/community-event-status.tsx", "language": "typescript", "sizeLines": 126, "fileCategory": "code"},
+    {"path": "packages/email/package.json", "language": "json", "sizeLines": 29, "fileCategory": "config"},
+    {"path": "packages/email/src/index.ts", "language": "typescript", "sizeLines": 2, "fileCategory": "code"},
+    {"path": "packages/email/src/templates.ts", "language": "typescript", "sizeLines": 10, "fileCategory": "code"},
+    {"path": "packages/email/tsconfig.json", "language": "json", "sizeLines": 15, "fileCategory": "config"},
+    {"path": "scripts/drain-queues.mjs", "language": "javascript", "sizeLines": 278, "fileCategory": "code"},
+    {"path": "scripts/railway-cron-drift.mjs", "language": "javascript", "sizeLines": 512, "fileCategory": "code"},
+    {"path": "scripts/railway-sandbox.mjs", "language": "javascript", "sizeLines": 427, "fileCategory": "code"},
+    {"path": "scripts/sync-url-validation.mjs", "language": "javascript", "sizeLines": 38, "fileCategory": "code"},
+    {"path": "scripts/verify-edge-fn.mjs", "language": "javascript", "sizeLines": 139, "fileCategory": "code"},
+    {"path": "supabase/.branches/_current_branch", "language": "unknown", "sizeLines": 0, "fileCategory": "code"},
+    {"path": "supabase/benchmarks/artifacts/p0-003-after.txt", "language": "txt", "sizeLines": 453, "fileCategory": "docs"},
+    {"path": "supabase/benchmarks/artifacts/p0-003-before.txt", "language": "txt", "sizeLines": 470, "fileCategory": "docs"},
+    {"path": "supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql", "language": "sql", "sizeLines": 386, "fileCategory": "data"},
+    {"path": "supabase/config.toml", "language": "toml", "sizeLines": 209, "fileCategory": "config"}
+  ],
+  "batchImportData": {"graphify-out/cache/stat-index.json": [], "infra/railway-cron-drift/.terraform-version": [], "infra/railway-cron-drift/.terraform.lock.hcl": [], "infra/railway-cron-drift/policies/railway-cron-poc-plan.rego": [], "packages/contracts/src/.keep": [], "packages/contracts/src/community-event.ts": [], "packages/contracts/src/index.ts": [], "packages/contracts/vitest.config.ts": [], "packages/deploy-cli/package.json": [], "packages/deploy-cli/tsconfig.json": [], "packages/email/emails/community-event-status.tsx": [], "packages/email/package.json": [], "packages/email/src/index.ts": [], "packages/email/src/templates.ts": [], "packages/email/tsconfig.json": [], "scripts/drain-queues.mjs": [], "scripts/railway-cron-drift.mjs": [], "scripts/railway-sandbox.mjs": [], "scripts/sync-url-validation.mjs": [], "scripts/verify-edge-fn.mjs": [], "supabase/.branches/_current_branch": [], "supabase/benchmarks/artifacts/p0-003-after.txt": [], "supabase/benchmarks/artifacts/p0-003-before.txt": [], "supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql": [], "supabase/config.toml": []}
+}

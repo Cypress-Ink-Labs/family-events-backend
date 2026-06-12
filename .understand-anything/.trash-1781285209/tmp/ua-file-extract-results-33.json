@@ -1,0 +1,92 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 4,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "scripts/db/README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 24,
+      "nonEmptyLines": 17,
+      "sections": [
+        {
+          "heading": "Database Evidence Scripts",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "collect-db-evidence.sql",
+          "level": 2,
+          "line": 5
+        },
+        {
+          "heading": "Sections",
+          "level": 3,
+          "line": 15
+        },
+        {
+          "heading": "Prerequisites",
+          "level": 3,
+          "line": 22
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "scripts/db/collect-db-evidence.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 154,
+      "nonEmptyLines": 135,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "scripts/db/find-missing-end-times.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 28,
+      "nonEmptyLines": 26,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 0
+      }
+    },
+    {
+      "path": "scripts/db/wipe-live-events.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 111,
+      "nonEmptyLines": 94,
+      "functions": [
+        {
+          "name": "usage",
+          "startLine": 10,
+          "endLine": 34,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}

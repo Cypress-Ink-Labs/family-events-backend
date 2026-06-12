@@ -1,0 +1,687 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 25,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/functions/_shared/env_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 45,
+      "nonEmptyLines": 38,
+      "functions": [
+        {
+          "name": "env",
+          "startLine": 4,
+          "endLine": 10,
+          "params": [
+            "values"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/env.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 51,
+      "nonEmptyLines": 46,
+      "functions": [
+        {
+          "name": "optionalEnv",
+          "startLine": 3,
+          "endLine": 8,
+          "params": [
+            "name",
+            "env"
+          ]
+        },
+        {
+          "name": "requiredEnv",
+          "startLine": 10,
+          "endLine": 19,
+          "params": [
+            "name",
+            "env"
+          ]
+        },
+        {
+          "name": "intEnv",
+          "startLine": 21,
+          "endLine": 31,
+          "params": [
+            "name",
+            "fallback",
+            "env"
+          ]
+        },
+        {
+          "name": "boolEnv",
+          "startLine": 33,
+          "endLine": 42,
+          "params": [
+            "name",
+            "fallback",
+            "env"
+          ]
+        },
+        {
+          "name": "urlEnv",
+          "startLine": 44,
+          "endLine": 51,
+          "params": [
+            "name",
+            "fallback",
+            "env"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "optionalEnv",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "requiredEnv",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "intEnv",
+          "line": 21,
+          "isDefault": false
+        },
+        {
+          "name": "boolEnv",
+          "line": 33,
+          "isDefault": false
+        },
+        {
+          "name": "urlEnv",
+          "line": 44,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "optionalEnv",
+          "callee": "(env.get(name) ?? \"\").trim",
+          "lineNumber": 7
+        },
+        {
+          "caller": "optionalEnv",
+          "callee": "env.get",
+          "lineNumber": 7
+        },
+        {
+          "caller": "requiredEnv",
+          "callee": "optionalEnv",
+          "lineNumber": 14
+        },
+        {
+          "caller": "intEnv",
+          "callee": "optionalEnv",
+          "lineNumber": 26
+        },
+        {
+          "caller": "intEnv",
+          "callee": "Number",
+          "lineNumber": 28
+        },
+        {
+          "caller": "intEnv",
+          "callee": "Number.isFinite",
+          "lineNumber": 29
+        },
+        {
+          "caller": "intEnv",
+          "callee": "Math.trunc",
+          "lineNumber": 30
+        },
+        {
+          "caller": "boolEnv",
+          "callee": "optionalEnv(name, env).toLowerCase",
+          "lineNumber": 38
+        },
+        {
+          "caller": "boolEnv",
+          "callee": "optionalEnv",
+          "lineNumber": 38
+        },
+        {
+          "caller": "urlEnv",
+          "callee": "optionalEnv",
+          "lineNumber": 49
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/admin-run-cron/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-embeddings/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 7,
+      "nonEmptyLines": 7,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-event-enrichment/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/backfill-event-enrichment/README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 70,
+      "nonEmptyLines": 51,
+      "sections": [
+        {
+          "heading": "backfill-event-enrichment",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Environment",
+          "level": 2,
+          "line": 6
+        },
+        {
+          "heading": "What it does per tick",
+          "level": 2,
+          "line": 14
+        },
+        {
+          "heading": "Tag-keyed Unsplash search",
+          "level": 2,
+          "line": 30
+        },
+        {
+          "heading": "Required attribution",
+          "level": 2,
+          "line": 48
+        },
+        {
+          "heading": "Local development",
+          "level": 2,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "supabase/functions/cleanup-stale-runs/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/db-maintenance/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/embed-event/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 7,
+      "nonEmptyLines": 7,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/generate-parent-tips/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 7,
+      "nonEmptyLines": 7,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/log-cron-run/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/notify-email/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "scripts",
+          "level": 1,
+          "line": 4
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "supabase/functions/process-event-review-queue/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/process-notification-queue/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/process-source-queue/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/process-tag-queue/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-due-sources/deno.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 8,
+      "nonEmptyLines": 8,
+      "sections": [
+        {
+          "heading": "nodeModulesDir",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "imports",
+          "level": 1,
+          "line": 3
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/atom/entry-content.xml",
+      "language": "xml",
+      "fileCategory": "config",
+      "totalLines": 10,
+      "nonEmptyLines": 10,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 110,
+      "nonEmptyLines": 107,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/html/events-page.html",
+      "language": "html",
+      "fileCategory": "markup",
+      "totalLines": 38,
+      "nonEmptyLines": 38,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/ical/folded-tzid.ics",
+      "language": "ics",
+      "fileCategory": "code",
+      "totalLines": 14,
+      "nonEmptyLines": 14,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/ical/hilliard-sample.ics",
+      "language": "ics",
+      "fileCategory": "code",
+      "totalLines": 52,
+      "nonEmptyLines": 52,
+      "metrics": {}
+    },
+    {
+      "path": "supabase/functions/scrape-source/__fixtures__/ical/lafayette-mom-sample.ics",
+      "language": "ics",
+      "fileCategory": "code",
+      "totalLines": 46,
+      "nonEmptyLines": 46,
+      "metrics": {}
+    }
+  ]
+}

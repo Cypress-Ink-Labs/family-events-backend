@@ -1,0 +1,1009 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/_shared/classification.test.ts",
+      "type": "file",
+      "name": "classification.test.ts",
+      "filePath": "supabase/functions/_shared/classification.test.ts",
+      "summary": "Test suite for the classification shared module, covering keyword-based tag computation, age range extraction, price extraction, and venue extraction helpers.",
+      "tags": ["test", "classification", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/classification.ts",
+      "type": "file",
+      "name": "classification.ts",
+      "filePath": "supabase/functions/_shared/classification.ts",
+      "summary": "Shared library of keyword-driven event classification helpers used by the tag-event function: computes tags via rule matching, extracts age ranges, prices, and venue names from free-text event descriptions.",
+      "tags": ["utility", "classification", "service", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/classification.ts:computeTags",
+      "type": "function",
+      "name": "computeTags",
+      "filePath": "supabase/functions/_shared/classification.ts",
+      "lineRange": [172, 193],
+      "summary": "Matches event title and description text against TAG_RULES keyword sets to produce a ranked list of tag slugs with confidence scores.",
+      "tags": ["classification", "utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/classification.ts:extractAgeRangeFromText",
+      "type": "function",
+      "name": "extractAgeRangeFromText",
+      "filePath": "supabase/functions/_shared/classification.ts",
+      "lineRange": [195, 233],
+      "summary": "Parses age range bounds (min/max) from event title and description text using regex patterns for common age-range formats.",
+      "tags": ["utility", "validation", "classification"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/classification.ts:extractPriceFromText",
+      "type": "function",
+      "name": "extractPriceFromText",
+      "filePath": "supabase/functions/_shared/classification.ts",
+      "lineRange": [235, 254],
+      "summary": "Detects free or paid pricing from event text, returning a price number or a free flag based on keyword and dollar-amount pattern matching.",
+      "tags": ["utility", "validation", "classification"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/classification.ts:extractVenueFromText",
+      "type": "function",
+      "name": "extractVenueFromText",
+      "filePath": "supabase/functions/_shared/classification.ts",
+      "lineRange": [256, 275],
+      "summary": "Extracts a venue name string from event text using 'at' and 'location' regex patterns.",
+      "tags": ["utility", "classification"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/classification.ts:clampConfidence",
+      "type": "function",
+      "name": "clampConfidence",
+      "filePath": "supabase/functions/_shared/classification.ts",
+      "lineRange": [167, 170],
+      "summary": "Clamps a numeric confidence value to the valid [0, 1] range, returning 0 for NaN.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/geocode.test.ts",
+      "type": "file",
+      "name": "geocode.test.ts",
+      "filePath": "supabase/functions/_shared/geocode.test.ts",
+      "summary": "Test suite for the geocode shared module, verifying Nominatim query building and geocoding behaviour under various input conditions.",
+      "tags": ["test", "utility", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/geocode.ts",
+      "type": "file",
+      "name": "geocode.ts",
+      "filePath": "supabase/functions/_shared/geocode.ts",
+      "summary": "Shared geocoding utility that wraps the Nominatim API with rate-limiting, retry logic, and query normalization to resolve event addresses to lat/lng coordinates.",
+      "tags": ["utility", "service", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/geocode.ts:geocodeViaNominatim",
+      "type": "function",
+      "name": "geocodeViaNominatim",
+      "filePath": "supabase/functions/_shared/geocode.ts",
+      "lineRange": [52, 80],
+      "summary": "Fetches lat/lng coordinates from the Nominatim geocoding API for a given query string, with rate-limiting and timeout handling.",
+      "tags": ["api-handler", "utility", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/geocode.ts:buildGeocodeQuery",
+      "type": "function",
+      "name": "buildGeocodeQuery",
+      "filePath": "supabase/functions/_shared/geocode.ts",
+      "lineRange": [97, 127],
+      "summary": "Constructs a normalized Nominatim search query string from structured address parts, deduplicating city/state tokens already present in the base address.",
+      "tags": ["utility", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/llm-config.ts",
+      "type": "file",
+      "name": "llm-config.ts",
+      "filePath": "supabase/functions/_shared/llm-config.ts",
+      "summary": "Shared LLM provider configuration resolver that reads environment variables to produce a normalized config object (provider, model, base URL, API key) used across edge functions.",
+      "tags": ["config", "service", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/llm-config.ts:resolveSharedLlmConfig",
+      "type": "function",
+      "name": "resolveSharedLlmConfig",
+      "filePath": "supabase/functions/_shared/llm-config.ts",
+      "lineRange": [59, 105],
+      "summary": "Resolves a complete LLM configuration record from environment variables and a feature-specific descriptor, handling provider selection, base URL normalization, and API key lookup.",
+      "tags": ["config", "service", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/llm-config.ts:resolveLlmProvider",
+      "type": "function",
+      "name": "resolveLlmProvider",
+      "filePath": "supabase/functions/_shared/llm-config.ts",
+      "lineRange": [50, 57],
+      "summary": "Validates and returns an LLM provider string, falling back to a default when the value is unrecognized.",
+      "tags": ["config", "utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/llm-config_test.ts",
+      "type": "file",
+      "name": "llm-config_test.ts",
+      "filePath": "supabase/functions/_shared/llm-config_test.ts",
+      "summary": "Test suite for the llm-config shared module, verifying provider resolution and config assembly from various environment variable combinations.",
+      "tags": ["test", "config", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/llm-openai.ts",
+      "type": "file",
+      "name": "llm-openai.ts",
+      "filePath": "supabase/functions/_shared/llm-openai.ts",
+      "summary": "Shared OpenAI-compatible chat completion client used by edge functions; handles HTTP POST, timeout, error extraction, JSON response parsing, and token usage logging.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/llm-openai.ts:postOpenAiChatCompletion",
+      "type": "function",
+      "name": "postOpenAiChatCompletion",
+      "filePath": "supabase/functions/_shared/llm-openai.ts",
+      "lineRange": [37, 97],
+      "summary": "POSTs a chat completion request to an OpenAI-compatible endpoint, handles non-2xx errors with body capture, parses the JSON response, and returns token usage metrics alongside the result.",
+      "tags": ["api-handler", "service", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/_shared/llm-openai.ts:parseJsonContent",
+      "type": "function",
+      "name": "parseJsonContent",
+      "filePath": "supabase/functions/_shared/llm-openai.ts",
+      "lineRange": [29, 35],
+      "summary": "Parses the first message content from an OpenAI chat completion response as JSON, returning null on parse errors.",
+      "tags": ["utility", "serialization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/llm-openai_test.ts",
+      "type": "file",
+      "name": "llm-openai_test.ts",
+      "filePath": "supabase/functions/_shared/llm-openai_test.ts",
+      "summary": "Test suite for the llm-openai shared module, testing chat completion posting and JSON content parsing against a mock fetch implementation.",
+      "tags": ["test", "api-handler", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "type": "file",
+      "name": "handler.ts",
+      "filePath": "supabase/functions/generate-parent-tips/handler.ts",
+      "summary": "Core handler for the generate-parent-tips edge function: loads feature config and event context from Supabase, calls the LLM to produce categorized parenting tips, persists them via RPC, and returns structured JSON.",
+      "tags": ["api-handler", "service", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/generate-parent-tips/handler.ts:createGenerateParentTipsHandler",
+      "type": "function",
+      "name": "createGenerateParentTipsHandler",
+      "filePath": "supabase/functions/generate-parent-tips/handler.ts",
+      "lineRange": [304, 410],
+      "summary": "Factory that wires injected dependencies into the complete HTTP request handler for the generate-parent-tips edge function, including auth, config loading, LLM call, and response serialization.",
+      "tags": ["api-handler", "factory", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/generate-parent-tips/handler.ts:generateWithLlm",
+      "type": "function",
+      "name": "generateWithLlm",
+      "filePath": "supabase/functions/generate-parent-tips/handler.ts",
+      "lineRange": [220, 284],
+      "summary": "Calls the LLM with system and user prompts built from event context, parses the JSON response, and validates and deduplicates the returned tip entries.",
+      "tags": ["service", "api-handler", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/generate-parent-tips/handler.ts:loadEventContext",
+      "type": "function",
+      "name": "loadEventContext",
+      "filePath": "supabase/functions/generate-parent-tips/handler.ts",
+      "lineRange": [159, 209],
+      "summary": "Queries Supabase for event metadata and associated tag slugs to assemble the context object passed to the LLM prompt builder.",
+      "tags": ["service", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:supabase/functions/generate-parent-tips/handler.ts:GenerateParentTipsRequestError",
+      "type": "class",
+      "name": "GenerateParentTipsRequestError",
+      "filePath": "supabase/functions/generate-parent-tips/handler.ts",
+      "lineRange": [61, 65],
+      "summary": "Custom error class for request validation failures in the generate-parent-tips handler.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/generate-parent-tips/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/generate-parent-tips/index.ts",
+      "summary": "Deno edge function entry point for generate-parent-tips; imports and invokes the handler from handler.ts.",
+      "tags": ["entry-point", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/generate-parent-tips/prompt.ts",
+      "type": "file",
+      "name": "prompt.ts",
+      "filePath": "supabase/functions/generate-parent-tips/prompt.ts",
+      "summary": "Defines the LLM system and user prompt builders, allowed tip categories, and JSON schema for the generate-parent-tips edge function.",
+      "tags": ["service", "utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/generate-parent-tips/prompt.ts:buildSystemPrompt",
+      "type": "function",
+      "name": "buildSystemPrompt",
+      "filePath": "supabase/functions/generate-parent-tips/prompt.ts",
+      "lineRange": [28, 46],
+      "summary": "Returns the system-role prompt string instructing the LLM to generate concise, event-specific parenting tips in a constrained JSON format.",
+      "tags": ["service", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/generate-parent-tips/prompt.ts:buildUserPrompt",
+      "type": "function",
+      "name": "buildUserPrompt",
+      "filePath": "supabase/functions/generate-parent-tips/prompt.ts",
+      "lineRange": [48, 71],
+      "summary": "Builds the user-role prompt from sanitized event context fields, wrapping untrusted data in delimiters to prevent prompt injection.",
+      "tags": ["service", "utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/tag-event/config.ts",
+      "type": "file",
+      "name": "config.ts",
+      "filePath": "supabase/functions/tag-event/config.ts",
+      "summary": "Configuration module for the tag-event edge function: exports constants for prompt version, timeouts, and text truncation limits, and resolves the AI/LLM config for tagging.",
+      "tags": ["config", "service", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/tag-event/config.ts:resolveTagEventAiConfig",
+      "type": "function",
+      "name": "resolveTagEventAiConfig",
+      "filePath": "supabase/functions/tag-event/config.ts",
+      "lineRange": [35, 56],
+      "summary": "Resolves the AI provider and model configuration for the tag-event function using the shared LLM config resolver.",
+      "tags": ["config", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/tag-event/config_test.ts",
+      "type": "file",
+      "name": "config_test.ts",
+      "filePath": "supabase/functions/tag-event/config_test.ts",
+      "summary": "Minimal test file for the tag-event config module, verifying exported constant values.",
+      "tags": ["test", "config"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/tag-event/handler.ts",
+      "type": "file",
+      "name": "handler.ts",
+      "filePath": "supabase/functions/tag-event/handler.ts",
+      "summary": "Core handler for the tag-event Supabase edge function: orchestrates LLM and keyword-based event classification, geocoding, tag persistence, embedding, and memory-context retrieval across ~1000 lines.",
+      "tags": ["api-handler", "service", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/tag-event/handler.ts:createTagEventHandler",
+      "type": "function",
+      "name": "createTagEventHandler",
+      "filePath": "supabase/functions/tag-event/handler.ts",
+      "lineRange": [894, 1054],
+      "summary": "Factory that assembles the complete tag-event HTTP handler from injected dependencies, coordinating auth, feature config, input loading, classification, embedding, persistence, and response.",
+      "tags": ["api-handler", "factory", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/tag-event/handler.ts:resolveClassification",
+      "type": "function",
+      "name": "resolveClassification",
+      "filePath": "supabase/functions/tag-event/handler.ts",
+      "lineRange": [454, 531],
+      "summary": "Determines classification strategy (LLM or keyword fallback) and executes it, falling back to keyword classification on LLM errors while logging and capturing exceptions.",
+      "tags": ["service", "classification", "middleware"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/tag-event/handler.ts:classifyWithLlm",
+      "type": "function",
+      "name": "classifyWithLlm",
+      "filePath": "supabase/functions/tag-event/handler.ts",
+      "lineRange": [157, 314],
+      "summary": "Sends event text to the LLM with a constrained classification prompt and memory context, parses and validates the returned tag/age/price/venue JSON.",
+      "tags": ["service", "classification", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/tag-event/handler.ts:persistTagTraceAndTags",
+      "type": "function",
+      "name": "persistTagTraceAndTags",
+      "filePath": "supabase/functions/tag-event/handler.ts",
+      "lineRange": [778, 813],
+      "summary": "Orchestrates the full persistence sequence: writes an AI trace record, upserts event tag assignments, and updates the event row with classification-derived fields.",
+      "tags": ["service", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/tag-event/handler.ts:resolveMissingCoordinates",
+      "type": "function",
+      "name": "resolveMissingCoordinates",
+      "filePath": "supabase/functions/tag-event/handler.ts",
+      "lineRange": [685, 736],
+      "summary": "Geocodes an event's address via Nominatim when the event lacks lat/lng coordinates, using the classification-derived venue name and the event's city as fallbacks.",
+      "tags": ["service", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:supabase/functions/tag-event/handler.ts:TagEventRequestError",
+      "type": "class",
+      "name": "TagEventRequestError",
+      "filePath": "supabase/functions/tag-event/handler.ts",
+      "lineRange": [102, 106],
+      "summary": "Custom error class for request validation failures in the tag-event handler.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/tag-event/handler_test.ts",
+      "type": "file",
+      "name": "handler_test.ts",
+      "filePath": "supabase/functions/tag-event/handler_test.ts",
+      "summary": "Comprehensive test suite for the tag-event handler, using in-memory fake Supabase and query implementations to test classification, auth, persistence, and error paths.",
+      "tags": ["test", "api-handler", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:supabase/functions/tag-event/handler_test.ts:FakeQuery",
+      "type": "class",
+      "name": "FakeQuery",
+      "filePath": "supabase/functions/tag-event/handler_test.ts",
+      "lineRange": [55, 197],
+      "summary": "In-memory Supabase query builder fake used in tests; implements select/insert/delete/update/upsert/eq/maybeSingle methods against an in-memory FakeSupabase database.",
+      "tags": ["test", "data-model"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/tag-event/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/tag-event/index.ts",
+      "summary": "Deno edge function entry point for tag-event; imports and invokes the handler from handler.ts.",
+      "tags": ["entry-point", "api-handler"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/_shared/classification.test.ts",
+      "target": "file:supabase/functions/_shared/classification.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.test.ts",
+      "target": "file:supabase/functions/_shared/classification.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:clampConfidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:computeTags",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractAgeRangeFromText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractPriceFromText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractVenueFromText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:clampConfidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:computeTags",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractAgeRangeFromText",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractPriceFromText",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/classification.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractVenueFromText",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/geocode.test.ts",
+      "target": "file:supabase/functions/_shared/geocode.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/geocode.test.ts",
+      "target": "file:supabase/functions/_shared/geocode.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/geocode.ts",
+      "target": "function:supabase/functions/_shared/geocode.ts:geocodeViaNominatim",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/geocode.ts",
+      "target": "function:supabase/functions/_shared/geocode.ts:buildGeocodeQuery",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/geocode.ts",
+      "target": "function:supabase/functions/_shared/geocode.ts:geocodeViaNominatim",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/geocode.ts",
+      "target": "function:supabase/functions/_shared/geocode.ts:buildGeocodeQuery",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-config_test.ts",
+      "target": "file:supabase/functions/_shared/llm-config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-config_test.ts",
+      "target": "file:supabase/functions/_shared/llm-config.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-config.ts",
+      "target": "function:supabase/functions/_shared/llm-config.ts:resolveSharedLlmConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-config.ts",
+      "target": "function:supabase/functions/_shared/llm-config.ts:resolveLlmProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-config.ts",
+      "target": "function:supabase/functions/_shared/llm-config.ts:resolveSharedLlmConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-config.ts",
+      "target": "function:supabase/functions/_shared/llm-config.ts:resolveLlmProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-openai_test.ts",
+      "target": "file:supabase/functions/_shared/llm-openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-openai_test.ts",
+      "target": "file:supabase/functions/_shared/llm-openai.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-openai.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:postOpenAiChatCompletion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-openai.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:parseJsonContent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-openai.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:postOpenAiChatCompletion",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/llm-openai.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:parseJsonContent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "file:supabase/functions/_shared/llm-config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "file:supabase/functions/_shared/llm-openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "file:supabase/functions/generate-parent-tips/prompt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/generate-parent-tips/handler.ts:createGenerateParentTipsHandler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/generate-parent-tips/handler.ts:generateWithLlm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/generate-parent-tips/handler.ts:loadEventContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "class:supabase/functions/generate-parent-tips/handler.ts:GenerateParentTipsRequestError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/generate-parent-tips/handler.ts:createGenerateParentTipsHandler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:postOpenAiChatCompletion",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:parseJsonContent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/_shared/llm-config.ts:resolveSharedLlmConfig",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/generate-parent-tips/prompt.ts:buildSystemPrompt",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "target": "function:supabase/functions/generate-parent-tips/prompt.ts:buildUserPrompt",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/index.ts",
+      "target": "file:supabase/functions/generate-parent-tips/handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/prompt.ts",
+      "target": "function:supabase/functions/generate-parent-tips/prompt.ts:buildSystemPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/prompt.ts",
+      "target": "function:supabase/functions/generate-parent-tips/prompt.ts:buildUserPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/prompt.ts",
+      "target": "function:supabase/functions/generate-parent-tips/prompt.ts:buildSystemPrompt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/generate-parent-tips/prompt.ts",
+      "target": "function:supabase/functions/generate-parent-tips/prompt.ts:buildUserPrompt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/config.ts",
+      "target": "file:supabase/functions/_shared/llm-config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/config.ts",
+      "target": "function:supabase/functions/tag-event/config.ts:resolveTagEventAiConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/config.ts",
+      "target": "function:supabase/functions/tag-event/config.ts:resolveTagEventAiConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/config.ts",
+      "target": "function:supabase/functions/_shared/llm-config.ts:resolveSharedLlmConfig",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/config_test.ts",
+      "target": "file:supabase/functions/tag-event/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/config_test.ts",
+      "target": "file:supabase/functions/tag-event/config.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/_shared/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/_shared/classification.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/_shared/geocode.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/_shared/llm-openai.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/_shared/logger.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/_shared/memory-context.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/_shared/sentry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/embed-event/handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "file:supabase/functions/tag-event/config.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/handler.ts:createTagEventHandler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/handler.ts:resolveClassification",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/handler.ts:classifyWithLlm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/handler.ts:persistTagTraceAndTags",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/handler.ts:resolveMissingCoordinates",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "class:supabase/functions/tag-event/handler.ts:TagEventRequestError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/handler.ts:createTagEventHandler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/handler.ts:resolveClassification",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:computeTags",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractAgeRangeFromText",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractPriceFromText",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:extractVenueFromText",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/classification.ts:clampConfidence",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/geocode.ts:buildGeocodeQuery",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:postOpenAiChatCompletion",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/_shared/llm-openai.ts:parseJsonContent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler.ts",
+      "target": "function:supabase/functions/tag-event/config.ts:resolveTagEventAiConfig",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler_test.ts",
+      "target": "file:supabase/functions/tag-event/handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler_test.ts",
+      "target": "file:supabase/functions/tag-event/handler.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/tag-event/handler_test.ts",
+      "target": "class:supabase/functions/tag-event/handler_test.ts:FakeQuery",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/tag-event/index.ts",
+      "target": "file:supabase/functions/tag-event/handler.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

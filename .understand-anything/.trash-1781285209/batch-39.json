@@ -1,0 +1,260 @@
+{
+  "nodes": [
+    {
+      "id": "config:graphify-out/cache/stat-index.json",
+      "type": "config",
+      "name": "stat-index.json",
+      "filePath": "graphify-out/cache/stat-index.json",
+      "summary": "Graphify tool file-stat cache index mapping absolute file paths to their last-modified timestamps for incremental graph rebuilds.",
+      "tags": ["tooling", "configuration", "cache"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:infra/railway-cron-drift/.terraform-version",
+      "type": "file",
+      "name": ".terraform-version",
+      "filePath": "infra/railway-cron-drift/.terraform-version",
+      "summary": "Pins the Terraform CLI version for the railway-cron-drift infrastructure module to ensure reproducible runs.",
+      "tags": ["infrastructure", "configuration", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:infra/railway-cron-drift/.terraform.lock.hcl",
+      "type": "file",
+      "name": ".terraform.lock.hcl",
+      "filePath": "infra/railway-cron-drift/.terraform.lock.hcl",
+      "summary": "Terraform provider lock file for the railway-cron-drift module, locking the Railway provider version and its checksums.",
+      "tags": ["infrastructure", "configuration", "deployment"],
+      "complexity": "simple",
+      "languageNotes": "HCL provider lock files pin provider versions and hash constraints for supply-chain integrity."
+    },
+    {
+      "id": "file:infra/railway-cron-drift/policies/railway-cron-poc-plan.rego",
+      "type": "file",
+      "name": "railway-cron-poc-plan.rego",
+      "filePath": "infra/railway-cron-drift/policies/railway-cron-poc-plan.rego",
+      "summary": "Open Policy Agent Rego policy validating that all Railway cron services in a Terraform plan have the expected cron schedule and environment variables set.",
+      "tags": ["infrastructure", "security", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/contracts/src/.keep",
+      "type": "file",
+      "name": ".keep",
+      "filePath": "packages/contracts/src/.keep",
+      "summary": "Empty placeholder file keeping the contracts src directory tracked in git.",
+      "tags": ["configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/contracts/src/community-event.ts",
+      "type": "file",
+      "name": "community-event.ts",
+      "filePath": "packages/contracts/src/community-event.ts",
+      "summary": "TypeScript type definition for the CommunityEvent contract, exported from the contracts package for cross-package usage.",
+      "tags": ["type-definition", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/contracts/src/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "packages/contracts/src/index.ts",
+      "summary": "Barrel entry point for the contracts package, re-exporting all public type definitions and database types.",
+      "tags": ["entry-point", "barrel", "type-definition"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/contracts/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "packages/contracts/vitest.config.ts",
+      "summary": "Vitest configuration for the contracts package defining the test environment and file patterns.",
+      "tags": ["configuration", "test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:packages/deploy-cli/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "packages/deploy-cli/package.json",
+      "summary": "Package manifest for the deploy-cli tool defining its binary entry point, dependencies on Railway/Supabase SDKs, and build scripts.",
+      "tags": ["configuration", "package-manager", "deployment"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:packages/deploy-cli/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "packages/deploy-cli/tsconfig.json",
+      "summary": "TypeScript compiler configuration for the deploy-cli package extending the shared monorepo tsconfig.",
+      "tags": ["configuration", "typescript", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/email/emails/community-event-status.tsx",
+      "type": "file",
+      "name": "community-event-status.tsx",
+      "filePath": "packages/email/emails/community-event-status.tsx",
+      "summary": "React Email component rendering a transactional email for community event status updates, including event details and action buttons.",
+      "tags": ["component", "email", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:packages/email/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "packages/email/package.json",
+      "summary": "Package manifest for the email package listing React Email component dependencies and build/deploy scripts.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:packages/email/src/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "packages/email/src/index.ts",
+      "summary": "Barrel entry point for the email package, re-exporting public email template utilities.",
+      "tags": ["entry-point", "barrel"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:packages/email/src/templates.ts",
+      "type": "file",
+      "name": "templates.ts",
+      "filePath": "packages/email/src/templates.ts",
+      "summary": "Maps email template names to their React Email component implementations for use by the email dispatch layer.",
+      "tags": ["service", "email", "factory"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:packages/email/tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "packages/email/tsconfig.json",
+      "summary": "TypeScript compiler configuration for the email package with JSX support for React Email components.",
+      "tags": ["configuration", "typescript", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/drain-queues.mjs",
+      "type": "file",
+      "name": "drain-queues.mjs",
+      "filePath": "scripts/drain-queues.mjs",
+      "summary": "CLI utility script for draining Supabase queue tables by invoking edge functions and reporting processed item counts.",
+      "tags": ["script", "utility", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/railway-cron-drift.mjs",
+      "type": "file",
+      "name": "railway-cron-drift.mjs",
+      "filePath": "scripts/railway-cron-drift.mjs",
+      "summary": "Script that detects configuration drift between expected Railway cron service definitions and live Railway API state, exporting parse and validation utilities.",
+      "tags": ["script", "utility", "infrastructure", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/railway-sandbox.mjs",
+      "type": "file",
+      "name": "railway-sandbox.mjs",
+      "filePath": "scripts/railway-sandbox.mjs",
+      "summary": "Script for provisioning and tearing down Railway sandbox environments for integration testing and ephemeral deployments.",
+      "tags": ["script", "deployment", "infrastructure"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/sync-url-validation.mjs",
+      "type": "file",
+      "name": "sync-url-validation.mjs",
+      "filePath": "scripts/sync-url-validation.mjs",
+      "summary": "Script that validates source URLs in the database by checking HTTP reachability and reporting broken or redirected links.",
+      "tags": ["script", "utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/verify-edge-fn.mjs",
+      "type": "file",
+      "name": "verify-edge-fn.mjs",
+      "filePath": "scripts/verify-edge-fn.mjs",
+      "summary": "Script for smoke-testing deployed Supabase edge functions by invoking them with test payloads and asserting expected responses.",
+      "tags": ["script", "utility", "test"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/.branches/_current_branch",
+      "type": "file",
+      "name": "_current_branch",
+      "filePath": "supabase/.branches/_current_branch",
+      "summary": "Supabase CLI marker file recording the currently active database branch name.",
+      "tags": ["configuration", "tooling"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:supabase/benchmarks/artifacts/p0-003-after.txt",
+      "type": "document",
+      "name": "p0-003-after.txt",
+      "filePath": "supabase/benchmarks/artifacts/p0-003-after.txt",
+      "summary": "Benchmark results captured after applying the P0-003 RLS/RPC performance optimization, showing query timing improvements.",
+      "tags": ["documentation", "database", "monitoring"],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:supabase/benchmarks/artifacts/p0-003-before.txt",
+      "type": "document",
+      "name": "p0-003-before.txt",
+      "filePath": "supabase/benchmarks/artifacts/p0-003-before.txt",
+      "summary": "Benchmark results captured before the P0-003 RLS/RPC performance optimization, serving as the baseline comparison.",
+      "tags": ["documentation", "database", "monitoring"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql",
+      "type": "file",
+      "name": "p0_003_rls_rpc_benchmarks.sql",
+      "filePath": "supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql",
+      "summary": "SQL benchmark script measuring Row Level Security policy and RPC function performance for the P0-003 optimization work.",
+      "tags": ["database", "monitoring", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:supabase/config.toml",
+      "type": "config",
+      "name": "config.toml",
+      "filePath": "supabase/config.toml",
+      "summary": "Primary Supabase project configuration defining local development settings, auth providers, edge function auth requirements, and storage buckets.",
+      "tags": ["configuration", "infrastructure", "database"],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:supabase/benchmarks/artifacts/p0-003-after.txt",
+      "target": "file:supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:supabase/benchmarks/artifacts/p0-003-before.txt",
+      "target": "file:supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/railway-cron-drift.mjs",
+      "target": "config:config/deploy.config.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:supabase/config.toml",
+      "target": "file:supabase/.branches/_current_branch",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

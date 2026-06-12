@@ -1,0 +1,12 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "graphify-out/.graphify_labels.json", "language": "json", "sizeLines": 0, "fileCategory": "config"},
+    {"path": "graphify-out/GRAPH_REPORT.md", "language": "markdown", "sizeLines": 701, "fileCategory": "docs"},
+    {"path": "graphify-out/cost.json", "language": "json", "sizeLines": 11, "fileCategory": "config"},
+    {"path": "graphify-out/graph.html", "language": "html", "sizeLines": 306, "fileCategory": "markup"},
+    {"path": "graphify-out/graph.json", "language": "json", "sizeLines": 51527, "fileCategory": "config"},
+    {"path": "graphify-out/manifest.json", "language": "json", "sizeLines": 1906, "fileCategory": "config"}
+  ],
+  "batchImportData": {}
+}

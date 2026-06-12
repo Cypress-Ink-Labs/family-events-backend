@@ -1,0 +1,8 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "cron/enrich-events/.dockerignore", "language": "unknown", "sizeLines": 4, "fileCategory": "infra"},
+    {"path": "cron/enrich-events/Dockerfile", "language": "dockerfile", "sizeLines": 5, "fileCategory": "infra"}
+  ],
+  "batchImportData": {}
+}

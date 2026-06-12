@@ -1,0 +1,3417 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 21,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "supabase/functions/_shared/guarded-fetch.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 62,
+      "nonEmptyLines": 53,
+      "functions": [
+        {
+          "name": "guardedFetch",
+          "startLine": 33,
+          "endLine": 62,
+          "params": [
+            "rawUrl",
+            "init",
+            "opts"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "SsrfRejectedError",
+          "startLine": 19,
+          "endLine": 24,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "SsrfRejectedError",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "guardedFetch",
+          "line": 33,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 21
+        },
+        {
+          "caller": "guardedFetch",
+          "callee": "resolveAndCheckPublicIp",
+          "lineNumber": 42
+        },
+        {
+          "caller": "guardedFetch",
+          "callee": "fetch",
+          "lineNumber": 47
+        },
+        {
+          "caller": "guardedFetch",
+          "callee": "response.headers.get",
+          "lineNumber": 50
+        },
+        {
+          "caller": "guardedFetch",
+          "callee": "response.body?.cancel().catch",
+          "lineNumber": 53
+        },
+        {
+          "caller": "guardedFetch",
+          "callee": "response.body?.cancel",
+          "lineNumber": 53
+        },
+        {
+          "caller": "guardedFetch",
+          "callee": "new URL(location, currentUrl).toString",
+          "lineNumber": 54
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/parsing.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 281,
+      "nonEmptyLines": 233,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/parsing.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 199,
+      "nonEmptyLines": 180,
+      "functions": [
+        {
+          "name": "parseIsoDate",
+          "startLine": 4,
+          "endLine": 14,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "parseIcalDate",
+          "startLine": 16,
+          "endLine": 51,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "decodeHtml",
+          "startLine": 53,
+          "endLine": 96,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "normalizeExtractedText",
+          "startLine": 98,
+          "endLine": 112,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "unescapeIcalText",
+          "startLine": 118,
+          "endLine": 124,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "stripHtml",
+          "startLine": 126,
+          "endLine": 128,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "stripShortcodes",
+          "startLine": 136,
+          "endLine": 151,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "cleanDescription",
+          "startLine": 158,
+          "endLine": 163,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "extractPrice",
+          "startLine": 165,
+          "endLine": 188,
+          "params": [
+            "text"
+          ]
+        },
+        {
+          "name": "dedupKey",
+          "startLine": 194,
+          "endLine": 199,
+          "params": [
+            "title",
+            "startDatetime",
+            "cityId"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "parseIsoDate",
+          "line": 4,
+          "isDefault": false
+        },
+        {
+          "name": "parseIcalDate",
+          "line": 16,
+          "isDefault": false
+        },
+        {
+          "name": "decodeHtml",
+          "line": 53,
+          "isDefault": false
+        },
+        {
+          "name": "normalizeExtractedText",
+          "line": 98,
+          "isDefault": false
+        },
+        {
+          "name": "unescapeIcalText",
+          "line": 118,
+          "isDefault": false
+        },
+        {
+          "name": "stripHtml",
+          "line": 126,
+          "isDefault": false
+        },
+        {
+          "name": "stripShortcodes",
+          "line": 136,
+          "isDefault": false
+        },
+        {
+          "name": "cleanDescription",
+          "line": 158,
+          "isDefault": false
+        },
+        {
+          "name": "extractPrice",
+          "line": 165,
+          "isDefault": false
+        },
+        {
+          "name": "dedupKey",
+          "line": 194,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "parseIsoDate",
+          "callee": "Number.isNaN",
+          "lineNumber": 10
+        },
+        {
+          "caller": "parseIsoDate",
+          "callee": "parsed.getTime",
+          "lineNumber": 10
+        },
+        {
+          "caller": "parseIsoDate",
+          "callee": "parsed.toISOString",
+          "lineNumber": 13
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "value.trim",
+          "lineNumber": 21
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "/^\\d{8}$/.test",
+          "lineNumber": 22
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 23
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 24
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 25
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString",
+          "lineNumber": 26
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "/^\\d{8}T\\d{6}Z$/.test",
+          "lineNumber": 29
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 30
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 31
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 32
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 33
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 34
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 35
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString",
+          "lineNumber": 36
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "/^\\d{8}T\\d{6}$/.test",
+          "lineNumber": 39
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 40
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 41
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 42
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 43
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 44
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "compact.slice",
+          "lineNumber": 45
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString",
+          "lineNumber": 47
+        },
+        {
+          "caller": "parseIcalDate",
+          "callee": "parseIsoDate",
+          "lineNumber": 50
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll(\"&lt;\", \"<\")\n    .replaceAll(\"&gt;\", \">\")\n    .replaceAll(\"&quot;\", '\"')\n    .replaceAll(\"&#39;\", \"'\")\n    .replaceAll(\"&apos;\", \"'\")\n    .replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => {\n      const codePoint = parseInt(hex, 16)\n      return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff\n        ? String.fromCodePoint(codePoint)\n        : match\n    })\n    .replace(/&#(\\d+);/g, (match, dec) => {\n      const codePoint = parseInt(dec, 10)\n      return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff\n        ? String.fromCodePoint(codePoint)\n        : match\n    })\n    .replace",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll(\"&lt;\", \"<\")\n    .replaceAll(\"&gt;\", \">\")\n    .replaceAll(\"&quot;\", '\"')\n    .replaceAll(\"&#39;\", \"'\")\n    .replaceAll(\"&apos;\", \"'\")\n    .replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => {\n      const codePoint = parseInt(hex, 16)\n      return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff\n        ? String.fromCodePoint(codePoint)\n        : match\n    })\n    .replace",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll(\"&lt;\", \"<\")\n    .replaceAll(\"&gt;\", \">\")\n    .replaceAll(\"&quot;\", '\"')\n    .replaceAll(\"&#39;\", \"'\")\n    .replaceAll(\"&apos;\", \"'\")\n    .replace",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll(\"&lt;\", \"<\")\n    .replaceAll(\"&gt;\", \">\")\n    .replaceAll(\"&quot;\", '\"')\n    .replaceAll(\"&#39;\", \"'\")\n    .replaceAll",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll(\"&lt;\", \"<\")\n    .replaceAll(\"&gt;\", \">\")\n    .replaceAll(\"&quot;\", '\"')\n    .replaceAll",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll(\"&lt;\", \"<\")\n    .replaceAll(\"&gt;\", \">\")\n    .replaceAll",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll(\"&lt;\", \"<\")\n    .replaceAll",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll(\"&amp;\", \"&\")\n    .replaceAll",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "value\n    .replaceAll",
+          "lineNumber": 74
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "parseInt",
+          "lineNumber": 82
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "Number.isFinite",
+          "lineNumber": 83
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "String.fromCodePoint",
+          "lineNumber": 84
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "parseInt",
+          "lineNumber": 88
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "Number.isFinite",
+          "lineNumber": 89
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "String.fromCodePoint",
+          "lineNumber": 90
+        },
+        {
+          "caller": "decodeHtml",
+          "callee": "entityName.toLowerCase",
+          "lineNumber": 94
+        },
+        {
+          "caller": "normalizeExtractedText",
+          "callee": "decodeHtml(value)\n    .replaceAll(\"\\u00a0\", \" \")\n    .replace(/[–—]/g, \"-\")\n    .replaceAll(/\\s+/g, \" \")\n    .replace(\n      /([a-z0-9).!?])\\s*(Spring Dates|Dates|Date|Time|Location|Meeting Point|Where|When|Cost|About|Themes|What to Bring):/gi,\n      \"$1 $2:\"\n    )\n    .replace(\n      /\\b([AP])\\.?M\\.?\\s*(Spring Dates|Dates|Date|Time|Location|Meeting Point|Where|When|Cost|About|Themes|What to Bring):/gi,\n      \"$1M $2:\"\n    )\n    .trim",
+          "lineNumber": 99
+        },
+        {
+          "caller": "normalizeExtractedText",
+          "callee": "decodeHtml(value)\n    .replaceAll(\"\\u00a0\", \" \")\n    .replace(/[–—]/g, \"-\")\n    .replaceAll(/\\s+/g, \" \")\n    .replace(\n      /([a-z0-9).!?])\\s*(Spring Dates|Dates|Date|Time|Location|Meeting Point|Where|When|Cost|About|Themes|What to Bring):/gi,\n      \"$1 $2:\"\n    )\n    .replace",
+          "lineNumber": 99
+        },
+        {
+          "caller": "normalizeExtractedText",
+          "callee": "decodeHtml(value)\n    .replaceAll(\"\\u00a0\", \" \")\n    .replace(/[–—]/g, \"-\")\n    .replaceAll(/\\s+/g, \" \")\n    .replace",
+          "lineNumber": 99
+        },
+        {
+          "caller": "normalizeExtractedText",
+          "callee": "decodeHtml(value)\n    .replaceAll(\"\\u00a0\", \" \")\n    .replace(/[–—]/g, \"-\")\n    .replaceAll",
+          "lineNumber": 99
+        },
+        {
+          "caller": "normalizeExtractedText",
+          "callee": "decodeHtml(value)\n    .replaceAll(\"\\u00a0\", \" \")\n    .replace",
+          "lineNumber": 99
+        },
+        {
+          "caller": "normalizeExtractedText",
+          "callee": "decodeHtml(value)\n    .replaceAll",
+          "lineNumber": 99
+        },
+        {
+          "caller": "normalizeExtractedText",
+          "callee": "decodeHtml",
+          "lineNumber": 99
+        },
+        {
+          "caller": "unescapeIcalText",
+          "callee": "value\n    .replace(/\\\\n/gi, \" \")\n    .replace(/\\\\,/g, \",\")\n    .replace(/\\\\;/g, \";\")\n    .replace",
+          "lineNumber": 119
+        },
+        {
+          "caller": "unescapeIcalText",
+          "callee": "value\n    .replace(/\\\\n/gi, \" \")\n    .replace(/\\\\,/g, \",\")\n    .replace",
+          "lineNumber": 119
+        },
+        {
+          "caller": "unescapeIcalText",
+          "callee": "value\n    .replace(/\\\\n/gi, \" \")\n    .replace",
+          "lineNumber": 119
+        },
+        {
+          "caller": "unescapeIcalText",
+          "callee": "value\n    .replace",
+          "lineNumber": 119
+        },
+        {
+          "caller": "stripHtml",
+          "callee": "normalizeExtractedText",
+          "lineNumber": 127
+        },
+        {
+          "caller": "stripHtml",
+          "callee": "value.replaceAll",
+          "lineNumber": 127
+        },
+        {
+          "caller": "stripShortcodes",
+          "callee": "value\n      .replace(/\\[\\/?et_pb_[a-z0-9_]*[^\\]]*\\]/gis, \"\")\n      // Truncated trailing Divi shortcode (no closing `]`) — historic ingest\n      // sliced raw description to 500 chars before cleaning and left rows like\n      // `…[et_pb_image src=\"…\" title_text=\"…\"` in the DB. The closed-bracket\n      // rule above misses these.\n      .replace(/\\[\\/?et_pb_[a-z0-9_]*[^\\]]*$/is, \"\")\n      // Lowercase-only shortcode names so user prose like `[See details]` survives.\n      .replace(/\\[\\/?[a-z][a-z0-9_]*(?:\\s[^\\]]*)?\\]/gs, \"\")\n      // Trailing unclosed generic shortcode (requires whitespace after the\n      // name so we don't eat user prose like `[See details` at end-of-string).\n      .replace",
+          "lineNumber": 138
+        },
+        {
+          "caller": "stripShortcodes",
+          "callee": "value\n      .replace(/\\[\\/?et_pb_[a-z0-9_]*[^\\]]*\\]/gis, \"\")\n      // Truncated trailing Divi shortcode (no closing `]`) — historic ingest\n      // sliced raw description to 500 chars before cleaning and left rows like\n      // `…[et_pb_image src=\"…\" title_text=\"…\"` in the DB. The closed-bracket\n      // rule above misses these.\n      .replace(/\\[\\/?et_pb_[a-z0-9_]*[^\\]]*$/is, \"\")\n      // Lowercase-only shortcode names so user prose like `[See details]` survives.\n      .replace",
+          "lineNumber": 138
+        },
+        {
+          "caller": "stripShortcodes",
+          "callee": "value\n      .replace(/\\[\\/?et_pb_[a-z0-9_]*[^\\]]*\\]/gis, \"\")\n      // Truncated trailing Divi shortcode (no closing `]`) — historic ingest\n      // sliced raw description to 500 chars before cleaning and left rows like\n      // `…[et_pb_image src=\"…\" title_text=\"…\"` in the DB. The closed-bracket\n      // rule above misses these.\n      .replace",
+          "lineNumber": 138
+        },
+        {
+          "caller": "stripShortcodes",
+          "callee": "value\n      .replace",
+          "lineNumber": 138
+        },
+        {
+          "caller": "cleanDescription",
+          "callee": "stripHtml",
+          "lineNumber": 162
+        },
+        {
+          "caller": "cleanDescription",
+          "callee": "stripShortcodes",
+          "lineNumber": 162
+        },
+        {
+          "caller": "extractPrice",
+          "callee": "text.toLowerCase",
+          "lineNumber": 166
+        },
+        {
+          "caller": "extractPrice",
+          "callee": "pattern.test",
+          "lineNumber": 177
+        },
+        {
+          "caller": "extractPrice",
+          "callee": "text.match",
+          "lineNumber": 182
+        },
+        {
+          "caller": "extractPrice",
+          "callee": "Number",
+          "lineNumber": 184
+        },
+        {
+          "caller": "dedupKey",
+          "callee": "title.trim().toLowerCase",
+          "lineNumber": 195
+        },
+        {
+          "caller": "dedupKey",
+          "callee": "title.trim",
+          "lineNumber": 195
+        },
+        {
+          "caller": "dedupKey",
+          "callee": "startDatetime.slice",
+          "lineNumber": 197
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 10,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/url-resolve.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 131,
+      "nonEmptyLines": 118,
+      "functions": [
+        {
+          "name": "ipv4BlockedReason",
+          "startLine": 41,
+          "endLine": 50,
+          "params": [
+            "ip"
+          ]
+        },
+        {
+          "name": "ipv6BlockedReason",
+          "startLine": 52,
+          "endLine": 66,
+          "params": [
+            "ip"
+          ]
+        },
+        {
+          "name": "resolveHost",
+          "startLine": 68,
+          "endLine": 83,
+          "params": [
+            "hostname"
+          ]
+        },
+        {
+          "name": "resolveAndCheckPublicIp",
+          "startLine": 90,
+          "endLine": 131,
+          "params": [
+            "rawUrl"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "resolveAndCheckPublicIp",
+          "line": 90,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ipv4BlockedReason",
+          "callee": "ip.match",
+          "lineNumber": 42
+        },
+        {
+          "caller": "ipv4BlockedReason",
+          "callee": "m.slice(1).map",
+          "lineNumber": 44
+        },
+        {
+          "caller": "ipv4BlockedReason",
+          "callee": "m.slice",
+          "lineNumber": 44
+        },
+        {
+          "caller": "ipv4BlockedReason",
+          "callee": "octets.some",
+          "lineNumber": 45
+        },
+        {
+          "caller": "ipv4BlockedReason",
+          "callee": "Number.isInteger",
+          "lineNumber": 45
+        },
+        {
+          "caller": "ipv4BlockedReason",
+          "callee": "rule.test",
+          "lineNumber": 47
+        },
+        {
+          "caller": "ipv6BlockedReason",
+          "callee": "ip.toLowerCase().replace",
+          "lineNumber": 53
+        },
+        {
+          "caller": "ipv6BlockedReason",
+          "callee": "ip.toLowerCase",
+          "lineNumber": 53
+        },
+        {
+          "caller": "ipv6BlockedReason",
+          "callee": "normalized.match",
+          "lineNumber": 57
+        },
+        {
+          "caller": "ipv6BlockedReason",
+          "callee": "ipv4BlockedReason",
+          "lineNumber": 58
+        },
+        {
+          "caller": "ipv6BlockedReason",
+          "callee": "/^f[cd][0-9a-f]{2}:/.test",
+          "lineNumber": 60
+        },
+        {
+          "caller": "ipv6BlockedReason",
+          "callee": "/^fe[89ab][0-9a-f]:/.test",
+          "lineNumber": 62
+        },
+        {
+          "caller": "resolveHost",
+          "callee": "Promise.allSettled",
+          "lineNumber": 72
+        },
+        {
+          "caller": "resolveHost",
+          "callee": "deno.resolveDns",
+          "lineNumber": 73
+        },
+        {
+          "caller": "resolveHost",
+          "callee": "deno.resolveDns",
+          "lineNumber": 74
+        },
+        {
+          "caller": "resolveHost",
+          "callee": "Array.isArray",
+          "lineNumber": 78
+        },
+        {
+          "caller": "resolveHost",
+          "callee": "ips.push",
+          "lineNumber": 79
+        },
+        {
+          "caller": "resolveAndCheckPublicIp",
+          "callee": "validateExternalUrl",
+          "lineNumber": 91
+        },
+        {
+          "caller": "resolveAndCheckPublicIp",
+          "callee": "/^\\d+\\.\\d+\\.\\d+\\.\\d+$/.test",
+          "lineNumber": 104
+        },
+        {
+          "caller": "resolveAndCheckPublicIp",
+          "callee": "/^\\[?[0-9a-fA-F:]+\\]?$/.test",
+          "lineNumber": 104
+        },
+        {
+          "caller": "resolveAndCheckPublicIp",
+          "callee": "resolveHost",
+          "lineNumber": 110
+        },
+        {
+          "caller": "resolveAndCheckPublicIp",
+          "callee": "ip.includes",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveAndCheckPublicIp",
+          "callee": "ipv6BlockedReason",
+          "lineNumber": 120
+        },
+        {
+          "caller": "resolveAndCheckPublicIp",
+          "callee": "ipv4BlockedReason",
+          "lineNumber": 120
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/url-validation.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 159,
+      "nonEmptyLines": 133,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/url-validation.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 139,
+      "nonEmptyLines": 121,
+      "functions": [
+        {
+          "name": "validateExternalUrl",
+          "startLine": 8,
+          "endLine": 45,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "parseIPv4",
+          "startLine": 47,
+          "endLine": 60,
+          "params": [
+            "host"
+          ]
+        },
+        {
+          "name": "blockedIPv4Reason",
+          "startLine": 62,
+          "endLine": 72,
+          "params": [
+            "octets"
+          ]
+        },
+        {
+          "name": "stripIpv6Brackets",
+          "startLine": 74,
+          "endLine": 77,
+          "params": [
+            "host"
+          ]
+        },
+        {
+          "name": "parseIPv6",
+          "startLine": 79,
+          "endLine": 100,
+          "params": [
+            "host"
+          ]
+        },
+        {
+          "name": "toGroups",
+          "startLine": 102,
+          "endLine": 110,
+          "params": [
+            "parts"
+          ]
+        },
+        {
+          "name": "blockedIPv6Reason",
+          "startLine": 112,
+          "endLine": 139,
+          "params": [
+            "groups"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "validateExternalUrl",
+          "line": 8,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "validateExternalUrl",
+          "callee": "parseIPv4",
+          "lineNumber": 29
+        },
+        {
+          "caller": "validateExternalUrl",
+          "callee": "blockedIPv4Reason",
+          "lineNumber": 31
+        },
+        {
+          "caller": "validateExternalUrl",
+          "callee": "stripIpv6Brackets",
+          "lineNumber": 36
+        },
+        {
+          "caller": "validateExternalUrl",
+          "callee": "parseIPv6",
+          "lineNumber": 37
+        },
+        {
+          "caller": "validateExternalUrl",
+          "callee": "blockedIPv6Reason",
+          "lineNumber": 39
+        },
+        {
+          "caller": "parseIPv4",
+          "callee": "host.match",
+          "lineNumber": 48
+        },
+        {
+          "caller": "parseIPv4",
+          "callee": "Number",
+          "lineNumber": 51
+        },
+        {
+          "caller": "parseIPv4",
+          "callee": "Number",
+          "lineNumber": 52
+        },
+        {
+          "caller": "parseIPv4",
+          "callee": "Number",
+          "lineNumber": 53
+        },
+        {
+          "caller": "parseIPv4",
+          "callee": "Number",
+          "lineNumber": 54
+        },
+        {
+          "caller": "parseIPv4",
+          "callee": "Number.isInteger",
+          "lineNumber": 57
+        },
+        {
+          "caller": "stripIpv6Brackets",
+          "callee": "host.startsWith",
+          "lineNumber": 75
+        },
+        {
+          "caller": "stripIpv6Brackets",
+          "callee": "host.endsWith",
+          "lineNumber": 75
+        },
+        {
+          "caller": "stripIpv6Brackets",
+          "callee": "host.slice",
+          "lineNumber": 75
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "host.includes",
+          "lineNumber": 80
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "/^[0-9a-fA-F:]+$/.test",
+          "lineNumber": 81
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "host.split",
+          "lineNumber": 83
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "leftRaw.split",
+          "lineNumber": 88
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "rightRaw.split",
+          "lineNumber": 89
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "toGroups",
+          "lineNumber": 93
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "Array(missing).fill",
+          "lineNumber": 98
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "Array",
+          "lineNumber": 98
+        },
+        {
+          "caller": "parseIPv6",
+          "callee": "toGroups",
+          "lineNumber": 99
+        },
+        {
+          "caller": "toGroups",
+          "callee": "/^[0-9a-fA-F]+$/.test",
+          "lineNumber": 106
+        },
+        {
+          "caller": "toGroups",
+          "callee": "out.push",
+          "lineNumber": 107
+        },
+        {
+          "caller": "toGroups",
+          "callee": "parseInt",
+          "lineNumber": 107
+        },
+        {
+          "caller": "blockedIPv6Reason",
+          "callee": "groups.slice(0, 7).every",
+          "lineNumber": 113
+        },
+        {
+          "caller": "blockedIPv6Reason",
+          "callee": "groups.slice",
+          "lineNumber": 113
+        },
+        {
+          "caller": "blockedIPv6Reason",
+          "callee": "groups.every",
+          "lineNumber": 125
+        },
+        {
+          "caller": "blockedIPv6Reason",
+          "callee": "groups.slice(0, 5).every",
+          "lineNumber": 129
+        },
+        {
+          "caller": "blockedIPv6Reason",
+          "callee": "groups.slice",
+          "lineNumber": 129
+        },
+        {
+          "caller": "blockedIPv6Reason",
+          "callee": "blockedIPv4Reason",
+          "lineNumber": 130
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-source-queue/lib/llm-extraction.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 80,
+      "nonEmptyLines": 75,
+      "functions": [
+        {
+          "name": "resolveLlmConfig",
+          "startLine": 21,
+          "endLine": 35,
+          "params": []
+        },
+        {
+          "name": "extractWithLlm",
+          "startLine": 37,
+          "endLine": 80,
+          "params": [
+            "source",
+            "artifact"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "resolveLlmConfig",
+          "line": 21,
+          "isDefault": false
+        },
+        {
+          "name": "extractWithLlm",
+          "line": 37,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "resolveLlmConfig",
+          "callee": "resolveSharedLlmConfig",
+          "lineNumber": 22
+        },
+        {
+          "caller": "extractWithLlm",
+          "callee": "resolveLlmConfig",
+          "lineNumber": 41
+        },
+        {
+          "caller": "extractWithLlm",
+          "callee": "postOpenAiChatCompletion",
+          "lineNumber": 46
+        },
+        {
+          "caller": "extractWithLlm",
+          "callee": "JSON.stringify",
+          "lineNumber": 61
+        },
+        {
+          "caller": "extractWithLlm",
+          "callee": "normalizeArtifactForLlm",
+          "lineNumber": 65
+        },
+        {
+          "caller": "extractWithLlm",
+          "callee": "parseLlmParsedEvents",
+          "lineNumber": 77
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-source-queue/lib/worker.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 535,
+      "nonEmptyLines": 492,
+      "functions": [
+        {
+          "name": "shouldReleaseBeforeSourceStart",
+          "startLine": 39,
+          "endLine": 44,
+          "params": [
+            "elapsedMs",
+            "budgetMs"
+          ]
+        },
+        {
+          "name": "sourceRetryDelayMinutes",
+          "startLine": 46,
+          "endLine": 53,
+          "params": [
+            "attemptCount"
+          ]
+        },
+        {
+          "name": "buildSourceRunInsert",
+          "startLine": 55,
+          "endLine": 59,
+          "params": [
+            "sourceId"
+          ]
+        },
+        {
+          "name": "shouldFallbackToLlm",
+          "startLine": 61,
+          "endLine": 70,
+          "params": [
+            "extractionMode",
+            "deterministicValidCount",
+            "deterministicError"
+          ]
+        },
+        {
+          "name": "buildExtractionErrorTrace",
+          "startLine": 72,
+          "endLine": 90,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "planSourceQueueClaimHandling",
+          "startLine": 92,
+          "endLine": 102,
+          "params": [
+            "claimedIds",
+            "elapsedMs"
+          ]
+        },
+        {
+          "name": "reapStuckSourceQueueRows",
+          "startLine": 104,
+          "endLine": 112,
+          "params": [
+            "supabase"
+          ]
+        },
+        {
+          "name": "markSkipped",
+          "startLine": 114,
+          "endLine": 124,
+          "params": [
+            "supabase",
+            "queueId",
+            "reason"
+          ]
+        },
+        {
+          "name": "markStarted",
+          "startLine": 126,
+          "endLine": 135,
+          "params": [
+            "supabase",
+            "queueId"
+          ]
+        },
+        {
+          "name": "scheduleRetry",
+          "startLine": 137,
+          "endLine": 149,
+          "params": [
+            "supabase",
+            "queueId",
+            "attemptCount",
+            "errorMessage"
+          ]
+        },
+        {
+          "name": "createAndLinkSourceRun",
+          "startLine": 151,
+          "endLine": 171,
+          "params": [
+            "supabase",
+            "queueId",
+            "sourceId"
+          ]
+        },
+        {
+          "name": "persistExtractionTrace",
+          "startLine": 173,
+          "endLine": 181,
+          "params": [
+            "supabase",
+            "input"
+          ]
+        },
+        {
+          "name": "markRunError",
+          "startLine": 183,
+          "endLine": 196,
+          "params": [
+            "supabase",
+            "runId",
+            "errorMessage"
+          ]
+        },
+        {
+          "name": "handleExtractionFailure",
+          "startLine": 204,
+          "endLine": 228,
+          "params": [
+            "supabase",
+            "row",
+            "runId",
+            "source",
+            "startedRow",
+            "extractor",
+            "err"
+          ]
+        },
+        {
+          "name": "loadRunnableSourceAndRun",
+          "startLine": 250,
+          "endLine": 279,
+          "params": [
+            "supabase",
+            "row"
+          ]
+        },
+        {
+          "name": "runDeterministicExtractionPhase",
+          "startLine": 281,
+          "endLine": 347,
+          "params": [
+            "supabase",
+            "row",
+            "source",
+            "runId",
+            "parser",
+            "artifact",
+            "ctx"
+          ]
+        },
+        {
+          "name": "extractParsedEventsForSource",
+          "startLine": 349,
+          "endLine": 467,
+          "params": [
+            "supabase",
+            "row",
+            "source",
+            "startedRow",
+            "runId",
+            "dependencies"
+          ]
+        },
+        {
+          "name": "processSourceQueueRow",
+          "startLine": 469,
+          "endLine": 519,
+          "params": [
+            "supabase",
+            "row",
+            "dependencies"
+          ]
+        },
+        {
+          "name": "resolveTimezone",
+          "startLine": 521,
+          "endLine": 535,
+          "params": [
+            "supabase",
+            "source"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "shouldReleaseBeforeSourceStart",
+          "line": 39,
+          "isDefault": false
+        },
+        {
+          "name": "sourceRetryDelayMinutes",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "buildSourceRunInsert",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "shouldFallbackToLlm",
+          "line": 61,
+          "isDefault": false
+        },
+        {
+          "name": "buildExtractionErrorTrace",
+          "line": 72,
+          "isDefault": false
+        },
+        {
+          "name": "planSourceQueueClaimHandling",
+          "line": 92,
+          "isDefault": false
+        },
+        {
+          "name": "reapStuckSourceQueueRows",
+          "line": 104,
+          "isDefault": false
+        },
+        {
+          "name": "markSkipped",
+          "line": 114,
+          "isDefault": false
+        },
+        {
+          "name": "markStarted",
+          "line": 126,
+          "isDefault": false
+        },
+        {
+          "name": "scheduleRetry",
+          "line": 137,
+          "isDefault": false
+        },
+        {
+          "name": "createAndLinkSourceRun",
+          "line": 151,
+          "isDefault": false
+        },
+        {
+          "name": "persistExtractionTrace",
+          "line": 173,
+          "isDefault": false
+        },
+        {
+          "name": "processSourceQueueRow",
+          "line": 469,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "planSourceQueueClaimHandling",
+          "callee": "shouldReleaseBeforeSourceStart",
+          "lineNumber": 97
+        },
+        {
+          "caller": "reapStuckSourceQueueRows",
+          "callee": "supabase.rpc",
+          "lineNumber": 107
+        },
+        {
+          "caller": "reapStuckSourceQueueRows",
+          "callee": "Number",
+          "lineNumber": 111
+        },
+        {
+          "caller": "markSkipped",
+          "callee": "supabase.rpc",
+          "lineNumber": 119
+        },
+        {
+          "caller": "markStarted",
+          "callee": "supabase.rpc",
+          "lineNumber": 127
+        },
+        {
+          "caller": "scheduleRetry",
+          "callee": "supabase.rpc",
+          "lineNumber": 143
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "supabase\n    .from(\"source_runs\")\n    .insert(buildSourceRunInsert(sourceId))\n    .select(\"id\")\n    .single",
+          "lineNumber": 156
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "supabase\n    .from(\"source_runs\")\n    .insert(buildSourceRunInsert(sourceId))\n    .select",
+          "lineNumber": 156
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "supabase\n    .from(\"source_runs\")\n    .insert",
+          "lineNumber": 156
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "supabase\n    .from",
+          "lineNumber": 156
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "buildSourceRunInsert",
+          "lineNumber": 158
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "String",
+          "lineNumber": 163
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "supabase\n    .from(\"source_scrape_queue\")\n    .update({ source_run_id: runId })\n    .eq",
+          "lineNumber": 164
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "supabase\n    .from(\"source_scrape_queue\")\n    .update",
+          "lineNumber": 164
+        },
+        {
+          "caller": "createAndLinkSourceRun",
+          "callee": "supabase\n    .from",
+          "lineNumber": 164
+        },
+        {
+          "caller": "persistExtractionTrace",
+          "callee": "supabase.from(\"source_extraction_traces\").insert",
+          "lineNumber": 177
+        },
+        {
+          "caller": "persistExtractionTrace",
+          "callee": "supabase.from",
+          "lineNumber": 177
+        },
+        {
+          "caller": "markRunError",
+          "callee": "supabase\n    .from(\"source_runs\")\n    .update({\n      completed_at: new Date().toISOString(),\n      status: \"error\",\n      error_log: errorMessage.slice(0, 1000),\n    })\n    .eq",
+          "lineNumber": 188
+        },
+        {
+          "caller": "markRunError",
+          "callee": "supabase\n    .from(\"source_runs\")\n    .update",
+          "lineNumber": 188
+        },
+        {
+          "caller": "markRunError",
+          "callee": "supabase\n    .from",
+          "lineNumber": 188
+        },
+        {
+          "caller": "markRunError",
+          "callee": "new Date().toISOString",
+          "lineNumber": 191
+        },
+        {
+          "caller": "markRunError",
+          "callee": "errorMessage.slice",
+          "lineNumber": 193
+        },
+        {
+          "caller": "handleExtractionFailure",
+          "callee": "errorMessage",
+          "lineNumber": 213
+        },
+        {
+          "caller": "handleExtractionFailure",
+          "callee": "persistExtractionTrace",
+          "lineNumber": 214
+        },
+        {
+          "caller": "handleExtractionFailure",
+          "callee": "buildExtractionErrorTrace",
+          "lineNumber": 216
+        },
+        {
+          "caller": "handleExtractionFailure",
+          "callee": "markRunError",
+          "lineNumber": 225
+        },
+        {
+          "caller": "handleExtractionFailure",
+          "callee": "scheduleRetry",
+          "lineNumber": 226
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "markSkipped",
+          "lineNumber": 255
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "supabase\n    .from(\"event_sources\")\n    .select(\"*\")\n    .eq(\"id\", row.source_id)\n    .maybeSingle",
+          "lineNumber": 259
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "supabase\n    .from(\"event_sources\")\n    .select(\"*\")\n    .eq",
+          "lineNumber": 259
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "supabase\n    .from(\"event_sources\")\n    .select",
+          "lineNumber": 259
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "supabase\n    .from",
+          "lineNumber": 259
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "markSkipped",
+          "lineNumber": 268
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "markSkipped",
+          "lineNumber": 272
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "markStarted",
+          "lineNumber": 276
+        },
+        {
+          "caller": "loadRunnableSourceAndRun",
+          "callee": "createAndLinkSourceRun",
+          "lineNumber": 277
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "validateParsedEvents",
+          "lineNumber": 300
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "parser.extractEvents",
+          "lineNumber": 301
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "persistExtractionTrace",
+          "lineNumber": 306
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "shouldFallbackToLlm",
+          "lineNumber": 320
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "errorMessage",
+          "lineNumber": 328
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "persistExtractionTrace",
+          "lineNumber": 329
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "buildExtractionErrorTrace",
+          "lineNumber": 331
+        },
+        {
+          "caller": "runDeterministicExtractionPhase",
+          "callee": "shouldFallbackToLlm",
+          "lineNumber": 343
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "handleExtractionFailure",
+          "lineNumber": 359
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "buildParserContext",
+          "lineNumber": 371
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "resolveTimezone",
+          "lineNumber": 373
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "parser.fetchArtifact",
+          "lineNumber": 378
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "handleExtractionFailure",
+          "lineNumber": 380
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "runDeterministicExtractionPhase",
+          "lineNumber": 392
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "markRunError",
+          "lineNumber": 409
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "scheduleRetry",
+          "lineNumber": 410
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "logEdgeEvent",
+          "lineNumber": 418
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "dependencies.extractWithLlm",
+          "lineNumber": 431
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "validateParsedEvents",
+          "lineNumber": 432
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "persistExtractionTrace",
+          "lineNumber": 436
+        },
+        {
+          "caller": "extractParsedEventsForSource",
+          "callee": "handleExtractionFailure",
+          "lineNumber": 453
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "loadRunnableSourceAndRun",
+          "lineNumber": 474
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "extractParsedEventsForSource",
+          "lineNumber": 479
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "dependencies.importParsedSourceEvents",
+          "lineNumber": 491
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "scheduleRetry",
+          "lineNumber": 499
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "supabase\n    .from(\"source_scrape_queue\")\n    .update({\n      status: \"succeeded\",\n      finished_at: new Date().toISOString(),\n      last_error: null,\n    })\n    .eq",
+          "lineNumber": 508
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "supabase\n    .from(\"source_scrape_queue\")\n    .update",
+          "lineNumber": 508
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "supabase\n    .from",
+          "lineNumber": 508
+        },
+        {
+          "caller": "processSourceQueueRow",
+          "callee": "new Date().toISOString",
+          "lineNumber": 512
+        },
+        {
+          "caller": "resolveTimezone",
+          "callee": "supabase\n    .from(\"cities\")\n    .select(\"timezone\")\n    .eq(\"id\", source.city_id)\n    .maybeSingle",
+          "lineNumber": 526
+        },
+        {
+          "caller": "resolveTimezone",
+          "callee": "supabase\n    .from(\"cities\")\n    .select(\"timezone\")\n    .eq",
+          "lineNumber": 526
+        },
+        {
+          "caller": "resolveTimezone",
+          "callee": "supabase\n    .from(\"cities\")\n    .select",
+          "lineNumber": 526
+        },
+        {
+          "caller": "resolveTimezone",
+          "callee": "supabase\n    .from",
+          "lineNumber": 526
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 13,
+        "functionCount": 19,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/process-source-queue/lib/worker_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 404,
+      "nonEmptyLines": 373,
+      "functions": [
+        {
+          "name": "queueRow",
+          "startLine": 60,
+          "endLine": 70,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "source",
+          "startLine": 72,
+          "endLine": 90,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "parsedEvent",
+          "startLine": 92,
+          "endLine": 107,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "parser",
+          "startLine": 109,
+          "endLine": 122,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "createDependencies",
+          "startLine": 124,
+          "endLine": 182,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "createFakeSupabase",
+          "startLine": 184,
+          "endLine": 232,
+          "params": [
+            "sourceRow"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "parser",
+          "callee": "Promise.resolve",
+          "lineNumber": 114
+        },
+        {
+          "caller": "parser",
+          "callee": "Promise.resolve",
+          "lineNumber": 119
+        },
+        {
+          "caller": "parser",
+          "callee": "parsedEvent",
+          "lineNumber": 119
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 143
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 144
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 145
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 146
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 147
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 148
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 149
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 150
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parser",
+          "lineNumber": 151
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "overrides.importParsedSourceEvents",
+          "lineNumber": 159
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "Promise.resolve",
+          "lineNumber": 160
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "overrides.extractWithLlm",
+          "lineNumber": 169
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "Promise.resolve",
+          "lineNumber": 170
+        },
+        {
+          "caller": "createDependencies",
+          "callee": "parsedEvent",
+          "lineNumber": 171
+        },
+        {
+          "caller": "createFakeSupabase",
+          "callee": "source",
+          "lineNumber": 184
+        },
+        {
+          "caller": "rpc",
+          "callee": "rpcCalls.push",
+          "lineNumber": 191
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 193
+        },
+        {
+          "caller": "rpc",
+          "callee": "queueRow",
+          "lineNumber": 194
+        },
+        {
+          "caller": "rpc",
+          "callee": "Promise.resolve",
+          "lineNumber": 198
+        },
+        {
+          "caller": "insert",
+          "callee": "inserts.push",
+          "lineNumber": 207
+        },
+        {
+          "caller": "update",
+          "callee": "updates.push",
+          "lineNumber": 211
+        },
+        {
+          "caller": "maybeSingle",
+          "callee": "Promise.resolve",
+          "lineNumber": 219
+        },
+        {
+          "caller": "maybeSingle",
+          "callee": "Promise.resolve",
+          "lineNumber": 221
+        },
+        {
+          "caller": "single",
+          "callee": "Promise.resolve",
+          "lineNumber": 224
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/date.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 110,
+      "nonEmptyLines": 98,
+      "functions": [
+        {
+          "name": "parseDateFromText",
+          "startLine": 14,
+          "endLine": 28,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "getTimeZoneOffset",
+          "startLine": 30,
+          "endLine": 56,
+          "params": [
+            "date",
+            "timeZone"
+          ]
+        },
+        {
+          "name": "wallClockToIso",
+          "startLine": 68,
+          "endLine": 86,
+          "params": [
+            "{ year, month, day, hour, minute, second = 0 }",
+            "timeZone",
+            "{ fallback = \"utc\" }"
+          ]
+        },
+        {
+          "name": "dateStampToWallClockIso",
+          "startLine": 88,
+          "endLine": 110,
+          "params": [
+            "dateStamp",
+            "hour",
+            "minute",
+            "timeZone"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "parseDateFromText",
+          "line": 14,
+          "isDefault": false
+        },
+        {
+          "name": "getTimeZoneOffset",
+          "line": 30,
+          "isDefault": false
+        },
+        {
+          "name": "wallClockToIso",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "dateStampToWallClockIso",
+          "line": 88,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "parseDateFromText",
+          "callee": "value.match",
+          "lineNumber": 18
+        },
+        {
+          "caller": "parseDateFromText",
+          "callee": "Number.isNaN",
+          "lineNumber": 24
+        },
+        {
+          "caller": "parseDateFromText",
+          "callee": "parsed.getTime",
+          "lineNumber": 24
+        },
+        {
+          "caller": "parseDateFromText",
+          "callee": "parsed.toISOString",
+          "lineNumber": 27
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "formatter.formatToParts",
+          "lineNumber": 42
+        },
+        {
+          "caller": "pick",
+          "callee": "Number",
+          "lineNumber": 44
+        },
+        {
+          "caller": "pick",
+          "callee": "parts.find",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "Date.UTC",
+          "lineNumber": 46
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "pick",
+          "lineNumber": 47
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "pick",
+          "lineNumber": 48
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "pick",
+          "lineNumber": 49
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "pick",
+          "lineNumber": 50
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "pick",
+          "lineNumber": 51
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "pick",
+          "lineNumber": 52
+        },
+        {
+          "caller": "getTimeZoneOffset",
+          "callee": "date.getTime",
+          "lineNumber": 55
+        },
+        {
+          "caller": "wallClockToIso",
+          "callee": "Date.UTC",
+          "lineNumber": 73
+        },
+        {
+          "caller": "wallClockToIso",
+          "callee": "getTimeZoneOffset",
+          "lineNumber": 76
+        },
+        {
+          "caller": "wallClockToIso",
+          "callee": "getTimeZoneOffset",
+          "lineNumber": 78
+        },
+        {
+          "caller": "wallClockToIso",
+          "callee": "new Date(adjusted).toISOString",
+          "lineNumber": 82
+        },
+        {
+          "caller": "wallClockToIso",
+          "callee": "new Date(utcGuess).toISOString",
+          "lineNumber": 84
+        },
+        {
+          "caller": "dateStampToWallClockIso",
+          "callee": "dateStamp.match",
+          "lineNumber": 94
+        },
+        {
+          "caller": "dateStampToWallClockIso",
+          "callee": "wallClockToIso",
+          "lineNumber": 100
+        },
+        {
+          "caller": "dateStampToWallClockIso",
+          "callee": "Number",
+          "lineNumber": 102
+        },
+        {
+          "caller": "dateStampToWallClockIso",
+          "callee": "Number",
+          "lineNumber": 103
+        },
+        {
+          "caller": "dateStampToWallClockIso",
+          "callee": "Number",
+          "lineNumber": 104
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/date_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 23,
+      "functions": [
+        {
+          "name": "assert",
+          "startLine": 3,
+          "endLine": 7,
+          "params": [
+            "condition",
+            "message"
+          ]
+        },
+        {
+          "name": "assertEquals",
+          "startLine": 9,
+          "endLine": 13,
+          "params": [
+            "actual",
+            "expected"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "assertEquals",
+          "callee": "Object.is",
+          "lineNumber": 10
+        },
+        {
+          "caller": "assertEquals",
+          "callee": "JSON.stringify",
+          "lineNumber": 11
+        },
+        {
+          "caller": "assertEquals",
+          "callee": "JSON.stringify",
+          "lineNumber": 11
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/enrichment.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 239,
+      "nonEmptyLines": 209,
+      "functions": [
+        {
+          "name": "normalizeHost",
+          "startLine": 22,
+          "endLine": 25,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "uniqueHosts",
+          "startLine": 27,
+          "endLine": 32,
+          "params": [
+            "hosts"
+          ]
+        },
+        {
+          "name": "hostFromUrl",
+          "startLine": 34,
+          "endLine": 41,
+          "params": [
+            "url"
+          ]
+        },
+        {
+          "name": "hostAllowed",
+          "startLine": 43,
+          "endLine": 51,
+          "params": [
+            "host",
+            "allowlist"
+          ]
+        },
+        {
+          "name": "configuredImageHostAllowlist",
+          "startLine": 53,
+          "endLine": 61,
+          "params": []
+        },
+        {
+          "name": "measureImageByteLength",
+          "startLine": 63,
+          "endLine": 110,
+          "params": [
+            "imageUrl"
+          ]
+        },
+        {
+          "name": "validateImageAtIngest",
+          "startLine": 112,
+          "endLine": 177,
+          "params": [
+            "imageUrl",
+            "allowedHosts"
+          ]
+        },
+        {
+          "name": "withTimeout",
+          "startLine": 179,
+          "endLine": 190,
+          "params": [
+            "promise",
+            "timeoutMs"
+          ]
+        },
+        {
+          "name": "sanitizeImagesForIngest",
+          "startLine": 192,
+          "endLine": 239,
+          "params": [
+            "parsed",
+            "sourceUrl"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "sanitizeImagesForIngest",
+          "line": 192,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "normalizeHost",
+          "callee": "value.trim().toLowerCase().replace",
+          "lineNumber": 24
+        },
+        {
+          "caller": "normalizeHost",
+          "callee": "value.trim().toLowerCase",
+          "lineNumber": 24
+        },
+        {
+          "caller": "normalizeHost",
+          "callee": "value.trim",
+          "lineNumber": 24
+        },
+        {
+          "caller": "uniqueHosts",
+          "callee": "hosts\n    .map((host) => normalizeHost(host))\n    .filter",
+          "lineNumber": 28
+        },
+        {
+          "caller": "uniqueHosts",
+          "callee": "hosts\n    .map",
+          "lineNumber": 28
+        },
+        {
+          "caller": "uniqueHosts",
+          "callee": "normalizeHost",
+          "lineNumber": 29
+        },
+        {
+          "caller": "uniqueHosts",
+          "callee": "Boolean",
+          "lineNumber": 30
+        },
+        {
+          "caller": "hostFromUrl",
+          "callee": "normalizeHost",
+          "lineNumber": 37
+        },
+        {
+          "caller": "hostAllowed",
+          "callee": "normalizeHost",
+          "lineNumber": 44
+        },
+        {
+          "caller": "hostAllowed",
+          "callee": "allowlist.some",
+          "lineNumber": 46
+        },
+        {
+          "caller": "hostAllowed",
+          "callee": "normalizedHost.endsWith",
+          "lineNumber": 49
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "Deno.env.get",
+          "lineNumber": 54
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "Deno.env.get",
+          "lineNumber": 55
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "envValue\n    .split(\",\")\n    .map((entry) => normalizeHost(entry))\n    .filter",
+          "lineNumber": 56
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "envValue\n    .split(\",\")\n    .map",
+          "lineNumber": 56
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "envValue\n    .split",
+          "lineNumber": 56
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "normalizeHost",
+          "lineNumber": 58
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "Boolean",
+          "lineNumber": 59
+        },
+        {
+          "caller": "configuredImageHostAllowlist",
+          "callee": "uniqueHosts",
+          "lineNumber": 60
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "guardedFetch",
+          "lineNumber": 68
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 75
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "response.headers.get(\"content-type\")?.toLowerCase",
+          "lineNumber": 83
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "response.headers.get",
+          "lineNumber": 83
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "contentType.startsWith",
+          "lineNumber": 84
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "response.body.getReader",
+          "lineNumber": 86
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "reader.read",
+          "lineNumber": 90
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "reader.cancel",
+          "lineNumber": 94
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "reader.cancel",
+          "lineNumber": 100
+        },
+        {
+          "caller": "measureImageByteLength",
+          "callee": "reader.releaseLock",
+          "lineNumber": 106
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "validateExternalUrl",
+          "lineNumber": 116
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "hostAllowed",
+          "lineNumber": 127
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "guardedFetch",
+          "lineNumber": 131
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "parsedUrl.toString",
+          "lineNumber": 131
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 138
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "parsedUrl.toString",
+          "lineNumber": 146
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "hostFromUrl",
+          "lineNumber": 147
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "hostAllowed",
+          "lineNumber": 148
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "response.headers.get(\"content-type\")?.toLowerCase",
+          "lineNumber": 158
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "response.headers.get",
+          "lineNumber": 158
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "contentType.startsWith",
+          "lineNumber": 159
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "response.headers.get",
+          "lineNumber": 161
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "Number",
+          "lineNumber": 163
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "measureImageByteLength",
+          "lineNumber": 167
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "finalUrl.toString",
+          "lineNumber": 167
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "Number.isFinite",
+          "lineNumber": 170
+        },
+        {
+          "caller": "validateImageAtIngest",
+          "callee": "finalUrl.toString",
+          "lineNumber": 176
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "setTimeout",
+          "lineNumber": 184
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "resolve",
+          "lineNumber": 184
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "promise\n      .then((value) => resolve(value))\n      .catch(() => resolve(null))\n      .finally",
+          "lineNumber": 185
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "promise\n      .then((value) => resolve(value))\n      .catch",
+          "lineNumber": 185
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "promise\n      .then",
+          "lineNumber": 185
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "resolve",
+          "lineNumber": 186
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "resolve",
+          "lineNumber": 187
+        },
+        {
+          "caller": "withTimeout",
+          "callee": "clearTimeout",
+          "lineNumber": 188
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "hostFromUrl",
+          "lineNumber": 196
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "uniqueHosts",
+          "lineNumber": 197
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "configuredImageHostAllowlist",
+          "lineNumber": 199
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "imageCandidates.slice",
+          "lineNumber": 216
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "Promise.all",
+          "lineNumber": 222
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "batch.map",
+          "lineNumber": 223
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "withTimeout",
+          "lineNumber": 224
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "validateImageAtIngest",
+          "lineNumber": 225
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "validImages.includes",
+          "lineNumber": 232
+        },
+        {
+          "caller": "sanitizeImagesForIngest",
+          "callee": "validImages.push",
+          "lineNumber": 233
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 9,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/event-processing.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 10,
+      "nonEmptyLines": 9,
+      "functions": [
+        {
+          "name": "resolveProcessingMode",
+          "startLine": 3,
+          "endLine": 10,
+          "params": [
+            "source"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "resolveProcessingMode",
+          "line": 3,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/event-processing_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 41,
+      "nonEmptyLines": 38,
+      "functions": [
+        {
+          "name": "buildSource",
+          "startLine": 5,
+          "endLine": 23,
+          "params": [
+            "overrides"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/extraction-pipeline.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 84,
+      "nonEmptyLines": 74,
+      "functions": [
+        {
+          "name": "selectExtractionPlan",
+          "startLine": 5,
+          "endLine": 14,
+          "params": [
+            "mode",
+            "deterministicValidCount"
+          ]
+        },
+        {
+          "name": "validateParsedEvents",
+          "startLine": 16,
+          "endLine": 25,
+          "params": [
+            "events"
+          ]
+        },
+        {
+          "name": "parseLlmParsedEvents",
+          "startLine": 27,
+          "endLine": 80,
+          "params": [
+            "rawJson"
+          ]
+        },
+        {
+          "name": "normalizeArtifactForLlm",
+          "startLine": 82,
+          "endLine": 84,
+          "params": [
+            "artifact"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "selectExtractionPlan",
+          "line": 5,
+          "isDefault": false
+        },
+        {
+          "name": "validateParsedEvents",
+          "line": 16,
+          "isDefault": false
+        },
+        {
+          "name": "parseLlmParsedEvents",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "normalizeArtifactForLlm",
+          "line": 82,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "validateParsedEvents",
+          "callee": "events.filter",
+          "lineNumber": 17
+        },
+        {
+          "caller": "validateParsedEvents",
+          "callee": "event.title?.trim",
+          "lineNumber": 18
+        },
+        {
+          "caller": "validateParsedEvents",
+          "callee": "Number.isNaN",
+          "lineNumber": 19
+        },
+        {
+          "caller": "validateParsedEvents",
+          "callee": "Date.parse",
+          "lineNumber": 19
+        },
+        {
+          "caller": "validateParsedEvents",
+          "callee": "Number.isNaN",
+          "lineNumber": 20
+        },
+        {
+          "caller": "validateParsedEvents",
+          "callee": "Date.parse",
+          "lineNumber": 20
+        },
+        {
+          "caller": "parseLlmParsedEvents",
+          "callee": "JSON.parse",
+          "lineNumber": 28
+        },
+        {
+          "caller": "parseLlmParsedEvents",
+          "callee": "Array.isArray",
+          "lineNumber": 29
+        },
+        {
+          "caller": "parseLlmParsedEvents",
+          "callee": "Array.isArray",
+          "lineNumber": 31
+        },
+        {
+          "caller": "parseLlmParsedEvents",
+          "callee": "rows.map",
+          "lineNumber": 39
+        },
+        {
+          "caller": "parseLlmParsedEvents",
+          "callee": "Array.isArray",
+          "lineNumber": 64
+        },
+        {
+          "caller": "parseLlmParsedEvents",
+          "callee": "record.images.filter",
+          "lineNumber": 65
+        },
+        {
+          "caller": "parseLlmParsedEvents",
+          "callee": "validateParsedEvents",
+          "lineNumber": 74
+        },
+        {
+          "caller": "normalizeArtifactForLlm",
+          "callee": "artifact.body.replace(/\\s+/g, \" \").trim().slice",
+          "lineNumber": 83
+        },
+        {
+          "caller": "normalizeArtifactForLlm",
+          "callee": "artifact.body.replace(/\\s+/g, \" \").trim",
+          "lineNumber": 83
+        },
+        {
+          "caller": "normalizeArtifactForLlm",
+          "callee": "artifact.body.replace",
+          "lineNumber": 83
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 4,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/extraction-pipeline_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 57,
+      "nonEmptyLines": 53,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/parser-context.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 11,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/process-source.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 460,
+      "nonEmptyLines": 425,
+      "functions": [
+        {
+          "name": "deriveIsOutdoorFromParsedEvent",
+          "startLine": 35,
+          "endLine": 62,
+          "params": [
+            "parsed"
+          ]
+        },
+        {
+          "name": "deriveRawImageCandidates",
+          "startLine": 64,
+          "endLine": 77,
+          "params": [
+            "parsed"
+          ]
+        },
+        {
+          "name": "fetchCityCentroid",
+          "startLine": 79,
+          "endLine": 90,
+          "params": [
+            "supabase",
+            "cityId"
+          ]
+        },
+        {
+          "name": "readResponseBodyCapped",
+          "startLine": 92,
+          "endLine": 128,
+          "params": [
+            "response",
+            "maxBytes"
+          ]
+        },
+        {
+          "name": "guardedFetchText",
+          "startLine": 132,
+          "endLine": 151,
+          "params": [
+            "url",
+            "accept"
+          ]
+        },
+        {
+          "name": "buildParserContext",
+          "startLine": 153,
+          "endLine": 169,
+          "params": [
+            "timezone"
+          ]
+        },
+        {
+          "name": "importParsedSourceEvents",
+          "startLine": 171,
+          "endLine": 460,
+          "params": [
+            "supabase",
+            "source",
+            "runId",
+            "parsedEvents"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "sanitizeImagesForIngest",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "deriveIsOutdoorFromParsedEvent",
+          "line": 35,
+          "isDefault": false
+        },
+        {
+          "name": "deriveRawImageCandidates",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "buildParserContext",
+          "line": 153,
+          "isDefault": false
+        },
+        {
+          "name": "importParsedSourceEvents",
+          "line": 171,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "[\n    parsed.title,\n    parsed.description,\n    parsed.venueName,\n    parsed.address,\n  ]\n    .filter((value): value is string => Boolean(value))\n    .join(\" \")\n    .toLowerCase",
+          "lineNumber": 38
+        },
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "[\n    parsed.title,\n    parsed.description,\n    parsed.venueName,\n    parsed.address,\n  ]\n    .filter((value): value is string => Boolean(value))\n    .join",
+          "lineNumber": 38
+        },
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "[\n    parsed.title,\n    parsed.description,\n    parsed.venueName,\n    parsed.address,\n  ]\n    .filter",
+          "lineNumber": 38
+        },
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "Boolean",
+          "lineNumber": 44
+        },
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "OUTDOOR_TAG_HINTS.some",
+          "lineNumber": 48
+        },
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "text.includes",
+          "lineNumber": 49
+        },
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "INDOOR_TAG_HINTS.some",
+          "lineNumber": 51
+        },
+        {
+          "caller": "deriveIsOutdoorFromParsedEvent",
+          "callee": "text.includes",
+          "lineNumber": 52
+        },
+        {
+          "caller": "deriveRawImageCandidates",
+          "callee": "candidate.trim",
+          "lineNumber": 69
+        },
+        {
+          "caller": "deriveRawImageCandidates",
+          "callee": "url.startsWith",
+          "lineNumber": 70
+        },
+        {
+          "caller": "deriveRawImageCandidates",
+          "callee": "url.startsWith",
+          "lineNumber": 70
+        },
+        {
+          "caller": "deriveRawImageCandidates",
+          "callee": "seen.has",
+          "lineNumber": 71
+        },
+        {
+          "caller": "deriveRawImageCandidates",
+          "callee": "seen.add",
+          "lineNumber": 72
+        },
+        {
+          "caller": "fetchCityCentroid",
+          "callee": "supabase\n    .from(\"cities\")\n    .select(\"latitude, longitude\")\n    .eq(\"id\", cityId)\n    .maybeSingle",
+          "lineNumber": 84
+        },
+        {
+          "caller": "fetchCityCentroid",
+          "callee": "supabase\n    .from(\"cities\")\n    .select(\"latitude, longitude\")\n    .eq",
+          "lineNumber": 84
+        },
+        {
+          "caller": "fetchCityCentroid",
+          "callee": "supabase\n    .from(\"cities\")\n    .select",
+          "lineNumber": 84
+        },
+        {
+          "caller": "fetchCityCentroid",
+          "callee": "supabase\n    .from",
+          "lineNumber": 84
+        },
+        {
+          "caller": "readResponseBodyCapped",
+          "callee": "response.body.getReader",
+          "lineNumber": 97
+        },
+        {
+          "caller": "readNextChunk",
+          "callee": "reader.read",
+          "lineNumber": 102
+        },
+        {
+          "caller": "readNextChunk",
+          "callee": "reader.cancel",
+          "lineNumber": 107
+        },
+        {
+          "caller": "readNextChunk",
+          "callee": "chunks.push",
+          "lineNumber": 111
+        },
+        {
+          "caller": "readNextChunk",
+          "callee": "readNextChunk",
+          "lineNumber": 112
+        },
+        {
+          "caller": "readResponseBodyCapped",
+          "callee": "readNextChunk",
+          "lineNumber": 116
+        },
+        {
+          "caller": "readResponseBodyCapped",
+          "callee": "reader.releaseLock",
+          "lineNumber": 118
+        },
+        {
+          "caller": "readResponseBodyCapped",
+          "callee": "buf.set",
+          "lineNumber": 124
+        },
+        {
+          "caller": "readResponseBodyCapped",
+          "callee": "new TextDecoder(\"utf-8\").decode",
+          "lineNumber": 127
+        },
+        {
+          "caller": "guardedFetchText",
+          "callee": "guardedFetch",
+          "lineNumber": 136
+        },
+        {
+          "caller": "guardedFetchText",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 141
+        },
+        {
+          "caller": "guardedFetchText",
+          "callee": "readResponseBodyCapped",
+          "lineNumber": 150
+        },
+        {
+          "caller": "buildParserContext",
+          "callee": "guardedFetchText",
+          "lineNumber": 157
+        },
+        {
+          "caller": "buildParserContext",
+          "callee": "guardedFetchText",
+          "lineNumber": 162
+        },
+        {
+          "caller": "buildParserContext",
+          "callee": "JSON.parse",
+          "lineNumber": 166
+        },
+        {
+          "caller": "flushProgress",
+          "callee": "supabase\n      .from(\"source_runs\")\n      .update({\n        events_found: eventsFound,\n        events_imported: eventsImported,\n        events_skipped: eventsSkipped,\n      })\n      .eq",
+          "lineNumber": 192
+        },
+        {
+          "caller": "flushProgress",
+          "callee": "supabase\n      .from(\"source_runs\")\n      .update",
+          "lineNumber": 192
+        },
+        {
+          "caller": "flushProgress",
+          "callee": "supabase\n      .from",
+          "lineNumber": 192
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "Promise.all",
+          "lineNumber": 203
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "resolveCityTimezone",
+          "lineNumber": 204
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "fetchCityCentroid",
+          "lineNumber": 205
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "parsedEvents.filter",
+          "lineNumber": 210
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "logEdgeEvent",
+          "lineNumber": 218
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "Math.round",
+          "lineNumber": 225
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "flushProgress",
+          "lineNumber": 230
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "parsedEvents.filter",
+          "lineNumber": 232
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "flushProgress",
+          "lineNumber": 241
+        },
+        {
+          "caller": "prepEventPayload",
+          "callee": "deriveIsOutdoorFromParsedEvent",
+          "lineNumber": 246
+        },
+        {
+          "caller": "prepEventPayload",
+          "callee": "deriveRawImageCandidates",
+          "lineNumber": 247
+        },
+        {
+          "caller": "prepEventPayload",
+          "callee": "Boolean",
+          "lineNumber": 262
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "validEvents.map",
+          "lineNumber": 269
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase.rpc",
+          "lineNumber": 274
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "logEdgeEvent",
+          "lineNumber": 307
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "flushProgress",
+          "lineNumber": 317
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "logEdgeEvent",
+          "lineNumber": 321
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "formatError",
+          "lineNumber": 348
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "captureEdgeException",
+          "lineNumber": 349
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "errorContext",
+          "lineNumber": 351
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "logEdgeEvent",
+          "lineNumber": 359
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "errorContext",
+          "lineNumber": 362
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase\n        .from(\"source_runs\")\n        .update({\n          completed_at: new Date().toISOString(),\n          status,\n          events_found: eventsFound,\n          events_imported: eventsImported,\n          events_skipped: eventsSkipped,\n          error_log: errorMessage,\n        })\n        .eq",
+          "lineNumber": 375
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase\n        .from(\"source_runs\")\n        .update",
+          "lineNumber": 375
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase\n        .from",
+          "lineNumber": 375
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "new Date().toISOString",
+          "lineNumber": 378
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase\n        .from(\"event_sources\")\n        .update({\n          last_scraped_at: new Date().toISOString(),\n          last_status: status,\n          // Only reset error_count on full success. A 'partial' run (events\n          // found, none imported) used to clear the counter and mask persistent\n          // failures; keep accumulating until a clean success.\n          error_count: status === \"success\"\n            ? 0\n            : source.error_count + (status === \"error\" ? 1 : 0),\n        })\n        .eq",
+          "lineNumber": 387
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase\n        .from(\"event_sources\")\n        .update",
+          "lineNumber": 387
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase\n        .from",
+          "lineNumber": 387
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "new Date().toISOString",
+          "lineNumber": 390
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "Math.min",
+          "lineNumber": 412
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "Math.max",
+          "lineNumber": 413
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "Math.ceil",
+          "lineNumber": 413
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "Promise.allSettled",
+          "lineNumber": 416
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "Array.from",
+          "lineNumber": 417
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "supabase.rpc",
+          "lineNumber": 419
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "results.filter",
+          "lineNumber": 422
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "logEdgeEvent",
+          "lineNumber": 424
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "captureEdgeException",
+          "lineNumber": 439
+        },
+        {
+          "caller": "importParsedSourceEvents",
+          "callee": "errorContext",
+          "lineNumber": 441
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 5,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/process-source_test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 207,
+      "nonEmptyLines": 189,
+      "functions": [
+        {
+          "name": "buildParsedEvent",
+          "startLine": 9,
+          "endLine": 24,
+          "params": [
+            "overrides"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/schedule.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 25,
+      "nonEmptyLines": 22,
+      "functions": [
+        {
+          "name": "isSourceDue",
+          "startLine": 4,
+          "endLine": 12,
+          "params": [
+            "source"
+          ]
+        },
+        {
+          "name": "resolveCityTimezone",
+          "startLine": 18,
+          "endLine": 25,
+          "params": [
+            "supabase",
+            "cityId"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "isSourceDue",
+          "line": 4,
+          "isDefault": false
+        },
+        {
+          "name": "resolveCityTimezone",
+          "line": 18,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "isSourceDue",
+          "callee": "new Date(source.last_scraped_at).getTime",
+          "lineNumber": 9
+        },
+        {
+          "caller": "isSourceDue",
+          "callee": "Date.now",
+          "lineNumber": 10
+        },
+        {
+          "caller": "resolveCityTimezone",
+          "callee": "supabase.from(\"cities\").select(\"timezone\").eq(\"id\", cityId).maybeSingle",
+          "lineNumber": 23
+        },
+        {
+          "caller": "resolveCityTimezone",
+          "callee": "supabase.from(\"cities\").select(\"timezone\").eq",
+          "lineNumber": 23
+        },
+        {
+          "caller": "resolveCityTimezone",
+          "callee": "supabase.from(\"cities\").select",
+          "lineNumber": 23
+        },
+        {
+          "caller": "resolveCityTimezone",
+          "callee": "supabase.from",
+          "lineNumber": 23
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/scrape-source/lib/types.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 64,
+      "nonEmptyLines": 59,
+      "exports": [
+        {
+          "name": "EventProcessingMode",
+          "line": 18,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

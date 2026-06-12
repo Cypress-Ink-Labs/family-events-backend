@@ -1,0 +1,357 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/ical/online-location-url.ics",
+      "type": "file",
+      "name": "online-location-url.ics",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/ical/online-location-url.ics",
+      "summary": "iCalendar fixture for an event with an online URL location, used to test URL-based location extraction in the iCal parser.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/ical/physical-location.ics",
+      "type": "file",
+      "name": "physical-location.ics",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/ical/physical-location.ics",
+      "summary": "iCalendar fixture for an event with a physical address location, used to test address parsing in the iCal scraper.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/ical/rrule.ics",
+      "type": "file",
+      "name": "rrule.ics",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/ical/rrule.ics",
+      "summary": "iCalendar fixture with a recurrence rule (RRULE) to test recurring event detection and expansion logic.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/ical/vermilionville-sample.ics",
+      "type": "file",
+      "name": "vermilionville-sample.ics",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/ical/vermilionville-sample.ics",
+      "summary": "Real-world iCalendar sample from Vermilionville used for end-to-end iCal parsing tests with multi-event and description fields.",
+      "tags": ["test", "data-pipeline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/lcglafayette/events-page.html",
+      "type": "file",
+      "name": "events-page.html",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/lcglafayette/events-page.html",
+      "summary": "HTML fixture capturing an LCG Lafayette events page for testing site-specific HTML scraper logic.",
+      "tags": ["test", "markup"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-api.json",
+      "type": "config",
+      "name": "lafayette-api.json",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-api.json",
+      "summary": "JSON API response fixture from the Macaroni Kid Lafayette feed used to test JSON-based event scraping.",
+      "tags": ["test", "data-pipeline", "configuration"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-page.html",
+      "type": "file",
+      "name": "lafayette-page.html",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-page.html",
+      "summary": "Minimal HTML fixture for the Macaroni Kid Lafayette page used alongside the API fixture in scrape-source tests.",
+      "tags": ["test", "markup"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/scrape-source/__fixtures__/rss/cdata-media.xml",
+      "type": "config",
+      "name": "cdata-media.xml",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/rss/cdata-media.xml",
+      "summary": "RSS feed XML fixture containing CDATA sections and media enclosures for testing rich RSS parsing.",
+      "tags": ["test", "data-pipeline", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/scrape-source/__fixtures__/rss/dc-date.xml",
+      "type": "config",
+      "name": "dc-date.xml",
+      "filePath": "supabase/functions/scrape-source/__fixtures__/rss/dc-date.xml",
+      "summary": "RSS feed XML fixture using Dublin Core date elements to test dc:date field extraction.",
+      "tags": ["test", "data-pipeline", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/scrape-source/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/scrape-source/deno.json",
+      "summary": "Deno configuration for the scrape-source edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/send-auth-email/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/send-auth-email/deno.json",
+      "summary": "Deno configuration for the send-auth-email edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/send-push/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/send-push/deno.json",
+      "summary": "Deno configuration for the send-push edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/send-push/send-push.test.ts",
+      "type": "file",
+      "name": "send-push.test.ts",
+      "filePath": "supabase/functions/send-push/send-push.test.ts",
+      "summary": "Comprehensive unit tests for the send-push edge function, covering VAPID key generation, payload parsing, and Web Push protocol encoding.",
+      "tags": ["test", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-push/send-push.test.ts:parsePayload",
+      "type": "function",
+      "name": "parsePayload",
+      "filePath": "supabase/functions/send-push/send-push.test.ts",
+      "lineRange": [55, 71],
+      "summary": "Test helper that parses a raw Web Push payload buffer into a structured object for assertion.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/send-reminders/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/send-reminders/deno.json",
+      "summary": "Deno configuration for the send-reminders edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/send-reminders/send-reminders.test.ts",
+      "type": "file",
+      "name": "send-reminders.test.ts",
+      "filePath": "supabase/functions/send-reminders/send-reminders.test.ts",
+      "summary": "Comprehensive unit tests for the send-reminders edge function, covering target flattening, date formatting, deduplication, and reminder dispatch logic.",
+      "tags": ["test", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-reminders/send-reminders.test.ts:flattenRows",
+      "type": "function",
+      "name": "flattenRows",
+      "filePath": "supabase/functions/send-reminders/send-reminders.test.ts",
+      "lineRange": [40, 69],
+      "summary": "Test helper that flattens database reminder rows into a list of notification targets with user preferences applied.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/send-reminders/send-reminders.test.ts:formatEventDate",
+      "type": "function",
+      "name": "formatEventDate",
+      "filePath": "supabase/functions/send-reminders/send-reminders.test.ts",
+      "lineRange": [71, 83],
+      "summary": "Test helper formatting an ISO date string into a human-readable event date for reminder message construction.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/send-weekly-digest/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/send-weekly-digest/deno.json",
+      "summary": "Deno configuration for the send-weekly-digest edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+      "type": "file",
+      "name": "send-weekly-digest.test.ts",
+      "filePath": "supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+      "summary": "Unit tests for the send-weekly-digest edge function, including Supabase client mocking, digest user building, and email dispatch verification.",
+      "tags": ["test", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-weekly-digest/send-weekly-digest.test.ts:createMockSupabase",
+      "type": "function",
+      "name": "createMockSupabase",
+      "filePath": "supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+      "lineRange": [19, 80],
+      "summary": "Creates a comprehensive Supabase client mock with configurable query results for testing the weekly digest workflow.",
+      "tags": ["test", "factory"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/send-weekly-digest/send-weekly-digest.test.ts:buildDigestUsers",
+      "type": "function",
+      "name": "buildDigestUsers",
+      "filePath": "supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+      "lineRange": [90, 128],
+      "summary": "Test helper building digest user objects by joining user preferences and profile rows.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:supabase/functions/share-og/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/share-og/deno.json",
+      "summary": "Deno configuration for the share-og edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/sitemap/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/sitemap/deno.json",
+      "summary": "Deno configuration for the sitemap edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/sitemap/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/sitemap/index.ts",
+      "summary": "Supabase edge function serving the sitemap.xml and robots.txt for the family events app, querying public events from Supabase.",
+      "tags": ["api-handler", "service", "entry-point"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/sitemap/index.ts:handleSitemap",
+      "type": "function",
+      "name": "handleSitemap",
+      "filePath": "supabase/functions/sitemap/index.ts",
+      "lineRange": [144, 154],
+      "summary": "Exported request handler that routes sitemap.xml and robots.txt requests to their respective generators.",
+      "tags": ["api-handler", "entry-point"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/sitemap/index.ts:sitemapXml",
+      "type": "function",
+      "name": "sitemapXml",
+      "filePath": "supabase/functions/sitemap/index.ts",
+      "lineRange": [75, 140],
+      "summary": "Builds the sitemap XML by querying public events from Supabase and generating W3C-formatted location entries.",
+      "tags": ["api-handler", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:supabase/functions/tag-event/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/tag-event/deno.json",
+      "summary": "Deno configuration for the tag-event edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "supabase/functions/vitest.config.ts",
+      "summary": "Vitest configuration for running edge function unit tests in the supabase/functions workspace.",
+      "tags": ["configuration", "test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:supabase/functions/weather/deno.json",
+      "type": "config",
+      "name": "deno.json",
+      "filePath": "supabase/functions/weather/deno.json",
+      "summary": "Deno configuration for the weather edge function.",
+      "tags": ["configuration", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/seed.sql",
+      "type": "file",
+      "name": "seed.sql",
+      "filePath": "supabase/seed.sql",
+      "summary": "Database seed script inserting initial data including event sources, tags, and test events for local development.",
+      "tags": ["database", "data-pipeline"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/snippets/add_macaroni_kids_source.sql",
+      "type": "file",
+      "name": "add_macaroni_kids_source.sql",
+      "filePath": "supabase/snippets/add_macaroni_kids_source.sql",
+      "summary": "One-off SQL snippet inserting the Macaroni Kids event source record into the sources table.",
+      "tags": ["database", "utility"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/send-push/send-push.test.ts",
+      "target": "function:supabase/functions/send-push/send-push.test.ts:parsePayload",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-reminders/send-reminders.test.ts",
+      "target": "function:supabase/functions/send-reminders/send-reminders.test.ts:flattenRows",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-reminders/send-reminders.test.ts",
+      "target": "function:supabase/functions/send-reminders/send-reminders.test.ts:formatEventDate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+      "target": "function:supabase/functions/send-weekly-digest/send-weekly-digest.test.ts:createMockSupabase",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/send-weekly-digest/send-weekly-digest.test.ts",
+      "target": "function:supabase/functions/send-weekly-digest/send-weekly-digest.test.ts:buildDigestUsers",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/sitemap/index.ts",
+      "target": "function:supabase/functions/sitemap/index.ts:handleSitemap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/sitemap/index.ts",
+      "target": "function:supabase/functions/sitemap/index.ts:sitemapXml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/sitemap/index.ts",
+      "target": "function:supabase/functions/sitemap/index.ts:handleSitemap",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

@@ -1,0 +1,1120 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "summary": "Shared internal type definitions for scrape-source parsers, re-exporting ParserContext and defining the SourceParser interface used by all parser implementations.",
+      "tags": ["type-definition", "utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "type": "file",
+      "name": "brec.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/brec.ts",
+      "summary": "Parser for the BREC (Baton Rouge Recreation and Park Commission) calendar website, scraping HTML to extract structured event data including time ranges, images, and descriptions.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/brec.ts:parseBrecCalendar",
+      "type": "function",
+      "name": "parseBrecCalendar",
+      "filePath": "supabase/functions/scrape-source/parsers/brec.ts",
+      "lineRange": [194, 238],
+      "summary": "Parses the BREC HTML calendar page by walking day-heading and article DOM nodes to extract a list of events with deduplication.",
+      "tags": ["api-handler", "utility", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/brec.ts:parseTimeRange",
+      "type": "function",
+      "name": "parseTimeRange",
+      "filePath": "supabase/functions/scrape-source/parsers/brec.ts",
+      "lineRange": [70, 122],
+      "summary": "Parses a raw time range string from a BREC calendar article into ISO datetime start and end values, handling all-day and ranged formats.",
+      "tags": ["utility", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/brec.ts:parseArticle",
+      "type": "function",
+      "name": "parseArticle",
+      "filePath": "supabase/functions/scrape-source/parsers/brec.ts",
+      "lineRange": [141, 192],
+      "summary": "Extracts a single event record from a BREC calendar article DOM node, collecting title, time, venue, URL, image, description, and price.",
+      "tags": ["api-handler", "utility", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/brec_test.ts",
+      "type": "file",
+      "name": "brec_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/brec_test.ts",
+      "summary": "Unit tests for the BREC calendar parser, verifying event extraction from fixture HTML across various time range and day-heading formats.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "type": "file",
+      "name": "downtownlafayette.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "summary": "Parser for the Downtown Lafayette events website, extracting event cards from HTML and producing structured event objects with time, location, image, and price data.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/downtownlafayette.ts:parseDowntownLafayetteEvents",
+      "type": "function",
+      "name": "parseDowntownLafayetteEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "lineRange": [78, 178],
+      "summary": "Parses Downtown Lafayette event cards from HTML, inferring event year, resolving start/end times, and collecting structured event data with deduplication.",
+      "tags": ["api-handler", "serialization", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/downtownlafayette_test.ts",
+      "type": "file",
+      "name": "downtownlafayette_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/downtownlafayette_test.ts",
+      "summary": "Unit tests for the Downtown Lafayette parser verifying event extraction correctness from fixture HTML, including time parsing and year inference.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts",
+      "type": "file",
+      "name": "ical-lafayette-sources_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts",
+      "summary": "Integration-style tests for the iCal parser against Lafayette-specific ical feed fixtures, validating event counts, titles, dates, and optional fields.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "type": "file",
+      "name": "ical.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/ical.ts",
+      "summary": "Parser for iCalendar (RFC 5545) feeds, unfolding lines, parsing property key-value-params, resolving TZID-aware datetimes, and producing structured event objects.",
+      "tags": ["service", "api-handler", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/ical.ts:parseIcalFeed",
+      "type": "function",
+      "name": "parseIcalFeed",
+      "filePath": "supabase/functions/scrape-source/parsers/ical.ts",
+      "lineRange": [93, 198],
+      "summary": "Parses a full iCalendar feed string into an array of structured event objects, handling VEVENT blocks, timezone-aware dates, image attachments, and price extraction.",
+      "tags": ["api-handler", "serialization", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/ical.ts:parseIcalDateWithTz",
+      "type": "function",
+      "name": "parseIcalDateWithTz",
+      "filePath": "supabase/functions/scrape-source/parsers/ical.ts",
+      "lineRange": [59, 91],
+      "summary": "Resolves an iCal date-time value with optional TZID parameter to an ISO datetime string, handling UTC, local, and named timezone formats.",
+      "tags": ["utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/ical_test.ts",
+      "type": "file",
+      "name": "ical_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/ical_test.ts",
+      "summary": "Unit tests for the iCal parser covering valid feeds, error conditions (missing BEGIN/END), and date/image/price field extraction.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/index.ts",
+      "summary": "Barrel entry point for all scrape-source parser implementations, exporting the parsers registry map and re-exporting SourceParser and ParserContext types.",
+      "tags": ["barrel", "entry-point", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/index_test.ts",
+      "type": "file",
+      "name": "index_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/index_test.ts",
+      "summary": "Smoke test for the parsers index, verifying that the exported parsers map contains all expected source type keys.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "type": "file",
+      "name": "lcg-lafayette.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "summary": "Parser for the LCG (Lafayette Consolidated Government) events calendar, extracting event links and dates from HTML and resolving datetime from URL-encoded parameters.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/lcg-lafayette.ts:parseLcgEventUrl",
+      "type": "function",
+      "name": "parseLcgEventUrl",
+      "filePath": "supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "lineRange": [42, 75],
+      "summary": "Parses date and time components encoded in an LCG event URL to produce ISO start and end datetime strings.",
+      "tags": ["utility", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/lcg-lafayette.ts:parseLcgEvents",
+      "type": "function",
+      "name": "parseLcgEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "lineRange": [77, 118],
+      "summary": "Parses the LCG Lafayette HTML calendar to extract event list items with titles, datetimes, descriptions, and prices.",
+      "tags": ["api-handler", "serialization"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts",
+      "type": "file",
+      "name": "lcg-lafayette_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts",
+      "summary": "Unit tests for the LCG Lafayette parser validating event extraction from fixture HTML including URL-based datetime parsing.",
+      "tags": ["test", "utility"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "type": "file",
+      "name": "localhop.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/localhop.ts",
+      "summary": "Parser for the LocalHop JSON API, building parametrized API URLs from source configuration and mapping JSON event records to the internal event schema.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/localhop.ts:parseLocalHopEvents",
+      "type": "function",
+      "name": "parseLocalHopEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/localhop.ts",
+      "lineRange": [92, 143],
+      "summary": "Maps LocalHop JSON event records to the internal event schema, resolving dates, addresses, images, prices, and deduplication keys.",
+      "tags": ["api-handler", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/localhop.ts:buildLocalHopUrl",
+      "type": "function",
+      "name": "buildLocalHopUrl",
+      "filePath": "supabase/functions/scrape-source/parsers/localhop.ts",
+      "lineRange": [145, 184],
+      "summary": "Builds a parametrized LocalHop API URL from source URL query parameters, encoding date ranges, city, and state filters.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/localhop_test.ts",
+      "type": "file",
+      "name": "localhop_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/localhop_test.ts",
+      "summary": "Unit tests for the LocalHop parser verifying JSON event mapping and API URL construction from fixture data.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "type": "file",
+      "name": "macaroni-kid.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "summary": "Parser for the Macaroni Kid API, fetching the town ID from the landing page HTML then querying the event API to map JSON records into internal event objects.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/macaroni-kid.ts:mapMacaroniKidEvent",
+      "type": "function",
+      "name": "mapMacaroniKidEvent",
+      "filePath": "supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "lineRange": [128, 209],
+      "summary": "Maps a single Macaroni Kid API event JSON record to the internal event schema, resolving dates, addresses, images, pricing, and descriptions from nested JSON structures.",
+      "tags": ["api-handler", "serialization", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/macaroni-kid.ts:fetchMacaroniKidEvents",
+      "type": "function",
+      "name": "fetchMacaroniKidEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "lineRange": [211, 240],
+      "summary": "Orchestrates Macaroni Kid event fetching: loads the HTML landing page to extract the town ID, constructs the API URL, fetches JSON, and maps each event record.",
+      "tags": ["api-handler", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/macaroni-kid_test.ts",
+      "type": "file",
+      "name": "macaroni-kid_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/macaroni-kid_test.ts",
+      "summary": "Unit and integration tests for the Macaroni Kid parser using fixture JSON, verifying event mapping, date handling, address resolution, and API URL construction.",
+      "tags": ["test", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/manual.ts",
+      "type": "file",
+      "name": "manual.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/manual.ts",
+      "summary": "Stub parser for manually-managed sources that skips artifact fetching and returns an empty event list, used as a no-op placeholder in the parsers registry.",
+      "tags": ["service", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "type": "file",
+      "name": "rss.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/rss.ts",
+      "summary": "Parser for RSS/Atom feeds, using an XML parser to extract event entries from both feed formats with image extraction, URL normalization, and price detection.",
+      "tags": ["service", "api-handler", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/rss.ts:parseRssFeed",
+      "type": "function",
+      "name": "parseRssFeed",
+      "filePath": "supabase/functions/scrape-source/parsers/rss.ts",
+      "lineRange": [222, 276],
+      "summary": "Parses a full RSS or Atom feed XML string into structured event records, collecting titles, dates, descriptions, images, and source links.",
+      "tags": ["api-handler", "serialization", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/rss.ts:extractImages",
+      "type": "function",
+      "name": "extractImages",
+      "filePath": "supabase/functions/scrape-source/parsers/rss.ts",
+      "lineRange": [104, 152],
+      "summary": "Extracts image URLs from an RSS/Atom feed item by scanning media namespace attributes, enclosure elements, and description HTML for img src tags.",
+      "tags": ["utility", "serialization"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/rss.ts:collectEntries",
+      "type": "function",
+      "name": "collectEntries",
+      "filePath": "supabase/functions/scrape-source/parsers/rss.ts",
+      "lineRange": [154, 197],
+      "summary": "Collects all RSS item or Atom entry nodes from a parsed XML tree, traversing RSS 2.0 channel/item, Atom feed/entry, and nested structure patterns.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/rss_test.ts",
+      "type": "file",
+      "name": "rss_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/rss_test.ts",
+      "summary": "Unit tests for the RSS/Atom parser verifying event extraction from fixture feed files including image, date, and description fields.",
+      "tags": ["test", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "type": "file",
+      "name": "website.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/website.ts",
+      "summary": "Multi-strategy HTML website parser that attempts JSON-LD structured data extraction followed by MEC calendar, Baton Rouge Zoo card, All-in-One calendar, and Squarespace summary pattern matching to extract events from arbitrary website HTML.",
+      "tags": ["service", "api-handler", "utility"],
+      "complexity": "complex",
+      "languageNotes": "Implements a cascading parser strategy: structured JSON-LD first, then four site-specific DOM layout detectors applied in priority order."
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/website.ts:parseWebsite",
+      "type": "function",
+      "name": "parseWebsite",
+      "filePath": "supabase/functions/scrape-source/parsers/website.ts",
+      "lineRange": [658, 698],
+      "summary": "Top-level website parsing orchestrator that runs all sub-parsers in order and merges unique events with deduplication.",
+      "tags": ["api-handler", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/website.ts:parseStructuredEvents",
+      "type": "function",
+      "name": "parseStructuredEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/website.ts",
+      "lineRange": [312, 397],
+      "summary": "Extracts events from JSON-LD structured data script tags embedded in page HTML, mapping schema.org Event nodes to internal event objects.",
+      "tags": ["api-handler", "serialization", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/website.ts:parseMecCalendarEvents",
+      "type": "function",
+      "name": "parseMecCalendarEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/website.ts",
+      "lineRange": [399, 471],
+      "summary": "Parses MEC (Modern Events Calendar) plugin HTML layout by walking day nodes and event links, merging with structured data when available.",
+      "tags": ["api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/website.ts:parseBatonRougeZooCards",
+      "type": "function",
+      "name": "parseBatonRougeZooCards",
+      "filePath": "supabase/functions/scrape-source/parsers/website.ts",
+      "lineRange": [473, 533],
+      "summary": "Parses the Baton Rouge Zoo website card layout to extract event dates, times, images, titles, and descriptions.",
+      "tags": ["api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/website.ts:parseAllInOneCalendarEvents",
+      "type": "function",
+      "name": "parseAllInOneCalendarEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/website.ts",
+      "lineRange": [543, 595],
+      "summary": "Parses the All-in-One Events WordPress plugin calendar layout, extracting events by human-readable date strings and structured DOM selectors.",
+      "tags": ["api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:supabase/functions/scrape-source/parsers/website.ts:parseSquarespaceSummaryEvents",
+      "type": "function",
+      "name": "parseSquarespaceSummaryEvents",
+      "filePath": "supabase/functions/scrape-source/parsers/website.ts",
+      "lineRange": [597, 651],
+      "summary": "Parses Squarespace summary block event listings, extracting date parts, wall clock times, images, descriptions, and prices.",
+      "tags": ["api-handler", "utility"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:supabase/functions/scrape-source/parsers/website_test.ts",
+      "type": "file",
+      "name": "website_test.ts",
+      "filePath": "supabase/functions/scrape-source/parsers/website_test.ts",
+      "summary": "Unit tests for the website parser covering all five extraction strategies using fixture HTML files for structured data, MEC, Baton Rouge Zoo, All-in-One, and Squarespace layouts.",
+      "tags": ["test", "utility"],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "target": "file:supabase/functions/scrape-source/lib/parser-context.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/manual.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid_test.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/manual.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "file:supabase/functions/_shared/parsing.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "file:supabase/functions/_shared/url-validation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "file:supabase/functions/scrape-source/lib/date.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "file:supabase/functions/scrape-source/lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/_lib/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website_test.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/brec.ts:parseBrecCalendar",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/brec.ts:parseTimeRange",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/brec.ts:parseArticle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/brec.ts:parseBrecCalendar",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/downtownlafayette.ts:parseDowntownLafayetteEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/downtownlafayette.ts:parseDowntownLafayetteEvents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/ical.ts:parseIcalFeed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/ical.ts:parseIcalDateWithTz",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/ical.ts:parseIcalFeed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/lcg-lafayette.ts:parseLcgEventUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/lcg-lafayette.ts:parseLcgEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/lcg-lafayette.ts:parseLcgEventUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/lcg-lafayette.ts:parseLcgEvents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/localhop.ts:parseLocalHopEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/localhop.ts:buildLocalHopUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/localhop.ts:parseLocalHopEvents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/macaroni-kid.ts:mapMacaroniKidEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/macaroni-kid.ts:fetchMacaroniKidEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/macaroni-kid.ts:mapMacaroniKidEvent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/macaroni-kid.ts:fetchMacaroniKidEvents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/rss.ts:parseRssFeed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/rss.ts:extractImages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/rss.ts:collectEntries",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/rss.ts:parseRssFeed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/website.ts:parseWebsite",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/website.ts:parseStructuredEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/website.ts:parseMecCalendarEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/website.ts:parseBatonRougeZooCards",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/website.ts:parseAllInOneCalendarEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/website.ts:parseSquarespaceSummaryEvents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "function:supabase/functions/scrape-source/parsers/website.ts:parseWebsite",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/brec.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/brec_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/downtownlafayette.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/downtownlafayette_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/ical_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/ical.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/index.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/index_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/lcg-lafayette.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/localhop.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/localhop_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/macaroni-kid.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/macaroni-kid_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/rss.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/rss_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/scrape-source/parsers/website.ts",
+      "target": "file:supabase/functions/scrape-source/parsers/website_test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

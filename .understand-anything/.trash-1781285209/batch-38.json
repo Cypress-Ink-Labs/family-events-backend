@@ -1,0 +1,311 @@
+{
+  "nodes": [
+    {
+      "id": "config:.changeset/config.json",
+      "type": "config",
+      "name": "config.json",
+      "filePath": ".changeset/config.json",
+      "summary": "Changesets configuration controlling changelog generation, versioning access, and ignored packages for this pnpm monorepo.",
+      "tags": ["configuration", "versioning", "changelog", "monorepo"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.gitleaksignore",
+      "type": "file",
+      "name": ".gitleaksignore",
+      "filePath": ".gitleaksignore",
+      "summary": "Gitleaks ignore file listing known false-positive secret fingerprints to suppress in security scanning.",
+      "tags": ["security", "configuration", "ci-cd"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.npmrc",
+      "type": "file",
+      "name": ".npmrc",
+      "filePath": ".npmrc",
+      "summary": "npm/pnpm registry configuration controlling package resolution, hoisting, and token settings for the monorepo.",
+      "tags": ["configuration", "build-system", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.railway/railway.ts",
+      "type": "file",
+      "name": "railway.ts",
+      "filePath": ".railway/railway.ts",
+      "summary": "Railway infrastructure-as-code configuration defining helper functions to compose cron service deployments with build and deploy settings.",
+      "tags": ["infrastructure", "deployment", "configuration"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.railway/railway.ts:cronService",
+      "type": "function",
+      "name": "cronService",
+      "filePath": ".railway/railway.ts",
+      "lineRange": [22, 31],
+      "summary": "Composes a full Railway cron service definition from name, root directory, cron schedule, and environment variables.",
+      "tags": ["infrastructure", "factory", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.understand-anything/.understandignore",
+      "type": "file",
+      "name": ".understandignore",
+      "filePath": ".understand-anything/.understandignore",
+      "summary": "Ignore patterns for the understand-anything knowledge graph tool, excluding generated artifacts, cache files, and test fixtures from analysis.",
+      "tags": ["configuration", "tooling"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:config/deploy.config.json",
+      "type": "config",
+      "name": "deploy.config.json",
+      "filePath": "config/deploy.config.json",
+      "summary": "Central deployment configuration mapping environment names to Supabase project IDs, Railway service IDs, and smoke-test endpoints for staging and production.",
+      "tags": ["configuration", "deployment", "infrastructure"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:cron/_shared/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/_shared/cron-runner.sh",
+      "summary": "Shared shell script template for Railway cron services that handles enable-checking, cron job invocation, result logging, and cleanup via the log-cron-run edge function.",
+      "tags": ["script", "ci-cd", "infrastructure", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:cron/cleanup-stale/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/cleanup-stale/cron-runner.sh",
+      "summary": "Cron runner script for the cleanup-stale job, invoking the cleanup-stale-runs edge function on schedule with logging and enable-check guards.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/cleanup-stale/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/cleanup-stale/package.json",
+      "summary": "Minimal package manifest for the cleanup-stale cron service, providing name and version metadata for the Railway workspace.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:cron/db-maintenance/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/db-maintenance/cron-runner.sh",
+      "summary": "Cron runner script for the db-maintenance job, invoking the db-maintenance edge function on schedule with logging and enable-check guards.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/db-maintenance/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/db-maintenance/package.json",
+      "summary": "Minimal package manifest for the db-maintenance cron service.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:cron/enrich-events/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/enrich-events/cron-runner.sh",
+      "summary": "Cron runner script for the enrich-events job, invoking the backfill-event-enrichment edge function on schedule.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/enrich-events/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/enrich-events/package.json",
+      "summary": "Minimal package manifest for the enrich-events cron service.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:cron/review-events/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/review-events/cron-runner.sh",
+      "summary": "Cron runner script for the review-events job, invoking the process-event-review-queue edge function on schedule.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/review-events/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/review-events/package.json",
+      "summary": "Minimal package manifest for the review-events cron service.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:cron/scrape-sources/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/scrape-sources/cron-runner.sh",
+      "summary": "Cron runner script for the scrape-sources job, invoking the scrape-due-sources edge function on schedule.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/scrape-sources/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/scrape-sources/package.json",
+      "summary": "Minimal package manifest for the scrape-sources cron service.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:cron/send-reminders/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/send-reminders/cron-runner.sh",
+      "summary": "Cron runner script for the send-reminders job, invoking the send-reminders edge function on schedule.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/send-reminders/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/send-reminders/package.json",
+      "summary": "Minimal package manifest for the send-reminders cron service.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:cron/tag-queue/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/tag-queue/cron-runner.sh",
+      "summary": "Cron runner script for the tag-queue job, invoking the process-tag-queue edge function on schedule.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/tag-queue/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/tag-queue/package.json",
+      "summary": "Minimal package manifest for the tag-queue cron service.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:cron/weekly-digest/cron-runner.sh",
+      "type": "file",
+      "name": "cron-runner.sh",
+      "filePath": "cron/weekly-digest/cron-runner.sh",
+      "summary": "Cron runner script for the weekly-digest job, invoking the send-weekly-digest edge function on schedule.",
+      "tags": ["script", "ci-cd", "deployment"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:cron/weekly-digest/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "cron/weekly-digest/package.json",
+      "summary": "Minimal package manifest for the weekly-digest cron service.",
+      "tags": ["configuration", "package-manager"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:graphify-out/.graphify_python",
+      "type": "file",
+      "name": ".graphify_python",
+      "filePath": "graphify-out/.graphify_python",
+      "summary": "Graphify tool marker file indicating the Python interpreter path used for graph generation.",
+      "tags": ["tooling", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:graphify-out/.graphify_root",
+      "type": "file",
+      "name": ".graphify_root",
+      "filePath": "graphify-out/.graphify_root",
+      "summary": "Graphify tool marker file recording the project root path for the knowledge graph output.",
+      "tags": ["tooling", "configuration"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:.railway/railway.ts",
+      "target": "function:.railway/railway.ts:cronService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "config:config/deploy.config.json",
+      "target": "file:.railway/railway.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/cleanup-stale/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/db-maintenance/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/enrich-events/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/review-events/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/scrape-sources/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/send-reminders/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/tag-queue/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:cron/weekly-digest/cron-runner.sh",
+      "target": "file:cron/_shared/cron-runner.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "packages/config-typescript/base.json", "language": "json", "sizeLines": 18, "fileCategory": "config"},
+    {"path": "packages/config-typescript/node.json", "language": "json", "sizeLines": 7, "fileCategory": "config"},
+    {"path": "packages/config-typescript/package.json", "language": "json", "sizeLines": 11, "fileCategory": "config"},
+    {"path": "packages/config-typescript/react-vite.json", "language": "json", "sizeLines": 8, "fileCategory": "config"}
+  ],
+  "batchImportData": {"packages/config-typescript/base.json": [], "packages/config-typescript/node.json": [], "packages/config-typescript/package.json": [], "packages/config-typescript/react-vite.json": []}
+}

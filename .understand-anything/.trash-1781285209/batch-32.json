@@ -1,0 +1,167 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/check-railway.sh",
+      "type": "file",
+      "name": "check-railway.sh",
+      "filePath": "scripts/check-railway.sh",
+      "summary": "Audits Railway services against repo IaC state via the Railway GraphQL API, detecting rootDirectory and cronSchedule drift; supports a --fix flag to auto-correct mismatches.",
+      "tags": ["deployment", "infrastructure", "ci-cd", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/check-railway.sh:graphql",
+      "type": "function",
+      "name": "graphql",
+      "filePath": "scripts/check-railway.sh",
+      "lineRange": [39, 44],
+      "summary": "Sends a GraphQL query to the Railway API using curl with the stored bearer token.",
+      "tags": ["utility", "api-handler"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/check-railway.sh:expected_root_for",
+      "type": "function",
+      "name": "expected_root_for",
+      "filePath": "scripts/check-railway.sh",
+      "lineRange": [51, 62],
+      "summary": "Returns the expected rootDirectory for a named Railway service by querying the IaC JSON, or UNMANAGED/NULL if not found.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/check-railway.sh:expected_cron_for",
+      "type": "function",
+      "name": "expected_cron_for",
+      "filePath": "scripts/check-railway.sh",
+      "lineRange": [64, 75],
+      "summary": "Returns the expected cronSchedule for a named Railway service from IaC JSON, or empty string if not found.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/deno-install-functions.sh",
+      "type": "file",
+      "name": "deno-install-functions.sh",
+      "filePath": "scripts/deno-install-functions.sh",
+      "summary": "Iterates all Supabase Edge Function directories and runs deno install for each function that has both deno.json and index.ts, updating deno.lock files.",
+      "tags": ["deployment", "infrastructure", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/deploy.sh",
+      "type": "file",
+      "name": "deploy.sh",
+      "filePath": "scripts/deploy.sh",
+      "summary": "Thin wrapper around the @cypress-ink-labs/deploy-cli that normalizes argument conventions (adding 'deploy' subcommand when missing) before delegating to pnpm.",
+      "tags": ["deployment", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/setup-local.sh",
+      "type": "file",
+      "name": "setup-local.sh",
+      "filePath": "scripts/setup-local.sh",
+      "summary": "Re-applies local development settings after a supabase db reset: configures app.settings.* database variables, writes .env.development.local files for the monorepo root and apps/web, and bootstraps the local admin user.",
+      "tags": ["deployment", "infrastructure", "development"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/supabase-functions-serve.sh",
+      "type": "file",
+      "name": "supabase-functions-serve.sh",
+      "filePath": "scripts/supabase-functions-serve.sh",
+      "summary": "Cleans stale Deno node_modules symlinks in the Supabase functions directory before delegating to supabase.sh to start the local functions server.",
+      "tags": ["deployment", "infrastructure", "development"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/supabase.sh",
+      "type": "file",
+      "name": "supabase.sh",
+      "filePath": "scripts/supabase.sh",
+      "summary": "Resolves and invokes the Supabase CLI from the system PATH, the local node_modules binary, or falls back to npx, ensuring consistent CLI behavior across environments.",
+      "tags": ["infrastructure", "utility", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/sync-cron-runner.sh",
+      "type": "file",
+      "name": "sync-cron-runner.sh",
+      "filePath": "scripts/sync-cron-runner.sh",
+      "summary": "Copies the canonical cron/_shared/cron-runner.sh into each of the eight Railway cron service directories, keeping cron runner scripts in sync after edits to the shared source.",
+      "tags": ["deployment", "infrastructure", "ci-cd"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/test.sh",
+      "type": "file",
+      "name": "test.sh",
+      "filePath": "scripts/test.sh",
+      "summary": "Runs the full suite of 15 Supabase SQL integration tests (RLS, RPC, pagination, security, cron) against a target Postgres database resolved from args, env, or local supabase status.",
+      "tags": ["test", "database", "ci-cd"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/test.sh:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "scripts/test.sh",
+      "lineRange": [14, 27],
+      "summary": "Prints usage instructions for test.sh including DB_URL resolution order and prerequisites.",
+      "tags": ["utility"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:scripts/check-railway.sh",
+      "target": "function:scripts/check-railway.sh:graphql",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/check-railway.sh",
+      "target": "function:scripts/check-railway.sh:expected_root_for",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/check-railway.sh",
+      "target": "function:scripts/check-railway.sh:expected_cron_for",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/test.sh",
+      "target": "function:scripts/test.sh:usage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/setup-local.sh",
+      "target": "file:scripts/supabase.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/supabase-functions-serve.sh",
+      "target": "file:scripts/supabase.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/test.sh",
+      "target": "file:scripts/supabase.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

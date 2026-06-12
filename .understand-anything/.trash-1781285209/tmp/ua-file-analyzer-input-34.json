@@ -1,0 +1,10 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/docs/EMAIL.md", "language": "markdown", "sizeLines": 152, "fileCategory": "docs"},
+    {"path": "supabase/docs/INVITE_GATE.md", "language": "markdown", "sizeLines": 95, "fileCategory": "docs"},
+    {"path": "supabase/docs/LOCAL_LLM_TAGGING.md", "language": "markdown", "sizeLines": 107, "fileCategory": "docs"},
+    {"path": "supabase/docs/PRODUCTION_SETUP.md", "language": "markdown", "sizeLines": 110, "fileCategory": "docs"}
+  ],
+  "batchImportData": {"supabase/docs/EMAIL.md": [], "supabase/docs/INVITE_GATE.md": [], "supabase/docs/LOCAL_LLM_TAGGING.md": [], "supabase/docs/PRODUCTION_SETUP.md": []}
+}

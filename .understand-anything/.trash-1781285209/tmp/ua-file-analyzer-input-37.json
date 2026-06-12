@@ -1,0 +1,23 @@
+{
+  "projectRoot": "/Users/lecoqjacob/Developer/personal/family-events-backend",
+  "batchFiles": [
+    {"path": "supabase/tests/admin_dashboard_stats.sql", "language": "sql", "sizeLines": 185, "fileCategory": "data"},
+    {"path": "supabase/tests/admin_db_health.sql", "language": "sql", "sizeLines": 152, "fileCategory": "data"},
+    {"path": "supabase/tests/admin_events_rpc.sql", "language": "sql", "sizeLines": 492, "fileCategory": "data"},
+    {"path": "supabase/tests/api_surface_hardening.sql", "language": "sql", "sizeLines": 25, "fileCategory": "data"},
+    {"path": "supabase/tests/cron_rpc_security.sql", "language": "sql", "sizeLines": 258, "fileCategory": "data"},
+    {"path": "supabase/tests/cron_toggle.sql", "language": "sql", "sizeLines": 189, "fileCategory": "data"},
+    {"path": "supabase/tests/events_cursor_pagination.sql", "language": "sql", "sizeLines": 369, "fileCategory": "data"},
+    {"path": "supabase/tests/events_enriched_parity.sql", "language": "sql", "sizeLines": 400, "fileCategory": "data"},
+    {"path": "supabase/tests/invite_gate_oauth_signup.sql", "language": "sql", "sizeLines": 389, "fileCategory": "data"},
+    {"path": "supabase/tests/llm_event_review_processing.sql", "language": "sql", "sizeLines": 360, "fileCategory": "data"},
+    {"path": "supabase/tests/reference_data.sql", "language": "sql", "sizeLines": 130, "fileCategory": "data"},
+    {"path": "supabase/tests/rls_access_expiry.sql", "language": "sql", "sizeLines": 162, "fileCategory": "data"},
+    {"path": "supabase/tests/rls_anon_read.sql", "language": "sql", "sizeLines": 163, "fileCategory": "data"},
+    {"path": "supabase/tests/rls_privilege_escalation.sql", "language": "sql", "sizeLines": 151, "fileCategory": "data"},
+    {"path": "supabase/tests/rls_public_events_view.sql", "language": "sql", "sizeLines": 294, "fileCategory": "data"},
+    {"path": "supabase/tests/role_smoke.sql", "language": "sql", "sizeLines": 205, "fileCategory": "data"},
+    {"path": "supabase/tests/trace_retention.sql", "language": "sql", "sizeLines": 122, "fileCategory": "data"}
+  ],
+  "batchImportData": {}
+}

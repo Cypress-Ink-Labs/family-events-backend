@@ -1,0 +1,73 @@
+{
+  "nodes": [
+    {
+      "id": "document:scripts/db/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "scripts/db/README.md",
+      "summary": "Documentation for the database evidence and diagnostic scripts directory, describing the purpose and sections of collect-db-evidence.sql and prerequisites for running it.",
+      "tags": ["documentation", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/db/collect-db-evidence.sql",
+      "type": "file",
+      "name": "collect-db-evidence.sql",
+      "filePath": "scripts/db/collect-db-evidence.sql",
+      "summary": "Read-only production diagnostic SQL script covering pg_stat_statements query performance, index usage, table bloat, constraint pre-validation checks for several tables, and commented EXPLAIN templates for key RPCs.",
+      "tags": ["database", "monitoring", "validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/db/find-missing-end-times.sql",
+      "type": "file",
+      "name": "find-missing-end-times.sql",
+      "filePath": "scripts/db/find-missing-end-times.sql",
+      "summary": "Diagnostic SQL script that reports summary statistics and a detailed list of events missing an end_datetime but having a start_datetime, ordered by recency.",
+      "tags": ["database", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/db/wipe-live-events.sh",
+      "type": "file",
+      "name": "wipe-live-events.sh",
+      "filePath": "scripts/db/wipe-live-events.sh",
+      "summary": "Destructive maintenance script that truncates all live event and scrape-history tables from the linked Supabase project and resets event_source health fields, with an interactive confirmation guard unless --yes is passed.",
+      "tags": ["database", "deployment", "infrastructure"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/db/wipe-live-events.sh:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "scripts/db/wipe-live-events.sh",
+      "lineRange": [10, 34],
+      "summary": "Prints detailed usage instructions for wipe-live-events.sh including all affected tables and available options.",
+      "tags": ["utility"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:scripts/db/wipe-live-events.sh",
+      "target": "function:scripts/db/wipe-live-events.sh:usage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/db/wipe-live-events.sh",
+      "target": "file:scripts/supabase.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:scripts/db/README.md",
+      "target": "file:scripts/db/collect-db-evidence.sql",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

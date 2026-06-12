@@ -1,0 +1,115 @@
+[
+  {
+    "order": 1,
+    "title": "Shared Type Contracts",
+    "description": "The contracts package is the vocabulary of the entire system. It exports auto-generated Supabase database types, hand-authored enum constants, and domain interfaces (notifications, community events, notification preferences) that are imported by every edge function, cron service, and CLI tool. Understanding these shapes first makes every subsequent file immediately readable.",
+    "nodeIds": [
+      "file:packages/contracts/src/index.ts",
+      "file:packages/contracts/src/database.types.ts",
+      "file:packages/contracts/src/database-enums.ts",
+      "file:packages/contracts/src/notifications.ts"
+    ],
+    "languageLesson": "TypeScript barrel files (index.ts with 'export * from') create a single import surface so consumers write `import { EventStatus } from '@family-events/contracts'` rather than navigating into internal file paths. This lets the package internals be reorganized without breaking callers."
+  },
+  {
+    "order": 2,
+    "title": "Database Schema Foundation",
+    "description": "The schema baseline migration is a single consolidated SQL file that defines all 23 core tables — events, cities, tags, event sources, queue tables, and user profiles — along with RLS policies, stored procedures, and indexes. It is the ground truth for the data model that every edge function and cron job operates on. The events and event_tag_queue tables are especially central to the AI enrichment pipeline explored in later steps.",
+    "nodeIds": [
+      "table:supabase/migrations/20260601000000_schema_baseline.sql",
+      "table:supabase/migrations/20260601000000_schema_baseline.sql:events",
+      "table:supabase/migrations/20260601000000_schema_baseline.sql:event_tag_queue"
+    ],
+    "languageLesson": "Supabase migrations run sequentially by timestamp prefix. Consolidating all prior migrations into a single schema_baseline file gives new environments a fast, single-pass setup while preserving the incremental migration pattern for future changes."
+  },
+  {
+    "order": 3,
+    "title": "Edge Function Shared Utilities",
+    "description": "The _shared/ directory under supabase/functions is imported by nearly every edge function — it is the most fan-in-heavy area of the entire codebase. auth.ts provides JWT verification and service-role guards; service-role-handler.ts wraps Deno.serve into an authenticated handler factory; cron-run-log.ts persists structured run metadata for each cron invocation; and logger.ts provides consistent structured JSON logging. Grasping this shared layer explains the boilerplate you will see in every function's index.ts.",
+    "nodeIds": [
+      "file:supabase/functions/_shared/auth.ts",
+      "file:supabase/functions/_shared/service-role-handler.ts",
+      "file:supabase/functions/_shared/cron-run-log.ts",
+      "file:supabase/functions/_shared/logger.ts"
+    ],
+    "languageLesson": "Deno edge functions import shared code via relative paths (no npm install), so the _shared/ directory is a convention rather than a published package. This keeps the shared layer co-located with the functions that use it while allowing each function to be deployed independently."
+  },
+  {
+    "order": 4,
+    "title": "AI Tagging Edge Function",
+    "description": "tag-event is the most complex individual edge function: its handler.ts has the highest fan-out of any file in the codebase (26 imports). It orchestrates LLM-based and keyword-based event classification, geocoding, and tag normalization. config.ts resolves the AI provider and model from environment variables and database overrides, demonstrating the pattern used by all LLM-backed functions. The classification helper in _shared/ feeds directly into this handler.",
+    "nodeIds": [
+      "file:supabase/functions/tag-event/handler.ts",
+      "file:supabase/functions/tag-event/config.ts",
+      "file:supabase/functions/_shared/classification.ts"
+    ],
+    "languageLesson": "Dependency injection via factory functions (createTagEventHandler) lets tests swap out the Supabase client, LLM client, and fetch with fakes without mocking globals — a pattern used consistently across handler.ts files in this codebase."
+  },
+  {
+    "order": 5,
+    "title": "AI Review Queue Function",
+    "description": "The event-review module adds an LLM moderation layer: incoming community-submitted events are queued and processed in batches by process-event-review-queue. mod.ts is its barrel entry point, normalizer.ts sanitizes raw event fields before they reach the LLM, and the queue worker claims rows, calls the LLM, and writes approve/reject decisions back to the database. Together with tag-event from Step 4, this pair forms the full AI enrichment pipeline.",
+    "nodeIds": [
+      "file:supabase/functions/event-review/mod.ts",
+      "file:supabase/functions/event-review/normalizer.ts",
+      "file:supabase/functions/process-event-review-queue/index.ts"
+    ]
+  },
+  {
+    "order": 6,
+    "title": "Cron Service: Tag Queue",
+    "description": "The cron layer bridges Railway's scheduled containers and Supabase edge functions. cron/_shared/cron-runner.sh is the canonical shell script copied into all eight cron services: it checks an enable flag, invokes the target edge function URL via curl, and logs the outcome. cron/tag-queue/Dockerfile packages this script into a minimal Alpine image. process-tag-queue/index.ts is the edge function it calls — it claims batches of event_tag_queue rows and drives the tag-event handler from Step 4.",
+    "nodeIds": [
+      "file:cron/_shared/cron-runner.sh",
+      "service:cron/tag-queue/Dockerfile",
+      "file:supabase/functions/process-tag-queue/index.ts",
+      "file:supabase/functions/process-tag-queue/queue-policy.ts"
+    ],
+    "languageLesson": "Multi-stage Docker builds are not needed here because the cron image contains only shell and curl — no compiled code. The minimal Alpine base keeps the image under 10MB while still having everything needed to call an HTTPS endpoint on a schedule."
+  },
+  {
+    "order": 7,
+    "title": "Transactional Email System",
+    "description": "The email subsystem spans two packages. packages/email contains React Email TSX templates (welcome, magic-link, weekly-digest, event-invite, event-change, reminder, community-event-status) and a deploy script that renders them to HTML and uploads to Resend. The notify-email edge function dispatches the right template at runtime based on notification type. supabase/docs/EMAIL.md documents the Resend wiring, Supabase Auth hook setup, and environment variables required.",
+    "nodeIds": [
+      "file:packages/email/emails/welcome.tsx",
+      "file:packages/email/emails/weekly-digest.tsx",
+      "file:packages/email/scripts/deploy-templates.tsx",
+      "file:supabase/functions/notify-email/index.ts",
+      "document:supabase/docs/EMAIL.md"
+    ],
+    "languageLesson": "React Email renders JSX to plain HTML strings at build time, producing email-safe HTML that works across clients that do not support modern CSS. The deploy script uploads pre-rendered HTML to Resend's template storage so the edge function only needs to pass variables at send time."
+  },
+  {
+    "order": 8,
+    "title": "Deploy CLI Entry & Workflow",
+    "description": "packages/deploy-cli is the operator-facing tool for releasing the entire stack. cli.ts registers all subcommands (deploy, doctor, rollback-plan, status, targets, validate) with Commander. deploy-runner.ts orchestrates the full deployment sequence: preflight checks, staged Supabase migrations and function deploys, Railway cron service deploys, and optional smoke checks. The Supabase and Railway provider wrappers abstract the respective CLIs behind a common interface.",
+    "nodeIds": [
+      "file:packages/deploy-cli/src/cli.ts",
+      "file:packages/deploy-cli/src/workflows/deploy-runner.ts",
+      "file:packages/deploy-cli/src/providers/railway.ts",
+      "file:packages/deploy-cli/src/providers/supabase.ts"
+    ],
+    "languageLesson": "The deploy CLI uses the Commander.js pattern of a root program that delegates to registerXxxCommand functions in separate files. Each subcommand file is responsible only for parsing its own options and invoking the corresponding workflow — keeping CLI surface and business logic cleanly separated."
+  },
+  {
+    "order": 9,
+    "title": "Infrastructure & Drift Detection",
+    "description": "infra/railway-cron-drift uses Terraform and an OPA Rego policy to detect when Railway cron schedules drift from the declared manifest. cron-services.json is the source of truth listing all eight cron services and their expected schedules; main.tf reads this manifest, queries the Railway API, and flags divergence. The railway-cron-drift.yml GitHub Actions workflow runs terraform plan on every pull request, enforcing schedule consistency before merge.",
+    "nodeIds": [
+      "config:infra/railway-cron-drift/cron-services.json",
+      "resource:infra/railway-cron-drift/main.tf",
+      "pipeline:.github/workflows/railway-cron-drift.yml"
+    ],
+    "languageLesson": "Terraform's plan-then-apply model is used here purely for drift detection rather than provisioning: the plan output is fed to an OPA policy that checks whether any cron schedule deviates from the manifest. This gives GitOps-style change detection without managing Railway resources as Terraform state."
+  },
+  {
+    "order": 10,
+    "title": "CI Pipeline",
+    "description": "The main CI workflow ties the whole project together. It runs four parallel jobs on every pull request and push to main: TruffleHog secret scanning, a type-check/lint/test pass across all TypeScript packages, Deno test runs for edge functions, and the Railway cron drift check from Step 9. This is the final gate before any change reaches production and reflects the complete set of quality checks that every contribution must pass.",
+    "nodeIds": [
+      "pipeline:.github/workflows/ci.yml"
+    ],
+    "languageLesson": "GitHub Actions jobs run in parallel by default when there are no `needs` dependencies between them. The four jobs here (secret-scan, check, deno-test, drift-guard) are intentionally independent so the total CI time equals the slowest single job rather than the sum of all four."
+  }
+]

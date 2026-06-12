@@ -1,0 +1,41 @@
+{
+  "nodes": [
+    {
+      "id": "document:supabase/docs/EMAIL.md",
+      "type": "document",
+      "name": "EMAIL.md",
+      "filePath": "supabase/docs/EMAIL.md",
+      "summary": "Comprehensive setup guide for transactional email delivery via Resend, covering Supabase Auth email wiring, application email configuration, soft-failure behavior, delivery verification, and cost notes.",
+      "tags": ["documentation", "configuration", "email", "infrastructure", "deployment"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:supabase/docs/INVITE_GATE.md",
+      "type": "document",
+      "name": "INVITE_GATE.md",
+      "filePath": "supabase/docs/INVITE_GATE.md",
+      "summary": "Documents the invite-gate feature controlling closed-beta versus open registration, listing affected database functions and providing SQL instructions to toggle the gate on or off.",
+      "tags": ["documentation", "configuration", "security", "database", "development"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:supabase/docs/LOCAL_LLM_TAGGING.md",
+      "type": "document",
+      "name": "LOCAL_LLM_TAGGING.md",
+      "filePath": "supabase/docs/LOCAL_LLM_TAGGING.md",
+      "summary": "Proof-of-concept guide for running local LLM-based event tagging via a Railway-hosted service, covering service setup, Supabase function secrets configuration, smoke testing, and success criteria.",
+      "tags": ["documentation", "ai", "configuration", "infrastructure", "development"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:supabase/docs/PRODUCTION_SETUP.md",
+      "type": "document",
+      "name": "PRODUCTION_SETUP.md",
+      "filePath": "supabase/docs/PRODUCTION_SETUP.md",
+      "summary": "Step-by-step production deployment checklist covering migration push, scraping scheduler configuration, first-admin bootstrap, edge function deployment, email setup via Resend, and verification steps.",
+      "tags": ["documentation", "deployment", "infrastructure", "configuration", "operations"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": []
+}
