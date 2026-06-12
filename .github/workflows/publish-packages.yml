@@ -47,7 +47,7 @@ jobs:
             pkg=$(node -e "console.log(require('./${pkg_dir}/package.json').name)")
             version=$(node -e "console.log(require('./${pkg_dir}/package.json').version)")
             if npm view "${pkg}@${version}" --registry https://npm.pkg.github.com version 2>/dev/null | grep -q "${version}"; then
-              echo "${pkg}@${version} already published — skipping"
+              echo "${pkg}@${version} already published -- skipping"
             else
               echo "Publishing ${pkg}@${version}"
               pnpm publish --filter "${pkg}" --no-git-checks
