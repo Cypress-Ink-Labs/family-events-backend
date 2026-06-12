@@ -1,0 +1,1907 @@
+{
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/.changeset/config.json": {
+    "mtime": 1781231756.1311927,
+    "ast_hash": "b069972f0e795f1b3eab79f1ece1262d",
+    "semantic_hash": "b069972f0e795f1b3eab79f1ece1262d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/.railway/railway.ts": {
+    "mtime": 1781232816.8072984,
+    "ast_hash": "00e142cc70f4fb2747f7b1fcefdf1f63",
+    "semantic_hash": "00e142cc70f4fb2747f7b1fcefdf1f63"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/config/deploy.config.json": {
+    "mtime": 1781233068.7703085,
+    "ast_hash": "c404614e70e135970da0d1d56b657f49",
+    "semantic_hash": "c404614e70e135970da0d1d56b657f49"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/_shared/cron-runner.sh": {
+    "mtime": 1781148337.09408,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/cleanup-stale/cron-runner.sh": {
+    "mtime": 1781233091.1931937,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/cleanup-stale/package.json": {
+    "mtime": 1781231756.1350393,
+    "ast_hash": "3fc0bbd8830e7842ebd8a1af71cbc089",
+    "semantic_hash": "3fc0bbd8830e7842ebd8a1af71cbc089"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/db-maintenance/cron-runner.sh": {
+    "mtime": 1781233091.1979284,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/db-maintenance/package.json": {
+    "mtime": 1781231756.134198,
+    "ast_hash": "352851637e2f8ddb8f0ba199bbf69cb8",
+    "semantic_hash": "352851637e2f8ddb8f0ba199bbf69cb8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/enrich-events/cron-runner.sh": {
+    "mtime": 1781233091.2020874,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/enrich-events/package.json": {
+    "mtime": 1781231756.1338077,
+    "ast_hash": "1b27ef9f5d1b7cc1b8a360675ec64ece",
+    "semantic_hash": "1b27ef9f5d1b7cc1b8a360675ec64ece"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/review-events/cron-runner.sh": {
+    "mtime": 1781233091.2058492,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/review-events/package.json": {
+    "mtime": 1781231756.135403,
+    "ast_hash": "1c1c2c8775f0b50465c494d22bf10487",
+    "semantic_hash": "1c1c2c8775f0b50465c494d22bf10487"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/scrape-sources/cron-runner.sh": {
+    "mtime": 1781233091.2094297,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/scrape-sources/package.json": {
+    "mtime": 1781231756.1357546,
+    "ast_hash": "75819c99f3c505acb3361c7f6a16f760",
+    "semantic_hash": "75819c99f3c505acb3361c7f6a16f760"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/send-reminders/cron-runner.sh": {
+    "mtime": 1781233091.2136803,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/send-reminders/package.json": {
+    "mtime": 1781231756.1347795,
+    "ast_hash": "cc0348c7cc6a48ddf260de4af4287901",
+    "semantic_hash": "cc0348c7cc6a48ddf260de4af4287901"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/tag-queue/cron-runner.sh": {
+    "mtime": 1781233091.2177176,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/tag-queue/package.json": {
+    "mtime": 1781231756.1345706,
+    "ast_hash": "80cbb57822e45e42396a1a40c19e8ba1",
+    "semantic_hash": "80cbb57822e45e42396a1a40c19e8ba1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/weekly-digest/cron-runner.sh": {
+    "mtime": 1781233091.2214963,
+    "ast_hash": "9d8d440be9ef7c720866c0e277d9fa13",
+    "semantic_hash": "9d8d440be9ef7c720866c0e277d9fa13"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/cron/weekly-digest/package.json": {
+    "mtime": 1781231756.1356106,
+    "ast_hash": "9258edca54b1032a9a99b11d812b709b",
+    "semantic_hash": "9258edca54b1032a9a99b11d812b709b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/.terraform.lock.hcl": {
+    "mtime": 1781148328.3446338,
+    "ast_hash": "0dda8ca20056cd2e147e490f223f8d6d",
+    "semantic_hash": "0dda8ca20056cd2e147e490f223f8d6d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/cron-services.json": {
+    "mtime": 1781204194.9094243,
+    "ast_hash": "f044c2710839a219c7933ef80292f5cf",
+    "semantic_hash": "f044c2710839a219c7933ef80292f5cf"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/main.tf": {
+    "mtime": 1781205354.72543,
+    "ast_hash": "c50dcf95715950e7adfcd4082dec41e5",
+    "semantic_hash": "c50dcf95715950e7adfcd4082dec41e5"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/infra/railway-cron-drift/versions.tf": {
+    "mtime": 1781148328.344933,
+    "ast_hash": "179d94b6fa0ac3a8f6d7bbe726b35314",
+    "semantic_hash": "179d94b6fa0ac3a8f6d7bbe726b35314"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/package.json": {
+    "mtime": 1781233619.530025,
+    "ast_hash": "0176ea19054a2b1c732a4709d2607e04",
+    "semantic_hash": "0176ea19054a2b1c732a4709d2607e04"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/oxfmt.base.json": {
+    "mtime": 1781148328.3453536,
+    "ast_hash": "2331039f50d61244d86b29ac639a73a4",
+    "semantic_hash": "2331039f50d61244d86b29ac639a73a4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/oxlint.base.json": {
+    "mtime": 1781148328.3454115,
+    "ast_hash": "2564e7018eb912c0f010c8408dfa7d02",
+    "semantic_hash": "2564e7018eb912c0f010c8408dfa7d02"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-quality/package.json": {
+    "mtime": 1781231756.1331384,
+    "ast_hash": "bb467c38fa4941e50290728bdab64e6c",
+    "semantic_hash": "bb467c38fa4941e50290728bdab64e6c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/base.json": {
+    "mtime": 1781148328.3455584,
+    "ast_hash": "1b6fff251496a71c622b21df204f542b",
+    "semantic_hash": "1b6fff251496a71c622b21df204f542b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/node.json": {
+    "mtime": 1781148328.345609,
+    "ast_hash": "d216bee3657d55d050d3571e355f7aa0",
+    "semantic_hash": "d216bee3657d55d050d3571e355f7aa0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/package.json": {
+    "mtime": 1781231756.1325092,
+    "ast_hash": "c1126d5a194062862b694f406632f4f7",
+    "semantic_hash": "c1126d5a194062862b694f406632f4f7"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/config-typescript/react-vite.json": {
+    "mtime": 1781148328.345717,
+    "ast_hash": "180e4fd80bf04bc9c1b84641cd613806",
+    "semantic_hash": "180e4fd80bf04bc9c1b84641cd613806"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/package.json": {
+    "mtime": 1781235843.4193008,
+    "ast_hash": "e6c7990437e9401b343e3787d58f9cf4",
+    "semantic_hash": "e6c7990437e9401b343e3787d58f9cf4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/community-event.ts": {
+    "mtime": 1781148328.3458998,
+    "ast_hash": "a7b4602e6a7462eef82762baa9fbd58a",
+    "semantic_hash": "a7b4602e6a7462eef82762baa9fbd58a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/database-enums.ts": {
+    "mtime": 1781148328.3459544,
+    "ast_hash": "66d0d71324fabb9a1b4c2a71d9816e99",
+    "semantic_hash": "66d0d71324fabb9a1b4c2a71d9816e99"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/database.types.ts": {
+    "mtime": 1781234437.364655,
+    "ast_hash": "e2feec7c10f0f66385f8ce7948ed2d46",
+    "semantic_hash": "e2feec7c10f0f66385f8ce7948ed2d46"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/index.ts": {
+    "mtime": 1781235843.9816644,
+    "ast_hash": "ef4ebcc1ccc51ec6f265e99fa2e02781",
+    "semantic_hash": "ef4ebcc1ccc51ec6f265e99fa2e02781"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/notification-preferences.ts": {
+    "mtime": 1781148328.346214,
+    "ast_hash": "4a28a6d0e5a9d1fdad106a0b9868fe4b",
+    "semantic_hash": "4a28a6d0e5a9d1fdad106a0b9868fe4b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/src/notifications.ts": {
+    "mtime": 1781148328.346278,
+    "ast_hash": "cee49457a00709a599dfad4040d4029d",
+    "semantic_hash": "cee49457a00709a599dfad4040d4029d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/tsconfig.json": {
+    "mtime": 1781148328.3463335,
+    "ast_hash": "13c4321b3c5091747bfa4306281774c4",
+    "semantic_hash": "13c4321b3c5091747bfa4306281774c4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/vitest.config.ts": {
+    "mtime": 1781148328.346501,
+    "ast_hash": "86c4a3217f81da66f88f5b12f7a7789d",
+    "semantic_hash": "86c4a3217f81da66f88f5b12f7a7789d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/package.json": {
+    "mtime": 1781231756.132834,
+    "ast_hash": "f38c0759b75fe0e4e73dc411316ac526",
+    "semantic_hash": "f38c0759b75fe0e4e73dc411316ac526"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/cli.ts": {
+    "mtime": 1781148328.3466735,
+    "ast_hash": "7d0ab3a201e83864547065f4ec9c91bc",
+    "semantic_hash": "7d0ab3a201e83864547065f4ec9c91bc"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/deploy.ts": {
+    "mtime": 1781148328.3467565,
+    "ast_hash": "32ec88b5d963a8e12fe01e9129503322",
+    "semantic_hash": "32ec88b5d963a8e12fe01e9129503322"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/doctor.ts": {
+    "mtime": 1781148328.3468165,
+    "ast_hash": "eca852469db1b6ea20fade54547f0a42",
+    "semantic_hash": "eca852469db1b6ea20fade54547f0a42"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/rollback-plan.ts": {
+    "mtime": 1781148328.3468666,
+    "ast_hash": "031b9b49238fad544f631c3f73729d4f",
+    "semantic_hash": "031b9b49238fad544f631c3f73729d4f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/status.ts": {
+    "mtime": 1781148328.3469188,
+    "ast_hash": "7c82ebff2b937abb2fb6e4c6ddf82a6c",
+    "semantic_hash": "7c82ebff2b937abb2fb6e4c6ddf82a6c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/targets.ts": {
+    "mtime": 1781148328.3469677,
+    "ast_hash": "407882cf4bf6e40021a60ba54229429b",
+    "semantic_hash": "407882cf4bf6e40021a60ba54229429b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/commands/validate.ts": {
+    "mtime": 1781148328.3470178,
+    "ast_hash": "de102c858ab700b047e17d3776ba6ca6",
+    "semantic_hash": "de102c858ab700b047e17d3776ba6ca6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/config.ts": {
+    "mtime": 1781148328.3471043,
+    "ast_hash": "733a24325c658942579ec00029f8b855",
+    "semantic_hash": "733a24325c658942579ec00029f8b855"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/errors.ts": {
+    "mtime": 1781148328.3471553,
+    "ast_hash": "a18b1628ac091c3adc85a4a0b920e694",
+    "semantic_hash": "a18b1628ac091c3adc85a4a0b920e694"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/exec.ts": {
+    "mtime": 1781148328.3472116,
+    "ast_hash": "ba7a095449c9efbb8d38241194983df4",
+    "semantic_hash": "ba7a095449c9efbb8d38241194983df4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/logger.ts": {
+    "mtime": 1781148328.3472576,
+    "ast_hash": "d6486f96d32aed7ac8b6769ed2ee3210",
+    "semantic_hash": "d6486f96d32aed7ac8b6769ed2ee3210"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/redaction.ts": {
+    "mtime": 1781148328.347304,
+    "ast_hash": "ab47d67de7dbfd557980b30df19ea5a9",
+    "semantic_hash": "ab47d67de7dbfd557980b30df19ea5a9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/result.ts": {
+    "mtime": 1781148328.3473504,
+    "ast_hash": "0aee201a6c755498d54c0414474a3b48",
+    "semantic_hash": "0aee201a6c755498d54c0414474a3b48"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/run-artifacts.ts": {
+    "mtime": 1781148328.3473992,
+    "ast_hash": "ac544fc81e9eaf73939a624e04e93c2e",
+    "semantic_hash": "ac544fc81e9eaf73939a624e04e93c2e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/signals.ts": {
+    "mtime": 1781148328.3474488,
+    "ast_hash": "d498f4006f20eb6732b09c2fa5aa6603",
+    "semantic_hash": "d498f4006f20eb6732b09c2fa5aa6603"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/target-graph.ts": {
+    "mtime": 1781148328.3475032,
+    "ast_hash": "0a60d18e35136c7da4d553602f365fdd",
+    "semantic_hash": "0a60d18e35136c7da4d553602f365fdd"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/core/types.ts": {
+    "mtime": 1781148328.3475578,
+    "ast_hash": "aa1a1f4f11634b2d0c396de8d40e7174",
+    "semantic_hash": "aa1a1f4f11634b2d0c396de8d40e7174"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/providers/railway.ts": {
+    "mtime": 1781148328.3476431,
+    "ast_hash": "5ec31c32ed9579c09bc3554b7f1145ad",
+    "semantic_hash": "5ec31c32ed9579c09bc3554b7f1145ad"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/providers/supabase.ts": {
+    "mtime": 1781148328.3476987,
+    "ast_hash": "f8fcdc9d25c746271cbb133c94edc3d1",
+    "semantic_hash": "f8fcdc9d25c746271cbb133c94edc3d1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/interactive.ts": {
+    "mtime": 1781148328.3477764,
+    "ast_hash": "6cbe736ac51229a5bd000852ebb85ec1",
+    "semantic_hash": "6cbe736ac51229a5bd000852ebb85ec1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/output.ts": {
+    "mtime": 1781148328.3478272,
+    "ast_hash": "e16a8fc91b48f69ef4dd405698911022",
+    "semantic_hash": "e16a8fc91b48f69ef4dd405698911022"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/ui/progress.ts": {
+    "mtime": 1781148328.3478727,
+    "ast_hash": "3999c20ca102b9dffdda65d0be8da141",
+    "semantic_hash": "3999c20ca102b9dffdda65d0be8da141"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/deploy-runner.ts": {
+    "mtime": 1781148328.347976,
+    "ast_hash": "e528bb5eae8f4415c35aad70f86b1919",
+    "semantic_hash": "e528bb5eae8f4415c35aad70f86b1919"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/rollback.ts": {
+    "mtime": 1781148328.3480294,
+    "ast_hash": "aa9ae3404aec8575933f0886d1a28524",
+    "semantic_hash": "aa9ae3404aec8575933f0886d1a28524"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/src/workflows/smoke-checks.ts": {
+    "mtime": 1781148328.3480828,
+    "ast_hash": "d1e9bd364f2692a502788cebca0d2381",
+    "semantic_hash": "d1e9bd364f2692a502788cebca0d2381"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/config.test.ts": {
+    "mtime": 1781148328.348173,
+    "ast_hash": "f3e3118dac014187cecbb83f55627208",
+    "semantic_hash": "f3e3118dac014187cecbb83f55627208"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/deploy-runner.test.ts": {
+    "mtime": 1781148328.3482237,
+    "ast_hash": "dfc58a6239c39479d22945fb07e8717b",
+    "semantic_hash": "dfc58a6239c39479d22945fb07e8717b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/errors.test.ts": {
+    "mtime": 1781148328.3482766,
+    "ast_hash": "1eb83a986af9f30de6875365ef3ba0e6",
+    "semantic_hash": "1eb83a986af9f30de6875365ef3ba0e6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/railway.test.ts": {
+    "mtime": 1781148328.3483303,
+    "ast_hash": "c244f93fe23d7bd0e592a44c454aefed",
+    "semantic_hash": "c244f93fe23d7bd0e592a44c454aefed"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/smoke-checks.test.ts": {
+    "mtime": 1781148328.348382,
+    "ast_hash": "f4108a6e3796088d910b3d0c25887180",
+    "semantic_hash": "f4108a6e3796088d910b3d0c25887180"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/supabase.test.ts": {
+    "mtime": 1781233047.2936528,
+    "ast_hash": "3e62fc7490db53671b320050ed932904",
+    "semantic_hash": "3e62fc7490db53671b320050ed932904"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tests/target-graph.test.ts": {
+    "mtime": 1781148328.3484862,
+    "ast_hash": "c2f22acc84f2ce6d232c3dae46accc86",
+    "semantic_hash": "c2f22acc84f2ce6d232c3dae46accc86"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/deploy-cli/tsconfig.json": {
+    "mtime": 1781148328.348533,
+    "ast_hash": "7c56924ce441e8bb157ac24770077aef",
+    "semantic_hash": "7c56924ce441e8bb157ac24770077aef"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/community-event-status.tsx": {
+    "mtime": 1781148328.3497012,
+    "ast_hash": "4e8c3bfc4b401c3fbea9f508470bcda9",
+    "semantic_hash": "4e8c3bfc4b401c3fbea9f508470bcda9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-change.tsx": {
+    "mtime": 1781148328.349755,
+    "ast_hash": "19638ebab4d50019c90cf44a306dd589",
+    "semantic_hash": "19638ebab4d50019c90cf44a306dd589"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-invite.tsx": {
+    "mtime": 1781148328.3498092,
+    "ast_hash": "2df4df4ce9f1f1dc7593eb0eb490ff1f",
+    "semantic_hash": "2df4df4ce9f1f1dc7593eb0eb490ff1f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/event-reminder.tsx": {
+    "mtime": 1781148328.3498542,
+    "ast_hash": "bf1bf20881d0b5b3696d5d8159252db0",
+    "semantic_hash": "bf1bf20881d0b5b3696d5d8159252db0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/magic-link.tsx": {
+    "mtime": 1781148328.3500261,
+    "ast_hash": "d945ec13b285618cce02751a72a3d407",
+    "semantic_hash": "d945ec13b285618cce02751a72a3d407"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/weekly-digest.tsx": {
+    "mtime": 1781148328.35015,
+    "ast_hash": "f1c0c141e26cc0fdba134a7c3715b29f",
+    "semantic_hash": "f1c0c141e26cc0fdba134a7c3715b29f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/emails/welcome.tsx": {
+    "mtime": 1781148328.3502216,
+    "ast_hash": "8a7c35db2c44c6e865c5c05f3ce8de56",
+    "semantic_hash": "8a7c35db2c44c6e865c5c05f3ce8de56"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/package.json": {
+    "mtime": 1781231756.133319,
+    "ast_hash": "ec46f75c5695b5840f4815bf5d77152e",
+    "semantic_hash": "ec46f75c5695b5840f4815bf5d77152e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/scripts/deploy-templates.tsx": {
+    "mtime": 1781148328.350361,
+    "ast_hash": "e34a1a5b8208ed43389381ed3e947bd9",
+    "semantic_hash": "e34a1a5b8208ed43389381ed3e947bd9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/src/index.ts": {
+    "mtime": 1781148328.350442,
+    "ast_hash": "f7e6cfcdc32a219baf197511b7270894",
+    "semantic_hash": "f7e6cfcdc32a219baf197511b7270894"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/src/templates.ts": {
+    "mtime": 1781148328.3505,
+    "ast_hash": "9918e87a95167f555fc94ccef8fbbb81",
+    "semantic_hash": "9918e87a95167f555fc94ccef8fbbb81"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/email/tsconfig.json": {
+    "mtime": 1781148328.35055,
+    "ast_hash": "247d9f0a1dea1c8538a671d4ec18c71a",
+    "semantic_hash": "247d9f0a1dea1c8538a671d4ec18c71a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/check-railway.sh": {
+    "mtime": 1781148328.3523731,
+    "ast_hash": "c6a81b3b4ea889336bba3bde5f5a55ca",
+    "semantic_hash": "c6a81b3b4ea889336bba3bde5f5a55ca"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/collect-db-evidence.sql": {
+    "mtime": 1781148328.3525667,
+    "ast_hash": "4f1dc3f61c36ae0156fcf199adb091d7",
+    "semantic_hash": "4f1dc3f61c36ae0156fcf199adb091d7"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/find-missing-end-times.sql": {
+    "mtime": 1781148328.3526182,
+    "ast_hash": "08ac575d1818a1d5dc18f2ed319dc9b3",
+    "semantic_hash": "08ac575d1818a1d5dc18f2ed319dc9b3"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/wipe-live-events.sh": {
+    "mtime": 1781148328.3526733,
+    "ast_hash": "ed08116d8f1f2b85090d04f8ef165fa5",
+    "semantic_hash": "ed08116d8f1f2b85090d04f8ef165fa5"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/deno-install-functions.sh": {
+    "mtime": 1781148328.352724,
+    "ast_hash": "c9a15f3bba267155d0f9c0bae3dd7718",
+    "semantic_hash": "c9a15f3bba267155d0f9c0bae3dd7718"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/deploy.sh": {
+    "mtime": 1781232790.255511,
+    "ast_hash": "05a8d911797f811413a9bb565d5c2ee4",
+    "semantic_hash": "05a8d911797f811413a9bb565d5c2ee4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/drain-queues.mjs": {
+    "mtime": 1781148328.3528845,
+    "ast_hash": "e9fba5802c99f6a519b506286c590099",
+    "semantic_hash": "e9fba5802c99f6a519b506286c590099"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/railway-cron-drift.mjs": {
+    "mtime": 1781232784.1386964,
+    "ast_hash": "ee6d96aa10a278a9f9a7cc487421c6c4",
+    "semantic_hash": "ee6d96aa10a278a9f9a7cc487421c6c4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/railway-sandbox.mjs": {
+    "mtime": 1781148328.3529618,
+    "ast_hash": "3f1671b8f1a98fedf9dc1c60c9823411",
+    "semantic_hash": "3f1671b8f1a98fedf9dc1c60c9823411"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/setup-local.sh": {
+    "mtime": 1781148328.3530223,
+    "ast_hash": "65ec3e59281beb4248d9361db57d86d8",
+    "semantic_hash": "65ec3e59281beb4248d9361db57d86d8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/supabase-functions-serve.sh": {
+    "mtime": 1781148328.353181,
+    "ast_hash": "9fe984c9ff265dc9770afbb35dd2e5c1",
+    "semantic_hash": "9fe984c9ff265dc9770afbb35dd2e5c1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/supabase.sh": {
+    "mtime": 1781148328.353242,
+    "ast_hash": "4e89142ff4d58121374f9d2399508f27",
+    "semantic_hash": "4e89142ff4d58121374f9d2399508f27"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/sync-cron-runner.sh": {
+    "mtime": 1781233047.2929382,
+    "ast_hash": "5c72a5bebddf57e81482174b989536be",
+    "semantic_hash": "5c72a5bebddf57e81482174b989536be"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/sync-url-validation.mjs": {
+    "mtime": 1781148328.3533475,
+    "ast_hash": "67327cc8b682bace4962ce8c52cfa599",
+    "semantic_hash": "67327cc8b682bace4962ce8c52cfa599"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/test.sh": {
+    "mtime": 1781148328.3534036,
+    "ast_hash": "8ae592c4f7135db517b44f260b5e4684",
+    "semantic_hash": "8ae592c4f7135db517b44f260b5e4684"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/verify-edge-fn.mjs": {
+    "mtime": 1781148328.3534613,
+    "ast_hash": "98eb260b7674c37491d76e31105ca111",
+    "semantic_hash": "98eb260b7674c37491d76e31105ca111"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/p0_003_rls_rpc_benchmarks.sql": {
+    "mtime": 1781148328.3540416,
+    "ast_hash": "2ef6ae2b2b52cefa0b26e0f97641e66e",
+    "semantic_hash": "2ef6ae2b2b52cefa0b26e0f97641e66e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/admin-handler.ts": {
+    "mtime": 1781148328.3549268,
+    "ast_hash": "cefe0b91d4f28fde2823579f16a983d9",
+    "semantic_hash": "cefe0b91d4f28fde2823579f16a983d9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/admin-handler_test.ts": {
+    "mtime": 1781148328.3549964,
+    "ast_hash": "945bf46b63e8640ba5baefee48a0fb47",
+    "semantic_hash": "945bf46b63e8640ba5baefee48a0fb47"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/auth.ts": {
+    "mtime": 1781148328.3550649,
+    "ast_hash": "d8a626160370d7f76f5c152c797ad2a7",
+    "semantic_hash": "d8a626160370d7f76f5c152c797ad2a7"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/auth_test.ts": {
+    "mtime": 1781148328.3551264,
+    "ast_hash": "b1b4fb5958096c045c73105e2d1aae57",
+    "semantic_hash": "b1b4fb5958096c045c73105e2d1aae57"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/classification.test.ts": {
+    "mtime": 1781148328.3551805,
+    "ast_hash": "abeae2610c2e8ce725d93e721f882062",
+    "semantic_hash": "abeae2610c2e8ce725d93e721f882062"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/classification.ts": {
+    "mtime": 1781148328.3552387,
+    "ast_hash": "15d5bf3415b7bef9a8e4bcdfc80c6cd9",
+    "semantic_hash": "15d5bf3415b7bef9a8e4bcdfc80c6cd9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/cors.ts": {
+    "mtime": 1781148328.3552864,
+    "ast_hash": "3dcde5b8efaead156d5520e057774dce",
+    "semantic_hash": "3dcde5b8efaead156d5520e057774dce"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/cron-run-log.ts": {
+    "mtime": 1781148328.355336,
+    "ast_hash": "8f8bc244ef12f46a7602dcf203b32a82",
+    "semantic_hash": "8f8bc244ef12f46a7602dcf203b32a82"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/env.ts": {
+    "mtime": 1781148328.3553905,
+    "ast_hash": "30d41947437faaaa4d28ca95646bdae3",
+    "semantic_hash": "30d41947437faaaa4d28ca95646bdae3"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/env_test.ts": {
+    "mtime": 1781148328.3554442,
+    "ast_hash": "24e4af1173c3b539556eef1de9a5b8f9",
+    "semantic_hash": "24e4af1173c3b539556eef1de9a5b8f9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/function-invoke.ts": {
+    "mtime": 1781148328.355494,
+    "ast_hash": "2cf43390a2dd57a76f6f88447f03b0ac",
+    "semantic_hash": "2cf43390a2dd57a76f6f88447f03b0ac"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/function-invoke_test.ts": {
+    "mtime": 1781148328.3555453,
+    "ast_hash": "23768a0d771279737e4ddc1f5d69a21f",
+    "semantic_hash": "23768a0d771279737e4ddc1f5d69a21f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/geocode.test.ts": {
+    "mtime": 1781148328.3555937,
+    "ast_hash": "5e5dfd924c24bd4a3d11af0947c5a6e9",
+    "semantic_hash": "5e5dfd924c24bd4a3d11af0947c5a6e9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/geocode.ts": {
+    "mtime": 1781148328.3557608,
+    "ast_hash": "cbdeefbc3e8c9362bffb6f8ea5372a5c",
+    "semantic_hash": "cbdeefbc3e8c9362bffb6f8ea5372a5c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/guarded-fetch.ts": {
+    "mtime": 1781148328.3558178,
+    "ast_hash": "99febfcdc8f63e26ade679025f351a39",
+    "semantic_hash": "99febfcdc8f63e26ade679025f351a39"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/html.ts": {
+    "mtime": 1781148328.3558655,
+    "ast_hash": "ff2b6739c1a69eeef8826dbe2dc12dba",
+    "semantic_hash": "ff2b6739c1a69eeef8826dbe2dc12dba"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/html_test.ts": {
+    "mtime": 1781148328.355912,
+    "ast_hash": "e242ced218a66b4ec53d5532769ee2f5",
+    "semantic_hash": "e242ced218a66b4ec53d5532769ee2f5"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/http.ts": {
+    "mtime": 1781148328.35596,
+    "ast_hash": "15eeb3502aed7f5eaf48d38deea2ae3f",
+    "semantic_hash": "15eeb3502aed7f5eaf48d38deea2ae3f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/http_test.ts": {
+    "mtime": 1781148328.3560064,
+    "ast_hash": "b6bfcb05413fb0294b9e8d7e81c5b7d9",
+    "semantic_hash": "b6bfcb05413fb0294b9e8d7e81c5b7d9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-config.ts": {
+    "mtime": 1781148328.356056,
+    "ast_hash": "77643ef03c896b8885cd6677bd9ddd10",
+    "semantic_hash": "77643ef03c896b8885cd6677bd9ddd10"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-config_test.ts": {
+    "mtime": 1781148328.3561063,
+    "ast_hash": "293ebeafc7aec548f05c8ed8699901de",
+    "semantic_hash": "293ebeafc7aec548f05c8ed8699901de"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-openai.ts": {
+    "mtime": 1781148328.3561559,
+    "ast_hash": "9116a27f8f3b4081817cabda2f887371",
+    "semantic_hash": "9116a27f8f3b4081817cabda2f887371"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/llm-openai_test.ts": {
+    "mtime": 1781148328.3562045,
+    "ast_hash": "f16ef9ff99e5d54eb1adb8882f5ac690",
+    "semantic_hash": "f16ef9ff99e5d54eb1adb8882f5ac690"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/logger.ts": {
+    "mtime": 1781148328.356254,
+    "ast_hash": "9661ff9fc6f191a59441e6f9ad3585cf",
+    "semantic_hash": "9661ff9fc6f191a59441e6f9ad3585cf"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/memory-context.ts": {
+    "mtime": 1781148328.3563225,
+    "ast_hash": "3975fef7830bf5c81cbb41d56a2dccc6",
+    "semantic_hash": "3975fef7830bf5c81cbb41d56a2dccc6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/memory-context_test.ts": {
+    "mtime": 1781148328.3564591,
+    "ast_hash": "64229cf3d9b7f464b5fa07324f513687",
+    "semantic_hash": "64229cf3d9b7f464b5fa07324f513687"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/parsing.test.ts": {
+    "mtime": 1781148328.356533,
+    "ast_hash": "6aa82345637e8fb62976542a3e4e93df",
+    "semantic_hash": "6aa82345637e8fb62976542a3e4e93df"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/parsing.ts": {
+    "mtime": 1781148328.356701,
+    "ast_hash": "d2c4e15d6f8f26f78fb1bcc3965cc1e7",
+    "semantic_hash": "d2c4e15d6f8f26f78fb1bcc3965cc1e7"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/sentry.ts": {
+    "mtime": 1781148328.3567781,
+    "ast_hash": "4b21eb21813518a082ff84bccc67dd6f",
+    "semantic_hash": "4b21eb21813518a082ff84bccc67dd6f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/service-role-handler.ts": {
+    "mtime": 1781148328.3568428,
+    "ast_hash": "37d3632e7a15a21b59d03b2249a4b5a9",
+    "semantic_hash": "37d3632e7a15a21b59d03b2249a4b5a9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/stock-images.ts": {
+    "mtime": 1781148328.356944,
+    "ast_hash": "e88576d5a4259a14cb932013d94c64a3",
+    "semantic_hash": "e88576d5a4259a14cb932013d94c64a3"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/stock-images_test.ts": {
+    "mtime": 1781148328.357001,
+    "ast_hash": "9ea8f948692bd33d395fea7a6b7662ee",
+    "semantic_hash": "9ea8f948692bd33d395fea7a6b7662ee"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/supabase-client.ts": {
+    "mtime": 1781148328.3570602,
+    "ast_hash": "a68cddded8757ff4c5478b8cba024e2b",
+    "semantic_hash": "a68cddded8757ff4c5478b8cba024e2b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/unsplash.test.ts": {
+    "mtime": 1781148328.357157,
+    "ast_hash": "24a172768006807ae146d61f4a1f41dc",
+    "semantic_hash": "24a172768006807ae146d61f4a1f41dc"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/unsplash.ts": {
+    "mtime": 1781148328.3572412,
+    "ast_hash": "a5080a3c1bd2468d8b42943c77738dff",
+    "semantic_hash": "a5080a3c1bd2468d8b42943c77738dff"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-resolve.ts": {
+    "mtime": 1781148328.3573065,
+    "ast_hash": "947106bf538b61dab8f07d530880d006",
+    "semantic_hash": "947106bf538b61dab8f07d530880d006"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-validation.test.ts": {
+    "mtime": 1781148328.3573687,
+    "ast_hash": "f0b449c00f664cf8a2efdbca74d452d9",
+    "semantic_hash": "f0b449c00f664cf8a2efdbca74d452d9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/url-validation.ts": {
+    "mtime": 1781148328.3574255,
+    "ast_hash": "abd241ea32d387b7ee8ed60714954434",
+    "semantic_hash": "abd241ea32d387b7ee8ed60714954434"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/validation.ts": {
+    "mtime": 1781148328.3574822,
+    "ast_hash": "28026b3f790336284dddf3f61efe014c",
+    "semantic_hash": "28026b3f790336284dddf3f61efe014c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/_shared/validation_test.ts": {
+    "mtime": 1781148328.357541,
+    "ast_hash": "6aa121079542c7746055641add7e6e16",
+    "semantic_hash": "6aa121079542c7746055641add7e6e16"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/admin-run-cron/deno.json": {
+    "mtime": 1781148328.3576446,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/admin-run-cron/index.ts": {
+    "mtime": 1781148328.3578126,
+    "ast_hash": "bda7b27e06879fad1c265c373298083f",
+    "semantic_hash": "bda7b27e06879fad1c265c373298083f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/deno.json": {
+    "mtime": 1781148328.3579047,
+    "ast_hash": "91712bafa2554ae9740b478e43a6c84b",
+    "semantic_hash": "91712bafa2554ae9740b478e43a6c84b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/index.ts": {
+    "mtime": 1781148328.3580346,
+    "ast_hash": "8795ca5d0ff1e8d9100951121600c81e",
+    "semantic_hash": "8795ca5d0ff1e8d9100951121600c81e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-embeddings/index_test.ts": {
+    "mtime": 1781148328.3581076,
+    "ast_hash": "4e9c665df735badb8b2ac2084cbe451d",
+    "semantic_hash": "4e9c665df735badb8b2ac2084cbe451d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/deno.json": {
+    "mtime": 1781148328.3582563,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/index.ts": {
+    "mtime": 1781148328.3584049,
+    "ast_hash": "9e895516b02c1cb3b215646d8dfaec3f",
+    "semantic_hash": "9e895516b02c1cb3b215646d8dfaec3f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/parent-tips-pass.ts": {
+    "mtime": 1781148328.3584688,
+    "ast_hash": "383efeee13eee547815367084eb4cd73",
+    "semantic_hash": "383efeee13eee547815367084eb4cd73"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/parent-tips-pass_test.ts": {
+    "mtime": 1781148328.3586354,
+    "ast_hash": "d09f184c19d07d7d67871d5e05e3c2c9",
+    "semantic_hash": "d09f184c19d07d7d67871d5e05e3c2c9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/cleanup-stale-runs/deno.json": {
+    "mtime": 1781148328.3587139,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/cleanup-stale-runs/index.ts": {
+    "mtime": 1781148328.358835,
+    "ast_hash": "5bd55c30a300153fc247241abdfa72f0",
+    "semantic_hash": "5bd55c30a300153fc247241abdfa72f0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/db-maintenance/deno.json": {
+    "mtime": 1781148328.3589067,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/db-maintenance/index.ts": {
+    "mtime": 1781148328.3590202,
+    "ast_hash": "179f1d166fac4106904a90a2aef941d4",
+    "semantic_hash": "179f1d166fac4106904a90a2aef941d4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/deno.json": {
+    "mtime": 1781148328.3590636,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/deno.json": {
+    "mtime": 1781148328.3591948,
+    "ast_hash": "91712bafa2554ae9740b478e43a6c84b",
+    "semantic_hash": "91712bafa2554ae9740b478e43a6c84b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/handler.ts": {
+    "mtime": 1781148328.3593223,
+    "ast_hash": "685100680f4eed661e6f7cb7b7d670fc",
+    "semantic_hash": "685100680f4eed661e6f7cb7b7d670fc"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/handler_test.ts": {
+    "mtime": 1781148328.3593893,
+    "ast_hash": "f36c046ba90a255988d98722df34fc1c",
+    "semantic_hash": "f36c046ba90a255988d98722df34fc1c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/embed-event/index.ts": {
+    "mtime": 1781148328.3594406,
+    "ast_hash": "f66fcb3357fad6e9a7e213fddc2d7c2c",
+    "semantic_hash": "f66fcb3357fad6e9a7e213fddc2d7c2c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/config.ts": {
+    "mtime": 1781148328.3596406,
+    "ast_hash": "fa8dd84592dbca57a3c398340028949f",
+    "semantic_hash": "fa8dd84592dbca57a3c398340028949f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/config_test.ts": {
+    "mtime": 1781148328.359711,
+    "ast_hash": "498e07ec795b2cd3aadbcae41d682f55",
+    "semantic_hash": "498e07ec795b2cd3aadbcae41d682f55"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/mod.ts": {
+    "mtime": 1781148328.3597631,
+    "ast_hash": "88248035856433e851e992a9f596a08f",
+    "semantic_hash": "88248035856433e851e992a9f596a08f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/normalizer.ts": {
+    "mtime": 1781148328.35982,
+    "ast_hash": "ffd17460e72dc025d34de82cb8cf8d54",
+    "semantic_hash": "ffd17460e72dc025d34de82cb8cf8d54"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/normalizer_test.ts": {
+    "mtime": 1781148328.3598738,
+    "ast_hash": "a006c80c080f89b0b25b73e34987cb33",
+    "semantic_hash": "a006c80c080f89b0b25b73e34987cb33"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/prompt.ts": {
+    "mtime": 1781148328.3599362,
+    "ast_hash": "daf75433061a43501d2d92782c3ed2d6",
+    "semantic_hash": "daf75433061a43501d2d92782c3ed2d6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/prompt_test.ts": {
+    "mtime": 1781148328.3599975,
+    "ast_hash": "549ac7ebdb52c7234ca834d5daa36e9f",
+    "semantic_hash": "549ac7ebdb52c7234ca834d5daa36e9f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/provider.ts": {
+    "mtime": 1781148328.3600543,
+    "ast_hash": "f163c562083fc15cc73c7bedbc93d8d1",
+    "semantic_hash": "f163c562083fc15cc73c7bedbc93d8d1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/reviewer.ts": {
+    "mtime": 1781148328.3601134,
+    "ast_hash": "adff9c9153e3cd121025df8a805223d5",
+    "semantic_hash": "adff9c9153e3cd121025df8a805223d5"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/schema.ts": {
+    "mtime": 1781148328.360173,
+    "ast_hash": "9e0fb13fe30b0bf3abee687bb20b2cea",
+    "semantic_hash": "9e0fb13fe30b0bf3abee687bb20b2cea"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/schema_test.ts": {
+    "mtime": 1781148328.3602297,
+    "ast_hash": "4793ce28cd057d377bf675210bac8f7b",
+    "semantic_hash": "4793ce28cd057d377bf675210bac8f7b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/event-review/types.ts": {
+    "mtime": 1781148328.360286,
+    "ast_hash": "9e0ecb477b0e560d70020edba6cb99b7",
+    "semantic_hash": "9e0ecb477b0e560d70020edba6cb99b7"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/deno.json": {
+    "mtime": 1781148328.3603826,
+    "ast_hash": "91712bafa2554ae9740b478e43a6c84b",
+    "semantic_hash": "91712bafa2554ae9740b478e43a6c84b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/handler.ts": {
+    "mtime": 1781148328.3605494,
+    "ast_hash": "f3c47d9a92535dcdcec608c6065d7480",
+    "semantic_hash": "f3c47d9a92535dcdcec608c6065d7480"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/index.ts": {
+    "mtime": 1781148328.3606117,
+    "ast_hash": "f7c1874a655fc0e96617da6a0f49b749",
+    "semantic_hash": "f7c1874a655fc0e96617da6a0f49b749"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/generate-parent-tips/prompt.ts": {
+    "mtime": 1781148328.360668,
+    "ast_hash": "9de0f10afe5f604834e1a14e426718e5",
+    "semantic_hash": "9de0f10afe5f604834e1a14e426718e5"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/log-cron-run/deno.json": {
+    "mtime": 1781148328.360855,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/log-cron-run/index.ts": {
+    "mtime": 1781148328.3609822,
+    "ast_hash": "bc9c351269d0a74d25d86acbab986ad3",
+    "semantic_hash": "bc9c351269d0a74d25d86acbab986ad3"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/notify-email/deno.json": {
+    "mtime": 1781148328.3610635,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/notify-email/index.ts": {
+    "mtime": 1781231756.1361506,
+    "ast_hash": "7d539e0f08ab83cb0a4e7f84d9159fa9",
+    "semantic_hash": "7d539e0f08ab83cb0a4e7f84d9159fa9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/package.json": {
+    "mtime": 1781231756.1319277,
+    "ast_hash": "a33347f3071ae2a0f2ace6ebef9f8cf2",
+    "semantic_hash": "a33347f3071ae2a0f2ace6ebef9f8cf2"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/deno.json": {
+    "mtime": 1781148328.361368,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/index.ts": {
+    "mtime": 1781148328.3614848,
+    "ast_hash": "ee2cc9838ef3a6aa57485388f642f3f0",
+    "semantic_hash": "ee2cc9838ef3a6aa57485388f642f3f0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/lib/worker.ts": {
+    "mtime": 1781148328.3615901,
+    "ast_hash": "68cb37bba086d034e553924a26573cf1",
+    "semantic_hash": "68cb37bba086d034e553924a26573cf1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-event-review-queue/lib/worker_test.ts": {
+    "mtime": 1781148328.3616672,
+    "ast_hash": "5536d015f05bcedf3827437f81b3809f",
+    "semantic_hash": "5536d015f05bcedf3827437f81b3809f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-notification-queue/deno.json": {
+    "mtime": 1781148328.3617647,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-notification-queue/index.ts": {
+    "mtime": 1781148328.3619282,
+    "ast_hash": "1c0f2bdc2a8c9f1ab0060b01ee18872d",
+    "semantic_hash": "1c0f2bdc2a8c9f1ab0060b01ee18872d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/deno.json": {
+    "mtime": 1781148328.3620021,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/index.ts": {
+    "mtime": 1781148328.3621328,
+    "ast_hash": "d8fa31814a8b5f303d616cd4da71db19",
+    "semantic_hash": "d8fa31814a8b5f303d616cd4da71db19"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/llm-extraction.ts": {
+    "mtime": 1781148328.3622296,
+    "ast_hash": "066802dea1930762ed4580e7a1ce006c",
+    "semantic_hash": "066802dea1930762ed4580e7a1ce006c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/worker.ts": {
+    "mtime": 1781148328.3623114,
+    "ast_hash": "1019e38afcac29c9f7ad50ecaf3db895",
+    "semantic_hash": "1019e38afcac29c9f7ad50ecaf3db895"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-source-queue/lib/worker_test.ts": {
+    "mtime": 1781148328.362385,
+    "ast_hash": "e84895be994b104eb382cdf78bb486bc",
+    "semantic_hash": "e84895be994b104eb382cdf78bb486bc"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/deno.json": {
+    "mtime": 1781148328.3624573,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/index.ts": {
+    "mtime": 1781148328.3625739,
+    "ast_hash": "3fb7d8c44af3f9e59db7647b8c672fd0",
+    "semantic_hash": "3fb7d8c44af3f9e59db7647b8c672fd0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/index_test.ts": {
+    "mtime": 1781148328.3626444,
+    "ast_hash": "9a16fc90e214f6d6749c4a895df47789",
+    "semantic_hash": "9a16fc90e214f6d6749c4a895df47789"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/queue-policy.ts": {
+    "mtime": 1781148328.3626907,
+    "ast_hash": "2bd6bd02b8f6ceecdd617f9b4ee7d51f",
+    "semantic_hash": "2bd6bd02b8f6ceecdd617f9b4ee7d51f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/process-tag-queue/queue-policy_test.ts": {
+    "mtime": 1781148328.3627365,
+    "ast_hash": "976c97d6040dbebc9e6febeb32fbd343",
+    "semantic_hash": "976c97d6040dbebc9e6febeb32fbd343"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-due-sources/deno.json": {
+    "mtime": 1781148328.362814,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-due-sources/index.ts": {
+    "mtime": 1781148328.3629386,
+    "ast_hash": "e55803c4a6b2f5472402952cdf0bc578",
+    "semantic_hash": "e55803c4a6b2f5472402952cdf0bc578"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-api.json": {
+    "mtime": 1781148328.3639016,
+    "ast_hash": "3a540087287743038e974e3d367ffdca",
+    "semantic_hash": "3a540087287743038e974e3d367ffdca"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/deno.json": {
+    "mtime": 1781148328.3641229,
+    "ast_hash": "b47f4afe100a81d2670ce01f92dd0fe8",
+    "semantic_hash": "b47f4afe100a81d2670ce01f92dd0fe8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/index.ts": {
+    "mtime": 1781148328.364236,
+    "ast_hash": "647034fd5eb90e24c7c4b9c55e3f9666",
+    "semantic_hash": "647034fd5eb90e24c7c4b9c55e3f9666"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/date.ts": {
+    "mtime": 1781148328.3643143,
+    "ast_hash": "a9dbeae28a46d022f187c89edc469819",
+    "semantic_hash": "a9dbeae28a46d022f187c89edc469819"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/date_test.ts": {
+    "mtime": 1781148328.3643596,
+    "ast_hash": "1811787b9c9a851ba78fd38624860875",
+    "semantic_hash": "1811787b9c9a851ba78fd38624860875"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/enrichment.ts": {
+    "mtime": 1781148328.3644097,
+    "ast_hash": "2122e001a8e65df3728c5aafdd9c701f",
+    "semantic_hash": "2122e001a8e65df3728c5aafdd9c701f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/event-processing.ts": {
+    "mtime": 1781148328.3644676,
+    "ast_hash": "1f221362ec02911a906edc95526d755b",
+    "semantic_hash": "1f221362ec02911a906edc95526d755b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/event-processing_test.ts": {
+    "mtime": 1781148328.364518,
+    "ast_hash": "3e0b1f2651aec554e244c64468e79633",
+    "semantic_hash": "3e0b1f2651aec554e244c64468e79633"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/extraction-pipeline.ts": {
+    "mtime": 1781148328.3645668,
+    "ast_hash": "cfdd73b2d5fa40cb4d4581cc9863416a",
+    "semantic_hash": "cfdd73b2d5fa40cb4d4581cc9863416a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/extraction-pipeline_test.ts": {
+    "mtime": 1781148328.3646169,
+    "ast_hash": "2a6575c85686df4736c144cb7cfb8850",
+    "semantic_hash": "2a6575c85686df4736c144cb7cfb8850"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/parser-context.ts": {
+    "mtime": 1781148328.364665,
+    "ast_hash": "bc0af8ca37bc83d6ee8cbbfdd496e195",
+    "semantic_hash": "bc0af8ca37bc83d6ee8cbbfdd496e195"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/process-source.ts": {
+    "mtime": 1781148328.36478,
+    "ast_hash": "ff8a5e838ae4802ffabaecb02ee45711",
+    "semantic_hash": "ff8a5e838ae4802ffabaecb02ee45711"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/process-source_test.ts": {
+    "mtime": 1781148328.36492,
+    "ast_hash": "02f580c93d868e6ef19025550af1335a",
+    "semantic_hash": "02f580c93d868e6ef19025550af1335a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/schedule.ts": {
+    "mtime": 1781148328.3649764,
+    "ast_hash": "7470362a5af8ec048fd4144b73c5f3da",
+    "semantic_hash": "7470362a5af8ec048fd4144b73c5f3da"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/source-queue.ts": {
+    "mtime": 1781148328.3650348,
+    "ast_hash": "9b5c6178fac55537d3a05467645ae47f",
+    "semantic_hash": "9b5c6178fac55537d3a05467645ae47f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/source-queue_test.ts": {
+    "mtime": 1781148328.3650815,
+    "ast_hash": "e73fbb72b536bfacad79b752a6750a75",
+    "semantic_hash": "e73fbb72b536bfacad79b752a6750a75"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/lib/types.ts": {
+    "mtime": 1781148328.3651273,
+    "ast_hash": "14b04329ff6e1ced87051366e687a32a",
+    "semantic_hash": "14b04329ff6e1ced87051366e687a32a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/_lib/types.ts": {
+    "mtime": 1781148328.3652372,
+    "ast_hash": "81d5cad8f6196cf7a71b1517b6e7f5d6",
+    "semantic_hash": "81d5cad8f6196cf7a71b1517b6e7f5d6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/brec.ts": {
+    "mtime": 1781148328.3653085,
+    "ast_hash": "d81d93c281ba0d645a39f08451807331",
+    "semantic_hash": "d81d93c281ba0d645a39f08451807331"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/brec_test.ts": {
+    "mtime": 1781148328.3659372,
+    "ast_hash": "440eb7193cae454e590e695bfbe5eaa6",
+    "semantic_hash": "440eb7193cae454e590e695bfbe5eaa6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/downtownlafayette.ts": {
+    "mtime": 1781148328.3660004,
+    "ast_hash": "8de15ed559077f8be589b9be7c3e52c6",
+    "semantic_hash": "8de15ed559077f8be589b9be7c3e52c6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/downtownlafayette_test.ts": {
+    "mtime": 1781148328.3660517,
+    "ast_hash": "077a9da88f8bbb0940f288c7a7adfb8a",
+    "semantic_hash": "077a9da88f8bbb0940f288c7a7adfb8a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical-lafayette-sources_test.ts": {
+    "mtime": 1781148328.3661091,
+    "ast_hash": "2f2cb53959bdb3c7cc21f93700c71b6e",
+    "semantic_hash": "2f2cb53959bdb3c7cc21f93700c71b6e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical.ts": {
+    "mtime": 1781148328.366172,
+    "ast_hash": "92ea42177da738d299d72562c933eb78",
+    "semantic_hash": "92ea42177da738d299d72562c933eb78"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/ical_test.ts": {
+    "mtime": 1781148328.3662236,
+    "ast_hash": "2c7aefae5bd3d3c3adc8bf7b0100d27f",
+    "semantic_hash": "2c7aefae5bd3d3c3adc8bf7b0100d27f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/index.ts": {
+    "mtime": 1781148328.3662724,
+    "ast_hash": "3c43efbe9456c01b8de0b6f2c73c5941",
+    "semantic_hash": "3c43efbe9456c01b8de0b6f2c73c5941"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/index_test.ts": {
+    "mtime": 1781148328.366319,
+    "ast_hash": "722d9da58853b1e0e23f63f055735037",
+    "semantic_hash": "722d9da58853b1e0e23f63f055735037"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/lcg-lafayette.ts": {
+    "mtime": 1781148328.3665876,
+    "ast_hash": "f903caca5a4cdd52f5b613a3bed5324a",
+    "semantic_hash": "f903caca5a4cdd52f5b613a3bed5324a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/lcg-lafayette_test.ts": {
+    "mtime": 1781148328.3666482,
+    "ast_hash": "229dc437531c0a83fe276e5581e545d9",
+    "semantic_hash": "229dc437531c0a83fe276e5581e545d9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/localhop.ts": {
+    "mtime": 1781148328.366706,
+    "ast_hash": "437411453a04c90ea9eecc5542b565b5",
+    "semantic_hash": "437411453a04c90ea9eecc5542b565b5"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/localhop_test.ts": {
+    "mtime": 1781148328.366758,
+    "ast_hash": "a8f3965ab992396fe3d2a9595cec2677",
+    "semantic_hash": "a8f3965ab992396fe3d2a9595cec2677"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/macaroni-kid.ts": {
+    "mtime": 1781148328.366834,
+    "ast_hash": "b9dfe3aeda1e4e6359796792a24a9d0a",
+    "semantic_hash": "b9dfe3aeda1e4e6359796792a24a9d0a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/macaroni-kid_test.ts": {
+    "mtime": 1781148328.3668907,
+    "ast_hash": "6eee99ddb16aaef9b89f3a43bee4b556",
+    "semantic_hash": "6eee99ddb16aaef9b89f3a43bee4b556"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/manual.ts": {
+    "mtime": 1781148328.3669417,
+    "ast_hash": "db3ded99b94a85b5cd3946fc3e778b44",
+    "semantic_hash": "db3ded99b94a85b5cd3946fc3e778b44"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/rss.ts": {
+    "mtime": 1781148328.3671892,
+    "ast_hash": "0458032f94c496f95f770f954d3caa40",
+    "semantic_hash": "0458032f94c496f95f770f954d3caa40"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/rss_test.ts": {
+    "mtime": 1781148328.367242,
+    "ast_hash": "0f95944978f5e37b8f1be3bf60a7341b",
+    "semantic_hash": "0f95944978f5e37b8f1be3bf60a7341b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/website.ts": {
+    "mtime": 1781148328.3673275,
+    "ast_hash": "5e821ac8633912543fb350244cbeba0a",
+    "semantic_hash": "5e821ac8633912543fb350244cbeba0a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/parsers/website_test.ts": {
+    "mtime": 1781148328.367412,
+    "ast_hash": "8e4d256ffa4ebc7bd055e0a3a0480c5e",
+    "semantic_hash": "8e4d256ffa4ebc7bd055e0a3a0480c5e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-auth-email/deno.json": {
+    "mtime": 1781148328.3674905,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-auth-email/index.ts": {
+    "mtime": 1781148328.367653,
+    "ast_hash": "56d1353363989f3f36e113051b15d74f",
+    "semantic_hash": "56d1353363989f3f36e113051b15d74f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/deno.json": {
+    "mtime": 1781148328.3677237,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/index.ts": {
+    "mtime": 1781231756.1367533,
+    "ast_hash": "cd79e27591a15f9ee7862c7433955078",
+    "semantic_hash": "cd79e27591a15f9ee7862c7433955078"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/lib/mobile-push.ts": {
+    "mtime": 1781148328.367957,
+    "ast_hash": "3c2b3a08398e11549b194c34b85b3677",
+    "semantic_hash": "3c2b3a08398e11549b194c34b85b3677"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/lib/mobile-push_test.ts": {
+    "mtime": 1781148328.3680055,
+    "ast_hash": "08b83714ff91f8360018ea565a0076e8",
+    "semantic_hash": "08b83714ff91f8360018ea565a0076e8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-push/send-push.test.ts": {
+    "mtime": 1781148328.3680897,
+    "ast_hash": "ea29cf574c591ee1a33c887e15ebf10f",
+    "semantic_hash": "ea29cf574c591ee1a33c887e15ebf10f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/deno.json": {
+    "mtime": 1781148328.36816,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/index.ts": {
+    "mtime": 1781148328.3682866,
+    "ast_hash": "61fc9d1009e465cb3d19d94b7b371f79",
+    "semantic_hash": "61fc9d1009e465cb3d19d94b7b371f79"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-reminders/send-reminders.test.ts": {
+    "mtime": 1781148328.3683507,
+    "ast_hash": "41b4d2b785ca24202e07dcbab3e87e69",
+    "semantic_hash": "41b4d2b785ca24202e07dcbab3e87e69"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/deno.json": {
+    "mtime": 1781148328.3684342,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/index.ts": {
+    "mtime": 1781148328.3685699,
+    "ast_hash": "62f42169a9dfb1f573d361bb95f4573e",
+    "semantic_hash": "62f42169a9dfb1f573d361bb95f4573e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/send-weekly-digest/send-weekly-digest.test.ts": {
+    "mtime": 1781148328.368655,
+    "ast_hash": "5d3fab031d8d0dfde16d9a4fc3ca72cb",
+    "semantic_hash": "5d3fab031d8d0dfde16d9a4fc3ca72cb"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/deno.json": {
+    "mtime": 1781148328.3687265,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/index.ts": {
+    "mtime": 1781148328.3688786,
+    "ast_hash": "7354b5edd689104c38af096ba3d53846",
+    "semantic_hash": "7354b5edd689104c38af096ba3d53846"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/index_test.ts": {
+    "mtime": 1781148328.3689342,
+    "ast_hash": "b108bc384827158c9316180ad2a6bfb8",
+    "semantic_hash": "b108bc384827158c9316180ad2a6bfb8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/share-og/integration_test.ts": {
+    "mtime": 1781148328.36899,
+    "ast_hash": "c11a7be5db4f6e5081d2593bac83a4c9",
+    "semantic_hash": "c11a7be5db4f6e5081d2593bac83a4c9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/sitemap/deno.json": {
+    "mtime": 1781148328.3690596,
+    "ast_hash": "91712bafa2554ae9740b478e43a6c84b",
+    "semantic_hash": "91712bafa2554ae9740b478e43a6c84b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/sitemap/index.ts": {
+    "mtime": 1781148328.3691697,
+    "ast_hash": "9a9c348043428dee162a5e3ab195ca2b",
+    "semantic_hash": "9a9c348043428dee162a5e3ab195ca2b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/config.ts": {
+    "mtime": 1781148328.3692555,
+    "ast_hash": "5f055a1474b11c6851ee7406b23120a9",
+    "semantic_hash": "5f055a1474b11c6851ee7406b23120a9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/config_test.ts": {
+    "mtime": 1781148328.3693063,
+    "ast_hash": "4962d47582964df449cc7e7a7a5eb86e",
+    "semantic_hash": "4962d47582964df449cc7e7a7a5eb86e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/deno.json": {
+    "mtime": 1781148328.3693485,
+    "ast_hash": "cdad6a113812a02c50f08c13eeb4ded6",
+    "semantic_hash": "cdad6a113812a02c50f08c13eeb4ded6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/handler.ts": {
+    "mtime": 1781148328.369479,
+    "ast_hash": "1f2cbd60c8736c3569365068649515a6",
+    "semantic_hash": "1f2cbd60c8736c3569365068649515a6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/handler_test.ts": {
+    "mtime": 1781148328.3695614,
+    "ast_hash": "b231f68e92388945cf86694b1e2b07a9",
+    "semantic_hash": "b231f68e92388945cf86694b1e2b07a9"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/tag-event/index.ts": {
+    "mtime": 1781148328.369622,
+    "ast_hash": "f940ef8041410f34b6370dd729812703",
+    "semantic_hash": "f940ef8041410f34b6370dd729812703"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/vitest.config.ts": {
+    "mtime": 1781148328.369669,
+    "ast_hash": "3f1d100c1dd542308361ff2bfd8bc800",
+    "semantic_hash": "3f1d100c1dd542308361ff2bfd8bc800"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/weather/deno.json": {
+    "mtime": 1781148328.3697393,
+    "ast_hash": "91e21552521a62e63d0c279c23382079",
+    "semantic_hash": "91e21552521a62e63d0c279c23382079"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/weather/index.ts": {
+    "mtime": 1781148328.3699498,
+    "ast_hash": "84dde2a41c2378c3d0cfd251eff80948",
+    "semantic_hash": "84dde2a41c2378c3d0cfd251eff80948"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601000000_schema_baseline.sql": {
+    "mtime": 1781148328.3701956,
+    "ast_hash": "2a7673b7dee5fe02535e589f0e8ffb55",
+    "semantic_hash": "2a7673b7dee5fe02535e589f0e8ffb55"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601000001_admin_dashboard_presence_track_policy.sql": {
+    "mtime": 1781148328.3702545,
+    "ast_hash": "7b5f18abeed4e2baef9c85c6a0e2af05",
+    "semantic_hash": "7b5f18abeed4e2baef9c85c6a0e2af05"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601001000_reference_security_and_cron.sql": {
+    "mtime": 1781148328.3703263,
+    "ast_hash": "9f9ffb80b90cf181af895cf0b328f95c",
+    "semantic_hash": "9f9ffb80b90cf181af895cf0b328f95c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601002000_event_ingestion_admin_foundation.sql": {
+    "mtime": 1781148328.3704202,
+    "ast_hash": "4a3998a1b1ec769676a072917f302b40",
+    "semantic_hash": "4a3998a1b1ec769676a072917f302b40"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601003000_maintenance_and_admin_queues.sql": {
+    "mtime": 1781148328.370562,
+    "ast_hash": "fa98019c57e8f39d5f866c44a6f9f265",
+    "semantic_hash": "fa98019c57e8f39d5f866c44a6f9f265"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601004000_llm_review_and_enrichment.sql": {
+    "mtime": 1781148328.3706348,
+    "ast_hash": "9ec01863f7c0cf3ab8831006eabe594e",
+    "semantic_hash": "9ec01863f7c0cf3ab8831006eabe594e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601005000_ai_models_and_cron_drilldown.sql": {
+    "mtime": 1781148328.3707054,
+    "ast_hash": "1fa7c92b015e7b7196dbf52c4e9d5ba1",
+    "semantic_hash": "1fa7c92b015e7b7196dbf52c4e9d5ba1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601006000_enrichment_images_and_rpc_cleanup.sql": {
+    "mtime": 1781148328.3708246,
+    "ast_hash": "f5efe64c7c219cc300e1cd75c9eaa1fd",
+    "semantic_hash": "f5efe64c7c219cc300e1cd75c9eaa1fd"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601007000_lafayette_new_sources.sql": {
+    "mtime": 1781148328.370903,
+    "ast_hash": "28bba3445f322f5de3f8387551842f1d",
+    "semantic_hash": "28bba3445f322f5de3f8387551842f1d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601008000_tier3_lafayette_sources.sql": {
+    "mtime": 1781148328.3709562,
+    "ast_hash": "9db88526e46752e1d450dde5e23c915e",
+    "semantic_hash": "9db88526e46752e1d450dde5e23c915e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601009000_cron_review_events_allowlist.sql": {
+    "mtime": 1781148328.3710074,
+    "ast_hash": "50d578fce5435750f198fdd6a67f4a9e",
+    "semantic_hash": "50d578fce5435750f198fdd6a67f4a9e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601010000_admin_events_realtime.sql": {
+    "mtime": 1781148328.3710582,
+    "ast_hash": "305fc9835bcd760973af854d70c452ed",
+    "semantic_hash": "305fc9835bcd760973af854d70c452ed"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601011000_add_pexels_pixabay_providers.sql": {
+    "mtime": 1781148328.3711154,
+    "ast_hash": "369c38eebe86b394c42f40bed9dcfbab",
+    "semantic_hash": "369c38eebe86b394c42f40bed9dcfbab"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601011001_fix_provider_constraint.sql": {
+    "mtime": 1781148328.371161,
+    "ast_hash": "b47eb7d1ac3648765a91bf4539ac3ae6",
+    "semantic_hash": "b47eb7d1ac3648765a91bf4539ac3ae6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601012000_disable_invite_gate.sql": {
+    "mtime": 1781148328.3712118,
+    "ast_hash": "3c93c6c4f64263853a509b083ac70808",
+    "semantic_hash": "3c93c6c4f64263853a509b083ac70808"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601013000_reset_invite_gate_guc.sql": {
+    "mtime": 1781148328.3712606,
+    "ast_hash": "2cbeb72379d845a05fb22fc08d704718",
+    "semantic_hash": "2cbeb72379d845a05fb22fc08d704718"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601014000_fix_invite_gate_default.sql": {
+    "mtime": 1781148328.3713078,
+    "ast_hash": "8dea850490c9b5fbcd2164859efc26d7",
+    "semantic_hash": "8dea850490c9b5fbcd2164859efc26d7"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601015000_fix_invite_gate_single_source.sql": {
+    "mtime": 1781148328.3713624,
+    "ast_hash": "404d57f43926c633c099efb9c3b31e2e",
+    "semantic_hash": "404d57f43926c633c099efb9c3b31e2e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601016000_anon_access_for_public_browsing.sql": {
+    "mtime": 1781148328.3714206,
+    "ast_hash": "d3c510a4c114bbab54e877c6857e9714",
+    "semantic_hash": "d3c510a4c114bbab54e877c6857e9714"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601017000_event_status_enum_and_validate_checks.sql": {
+    "mtime": 1781148328.3715038,
+    "ast_hash": "cbb2fe360b277e1065bca38d0febc3ce",
+    "semantic_hash": "cbb2fe360b277e1065bca38d0febc3ce"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601018000_fix_events_enriched_enum_cast.sql": {
+    "mtime": 1781148328.3717,
+    "ast_hash": "c694c13e02f8c76f7c4917fd7d3a4497",
+    "semantic_hash": "c694c13e02f8c76f7c4917fd7d3a4497"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601019000_restore_events_enriched_cursor_signature.sql": {
+    "mtime": 1781148328.3718004,
+    "ast_hash": "44e82608bf2186ef29a507bbfccc404b",
+    "semantic_hash": "44e82608bf2186ef29a507bbfccc404b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601020000_event_embeddings_and_similarity.sql": {
+    "mtime": 1781148328.3718905,
+    "ast_hash": "0def74b4b51123d015084d4622a43337",
+    "semantic_hash": "0def74b4b51123d015084d4622a43337"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601021000_admin_event_decisions.sql": {
+    "mtime": 1781148328.3719964,
+    "ast_hash": "e084b2e531dafd2b6b3c65a80713a5d8",
+    "semantic_hash": "e084b2e531dafd2b6b3c65a80713a5d8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601022000_source_auto_reject_and_stats.sql": {
+    "mtime": 1781148328.3720603,
+    "ast_hash": "fc8e65448c10ea4a3638904512ef5a49",
+    "semantic_hash": "fc8e65448c10ea4a3638904512ef5a49"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601023000_fix_ai_settings_rpc_grants.sql": {
+    "mtime": 1781148328.3721223,
+    "ast_hash": "e88174de24a9d68e8f5b21409509820b",
+    "semantic_hash": "e88174de24a9d68e8f5b21409509820b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601024000_admin_retry_dead_tag_queue.sql": {
+    "mtime": 1781148328.3721817,
+    "ast_hash": "3d28dc3ae00d692293786490369f27a4",
+    "semantic_hash": "3d28dc3ae00d692293786490369f27a4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601025000_baton_rouge_sources.sql": {
+    "mtime": 1781148328.3722413,
+    "ast_hash": "4f498865da1c7a0749a5cea08acd3905",
+    "semantic_hash": "4f498865da1c7a0749a5cea08acd3905"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601026000_fix_unindexed_fk_admin_event_decisions.sql": {
+    "mtime": 1781148328.3722987,
+    "ast_hash": "e52b891557bc250f250908a449888d94",
+    "semantic_hash": "e52b891557bc250f250908a449888d94"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601027000_user_notification_preferences.sql": {
+    "mtime": 1781148328.3723629,
+    "ast_hash": "a257432baefce87465171df1c7eb4574",
+    "semantic_hash": "a257432baefce87465171df1c7eb4574"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601028000_search_events_radius_filter.sql": {
+    "mtime": 1781148328.3725452,
+    "ast_hash": "a11be5bb4b743d88c95c2e3c940a10ca",
+    "semantic_hash": "a11be5bb4b743d88c95c2e3c940a10ca"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601029000_find_similar_events_by_id.sql": {
+    "mtime": 1781148328.372604,
+    "ast_hash": "dd4c92120a4a33da87c2fef9cf0eec98",
+    "semantic_hash": "dd4c92120a4a33da87c2fef9cf0eec98"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601030000_push_and_notifications.sql": {
+    "mtime": 1781148328.3726792,
+    "ast_hash": "2ae9eb47d724c923bf0cfe72d9c34c0f",
+    "semantic_hash": "2ae9eb47d724c923bf0cfe72d9c34c0f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601031000_event_change_notifications.sql": {
+    "mtime": 1781148328.372848,
+    "ast_hash": "848d9a3ea3ea50ec747d4bc404a4002f",
+    "semantic_hash": "848d9a3ea3ea50ec747d4bc404a4002f"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601032000_drop_old_search_events_overload.sql": {
+    "mtime": 1781148328.373,
+    "ast_hash": "49115f06c3bf38f80012335384986a16",
+    "semantic_hash": "49115f06c3bf38f80012335384986a16"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601033000_community_event_submission.sql": {
+    "mtime": 1781148328.3730652,
+    "ast_hash": "7f342fefda621d122aafedc95b80f078",
+    "semantic_hash": "7f342fefda621d122aafedc95b80f078"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601034000_activate_baton_rouge_sources.sql": {
+    "mtime": 1781148328.3731182,
+    "ast_hash": "b5e43837f444ff55a54d8a0660a68429",
+    "semantic_hash": "b5e43837f444ff55a54d8a0660a68429"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601035000_community_event_status_notification.sql": {
+    "mtime": 1781148328.3731747,
+    "ast_hash": "56f931d3dc5185ee36a78c4721944308",
+    "semantic_hash": "56f931d3dc5185ee36a78c4721944308"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260601036000_admin_user_delete.sql": {
+    "mtime": 1781148328.3732316,
+    "ast_hash": "f9ee73524b7f7a1d7a16c81aa6a32dc0",
+    "semantic_hash": "f9ee73524b7f7a1d7a16c81aa6a32dc0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610162002_enqueue_source_scrape_rpc.sql": {
+    "mtime": 1781148328.3732793,
+    "ast_hash": "c3256f7e9c48bdbe1f12221ea5d62f8b",
+    "semantic_hash": "c3256f7e9c48bdbe1f12221ea5d62f8b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610170000_admin_events_source_filter.sql": {
+    "mtime": 1781148328.3733711,
+    "ast_hash": "9083b27f5cb75e58f88e0f2b69770acb",
+    "semantic_hash": "9083b27f5cb75e58f88e0f2b69770acb"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/migrations/20260610180000_admin_dashboard_stats.sql": {
+    "mtime": 1781148328.373431,
+    "ast_hash": "7c0836ec8f0fa3dde13c6d132caf5d17",
+    "semantic_hash": "7c0836ec8f0fa3dde13c6d132caf5d17"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000000_001_schema_down.sql": {
+    "mtime": 1781148328.373517,
+    "ast_hash": "08134aad9f539d7cfc5c543cf1323a64",
+    "semantic_hash": "08134aad9f539d7cfc5c543cf1323a64"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000100_002_functions_down.sql": {
+    "mtime": 1781148328.373585,
+    "ast_hash": "45b15cf1a43eb0e5c48ba2f42c873489",
+    "semantic_hash": "45b15cf1a43eb0e5c48ba2f42c873489"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601000300_004_views_and_rpcs_down.sql": {
+    "mtime": 1781148328.373633,
+    "ast_hash": "f7884c1b49393a9ec466d470fd02a249",
+    "semantic_hash": "f7884c1b49393a9ec466d470fd02a249"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601002700_admin_event_lifetime_editing_down.sql": {
+    "mtime": 1781148328.3736806,
+    "ast_hash": "dac82b128a8e42945a33ccc3853656b2",
+    "semantic_hash": "dac82b128a8e42945a33ccc3853656b2"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601017000_event_status_enum_and_validate_checks_down.sql": {
+    "mtime": 1781148328.3737395,
+    "ast_hash": "d610fb4e4a838253ee4510077caa9a22",
+    "semantic_hash": "d610fb4e4a838253ee4510077caa9a22"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601018000_fix_events_enriched_enum_cast_down.sql": {
+    "mtime": 1781148328.373814,
+    "ast_hash": "6fb1a941b0cce37d6d9a8f74d9a970f0",
+    "semantic_hash": "6fb1a941b0cce37d6d9a8f74d9a970f0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601019000_restore_events_enriched_cursor_signature_down.sql": {
+    "mtime": 1781148328.3738697,
+    "ast_hash": "1a92023eb3a91ea745b1900d73c45540",
+    "semantic_hash": "1a92023eb3a91ea745b1900d73c45540"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601020000_event_embeddings_and_similarity_down.sql": {
+    "mtime": 1781148328.373923,
+    "ast_hash": "03d5552e663d7f2eb37aba1f33de00d2",
+    "semantic_hash": "03d5552e663d7f2eb37aba1f33de00d2"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601021000_admin_event_decisions_down.sql": {
+    "mtime": 1781148328.374002,
+    "ast_hash": "73dafa30e4d504bd44d202758c426ed2",
+    "semantic_hash": "73dafa30e4d504bd44d202758c426ed2"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601022000_source_auto_reject_and_stats_down.sql": {
+    "mtime": 1781148328.3740535,
+    "ast_hash": "1aa5420a2ef011d492755f4f94340273",
+    "semantic_hash": "1aa5420a2ef011d492755f4f94340273"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601023000_fix_ai_settings_rpc_grants_down.sql": {
+    "mtime": 1781148328.3741074,
+    "ast_hash": "21ce326ec3c695da18deab33ff3732cf",
+    "semantic_hash": "21ce326ec3c695da18deab33ff3732cf"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601024000_admin_retry_dead_tag_queue_down.sql": {
+    "mtime": 1781148328.3741598,
+    "ast_hash": "fafce8d3926b18a3c97971935e010cb0",
+    "semantic_hash": "fafce8d3926b18a3c97971935e010cb0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601025000_baton_rouge_sources_down.sql": {
+    "mtime": 1781148328.3742142,
+    "ast_hash": "085e13ee595ed01a1cd6cf2508806a08",
+    "semantic_hash": "085e13ee595ed01a1cd6cf2508806a08"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601026000_fix_unindexed_fk_admin_event_decisions_down.sql": {
+    "mtime": 1781148328.3742616,
+    "ast_hash": "995828dd2dec0ae46db0785a8c5f7510",
+    "semantic_hash": "995828dd2dec0ae46db0785a8c5f7510"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601027000_user_notification_preferences_down.sql": {
+    "mtime": 1781148328.3743098,
+    "ast_hash": "4c042eb2d9e4d3a79d53cae09c1293f0",
+    "semantic_hash": "4c042eb2d9e4d3a79d53cae09c1293f0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601028000_search_events_radius_filter_down.sql": {
+    "mtime": 1781148328.3743627,
+    "ast_hash": "10def16e41974e79886ae8e2d62cbc35",
+    "semantic_hash": "10def16e41974e79886ae8e2d62cbc35"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601029000_find_similar_events_by_id_down.sql": {
+    "mtime": 1781148328.3745153,
+    "ast_hash": "bf5890d4a6cb13e57c72d7da294357d0",
+    "semantic_hash": "bf5890d4a6cb13e57c72d7da294357d0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601030000_push_and_notifications_down.sql": {
+    "mtime": 1781148328.3745775,
+    "ast_hash": "5cf97b03b4cf13a2d59c1071c05f9d1d",
+    "semantic_hash": "5cf97b03b4cf13a2d59c1071c05f9d1d"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601031000_event_change_notifications_down.sql": {
+    "mtime": 1781148328.374637,
+    "ast_hash": "c7c8b1b6e910ca6d496f08fda98c31b6",
+    "semantic_hash": "c7c8b1b6e910ca6d496f08fda98c31b6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601032000_drop_old_search_events_overload_down.sql": {
+    "mtime": 1781148328.3746903,
+    "ast_hash": "7f44e868807582350ae11132acf2d2cf",
+    "semantic_hash": "7f44e868807582350ae11132acf2d2cf"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601033000_community_event_submission_down.sql": {
+    "mtime": 1781148328.3747485,
+    "ast_hash": "ffe3d4c51c0476b08f69830c0e22f186",
+    "semantic_hash": "ffe3d4c51c0476b08f69830c0e22f186"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601034000_activate_baton_rouge_sources_down.sql": {
+    "mtime": 1781148328.3748016,
+    "ast_hash": "0ca145ad404d5259796d57dbf07155ad",
+    "semantic_hash": "0ca145ad404d5259796d57dbf07155ad"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601035000_community_event_status_notification_down.sql": {
+    "mtime": 1781148328.3748584,
+    "ast_hash": "2658c3509c6318d226beb914a57dd181",
+    "semantic_hash": "2658c3509c6318d226beb914a57dd181"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260601036000_admin_user_delete_down.sql": {
+    "mtime": 1781148328.3749154,
+    "ast_hash": "29ca9213974957e3c7c19d58d5e480bd",
+    "semantic_hash": "29ca9213974957e3c7c19d58d5e480bd"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610162002_enqueue_source_scrape_rpc_down.sql": {
+    "mtime": 1781148328.3750718,
+    "ast_hash": "9f912ef5a7eabea69074d18fa864f89c",
+    "semantic_hash": "9f912ef5a7eabea69074d18fa864f89c"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610170000_admin_events_source_filter_down.sql": {
+    "mtime": 1781148328.3751776,
+    "ast_hash": "574167343fdc24d4ddb0e36a22558216",
+    "semantic_hash": "574167343fdc24d4ddb0e36a22558216"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/rollbacks/20260610180000_admin_dashboard_stats_down.sql": {
+    "mtime": 1781148328.375238,
+    "ast_hash": "a7e65770e1d35b18a61fc3477e71a7b0",
+    "semantic_hash": "a7e65770e1d35b18a61fc3477e71a7b0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/seed.sql": {
+    "mtime": 1781148328.3752973,
+    "ast_hash": "812672649c166d3b96312637227b8289",
+    "semantic_hash": "812672649c166d3b96312637227b8289"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/snippets/add_macaroni_kids_source.sql": {
+    "mtime": 1781148328.3753953,
+    "ast_hash": "d115fc3b14929b3c46c8e200d7f80928",
+    "semantic_hash": "d115fc3b14929b3c46c8e200d7f80928"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/snippets/provision_remote_admin_test_user.sql": {
+    "mtime": 1781148328.3754592,
+    "ast_hash": "a2e7c3724d390622dd5f0e9c35b25357",
+    "semantic_hash": "a2e7c3724d390622dd5f0e9c35b25357"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_dashboard_stats.sql": {
+    "mtime": 1781148328.3755512,
+    "ast_hash": "113def88c1473c6f5754e8ecdd92a800",
+    "semantic_hash": "113def88c1473c6f5754e8ecdd92a800"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_db_health.sql": {
+    "mtime": 1781148328.3756082,
+    "ast_hash": "b8d3db17619662db6b92bf18b5725dde",
+    "semantic_hash": "b8d3db17619662db6b92bf18b5725dde"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/admin_events_rpc.sql": {
+    "mtime": 1781148328.3757067,
+    "ast_hash": "a90c316b29c7983cb09f6c2e8f59de11",
+    "semantic_hash": "a90c316b29c7983cb09f6c2e8f59de11"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/api_surface_hardening.sql": {
+    "mtime": 1781148328.375763,
+    "ast_hash": "9956f444a73623c97ef802299c2f6c83",
+    "semantic_hash": "9956f444a73623c97ef802299c2f6c83"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/cron_rpc_security.sql": {
+    "mtime": 1781148328.3758223,
+    "ast_hash": "4d2164632d281372e9e7538e99ec1d8b",
+    "semantic_hash": "4d2164632d281372e9e7538e99ec1d8b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/cron_toggle.sql": {
+    "mtime": 1781148328.375884,
+    "ast_hash": "14f336660228e3feeae9f9e33dd96517",
+    "semantic_hash": "14f336660228e3feeae9f9e33dd96517"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/events_cursor_pagination.sql": {
+    "mtime": 1781148328.3759696,
+    "ast_hash": "7b1df17a7908788ba1efd45399617f25",
+    "semantic_hash": "7b1df17a7908788ba1efd45399617f25"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/events_enriched_parity.sql": {
+    "mtime": 1781148328.37603,
+    "ast_hash": "62c96678b587aaf8d0ca86ce5ec45d07",
+    "semantic_hash": "62c96678b587aaf8d0ca86ce5ec45d07"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/invite_gate_oauth_signup.sql": {
+    "mtime": 1781148328.3761106,
+    "ast_hash": "a957f1cc015c58c5af046793b8957ef4",
+    "semantic_hash": "a957f1cc015c58c5af046793b8957ef4"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/llm_event_review_processing.sql": {
+    "mtime": 1781148328.3761816,
+    "ast_hash": "0a9243f28210be31e73599c97921e332",
+    "semantic_hash": "0a9243f28210be31e73599c97921e332"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/reference_data.sql": {
+    "mtime": 1781148328.3762338,
+    "ast_hash": "9cd1bd6cfaaa4f85663bd519dfad2011",
+    "semantic_hash": "9cd1bd6cfaaa4f85663bd519dfad2011"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_access_expiry.sql": {
+    "mtime": 1781148328.3762848,
+    "ast_hash": "e576dff7095b42ba1dbfa8a4fc0f7d48",
+    "semantic_hash": "e576dff7095b42ba1dbfa8a4fc0f7d48"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_anon_read.sql": {
+    "mtime": 1781148328.376332,
+    "ast_hash": "0c9e432bd2438810380b3a6ce8487e1b",
+    "semantic_hash": "0c9e432bd2438810380b3a6ce8487e1b"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_privilege_escalation.sql": {
+    "mtime": 1781148328.3763826,
+    "ast_hash": "88d98292bc43e3c9f6c9a8c7375807e3",
+    "semantic_hash": "88d98292bc43e3c9f6c9a8c7375807e3"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/rls_public_events_view.sql": {
+    "mtime": 1781148328.3764493,
+    "ast_hash": "24f16562e713cbe276753dac4f696a3a",
+    "semantic_hash": "24f16562e713cbe276753dac4f696a3a"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/role_smoke.sql": {
+    "mtime": 1781148328.3765008,
+    "ast_hash": "1642c10a292fe23e96cf977c46df32b1",
+    "semantic_hash": "1642c10a292fe23e96cf977c46df32b1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/tests/trace_retention.sql": {
+    "mtime": 1781148328.376553,
+    "ast_hash": "8379288a1767a46b1f587d9bb2354747",
+    "semantic_hash": "8379288a1767a46b1f587d9bb2354747"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/fixtures/railway-cron-poc-drift.json": {
+    "mtime": 1781148328.3766599,
+    "ast_hash": "125a37aaae1c79890e9c0e7cf3a9ea6e",
+    "semantic_hash": "125a37aaae1c79890e9c0e7cf3a9ea6e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/fixtures/railway-cron-poc-live.json": {
+    "mtime": 1781148328.376712,
+    "ast_hash": "b3e9abab4a1af0cef6b8960afd8dbb88",
+    "semantic_hash": "b3e9abab4a1af0cef6b8960afd8dbb88"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/cron-runner-boundary.test.mjs": {
+    "mtime": 1781233047.2934437,
+    "ast_hash": "49272fcaba35e9b31888b92984d64adf",
+    "semantic_hash": "49272fcaba35e9b31888b92984d64adf"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/db-types-script.test.mjs": {
+    "mtime": 1781233879.8164294,
+    "ast_hash": "dbf30d8f5aac2ba603581ffdf43b3962",
+    "semantic_hash": "dbf30d8f5aac2ba603581ffdf43b3962"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/deploy-cli-boundary.test.mjs": {
+    "mtime": 1781231756.131632,
+    "ast_hash": "bed36d411328e8307bd8ff14356f4616",
+    "semantic_hash": "bed36d411328e8307bd8ff14356f4616"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/migration-rollbacks.test.mjs": {
+    "mtime": 1781148328.3772433,
+    "ast_hash": "13115000a0dfba8a42d0b298c986c6a0",
+    "semantic_hash": "13115000a0dfba8a42d0b298c986c6a0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/tests/guards/supabase-function-auth-config.test.mjs": {
+    "mtime": 1781148328.3775032,
+    "ast_hash": "9afb30c0219aa62d1fdcff8efec3f802",
+    "semantic_hash": "9afb30c0219aa62d1fdcff8efec3f802"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/ci.yml": {
+    "mtime": 1781275224.478531,
+    "ast_hash": "a62e2dde80000f3b05c3e13b3808ba58",
+    "semantic_hash": "a62e2dde80000f3b05c3e13b3808ba58"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/publish-packages.yml": {
+    "mtime": 1781232239.2494798,
+    "ast_hash": "653ade4f7ba0a48c539b597996435a21",
+    "semantic_hash": "653ade4f7ba0a48c539b597996435a21"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/railway-cron-drift.yml": {
+    "mtime": 1781205384.8725276,
+    "ast_hash": "a5d019da018ac9840983af0ff6dc99b6",
+    "semantic_hash": "a5d019da018ac9840983af0ff6dc99b6"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/.github/workflows/railway-sandbox-verify.yml": {
+    "mtime": 1781148328.2613628,
+    "ast_hash": "1d47672f6f30a4639b75c9ecbfb42ed7",
+    "semantic_hash": "1d47672f6f30a4639b75c9ecbfb42ed7"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/packages/contracts/CHANGELOG.md": {
+    "mtime": 1781213436.62684,
+    "ast_hash": "b3bc808a8fe087f515be3af85aa5c7ce",
+    "semantic_hash": "b3bc808a8fe087f515be3af85aa5c7ce"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/pnpm-workspace.yaml": {
+    "mtime": 1781148555.298336,
+    "ast_hash": "0b71b66ad5ed1d60218f5ec693d372b1",
+    "semantic_hash": "0b71b66ad5ed1d60218f5ec693d372b1"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/scripts/db/README.md": {
+    "mtime": 1781148328.352508,
+    "ast_hash": "0c0115e0979c257c719aa4cce5efe0ef",
+    "semantic_hash": "0c0115e0979c257c719aa4cce5efe0ef"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/artifacts/p0-003-after.txt": {
+    "mtime": 1781148328.3538437,
+    "ast_hash": "ead0ba2b2d7c607a4744bbf5c42fc986",
+    "semantic_hash": "ead0ba2b2d7c607a4744bbf5c42fc986"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/benchmarks/artifacts/p0-003-before.txt": {
+    "mtime": 1781148328.3539472,
+    "ast_hash": "0a82da800459a4a0dc24f4ce741d4af5",
+    "semantic_hash": "0a82da800459a4a0dc24f4ce741d4af5"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/EMAIL.md": {
+    "mtime": 1781148328.3541968,
+    "ast_hash": "d1aa890ae73efe4de68c081b97b43dbd",
+    "semantic_hash": "d1aa890ae73efe4de68c081b97b43dbd"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/INVITE_GATE.md": {
+    "mtime": 1781148328.3542488,
+    "ast_hash": "6249d8038942a1e104eaae1461fdd053",
+    "semantic_hash": "6249d8038942a1e104eaae1461fdd053"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/LOCAL_LLM_TAGGING.md": {
+    "mtime": 1781148328.354303,
+    "ast_hash": "a1e5406a8b3ed71212cbc3b0c04bfe5e",
+    "semantic_hash": "a1e5406a8b3ed71212cbc3b0c04bfe5e"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/docs/PRODUCTION_SETUP.md": {
+    "mtime": 1781148328.354357,
+    "ast_hash": "c58542c3b105c4e4442b19a279bffdc8",
+    "semantic_hash": "c58542c3b105c4e4442b19a279bffdc8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/backfill-event-enrichment/README.md": {
+    "mtime": 1781148328.3582082,
+    "ast_hash": "6aceb1ddc6a0dfb693c86bae97ea27b0",
+    "semantic_hash": "6aceb1ddc6a0dfb693c86bae97ea27b0"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/downtownlafayette/events-page.html": {
+    "mtime": 1781148328.3632615,
+    "ast_hash": "464b42877f22aa4700616b35452ca8c8",
+    "semantic_hash": "464b42877f22aa4700616b35452ca8c8"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/html/events-page.html": {
+    "mtime": 1781148328.3633611,
+    "ast_hash": "875c88b372cc32f304deb9ae057d7738",
+    "semantic_hash": "875c88b372cc32f304deb9ae057d7738"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/lcglafayette/events-page.html": {
+    "mtime": 1781148328.3638222,
+    "ast_hash": "cdba9c20b7c5875497251ba018310a12",
+    "semantic_hash": "cdba9c20b7c5875497251ba018310a12"
+  },
+  "/Users/lecoqjacob/Developer/personal/family-events-backend/supabase/functions/scrape-source/__fixtures__/macaronikid/lafayette-page.html": {
+    "mtime": 1781148328.3639514,
+    "ast_hash": "7f314d3c56118684fb5def54b3b334da",
+    "semantic_hash": "7f314d3c56118684fb5def54b3b334da"
+  }
+}
