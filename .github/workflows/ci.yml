@@ -96,7 +96,11 @@ jobs:
       - name: Start local Supabase
         run: pnpm run db:start
       - name: Regenerate types
-        run: pnpm run db:types
+        run: |
+          supabase gen types typescript \
+            --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres \
+            --schema public \
+            > packages/contracts/src/database.types.ts
       - name: Fail on type drift
         run: |
           if ! git diff --exit-code packages/contracts/src/database.types.ts; then
