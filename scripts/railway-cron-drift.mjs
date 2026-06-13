@@ -127,7 +127,12 @@ function readRailwayIacGraph(repoRoot) {
     throw new Error(`Missing Railway config: .railway/railway.ts`);
   }
 
-  const output = execFileSync("pnpm", ["exec", "railway-iac-ts", railwayConfigPath], {
+  const output = execFileSync("pnpm", [
+    "exec",
+    "tsx",
+    path.join(repoRoot, "scripts", "evaluate-railway-iac-graph.mjs"),
+    railwayConfigPath,
+  ], {
     cwd: repoRoot,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
