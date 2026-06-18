@@ -7,7 +7,11 @@ import {
 } from "../_shared/cron-run-log.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage } from "../_shared/logger.ts";
-import { buildGeocodeQuery, geocodeViaNominatim } from "../_shared/geocode.ts";
+import {
+  buildGeocodeQuery,
+  geocodeViaNominatim,
+  type GeocodeResult,
+} from "../_shared/geocode.ts";
 import {
   findFallbackImage,
   trackUnsplashDownload,
@@ -115,6 +119,8 @@ async function enrichOne(
   cityCache: Map<string, SourceCityContext | null>,
   sourceCache: Map<string, string | null>,
   providerKeys: StockImageProviderKeys,
+  geocodeCache: Map<string, GeocodeResult | null>,
+  imageCache: Map<string, Awaited<ReturnType<typeof findFallbackImage>>>,
 ): Promise<{
   updated: boolean;
   gotCoords: boolean;
@@ -146,7 +152,16 @@ async function enrichOne(
       cityState: cityCtx?.state ?? null,
     });
     if (query) {
-      const geo = await geocodeViaNominatim(query);
+      // Use geocodeCache to avoid re-fetching the same address within a batch.
+      // Both hits and misses are cached — a venue that fails to geocode should
+      // not be retried for every event in the same batch.
+      let geo: GeocodeResult | null;
+      if (geocodeCache.has(query)) {
+        geo = geocodeCache.get(query)!;
+      } else {
+        geo = await geocodeViaNominatim(query);
+        geocodeCache.set(query, geo);
+      }
       if (geo) {
         latitude = geo.latitude;
         longitude = geo.longitude;
@@ -167,7 +182,13 @@ async function enrichOne(
                 cityState: cityCtx?.state ?? null,
               });
               if (fallbackQuery) {
-                const fallbackGeo = await geocodeViaNominatim(fallbackQuery);
+                let fallbackGeo: GeocodeResult | null;
+                if (geocodeCache.has(fallbackQuery)) {
+                  fallbackGeo = geocodeCache.get(fallbackQuery)!;
+                } else {
+                  fallbackGeo = await geocodeViaNominatim(fallbackQuery);
+                  geocodeCache.set(fallbackQuery, fallbackGeo);
+                }
                 if (fallbackGeo) {
                   latitude = fallbackGeo.latitude;
                   longitude = fallbackGeo.longitude;
@@ -193,7 +214,13 @@ async function enrichOne(
         cityState: null,
       });
       if (venueOnlyQuery && venueOnlyQuery !== query) {
-        const venueGeo = await geocodeViaNominatim(venueOnlyQuery);
+        let venueGeo: GeocodeResult | null;
+        if (geocodeCache.has(venueOnlyQuery)) {
+          venueGeo = geocodeCache.get(venueOnlyQuery)!;
+        } else {
+          venueGeo = await geocodeViaNominatim(venueOnlyQuery);
+          geocodeCache.set(venueOnlyQuery, venueGeo);
+        }
         if (venueGeo) {
           latitude = venueGeo.latitude;
           longitude = venueGeo.longitude;
@@ -249,7 +276,18 @@ async function enrichOne(
   // at least one provider key. Failure leaves images empty and the row stays
   // on the queue for the next tick.
   if (row.needs_images && images.length === 0 && row.tags.length > 0) {
-    stockResult = await findFallbackImage(row.tags, providerKeys, { title: row.title });
+    // Cache keyed on sorted tag slugs. Events sharing the same tag set are
+    // thematically identical so reusing the result is acceptable. The title
+    // arg varies per event but tag-driven dedup is the dominant case and a
+    // best-effort win within one batch. findFallbackImage has no side effects
+    // (download tracking is a separate call), so caching is safe.
+    const imageKey = [...row.tags].sort().join(",");
+    if (imageCache.has(imageKey)) {
+      stockResult = imageCache.get(imageKey)!;
+    } else {
+      stockResult = await findFallbackImage(row.tags, providerKeys, { title: row.title });
+      imageCache.set(imageKey, stockResult);
+    }
     if (stockResult) {
       images = [stockResult.url];
       imageSource = stockResult.attribution.provider;
@@ -572,6 +610,11 @@ Deno.serve(async (req: Request) => {
     };
     const cityCache = new Map<string, SourceCityContext | null>();
     const sourceCache = new Map<string, string | null>();
+    // Per-batch geocode + image caches: keyed on normalized query string and
+    // sorted tag slugs respectively. Cuts redundant external calls when multiple
+    // events share the same venue/address or tag set.
+    const geocodeCache = new Map<string, GeocodeResult | null>();
+    const imageCache = new Map<string, Awaited<ReturnType<typeof findFallbackImage>>>();
 
     for (const row of rows) {
       try {
@@ -581,6 +624,8 @@ Deno.serve(async (req: Request) => {
           cityCache,
           sourceCache,
           providerKeys,
+          geocodeCache,
+          imageCache,
         );
         if (result.updated) summary.updated += 1;
         if (result.gotCoords) summary.coords += 1;
