@@ -48,16 +48,6 @@ const cronService = (name: string, rootDirectory: string, cronSchedule: string, 
   });
 
 export default defineRailway(() => {
-  const web = service("web", {
-    source: github(repo),
-    build: {
-      builder: "RAILPACK",
-    },
-    deploy: {
-      restartPolicyType: "ON_FAILURE" as const,
-    },
-  });
-
   const cronTagQueue = cronService("cron-tag-queue", "cron/tag-queue", "*/5 * * * *", {
     PROCESS_TAG_QUEUE_URL: fnUrl("process-tag-queue"),
   });
@@ -107,7 +97,10 @@ export default defineRailway(() => {
     cronReviewEvents,
   ]);
 
-  return project("family-events", {
-    resources: [web, cronJobs],
+  // Project name matches the live Railway project. web / backend / mobile all deploy
+  // into "family-events-ui"; the `web` service is owned by the web repo's own IaC, so
+  // this backend repo's IaC declares only the cron services it owns.
+  return project("family-events-ui", {
+    resources: [cronJobs],
   });
 });
