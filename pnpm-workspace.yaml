@@ -8,6 +8,7 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - railway@3.2.0
+  - railway@3.3.2
 
 onlyBuiltDependencies:
   - esbuild
