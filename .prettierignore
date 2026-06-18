@@ -1,0 +1,4 @@
+# oxfmt and prettier read this file by default.
+# Generated Supabase types — owned by `pnpm run db:types`, must match `supabase gen types`
+# output verbatim. Formatting it drifts it from the generator and breaks the CI type-drift check.
+packages/contracts/src/database.types.ts

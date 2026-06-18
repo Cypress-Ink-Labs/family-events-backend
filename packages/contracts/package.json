@@ -19,8 +19,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "format": "oxfmt --config ../config-quality/oxfmt.base.json --write src",
-    "format:check": "oxfmt --config ../config-quality/oxfmt.base.json --check src",
+    "format": "oxfmt --config ../config-quality/oxfmt.base.json --write src '!src/database.types.ts'",
+    "format:check": "oxfmt --config ../config-quality/oxfmt.base.json --check src '!src/database.types.ts'",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests"
   },

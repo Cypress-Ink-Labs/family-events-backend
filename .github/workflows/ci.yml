@@ -131,7 +131,7 @@ jobs:
           cache: pnpm
       - uses: supabase/setup-cli@v1
         with:
-          version: 2.105.0
+          version: 2.106.0
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         env:
