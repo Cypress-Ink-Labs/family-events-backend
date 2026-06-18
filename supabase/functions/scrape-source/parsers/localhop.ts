@@ -1,4 +1,5 @@
 import { cleanDescription, extractPrice, parseIsoDate } from "../../_shared/parsing.ts";
+import { guardedFetch, SsrfRejectedError } from "../../_shared/guarded-fetch.ts";
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
 import type { ParsedEvent } from "../lib/types.ts";
 import type { SourceParser } from "./_lib/types.ts";
@@ -194,7 +195,7 @@ export const localHopParser: SourceParser<"localhop"> = {
 
     let response: Response;
     try {
-      response = await fetch(buildLocalHopUrl(source.url), {
+      response = await guardedFetch(buildLocalHopUrl(source.url), {
         headers: {
           Accept: "application/json",
           "X-Parse-Application-Id": LOCALHOP_APP_ID,
@@ -203,6 +204,9 @@ export const localHopParser: SourceParser<"localhop"> = {
       });
     } catch (err) {
       clearTimeout(timeoutId);
+      if (err instanceof SsrfRejectedError) {
+        throw new Error(`localhop: blocked by SSRF guard: ${err.message}`);
+      }
       if (err instanceof Error && err.name === "AbortError") {
         throw new Error(`localhop: fetch timed out after ${FETCH_TIMEOUT_MS}ms`);
       }
