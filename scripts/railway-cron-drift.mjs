@@ -15,6 +15,7 @@ function loadServiceConfigs(repoRoot) {
     rootDirectory: value.root_directory,
     requiredLatestDeploymentStatus: normalizeStatus(value.required_latest_deployment_status),
     forbiddenInstanceStatuses: (value.forbidden_instance_statuses ?? []).map(normalizeStatus),
+    requiredEnv: Array.isArray(value.required_env) ? value.required_env.map(String) : [],
   }))
 }
 
@@ -221,6 +222,64 @@ export function collectRailwayServiceState(serviceName, sources) {
   }
 }
 
+// Collect the env-var KEYS present (and non-empty) for a service, from the live
+// sources / fixture. Reads either a `{ variables: { KEY: value } }` object (a value
+// counts as "present" only when non-empty) or a `{ variableKeys: ["KEY", ...] }`
+// presence list. Never inspects or returns the values themselves.
+export function collectServiceVariableKeys(serviceName, sources) {
+  const sourceObjects = Array.isArray(sources) ? sources : [sources]
+  const serviceObjects = sourceObjects.flatMap((source) => findServiceObjects(source, serviceName))
+  const keys = new Set()
+  let available = false
+
+  for (const node of serviceObjects) {
+    const vars = node?.variables
+    if (vars && typeof vars === "object" && !Array.isArray(vars)) {
+      available = true
+      for (const [key, value] of Object.entries(vars)) {
+        const present = typeof value === "string" ? value.trim().length > 0 : value != null
+        if (present) {
+          keys.add(key)
+        }
+      }
+    }
+    if (Array.isArray(node?.variableKeys)) {
+      available = true
+      for (const key of node.variableKeys) {
+        if (typeof key === "string") {
+          keys.add(key)
+        }
+      }
+    }
+  }
+
+  return { available, keys }
+}
+
+// Pure check: for each service, every key in `requiredEnv` must be present (and
+// non-empty) in the collected keys. Services whose variables could not be read
+// (`available === false`) are skipped rather than failed, so the check never
+// produces a false negative when variable info simply isn't available.
+export function validateRequiredEnv(expectedConfigs, presentKeysByService) {
+  const diagnostics = []
+  for (const expected of expectedConfigs) {
+    const required = expected.requiredEnv ?? []
+    if (required.length === 0) {
+      continue
+    }
+    const present = presentKeysByService[expected.name]
+    if (!present || !present.available) {
+      continue
+    }
+    for (const key of required) {
+      if (!present.keys.has(key)) {
+        diagnostics.push(`${expected.name}: required env ${key} is missing or empty`)
+      }
+    }
+  }
+  return diagnostics
+}
+
 function findServiceObjects(value, serviceName) {
   const matches = []
   walk(value, (node) => {
@@ -419,6 +478,12 @@ export function validateRailwayCronState(expectedConfigs, liveSources) {
     }
   }
 
+  const presentKeysByService = {}
+  for (const expected of expectedConfigs) {
+    presentKeysByService[expected.name] = collectServiceVariableKeys(expected.name, liveSources)
+  }
+  diagnostics.push(...validateRequiredEnv(expectedConfigs, presentKeysByService))
+
   return {
     ok: diagnostics.length === 0,
     diagnostics,
@@ -456,6 +521,39 @@ function runRailwayJson(args, cwd) {
       `Railway CLI JSON command failed: railway ${args.join(" ")}\n${stderr}${authHint}`
     )
   }
+}
+
+// Best-effort: read each service's live variable KEYS via the Railway CLI and
+// return synthetic source objects ({ serviceName, variables: { KEY: "set" | "" } }).
+// Values are reduced to a "set"/"" sentinel immediately — the real secret value is
+// never stored, returned, or logged. Any failure (auth/link/CLI) is swallowed so the
+// env check degrades to "unverified" rather than a false failure.
+function fetchServiceVariableSources(expectedConfigs, repoRoot) {
+  const sources = []
+  for (const expected of expectedConfigs) {
+    try {
+      const output = execFileSync("railway", ["variables", "--service", expected.name, "--kv"], {
+        cwd: repoRoot,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      })
+      const variables = {}
+      for (const line of output.split(/\r?\n/)) {
+        const eq = line.indexOf("=")
+        if (eq <= 0) {
+          continue
+        }
+        const key = line.slice(0, eq).trim()
+        if (key) {
+          variables[key] = line.slice(eq + 1).trim().length > 0 ? "set" : ""
+        }
+      }
+      sources.push({ serviceName: expected.name, variables })
+    } catch {
+      // Variables not readable for this service — skip; env presence goes unverified.
+    }
+  }
+  return sources
 }
 
 function loadLiveSources({ repoRoot, fixturePath }) {
@@ -497,6 +595,12 @@ function main() {
     const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
     const expected = readExpectedCronConfigs(repoRoot)
     const liveSources = loadLiveSources({ repoRoot, fixturePath: args.fixturePath })
+    if (!args.fixturePath) {
+      // Best-effort: append each service's live variable KEYS so required_env can be
+      // checked. Skipped silently if the CLI can't read them (env presence simply
+      // goes unverified rather than failing). Values are never stored or printed.
+      liveSources.push(...fetchServiceVariableSources(expected, repoRoot))
+    }
     const result = validateRailwayCronState(expected, liveSources)
 
     if (!result.ok) {

@@ -33,7 +33,7 @@ suites + lint into CI. Several later plans assume those gates exist so their new
 | 018  | (spike) Design public read REST API                       | P3       | L      | —    | —          | DONE                                  |
 | 019  | Adopt Railway project into IaC management (Model A)       | P3       | L      | HIGH | —          | REJECTED — superseded by 021 (keep one project; guard, don't migrate) |
 | 020  | Split crons into own IaC-managed Railway project (Model B)| P3       | L      | HIGH | —          | REJECTED — fragments deploy topology to satisfy IaC tooling; not worth it |
-| 021  | Guard against missing cron env vars (no migration)        | P2       | M      | LOW  | —          | TODO                                  |
+| 021  | Guard against missing cron env vars (no migration)        | P2       | M      | LOW  | —          | DONE                                  |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale)
 

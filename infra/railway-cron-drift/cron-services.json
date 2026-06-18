@@ -8,7 +8,13 @@
     "cron_schedule": "*/5 * * * *",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "PROCESS_TAG_QUEUE_URL"
+    ]
   },
   "cron-scrape-sources": {
     "config_path": ".railway/railway.ts",
@@ -19,7 +25,13 @@
     "cron_schedule": "0 * * * *",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "SCRAPE_DUE_SOURCES_URL"
+    ]
   },
   "cron-db-maintenance": {
     "config_path": ".railway/railway.ts",
@@ -30,7 +42,13 @@
     "cron_schedule": "15 3 * * *",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "DB_MAINTENANCE_URL"
+    ]
   },
   "cron-cleanup-stale": {
     "config_path": ".railway/railway.ts",
@@ -41,7 +59,13 @@
     "cron_schedule": "*/30 * * * *",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "CLEANUP_STALE_RUNS_URL"
+    ]
   },
   "cron-enrich-events": {
     "config_path": ".railway/railway.ts",
@@ -52,7 +76,14 @@
     "cron_schedule": "*/15 * * * *",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "BACKFILL_EVENT_ENRICHMENT_URL",
+      "UNSPLASH_ACCESS_KEY"
+    ]
   },
   "cron-weekly-digest": {
     "config_path": ".railway/railway.ts",
@@ -63,7 +94,13 @@
     "cron_schedule": "0 13 * * 1",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "SEND_WEEKLY_DIGEST_URL"
+    ]
   },
   "cron-send-reminders": {
     "config_path": ".railway/railway.ts",
@@ -74,7 +111,15 @@
     "cron_schedule": "0 11 * * *",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "SEND_REMINDERS_URL",
+      "VITE_VAPID_PRIVATE_KEY",
+      "VITE_VAPID_PUBLIC_KEY"
+    ]
   },
   "cron-review-events": {
     "config_path": ".railway/railway.ts",
@@ -85,6 +130,12 @@
     "cron_schedule": "*/5 * * * *",
     "restart_policy_type": "NEVER",
     "required_latest_deployment_status": "SUCCESS",
-    "forbidden_instance_statuses": ["CRASHED", "FAILED"]
+    "forbidden_instance_statuses": ["CRASHED", "FAILED"],
+    "required_env": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "IS_CRON_ENABLED_URL",
+      "LOG_CRON_RUN_URL",
+      "PROCESS_EVENT_REVIEW_QUEUE_URL"
+    ]
   }
 }
