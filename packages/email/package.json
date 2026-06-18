@@ -21,9 +21,9 @@
   },
   "devDependencies": {
     "@cypress-ink-labs/config-typescript": "workspace:*",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "tsx": "latest"
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.22.4"
   }
 }

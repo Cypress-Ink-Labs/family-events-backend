@@ -2,7 +2,7 @@
   "nodeModulesDir": "auto",
   "imports": {
     "@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js@2.108.1/edge-runtime.d.ts",
-    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.108.1",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.108.2",
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@0.1.56"
   }
 }
