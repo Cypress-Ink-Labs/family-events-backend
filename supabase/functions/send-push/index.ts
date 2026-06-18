@@ -17,10 +17,12 @@ import {
 // send-push
 // ----------------------------------------------------------------
 // Service-role-only edge function that delivers web push notifications
-// to a user's registered push subscriptions. Called internally by
-// send-reminders and process-notification-queue.
+// to one or more users' registered push subscriptions. Called internally
+// by send-reminders and process-notification-queue.
 //
-// Payload: { user_id, title, body, url? }
+// Accepted payload shapes (both preserved for backward compat):
+//   Single-user:  { user_id: string, title, body, url? }
+//   Batch:        { user_ids: string[], title, body, url? }
 //
 // Follows the notify-email soft-failure pattern: when VAPID keys are
 // unset (local/dev) the function logs and returns { sent: 0, dev: true }.
@@ -273,28 +275,47 @@ async function encryptPayload(
 // ─── Main handler ───────────────────────────────────────────────────────────
 
 interface SendPushPayload {
-  user_id: string
+  user_ids: string[]
   title: string
   body: string
   url?: string
 }
 
+/**
+ * Parse the incoming request body into a normalised SendPushPayload.
+ *
+ * Accepts two shapes (preserves backward compat for send-reminders):
+ *   Single-user:  { user_id: string, title, body, url? }
+ *   Batch:        { user_ids: string[], title, body, url? }
+ */
 function parsePayload(value: unknown): SendPushPayload {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("invalid payload")
   }
   const obj = value as Record<string, unknown>
-  const user_id = obj.user_id
   const title = obj.title
   const body = obj.body
   const url = obj.url
 
-  if (typeof user_id !== "string" || !user_id) throw new Error("missing user_id")
   if (typeof title !== "string" || !title) throw new Error("missing title")
   if (typeof body !== "string" || !body) throw new Error("missing body")
   if (url !== undefined && typeof url !== "string") throw new Error("invalid url")
 
-  return { user_id, title, body, url: typeof url === "string" ? url : undefined }
+  // Resolve user_ids from either shape
+  let user_ids: string[]
+  if (Array.isArray(obj.user_ids)) {
+    user_ids = obj.user_ids as string[]
+    if (user_ids.length === 0) throw new Error("user_ids must not be empty")
+    if (user_ids.some((id) => typeof id !== "string" || !id)) {
+      throw new Error("user_ids must be non-empty strings")
+    }
+  } else if (typeof obj.user_id === "string" && obj.user_id) {
+    user_ids = [obj.user_id]
+  } else {
+    throw new Error("missing user_id or user_ids")
+  }
+
+  return { user_ids, title, body, url: typeof url === "string" ? url : undefined }
 }
 
 const PUSH_TIMEOUT_MS = 10_000
@@ -383,18 +404,18 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
   }
   const credentialStatus = mobileCredentialStatus(mobileCredentials)
 
-  // Fetch user's push subscriptions
+  // Fetch push subscriptions for all requested users in one query
   const { data: subscriptions, error: subError } = await supabase
     .from("push_subscriptions")
-    .select("id, platform, endpoint, token, p256dh, auth_key")
-    .eq("user_id", payload.user_id)
+    .select("id, user_id, platform, endpoint, token, p256dh, auth_key")
+    .in("user_id", payload.user_ids)
 
   if (subError) throw subError
 
   if (!subscriptions || subscriptions.length === 0) {
-    logEdgeEvent("log", "send-push: no push subscriptions for user", {
+    logEdgeEvent("log", "send-push: no push subscriptions for users", {
       function: "send-push",
-      user_id: payload.user_id,
+      user_ids: payload.user_ids,
     })
     return { sent: 0, reason: "no_subscriptions" }
   }
@@ -407,7 +428,7 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
   if (webSubscriptions.length > 0 && (!vapidPrivateKey || !vapidPublicKey)) {
     logEdgeEvent("warn", "send-push: VAPID keys not configured; skipping web push", {
       function: "send-push",
-      user_id: payload.user_id,
+      user_ids: payload.user_ids,
       title: payload.title,
     })
   }
@@ -486,7 +507,7 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
   if (mobileSubscriptions.apns.length > 0 && !credentialStatus.apns) {
     logEdgeEvent("warn", "send-push: APNs credentials not configured; skipping iOS push", {
       function: "send-push",
-      user_id: payload.user_id,
+      user_ids: payload.user_ids,
       count: mobileSubscriptions.apns.length,
     })
   } else if (apnsCredentials) {
@@ -547,7 +568,7 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
   if (mobileSubscriptions.fcm.length > 0 && !credentialStatus.fcm) {
     logEdgeEvent("warn", "send-push: FCM credentials not configured; skipping Android push", {
       function: "send-push",
-      user_id: payload.user_id,
+      user_ids: payload.user_ids,
       count: mobileSubscriptions.fcm.length,
     })
   } else if (fcmCredentials) {
@@ -613,7 +634,7 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
 
   logEdgeEvent("log", "send-push: complete", {
     function: "send-push",
-    user_id: payload.user_id,
+    user_ids: payload.user_ids,
     sent,
     failed,
     pruned: pruned.length,

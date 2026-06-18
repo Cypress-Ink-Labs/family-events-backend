@@ -46,59 +46,97 @@ function derToRaw(der: Uint8Array): Uint8Array {
 // ---------------------------------------------------------------------------
 
 interface SendPushPayload {
-  user_id: string
+  user_ids: string[]
   title: string
   body: string
   url?: string
 }
 
+/**
+ * Local copy of the parsePayload logic (mirrors send-push/index.ts).
+ * Accepts both { user_id } (single) and { user_ids } (batch) shapes.
+ */
 function parsePayload(value: unknown): SendPushPayload {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("invalid payload")
   }
   const obj = value as Record<string, unknown>
-  const user_id = obj.user_id
   const title = obj.title
   const body = obj.body
   const url = obj.url
 
-  if (typeof user_id !== "string" || !user_id) throw new Error("missing user_id")
   if (typeof title !== "string" || !title) throw new Error("missing title")
   if (typeof body !== "string" || !body) throw new Error("missing body")
   if (url !== undefined && typeof url !== "string") throw new Error("invalid url")
 
-  return { user_id, title, body, url: typeof url === "string" ? url : undefined }
+  let user_ids: string[]
+  if (Array.isArray(obj.user_ids)) {
+    user_ids = obj.user_ids as string[]
+    if (user_ids.length === 0) throw new Error("user_ids must not be empty")
+    if (user_ids.some((id) => typeof id !== "string" || !id)) {
+      throw new Error("user_ids must be non-empty strings")
+    }
+  } else if (typeof obj.user_id === "string" && obj.user_id) {
+    user_ids = [obj.user_id]
+  } else {
+    throw new Error("missing user_id or user_ids")
+  }
+
+  return { user_ids, title, body, url: typeof url === "string" ? url : undefined }
 }
 
-Deno.test("parsePayload accepts valid payload with url", () => {
+Deno.test("parsePayload accepts single user_id shape with url", () => {
   const result = parsePayload({
     user_id: "u1",
     title: "Test Title",
     body: "Test body",
     url: "https://example.com",
   })
-  assertEquals(result.user_id, "u1")
+  assertEquals(result.user_ids, ["u1"])
   assertEquals(result.title, "Test Title")
   assertEquals(result.body, "Test body")
   assertEquals(result.url, "https://example.com")
 })
 
-Deno.test("parsePayload accepts valid payload without url", () => {
+Deno.test("parsePayload accepts single user_id shape without url", () => {
   const result = parsePayload({
     user_id: "u1",
     title: "Test Title",
     body: "Test body",
   })
+  assertEquals(result.user_ids, ["u1"])
   assertEquals(result.url, undefined)
 })
 
-Deno.test("parsePayload rejects missing user_id", () => {
+Deno.test("parsePayload accepts batch user_ids shape", () => {
+  const result = parsePayload({
+    user_ids: ["u1", "u2", "u3"],
+    title: "Event cancelled",
+    body: "This event has been cancelled.",
+    url: "https://example.com/events/e1",
+  })
+  assertEquals(result.user_ids, ["u1", "u2", "u3"])
+  assertEquals(result.title, "Event cancelled")
+})
+
+Deno.test("parsePayload rejects empty user_ids array", () => {
+  let threw = false
+  try {
+    parsePayload({ user_ids: [], title: "T", body: "B" })
+  } catch (e) {
+    threw = true
+    assertEquals((e as Error).message, "user_ids must not be empty")
+  }
+  assertEquals(threw, true)
+})
+
+Deno.test("parsePayload rejects missing user_id and user_ids", () => {
   let threw = false
   try {
     parsePayload({ title: "T", body: "B" })
   } catch (e) {
     threw = true
-    assertEquals((e as Error).message, "missing user_id")
+    assertEquals((e as Error).message, "missing user_id or user_ids")
   }
   assertEquals(threw, true)
 })

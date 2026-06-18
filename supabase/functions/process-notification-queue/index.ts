@@ -169,6 +169,16 @@ serveServiceRoleJson(
     let failedPush = 0
     const processedIds: string[] = []
 
+    // Push groups: keyed by "${event_id}:${change_type}" — all users sharing the same
+    // push payload text are batched into a single send-push invocation.
+    interface PushGroup {
+      title: string
+      body: string
+      url: string
+      userIds: string[]
+    }
+    const pushGroups = new Map<string, PushGroup>()
+
     // 6. Process entries in batches
     for (let i = 0; i < entries.length; i += BATCH_SIZE) {
       const batch = (entries as QueueEntry[]).slice(i, i + BATCH_SIZE)
@@ -190,7 +200,7 @@ serveServiceRoleJson(
           : `Updated: ${event.title}`
         const eventUrl = `${appUrl}/events/${entry.event_id}`
 
-        // Create in-app notification
+        // Create in-app notification (stays per-user)
         const { error: notifErr } = await supabase
           .from("user_notifications")
           .insert({
@@ -212,7 +222,7 @@ serveServiceRoleJson(
           inApp++
         }
 
-        // Send email if user wants change emails
+        // Send email if user wants change emails (stays per-user: personalized template vars)
         if (userPrefs.change_email && resendApiKey) {
           try {
             const response = await fetch(RESEND_API_ENDPOINT, {
@@ -266,40 +276,21 @@ serveServiceRoleJson(
           })
         }
 
-        // Send push if user wants change push
+        // Collect push-eligible users into groups keyed by (event_id, change_type).
+        // The push payload is identical for all users in the same group, so one
+        // send-push invocation per group replaces one per entry.
         if (userPrefs.change_push) {
-          try {
-            const pushResponse = await fetch(
-              `${supabaseUrl}/functions/v1/send-push`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${serviceRoleKey}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  user_id: entry.user_id,
-                  title: notifTitle,
-                  body: summary,
-                  url: eventUrl,
-                }),
-                signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-              },
-            )
-
-            if (pushResponse.ok) {
-              const result = await pushResponse.json().catch(() => ({})) as { sent?: number }
-              sentPush += result.sent ?? 0
-            } else {
-              failedPush++
-            }
-          } catch (err) {
-            logEdgeEvent("warn", "process-notification-queue: push delivery error", {
-              function: "process-notification-queue",
-              user_id: entry.user_id,
-              error: err instanceof Error ? err.message : String(err),
+          const groupKey = `${entry.event_id}:${entry.change_type}`
+          const existing = pushGroups.get(groupKey)
+          if (existing) {
+            existing.userIds.push(entry.user_id)
+          } else {
+            pushGroups.set(groupKey, {
+              title: notifTitle,
+              body: summary,
+              url: eventUrl,
+              userIds: [entry.user_id],
             })
-            failedPush++
           }
         }
 
@@ -309,6 +300,44 @@ serveServiceRoleJson(
       // Rate-limit between batches
       if (i + BATCH_SIZE < entries.length) {
         await sleep(BATCH_DELAY_MS)
+      }
+    }
+
+    // 6b. Dispatch push notifications — one send-push call per (event_id, change_type) group
+    for (const [_groupKey, group] of pushGroups) {
+      try {
+        const pushResponse = await fetch(
+          `${supabaseUrl}/functions/v1/send-push`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${serviceRoleKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_ids: group.userIds,
+              title: group.title,
+              body: group.body,
+              url: group.url,
+            }),
+            signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
+          },
+        )
+
+        if (pushResponse.ok) {
+          const result = await pushResponse.json().catch(() => ({})) as { sent?: number }
+          sentPush += result.sent ?? 0
+        } else {
+          // Count all users in this group as failed push
+          failedPush += group.userIds.length
+        }
+      } catch (err) {
+        logEdgeEvent("warn", "process-notification-queue: push delivery error", {
+          function: "process-notification-queue",
+          user_ids: group.userIds,
+          error: err instanceof Error ? err.message : String(err),
+        })
+        failedPush += group.userIds.length
       }
     }
 
