@@ -17,12 +17,12 @@ suites + lint into CI. Several later plans assume those gates exist so their new
 | 002 | Complete `.env.example` | P1 | S | LOW | — | DONE |
 | 003 | Add root `README.md` + `CLAUDE.md` | P2 | M | LOW | — | DONE |
 | 004 | Fix UTC day-window timezone bug (reminders + digest) | P1 | M | MED | 001 | DONE |
-| 005 | backfill-embeddings: LEFT JOIN RPC instead of NOT-IN | P2 | S | LOW | 001 | TODO |
-| 006 | Standardize CORS on shared allowlist | P2 | S | LOW | 001 | TODO |
-| 007 | localhop parser: route through `guardedFetch` | P2 | S | LOW | 001 | TODO |
-| 008 | scrape-source: await queue-kick when EdgeRuntime absent | P3 | S | LOW | 001 | TODO |
-| 009 | backfill-event-enrichment: in-batch geocode + image cache | P2 | M | LOW | 001 | TODO |
-| 010 | process-notification-queue: batch push fan-out | P2 | M | MED | 001 | TODO |
+| 005 | backfill-embeddings: LEFT JOIN RPC instead of NOT-IN | P2 | S | LOW | 001 | BLOCKED — code+migration done locally (uncommitted); needs `pnpm run db:types` regen (Docker/Supabase) so `type-drift` CI passes before merge |
+| 006 | Standardize CORS on shared allowlist | P2 | S | LOW | 001 | DONE |
+| 007 | localhop parser: route through `guardedFetch` | P2 | S | LOW | 001 | DONE |
+| 008 | scrape-source: await queue-kick when EdgeRuntime absent | P3 | S | LOW | 001 | DONE |
+| 009 | backfill-event-enrichment: in-batch geocode + image cache | P2 | M | LOW | 001 | DONE |
+| 010 | process-notification-queue: batch push fan-out | P2 | M | MED | 001 | DONE |
 | 011 | Nominatim distributed rate limiter | P3 | L | MED | 001 | TODO |
 | 012 | cron-runner.sh dedup | — | — | — | — | REJECTED — already solved (see below) |
 | 013 | Pin `deno.json` supabase-js + email `@types` versions | P3 | S | LOW | — | TODO |
