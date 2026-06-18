@@ -27,7 +27,7 @@ suites + lint into CI. Several later plans assume those gates exist so their new
 | 012  | cron-runner.sh dedup                                      | —        | —      | —    | —          | REJECTED — already solved (see below) |
 | 013  | Pin `deno.json` supabase-js + email `@types` versions     | P3       | S      | LOW  | —          | DONE                                  |
 | 014  | `event-review` deploy-config drift                        | —        | —      | —    | —          | REJECTED — not a drift (see below)    |
-| 015  | Backfill rollbacks for grandfathered migrations           | P3       | L      | HIGH | —          | TODO                                  |
+| 015  | Backfill rollbacks for grandfathered migrations           | P3       | L      | HIGH | —          | IN PROGRESS — batch 1 done+DB-verified (000001, 007000, 010000, 016000); 14 remain (6 large foundational 001000–006000; 008000/011001 constraint-prior-value + 009000 fn-body + invite-gate 012–015 — deferred per STOP) |
 | 016  | (spike) iCal + RSS export edge function                   | P3       | M      | LOW  | —          | DONE                                  |
 | 017  | (spike) Verify + document public semantic-search RPC      | P3       | S      | LOW  | —          | DONE                                  |
 | 018  | (spike) Design public read REST API                       | P3       | L      | —    | —          | DONE                                  |

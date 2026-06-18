@@ -17,24 +17,22 @@ const migrationsDir = path.join(repoRoot, "supabase", "migrations")
 const rollbacksDir = path.join(repoRoot, "supabase", "rollbacks")
 
 const LEGACY_ALLOWLIST = new Set([
-  "20260601000001",
+  // Backfilled rollbacks land in supabase/rollbacks/ and are removed from this list.
+  // Done (plan 015, batch 1): 000001, 007000, 010000, 016000.
   "20260601001000",
   "20260601002000",
   "20260601003000",
   "20260601004000",
   "20260601005000",
   "20260601006000",
-  "20260601007000",
   "20260601008000",
   "20260601009000",
-  "20260601010000",
   "20260601011000",
   "20260601011001",
   "20260601012000",
   "20260601013000",
   "20260601014000",
   "20260601015000",
-  "20260601016000",
 ])
 
 function timestampOf(filename) {
