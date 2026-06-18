@@ -32,34 +32,11 @@ async function findEventsWithoutEmbeddings(
   supabase: SupabaseClient,
   limit: number,
 ): Promise<EventRow[]> {
-  // Use a raw SQL query via rpc or a left-join-aware select.
-  // Supabase JS doesn't support LEFT JOIN directly, so we use a NOT IN subquery approach.
-  const { data: embeddedIds, error: embError } = await supabase
-    .from("event_embeddings")
-    .select("event_id");
-
-  if (embError) throw embError;
-
-  const excludeIds = (embeddedIds ?? []).map(
-    (row: { event_id: string }) => row.event_id,
-  );
-
-  // Fetch events not in the embedded set
-  let query = supabase
-    .from("events")
-    .select("id, title, description")
-    .order("created_at", { ascending: true })
-    .limit(limit);
-
-  // If we have existing embeddings, exclude them
-  if (excludeIds.length > 0) {
-    // Use .not('id', 'in', ...) for exclusion. For large sets this could be
-    // slow — but at our scale (< 10K events) it's fine. For production scale
-    // we'd use an RPC with a proper LEFT JOIN.
-    query = query.not("id", "in", `(${excludeIds.join(",")})`);
-  }
-
-  const { data, error } = await query;
+  // Delegate to an indexed LEFT JOIN RPC so the server does O(events) work
+  // rather than serializing all embedded IDs into a NOT-IN filter.
+  const { data, error } = await supabase.rpc("list_events_needing_embeddings", {
+    p_limit: limit,
+  });
   if (error) throw error;
   return (data ?? []) as EventRow[];
 }

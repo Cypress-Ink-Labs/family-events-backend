@@ -2866,6 +2866,14 @@ export type Database = {
           image_url: string
         }[]
       }
+      list_events_needing_embeddings: {
+        Args: { p_limit?: number }
+        Returns: {
+          description: string
+          id: string
+          title: string
+        }[]
+      }
       list_events_needing_enrichment: {
         Args: { p_limit?: number }
         Returns: {
