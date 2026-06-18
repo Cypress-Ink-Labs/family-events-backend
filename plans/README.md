@@ -23,7 +23,7 @@ suites + lint into CI. Several later plans assume those gates exist so their new
 | 008  | scrape-source: await queue-kick when EdgeRuntime absent   | P3       | S      | LOW  | 001        | DONE                                  |
 | 009  | backfill-event-enrichment: in-batch geocode + image cache | P2       | M      | LOW  | 001        | DONE                                  |
 | 010  | process-notification-queue: batch push fan-out            | P2       | M      | MED  | 001        | DONE                                  |
-| 011  | Nominatim distributed rate limiter                        | P3       | L      | MED  | 001        | TODO                                  |
+| 011  | Nominatim distributed rate limiter                        | P3       | L      | MED  | 001        | DONE — resolved via option 3 (degrade on 429 + documented); option 1 (DB-coordinated slot) deferred unless Nominatim bans |
 | 012  | cron-runner.sh dedup                                      | —        | —      | —    | —          | REJECTED — already solved (see below) |
 | 013  | Pin `deno.json` supabase-js + email `@types` versions     | P3       | S      | LOW  | —          | DONE                                  |
 | 014  | `event-review` deploy-config drift                        | —        | —      | —    | —          | REJECTED — not a drift (see below)    |
@@ -77,7 +77,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED 
 | Guard tests   | `pnpm run workspace:test`    | node:test, 5 files                                                   |
 | DB tests      | `pnpm run db:test`           | needs `pnpm run db:start` first (local Supabase)                     |
 | Lint          | `pnpm run lint` (`oxlint .`) | wired in CI (plan 001)                                               |
-| Deno fn tests | `pnpm run test:deno`         | wired in CI (plan 001); `process-source_test.ts` excluded — see note |
+| Deno fn tests | `pnpm run test:deno`         | wired in CI (plan 001)                                               |
 | vitest        | `pnpm run test:functions`    | wired in CI (plan 001)                                               |
 
 > **Local pnpm caveat**: `pnpm install`/`pnpm run`/`pnpm test` may fail locally on a transient supply-chain
@@ -85,7 +85,6 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED 
 > `cd supabase/functions && ../../node_modules/.bin/vitest run`, `./node_modules/.bin/oxlint .`. CI runs the
 > pnpm scripts after a fresh `pnpm install`.
 >
-> **Follow-up (plan 001 fallout)**: `supabase/functions/scrape-source/lib/process-source_test.ts` has 2
-> failing `sanitizeImagesForIngest` tests (expects 4 images, gets 0 — the test doesn't stub the SSRF
-> resolver in `guardedFetch`, so fake image hosts fail DNS even with `--allow-net`). It is `--ignore`d in
-> `test:deno` to keep the gate green; fix the test (stub the resolver) then remove it from the ignore list.
+> **Resolved**: `supabase/functions/scrape-source/lib/process-source_test.ts` is back in `test:deno`.
+> `guardedFetch` now takes an injectable `resolve` seam (default = real `resolveAndCheckPublicIp`), so the
+> `sanitizeImagesForIngest` tests stub the SSRF resolver and run offline (no `--allow-net`). 359 deno tests pass.

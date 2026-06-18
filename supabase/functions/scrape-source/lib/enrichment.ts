@@ -1,5 +1,5 @@
 import { validateExternalUrl } from "../../_shared/url-validation.ts"
-import { guardedFetch } from "../../_shared/guarded-fetch.ts"
+import { guardedFetch, type PublicIpResolver } from "../../_shared/guarded-fetch.ts"
 import type { ParsedEvent } from "./types.ts"
 
 const IMAGE_HEAD_TIMEOUT_MS = 5_000
@@ -63,17 +63,24 @@ function configuredImageHostAllowlist(): string[] {
   return uniqueHosts([...DEFAULT_IMAGE_HOST_ALLOWLIST, ...configuredHosts])
 }
 
-async function measureImageByteLength(imageUrl: string): Promise<number | null> {
+async function measureImageByteLength(
+  imageUrl: string,
+  resolve?: PublicIpResolver
+): Promise<number | null> {
   let response: Response
   try {
-    response = await guardedFetch(imageUrl, {
-      method: "GET",
-      headers: {
-        "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
-        Accept: "image/*",
+    response = await guardedFetch(
+      imageUrl,
+      {
+        method: "GET",
+        headers: {
+          "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
+          Accept: "image/*",
+        },
+        signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
       },
-      signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
-    })
+      { resolve }
+    )
   } catch {
     return null
   }
@@ -111,7 +118,8 @@ async function measureImageByteLength(imageUrl: string): Promise<number | null> 
 
 async function validateImageAtIngest(
   imageUrl: string,
-  allowedHosts: string[]
+  allowedHosts: string[],
+  resolve?: PublicIpResolver
 ): Promise<string | null> {
   const externalUrlValidation = validateExternalUrl(imageUrl)
   if (!externalUrlValidation.ok) return null
@@ -128,14 +136,18 @@ async function validateImageAtIngest(
 
   let response: Response
   try {
-    response = await guardedFetch(parsedUrl.toString(), {
-      method: "HEAD",
-      headers: {
-        "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
-        Accept: "image/*",
+    response = await guardedFetch(
+      parsedUrl.toString(),
+      {
+        method: "HEAD",
+        headers: {
+          "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
+          Accept: "image/*",
+        },
+        signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
       },
-      signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
-    })
+      { resolve }
+    )
   } catch {
     return null
   }
@@ -161,7 +173,7 @@ async function validateImageAtIngest(
   const contentLength = contentLengthHeader ? Number(contentLengthHeader) : null
   const measuredLength = contentLengthHeader
     ? null
-    : await measureImageByteLength(finalUrl.toString())
+    : await measureImageByteLength(finalUrl.toString(), resolve)
   const effectiveLength = contentLength ?? measuredLength
   if (
     effectiveLength === null ||
@@ -187,7 +199,8 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | nul
 
 export async function sanitizeImagesForIngest(
   parsed: ParsedEvent,
-  sourceUrl: string
+  sourceUrl: string,
+  deps?: { resolve?: PublicIpResolver }
 ): Promise<string[]> {
   const sourceHost = hostFromUrl(sourceUrl)
   const allowedHosts = uniqueHosts([sourceHost, ...configuredImageHostAllowlist()])
@@ -207,7 +220,7 @@ export async function sanitizeImagesForIngest(
     const results = await Promise.all(
       batch.map((imageCandidate) =>
         withTimeout(
-          validateImageAtIngest(imageCandidate, allowedHosts),
+          validateImageAtIngest(imageCandidate, allowedHosts, deps?.resolve),
           IMAGE_VALIDATION_TIMEOUT_MS
         )
       )

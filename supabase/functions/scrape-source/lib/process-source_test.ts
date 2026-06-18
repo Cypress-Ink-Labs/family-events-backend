@@ -132,7 +132,11 @@ if (typeof Deno !== "undefined") {
         ],
       })
 
-      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
+      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed", {
+        // Inject a no-op SSRF resolver so the test exercises the fetch/validation
+        // logic without real DNS (which would need --allow-net and a resolvable host).
+        resolve: () => Promise.resolve({ ok: true }),
+      })
       assertEquals(images, [
         "https://events.example.com/ok.jpg",
         "https://events.example.com/ok-no-length.jpg",
@@ -160,7 +164,11 @@ if (typeof Deno !== "undefined") {
         images: ["https://evil.example.net/bad.jpg"],
       })
 
-      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
+      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed", {
+        // Inject a no-op SSRF resolver so the test exercises the fetch/validation
+        // logic without real DNS (which would need --allow-net and a resolvable host).
+        resolve: () => Promise.resolve({ ok: true }),
+      })
       assertEquals(images, [])
       assertEquals(fetchCalls, 0)
     } finally {
@@ -196,7 +204,11 @@ if (typeof Deno !== "undefined") {
         ],
       })
 
-      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
+      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed", {
+        // Inject a no-op SSRF resolver so the test exercises the fetch/validation
+        // logic without real DNS (which would need --allow-net and a resolvable host).
+        resolve: () => Promise.resolve({ ok: true }),
+      })
       assertEquals(images.length, 4)
       assertEquals(maxActive, 2)
     } finally {

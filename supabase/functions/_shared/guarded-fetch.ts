@@ -11,9 +11,18 @@
 
 import { resolveAndCheckPublicIp } from "./url-resolve.ts"
 
+/** SSRF resolver/range-check seam. Defaults to {@link resolveAndCheckPublicIp}. */
+export type PublicIpResolver = (url: string) => Promise<{ ok: boolean; reason?: string }>
+
 export interface GuardedFetchOptions {
   /** Max redirect hops to follow (each re-validated). Default 3. */
   maxRedirects?: number
+  /**
+   * Resolver used to range-check every hop. Defaults to the real DNS-backed
+   * {@link resolveAndCheckPublicIp}; injectable so unit tests can validate the
+   * fetch/redirect logic without real DNS (which needs `--allow-net`).
+   */
+  resolve?: PublicIpResolver
 }
 
 export class SsrfRejectedError extends Error {
@@ -36,10 +45,11 @@ export async function guardedFetch(
   opts: GuardedFetchOptions = {}
 ): Promise<Response> {
   const maxRedirects = opts.maxRedirects ?? 3
+  const resolve = opts.resolve ?? resolveAndCheckPublicIp
   let currentUrl = rawUrl
 
   for (let hop = 0; hop <= maxRedirects; hop++) {
-    const check = await resolveAndCheckPublicIp(currentUrl)
+    const check = await resolve(currentUrl)
     if (!check.ok) {
       throw new SsrfRejectedError(check.reason ?? "unknown reason")
     }

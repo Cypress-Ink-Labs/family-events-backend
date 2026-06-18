@@ -18,6 +18,17 @@ interface NominatimHit {
 const NOMINATIM_UA = "family-events-ui/1.0 (geocoder)"
 const NOMINATIM_RATE_LIMIT_MS = 1_000
 
+// Rate-limiting note (advisor plan 011): the limiter below is per V8 isolate, so it
+// enforces 1 req/sec only WITHIN a single function instance. When more than one
+// instance geocodes concurrently (the enrichment cron overlapping tag-event),
+// aggregate traffic can briefly exceed Nominatim's 1 req/sec policy. We accept that
+// and DEGRADE GRACEFULLY rather than add cross-instance coordination:
+// geocodeViaNominatim returns null on any non-2xx (incl. HTTP 429) and every caller
+// falls back to the city centroid — so a throttle never crashes enrichment and an
+// over-limit request is never hot-retried. Overlap is occasional today (cron is
+// */15, sequential). If Nominatim ever hard-throttles/bans (sustained 429s),
+// escalate to a Postgres-coordinated slot reservation (plan 011, option 1).
+
 let lastNominatimRequestAt = 0
 let nominatimQueue: Promise<void> = Promise.resolve()
 
@@ -63,6 +74,8 @@ export async function geocodeViaNominatim(query: string): Promise<GeocodeResult 
       },
       signal: AbortSignal.timeout(5_000),
     })
+    // Non-2xx (incl. 429 rate-limited): degrade to the caller's city-centroid
+    // fallback. Do NOT retry — a hot retry would only worsen an over-limit burst.
     if (!res.ok) return null
 
     const hits = (await res.json()) as NominatimHit[]
