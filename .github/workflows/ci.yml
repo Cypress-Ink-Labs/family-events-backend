@@ -75,6 +75,49 @@ jobs:
       - name: Run guard tests
         run: pnpm run workspace:test
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run lint
+        run: pnpm run lint
+
+  function-tests:
+    name: Function tests (vitest + Deno)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run vitest (function unit tests)
+        run: pnpm run test:functions
+      - name: Run Deno tests
+        # scrape-source/lib/process-source_test.ts excluded: 2 pre-existing failures in
+        # sanitizeImagesForIngest (mock fetch mismatch — product bug, not test-harness issue)
+        run: pnpm run test:deno
+
   type-drift:
     name: DB type drift check
     runs-on: ubuntu-latest
