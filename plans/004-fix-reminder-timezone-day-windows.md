@@ -34,22 +34,25 @@ notification value.
 
 ```ts
 // Compute date boundaries in UTC
-const now = new Date()
-const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
-const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
-const tomorrowStart = new Date(todayEnd)
-const tomorrowEnd = new Date(tomorrowStart.getTime() + 24 * 60 * 60 * 1000)
+const now = new Date();
+const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+const tomorrowStart = new Date(todayEnd);
+const tomorrowEnd = new Date(tomorrowStart.getTime() + 24 * 60 * 60 * 1000);
 // ...
 const { data: dayBeforeRows, error: dbErr } = await supabase
   .from("favorites")
-  .select(`user_id, event_id, events!inner(id, title, start_datetime, venue_name, address, status), user_profiles!inner(email, display_name)`)
+  .select(
+    `user_id, event_id, events!inner(id, title, start_datetime, venue_name, address, status), user_profiles!inner(email, display_name)`,
+  )
   .gte("events.start_datetime", tomorrowStart.toISOString())
   .lt("events.start_datetime", tomorrowEnd.toISOString())
-  .eq("events.status", "published")
+  .eq("events.status", "published");
 // ... morningOfRows uses todayStart / todayEnd identically.
 ```
 
 Relevant facts:
+
 - `events.timezone` column exists, `DEFAULT 'America/Chicago' NOT NULL`
   (`supabase/migrations/20260601000000_schema_baseline.sql:1547`).
 - The function runs under `serveServiceRoleJson` (`send-reminders/index.ts:58`); the handler returns a
@@ -57,22 +60,23 @@ Relevant facts:
 - `send-reminders/send-reminders.test.ts` already exists (vitest) and tests utilities like
   `deduplicateTargets`, `flattenRows`, `formatEventDate`. New tests go here, same style.
 
-**IMPORTANT — `send-weekly-digest` is NOT in scope.** It uses a *rolling* window
+**IMPORTANT — `send-weekly-digest` is NOT in scope.** It uses a _rolling_ window
 (`send-weekly-digest/index.ts:388-396`: `now .. now + 7 days` passed to an RPC), which has no
 calendar-day boundary and therefore no timezone bug. Do not touch it. (This corrects an over-broad audit note.)
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Install | `pnpm install --frozen-lockfile` | exit 0 |
-| Typecheck | `pnpm run check` | exit 0 |
-| Run these tests | `pnpm -C supabase/functions exec vitest run send-reminders` | all pass incl. new cases |
-| Deno tests | `deno test` in `supabase/functions/send-reminders` (if a `*_test.ts` exists) | pass |
+| Purpose         | Command                                                                      | Expected                 |
+| --------------- | ---------------------------------------------------------------------------- | ------------------------ |
+| Install         | `pnpm install --frozen-lockfile`                                             | exit 0                   |
+| Typecheck       | `pnpm run check`                                                             | exit 0                   |
+| Run these tests | `pnpm -C supabase/functions exec vitest run send-reminders`                  | all pass incl. new cases |
+| Deno tests      | `deno test` in `supabase/functions/send-reminders` (if a `*_test.ts` exists) | pass                     |
 
 ## Scope
 
 **In scope:**
+
 - `supabase/functions/send-reminders/index.ts`
 - `supabase/functions/send-reminders/send-reminders.test.ts` (add cases)
 - Optionally a new helper file `supabase/functions/_shared/zoned-time.ts` + its `*.test.ts` if you
@@ -80,6 +84,7 @@ calendar-day boundary and therefore no timezone bug. Do not touch it. (This corr
   helper unit-tested.
 
 **Out of scope:**
+
 - `supabase/functions/send-weekly-digest/**` — different (correct) windowing; do not change.
 - The `favorites`/`events` query shape and the dedup/preferences logic — leave as-is except for the
   boundary values fed into `.gte`/`.lt`.
@@ -95,10 +100,11 @@ start of "today" and "tomorrow" **in that zone**:
 ```ts
 // Returns the UTC Date for midnight (00:00) of the given zone-local day offset.
 // dayOffset 0 = start of today (zone-local), 1 = start of tomorrow, etc.
-export function zonedDayStartUtc(now: Date, timeZone: string, dayOffset: number): Date
+export function zonedDayStartUtc(now: Date, timeZone: string, dayOffset: number): Date;
 ```
 
 Implementation approach (no external deps — Deno + vitest both have `Intl`):
+
 1. Use `Intl.DateTimeFormat("en-US", { timeZone, year, month, day, hour, minute, second, hour12: false })`
    `.formatToParts(now)` to read the zone-local wall-clock Y/M/D.
 2. Compute the zone's current UTC offset: build a `Date` from those wall-clock parts as if they were UTC
@@ -113,11 +119,11 @@ Replace the UTC boundary block (lines 63-68) so the four boundaries come from th
 `timeZone = "America/Chicago"` (introduce a module constant `const REMINDER_TZ = "America/Chicago"`):
 
 ```ts
-const now = new Date()
-const todayStart = zonedDayStartUtc(now, REMINDER_TZ, 0)
-const todayEnd = zonedDayStartUtc(now, REMINDER_TZ, 1)
-const tomorrowStart = todayEnd
-const tomorrowEnd = zonedDayStartUtc(now, REMINDER_TZ, 2)
+const now = new Date();
+const todayStart = zonedDayStartUtc(now, REMINDER_TZ, 0);
+const todayEnd = zonedDayStartUtc(now, REMINDER_TZ, 1);
+const tomorrowStart = todayEnd;
+const tomorrowEnd = zonedDayStartUtc(now, REMINDER_TZ, 2);
 ```
 
 Leave the `.gte(...).lt(...)` query lines unchanged — they already call `.toISOString()` on these Dates.
@@ -127,6 +133,7 @@ Leave the `.gte(...).lt(...)` query lines unchanged — they already call `.toIS
 ### Step 3: Tests
 
 In `send-reminders.test.ts` (or the helper's own `*.test.ts`), add cases for `zonedDayStartUtc`:
+
 - **Standard time (CST, UTC−6)**: `now = 2026-01-15T12:00:00Z`. `zonedDayStartUtc(now, "America/Chicago", 0)`
   must equal `2026-01-15T06:00:00Z` (Chicago midnight Jan 15 = 06:00Z).
 - **Daylight time (CDT, UTC−5)**: `now = 2026-07-15T12:00:00Z` → start of today = `2026-07-15T05:00:00Z`.
@@ -155,6 +162,7 @@ ALL must hold:
 ## STOP conditions
 
 Stop and report (do not improvise) if:
+
 - The "Current state" excerpt doesn't match `send-reminders/index.ts` (drift).
 - You discover the deployment actually runs `send-reminders` on a schedule that already accounts for tz
   (e.g. a cron that fires at Chicago midnight) such that the UTC math was intentional — in that case the

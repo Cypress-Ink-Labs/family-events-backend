@@ -64,7 +64,11 @@ function toIcalDatetime(iso: string): string {
       `T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`
     );
   } catch {
-    return new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "").replace("Z", "Z");
+    return new Date()
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}/, "")
+      .replace("Z", "Z");
   }
 }
 
@@ -230,7 +234,7 @@ export async function handleEventsFeed(req: Request): Promise<Response> {
   const cityId = url.searchParams.get("city") ?? null;
 
   if (format !== "ics" && format !== "rss") {
-    return new Response('Invalid format. Use ?format=ics or ?format=rss', { status: 400 });
+    return new Response("Invalid format. Use ?format=ics or ?format=rss", { status: 400 });
   }
 
   const events = await fetchPublishedEvents(cityId);

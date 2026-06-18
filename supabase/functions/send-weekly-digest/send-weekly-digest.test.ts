@@ -26,10 +26,7 @@ function createMockSupabase(opts: {
   const rpcCalls: MockRpcCall[] = opts.rpcCalls ?? [];
   const queryCalls: MockQueryChain[] = opts.queryCalls ?? [];
 
-  function buildSelectChain(
-    tableName: string,
-    rows: Array<Record<string, unknown>>,
-  ) {
+  function buildSelectChain(tableName: string, rows: Array<Record<string, unknown>>) {
     let selectStr = "";
     const eqCalls: Array<{ col: string; val: unknown }> = [];
 
@@ -44,7 +41,12 @@ function createMockSupabase(opts: {
         return Promise.resolve({ data: rows, error: null });
       },
       in(col: string, val: unknown[]) {
-        queryCalls.push({ from: tableName, selectStr, eqCalls: [...eqCalls], inCalls: [{ col, val }] });
+        queryCalls.push({
+          from: tableName,
+          selectStr,
+          eqCalls: [...eqCalls],
+          inCalls: [{ col, val }],
+        });
         return Promise.resolve({ data: rows, error: null });
       },
     };
@@ -132,10 +134,7 @@ function buildDigestUsers(
 // ---------------------------------------------------------------------------
 
 Deno.test("buildDigestUsers flattens join rows correctly", () => {
-  const prefsRows = [
-    { user_id: "u1" },
-    { user_id: "u2" },
-  ];
+  const prefsRows = [{ user_id: "u1" }, { user_id: "u2" }];
   const profileRows = [
     {
       id: "u1",
@@ -209,10 +208,7 @@ Deno.test("digest user reads avoid nonexistent preferences to profiles embed", a
     queryCalls,
   });
 
-  await supabase
-    .from("user_notification_preferences")
-    .select("user_id")
-    .eq("digest_email", true);
+  await supabase.from("user_notification_preferences").select("user_id").eq("digest_email", true);
   await supabase
     .from("user_profiles")
     .select("id, email, display_name, city_preference_id, cities!inner(id, name)")
@@ -230,8 +226,20 @@ Deno.test("mock Supabase queries events by city via search_events RPC", async ()
   const rpcCalls: MockRpcCall[] = [];
   const mockEvents = {
     c1: [
-      { id: "e1", title: "Park Day", start_datetime: "2026-06-02T10:00:00Z", venue_name: "City Park", is_free: true },
-      { id: "e2", title: "Story Time", start_datetime: "2026-06-03T14:00:00Z", venue_name: "Library", is_free: true },
+      {
+        id: "e1",
+        title: "Park Day",
+        start_datetime: "2026-06-02T10:00:00Z",
+        venue_name: "City Park",
+        is_free: true,
+      },
+      {
+        id: "e2",
+        title: "Story Time",
+        start_datetime: "2026-06-03T14:00:00Z",
+        venue_name: "Library",
+        is_free: true,
+      },
     ],
     c2: [],
   };

@@ -118,12 +118,7 @@ Deno.test("generateEmbedding - returns valid embedding from mocked OpenAI", asyn
 
 Deno.test("generateEmbedding - throws on OpenAI API error", async () => {
   await assertRejects(
-    () =>
-      generateEmbedding(
-        "Test event",
-        "fake-api-key",
-        makeMockFetchError(429, "rate limited"),
-      ),
+    () => generateEmbedding("Test event", "fake-api-key", makeMockFetchError(429, "rate limited")),
     EmbedEventUpstreamError,
     "OpenAI embeddings failed (429)",
   );
@@ -131,12 +126,7 @@ Deno.test("generateEmbedding - throws on OpenAI API error", async () => {
 
 Deno.test("generateEmbedding - throws on wrong dimensions", async () => {
   await assertRejects(
-    () =>
-      generateEmbedding(
-        "Test event",
-        "fake-api-key",
-        makeMockFetchBadDimensions(),
-      ),
+    () => generateEmbedding("Test event", "fake-api-key", makeMockFetchBadDimensions()),
     Error,
     "unexpected embedding dimensions: 3",
   );
@@ -151,8 +141,7 @@ Deno.test("embedEvent - generates and stores embedding", async () => {
       description: "Fun painting for ages 3-8",
     },
     {
-      supabase:
-        fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
+      supabase: fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
       openAiApiKey: "fake-key",
       fetchImpl: makeMockFetch(),
     },
@@ -175,10 +164,7 @@ Deno.test("embedEvent - truncates long description", async () => {
   const longDescription = "x".repeat(5000);
   let capturedInput = "";
 
-  const mockFetch: typeof fetch = async (
-    input: string | URL | Request,
-    init?: RequestInit,
-  ) => {
+  const mockFetch: typeof fetch = async (input: string | URL | Request, init?: RequestInit) => {
     // Extract the body from the request to inspect it
     if (init && typeof init.body === "string") {
       capturedInput = init.body;
@@ -202,8 +188,7 @@ Deno.test("embedEvent - truncates long description", async () => {
       description: longDescription,
     },
     {
-      supabase:
-        fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
+      supabase: fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
       openAiApiKey: "fake-key",
       fetchImpl: mockFetch,
     },
@@ -219,11 +204,13 @@ Deno.test("handleEmbedEventRequest - requires event_id", async () => {
   const fakeSupabase = new FakeSupabase();
   await assertRejects(
     () =>
-      handleEmbedEventRequest({}, {
-        supabase:
-          fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
-        openAiApiKey: "fake-key",
-      }),
+      handleEmbedEventRequest(
+        {},
+        {
+          supabase: fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
+          openAiApiKey: "fake-key",
+        },
+      ),
     EmbedEventRequestError,
     "event_id is required",
   );
@@ -239,8 +226,7 @@ Deno.test("handleEmbedEventRequest - fetches event from DB when no title provide
   const result = await handleEmbedEventRequest(
     { event_id: "evt-db" },
     {
-      supabase:
-        fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
+      supabase: fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
       openAiApiKey: "fake-key",
       fetchImpl: makeMockFetch(),
     },
@@ -257,8 +243,7 @@ Deno.test("handleEmbedEventRequest - 404 when event not found in DB", async () =
       handleEmbedEventRequest(
         { event_id: "evt-missing" },
         {
-          supabase:
-            fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
+          supabase: fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
           openAiApiKey: "fake-key",
         },
       ),
@@ -270,24 +255,17 @@ Deno.test("handleEmbedEventRequest - 404 when event not found in DB", async () =
 Deno.test("embedEvent - upserts on re-embed", async () => {
   const fakeSupabase = new FakeSupabase();
   const deps = {
-    supabase:
-      fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
+    supabase: fakeSupabase as unknown as import("@supabase/supabase-js").SupabaseClient,
     openAiApiKey: "fake-key",
     fetchImpl: makeMockFetch(),
   };
 
   // First embed
-  await embedEvent(
-    { event_id: "evt-re", title: "Original title" },
-    deps,
-  );
+  await embedEvent({ event_id: "evt-re", title: "Original title" }, deps);
   const first = fakeSupabase.embeddings.get("evt-re");
 
   // Re-embed with different title
-  await embedEvent(
-    { event_id: "evt-re", title: "Updated title" },
-    deps,
-  );
+  await embedEvent({ event_id: "evt-re", title: "Updated title" }, deps);
   const second = fakeSupabase.embeddings.get("evt-re");
 
   // Both should succeed (upsert), stored model should be same

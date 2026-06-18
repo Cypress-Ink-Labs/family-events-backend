@@ -20,9 +20,7 @@ export interface ParentTipsPassDeps {
   supabaseUrl: string;
 }
 
-export async function runParentTipsPass(
-  deps: ParentTipsPassDeps,
-): Promise<ParentTipsPassSummary> {
+export async function runParentTipsPass(deps: ParentTipsPassDeps): Promise<ParentTipsPassSummary> {
   const summary: ParentTipsPassSummary = {
     enabled: false,
     claimed: 0,
@@ -46,17 +44,11 @@ export async function runParentTipsPass(
     { p_limit: PARENT_TIPS_BATCH },
   );
   if (claimErr) {
-    await logCronRunEvent(
-      deps.supabase,
-      deps.cronContext,
-      "warn",
-      "parent-tips claim failed",
-      {
-        function: "backfill-event-enrichment",
-        stage: "parent-tips",
-        error: errorMessage(claimErr),
-      },
-    );
+    await logCronRunEvent(deps.supabase, deps.cronContext, "warn", "parent-tips claim failed", {
+      function: "backfill-event-enrichment",
+      stage: "parent-tips",
+      error: errorMessage(claimErr),
+    });
     return summary;
   }
 
@@ -82,12 +74,9 @@ export async function runParentTipsPass(
           break;
         }
         summary.errors += 1;
-        const { error: markErr } = await deps.supabase.rpc(
-          "mark_event_enrichment_attempt",
-          {
-            p_event_id: row.event_id,
-          },
-        );
+        const { error: markErr } = await deps.supabase.rpc("mark_event_enrichment_attempt", {
+          p_event_id: row.event_id,
+        });
         if (markErr) {
           await logCronRunEvent(
             deps.supabase,
@@ -108,18 +97,12 @@ export async function runParentTipsPass(
       summary.generated += 1;
     } catch (rowErr) {
       summary.errors += 1;
-      await logCronRunEvent(
-        deps.supabase,
-        deps.cronContext,
-        "warn",
-        "parent-tips row failed",
-        {
-          function: "backfill-event-enrichment",
-          stage: "parent-tips",
-          event_id: row.event_id,
-          error: errorMessage(rowErr),
-        },
-      );
+      await logCronRunEvent(deps.supabase, deps.cronContext, "warn", "parent-tips row failed", {
+        function: "backfill-event-enrichment",
+        stage: "parent-tips",
+        event_id: row.event_id,
+        error: errorMessage(rowErr),
+      });
     }
   }
 

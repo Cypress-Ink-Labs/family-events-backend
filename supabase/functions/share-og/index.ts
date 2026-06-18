@@ -10,11 +10,9 @@ const corsHeaders = buildCorsHeaders({ methods: ["GET", "OPTIONS"] });
 // description edits, cancellation), and a long s-maxage keeps the stale
 // preview pinned at the edge. 5 min is enough to absorb crawler spikes
 // without holding a deleted/unpublished event visible for hours.
-const CACHE_CONTROL_SUCCESS =
-  "public, max-age=300, s-maxage=300, stale-while-revalidate=60";
+const CACHE_CONTROL_SUCCESS = "public, max-age=300, s-maxage=300, stale-while-revalidate=60";
 const CACHE_CONTROL_FALLBACK = "public, max-age=60, s-maxage=60";
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const OG_IMAGE_WIDTH = "1200";
 const OG_IMAGE_HEIGHT = "630";
 const MAX_OG_DESCRIPTION_LENGTH = 200;
@@ -100,9 +98,9 @@ export function pickOgImage(images: unknown, origin: string): string {
 }
 
 export function extractEventIdFromRequest(url: URL): string | null {
-  const queryEventId = url.searchParams.get("eventId") ??
-    url.searchParams.get("event_id");
-  const candidate = queryEventId ??
+  const queryEventId = url.searchParams.get("eventId") ?? url.searchParams.get("event_id");
+  const candidate =
+    queryEventId ??
     (() => {
       const pathParts = url.pathname.split("/").filter(Boolean);
       const idx = pathParts.findIndex((part) => part === "share-og");
@@ -217,9 +215,7 @@ function renderHtml(params: {
     <div id="root">
       <main class="shell">
         <article class="card">
-          <p class="meta">${escapedVenue}${
-    escapedStart ? ` · ${escapedStart}` : ""
-  }</p>
+          <p class="meta">${escapedVenue}${escapedStart ? ` · ${escapedStart}` : ""}</p>
           <h1 class="title">${escapedTitle}</h1>
           <p class="desc">${escapedDescription}</p>
           <a class="cta" href="/sign-up">Open in Family Events</a>

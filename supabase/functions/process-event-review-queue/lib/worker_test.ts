@@ -78,11 +78,12 @@ class FakeSupabase {
 
       const appliedDecision = args.p_applied_decision as LlmEventReviewDecision;
       Object.assign(event, {
-        status: appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE
-          ? "published"
-          : appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT
-          ? "rejected"
-          : "draft",
+        status:
+          appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE
+            ? "published"
+            : appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT
+              ? "rejected"
+              : "draft",
         llm_review_status: args.p_review_status,
         llm_review_decision: appliedDecision,
         llm_review_confidence: args.p_confidence,
@@ -121,9 +122,7 @@ class FakeSupabase {
 
       if (appliedDecision !== LLM_EVENT_REVIEW_DECISION.REJECT) {
         const duplicate = this.tagQueue.some(
-          (existing) =>
-            String((existing as { event_id?: string }).event_id ?? "") ===
-              eventId,
+          (existing) => String((existing as { event_id?: string }).event_id ?? "") === eventId,
         );
         if (!duplicate) {
           this.tagQueue.push({
@@ -154,8 +153,7 @@ class FakeSupabase {
 
 class FakeQuery {
   private operation: "select" | "update" | "insert" = "select";
-  private payload: Record<string, unknown> | Record<string, unknown>[] | null =
-    null;
+  private payload: Record<string, unknown> | Record<string, unknown>[] | null = null;
   private filters = new Map<string, unknown>();
   private wantsSingle = false;
 
@@ -225,9 +223,7 @@ class FakeQuery {
       return Promise.resolve({ data: null, error: null });
     }
 
-    if (
-      this.operation === "update" && this.table === "event_llm_review_queue"
-    ) {
+    if (this.operation === "update" && this.table === "event_llm_review_queue") {
       const id = Number(this.filters.get("id"));
       const row = this.db.queue.get(id);
       if (!row) return Promise.resolve({ data: null, error: null });
@@ -236,9 +232,7 @@ class FakeQuery {
       return Promise.resolve({ data: null, error: null });
     }
 
-    if (
-      this.operation === "insert" && this.table === "event_llm_review_traces"
-    ) {
+    if (this.operation === "insert" && this.table === "event_llm_review_traces") {
       if (Array.isArray(this.payload)) {
         this.db.traces.push(...this.payload);
       } else if (this.payload) {
@@ -253,9 +247,7 @@ class FakeQuery {
         if (!row) continue;
         const eventId = String((row as { event_id?: string }).event_id ?? "");
         const duplicate = this.db.tagQueue.some(
-          (existing) =>
-            String((existing as { event_id?: string }).event_id ?? "") ===
-              eventId,
+          (existing) => String((existing as { event_id?: string }).event_id ?? "") === eventId,
         );
         if (duplicate) {
           return Promise.resolve({ data: null, error: { code: "23505" } });
@@ -386,10 +378,7 @@ Deno.test("approve publishes event and enqueues tag queue", async () => {
   assertEquals(result.outcome, "succeeded");
   assertEquals(supabase.events.get(eventId)?.status, "published");
   assertEquals(supabase.tagQueue.length, 1);
-  assertEquals(
-    supabase.queue.get(1)?.status,
-    "succeeded",
-  );
+  assertEquals(supabase.queue.get(1)?.status, "succeeded");
 });
 
 Deno.test("reject rejects event and does not enqueue tag queue", async () => {
@@ -434,10 +423,7 @@ Deno.test("provider timeout routes to admin review", async () => {
   assertEquals(result.outcome, "succeeded");
   assertEquals(result.failed, true);
   assertEquals(supabase.events.get(eventId)?.status, "draft");
-  assertEquals(
-    supabase.events.get(eventId)?.llm_review_status,
-    LLM_EVENT_REVIEW_STATUS.FAILED,
-  );
+  assertEquals(supabase.events.get(eventId)?.llm_review_status, LLM_EVENT_REVIEW_STATUS.FAILED);
 });
 
 Deno.test("malformed provider output routes to admin review", async () => {
@@ -496,10 +482,7 @@ Deno.test("low confidence routes to admin review", async () => {
   });
 
   assertEquals(supabase.events.get(eventId)?.status, "draft");
-  assertEquals(
-    supabase.events.get(eventId)?.llm_review_status,
-    LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
-  );
+  assertEquals(supabase.events.get(eventId)?.llm_review_status, LLM_EVENT_REVIEW_STATUS.SUCCEEDED);
   assertEquals(
     supabase.events.get(eventId)?.llm_review_decision,
     LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,

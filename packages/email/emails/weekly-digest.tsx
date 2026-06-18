@@ -12,7 +12,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email"
+} from "react-email";
 
 /**
  * Weekly Digest email template — "Dusk-Meadow" theme.
@@ -55,7 +55,7 @@ const tailwindConfig = {
       },
     },
   },
-}
+};
 
 export default function WeeklyDigestEmail() {
   return (
@@ -168,5 +168,5 @@ export default function WeeklyDigestEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

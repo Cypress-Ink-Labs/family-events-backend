@@ -45,7 +45,7 @@ export async function geocodeViaNominatim(query: string): Promise<GeocodeResult 
 }
 ```
 
-This in-isolate limiter is correct *within* one instance but does not coordinate across instances.
+This in-isolate limiter is correct _within_ one instance but does not coordinate across instances.
 
 ## Approach — pick ONE, in this preference order
 
@@ -74,33 +74,37 @@ This is genuinely a design choice; the right answer depends on operational facts
 ## Steps (option 1)
 
 ### Step 1: Migration — state table + reserve RPC (+ rollback)
+
 Create the table, the `SECURITY DEFINER` reserve RPC with `search_path TO ''`, grant EXECUTE to
 `service_role` only, REVOKE from PUBLIC/anon/authenticated. Add the paired `_down.sql`
 (drop function, drop table). New timestamp strictly greater than the current max migration.
 
 ### Step 2: Thread a supabase client into `geocodeViaNominatim`
+
 The function currently takes only `query`. Add a parameter for a service-role `SupabaseClient` (or a
 `reserveSlot: () => Promise<number>` callback so it stays unit-testable without a DB). Update all callers
 (`grep -rn "geocodeViaNominatim" supabase/functions`) to pass it. Inside, replace `await waitForNominatimSlot()`
 with: call the reserve RPC → `await sleep(ms)` → fetch.
 
 ### Step 3: Handle Nominatim 429 explicitly
+
 On HTTP 429 (or repeated failures), return `null` (caller already falls back) and log a warning — do not
 hot-retry.
 
 ### Step 4: Tests
+
 Unit-test the wait math with a fake `reserveSlot` returning various ms. If you keep the callback seam,
 tests need no DB. Optionally add a DB test under `supabase/tests/` that two concurrent `reserve_nominatim_slot`
 calls return non-overlapping slots.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Function tests | `pnpm -C supabase/functions exec vitest run` + `deno test` | pass |
-| Rollback guard | `pnpm run workspace:test` | new migration is paired |
-| Regenerate types | `pnpm run db:types` | new RPC in `database.types.ts`; commit |
+| Purpose          | Command                                                    | Expected                               |
+| ---------------- | ---------------------------------------------------------- | -------------------------------------- |
+| Typecheck        | `pnpm run check`                                           | exit 0                                 |
+| Function tests   | `pnpm -C supabase/functions exec vitest run` + `deno test` | pass                                   |
+| Rollback guard   | `pnpm run workspace:test`                                  | new migration is paired                |
+| Regenerate types | `pnpm run db:types`                                        | new RPC in `database.types.ts`; commit |
 
 ## Done criteria
 
@@ -114,6 +118,7 @@ calls return non-overlapping slots.
 ## STOP conditions
 
 Stop and report **before implementing** if you cannot confirm:
+
 - Whether multiple geocoding instances actually run concurrently in production (check the cron schedules
   in `config/deploy.config.json` / Railway and whether `tag-event` geocodes alongside `backfill-event-enrichment`).
   If concurrency is impossible, option 3 (document + degrade) is the correct, far cheaper answer — do that instead.
@@ -122,7 +127,7 @@ Stop and report **before implementing** if you cannot confirm:
 
 ## Maintenance notes
 
-- Reviewer: the failure mode to guard against is *stalling* geocoding. Confirm the lock is `xact`-scoped
-  (auto-released) and the sleep happens *outside* the lock/transaction.
+- Reviewer: the failure mode to guard against is _stalling_ geocoding. Confirm the lock is `xact`-scoped
+  (auto-released) and the sleep happens _outside_ the lock/transaction.
 - This is the kind of finding where "document the limitation + degrade on 429" is a legitimate, lower-cost
   resolution. Don't over-engineer if concurrency is rare.

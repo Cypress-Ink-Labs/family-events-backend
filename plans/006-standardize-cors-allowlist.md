@@ -20,6 +20,7 @@
 There is a correct, allowlist-aware CORS module (`_shared/cors.ts`) that omits
 `Access-Control-Allow-Origin` for non-allowlisted origins. But the two shared request handlers and the
 `scrape-source` function don't use it:
+
 - `service-role-handler.ts` hardcodes `Access-Control-Allow-Origin: *`.
 - `admin-handler.ts` builds CORS via `http.ts#buildCorsHeaders`, which defaults to `*`.
 - `scrape-source/index.ts` re-declares its **own** copy of `resolveAllowedOrigin` + `buildCorsHeaders` +
@@ -33,16 +34,28 @@ allowlist removes the divergence and the dead duplicate.
 ## Current state
 
 `_shared/cors.ts` (the canonical module):
+
 ```ts
-export const DEFAULT_ALLOWED_ORIGINS = [ "https://family-events.org", "https://www.family-events.org",
-  "https://family-events.up.railway.app", "http://localhost:5173", ... "http://127.0.0.1:5175" ];
-export function resolveAllowedOrigin(origin: string | null): string | null { /* env ALLOWED_ORIGINS override */ }
-export function buildCorsHeaders(allowedOrigin: string | null, methods = ["POST","OPTIONS"]): Record<string,string> {
+export const DEFAULT_ALLOWED_ORIGINS = [
+  "https://family-events.org",
+  "https://www.family-events.org",
+  "https://family-events.up.railway.app",
+  "http://localhost:5173",
+  ..."http://127.0.0.1:5175",
+];
+export function resolveAllowedOrigin(origin: string | null): string | null {
+  /* env ALLOWED_ORIGINS override */
+}
+export function buildCorsHeaders(
+  allowedOrigin: string | null,
+  methods = ["POST", "OPTIONS"],
+): Record<string, string> {
   // sets Vary: Origin always; sets ACAO only when allowedOrigin is non-null
 }
 ```
 
 `_shared/service-role-handler.ts:6-13` (to change):
+
 ```ts
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,6 +64,7 @@ const corsHeaders = {
 };
 const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
 ```
+
 These `corsHeaders` are used on the OPTIONS preflight (line 58) and on every JSON response (line 13/48).
 
 `scrape-source/index.ts:13-49` — a full inline duplicate of `DEFAULT_ALLOWED_ORIGINS`,
@@ -92,6 +106,7 @@ handler currently passes.
 ### Step 4: Tests
 
 Add/extend a vitest test (e.g. `_shared/cors.test.ts` if absent, or alongside an existing handler test):
+
 - `resolveAllowedOrigin` returns the origin for an allowlisted value, `null` for a random origin, and
   honors `ALLOWED_ORIGINS` env override.
 - `buildCorsHeaders(null)` omits `Access-Control-Allow-Origin` but sets `Vary: Origin`.
@@ -99,11 +114,11 @@ Add/extend a vitest test (e.g. `_shared/cors.test.ts` if absent, or alongside an
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Function tests | `pnpm -C supabase/functions exec vitest run` and `deno test` (cwd `supabase/functions`) | pass |
-| Confirm no stray `*` | `grep -rn '"Access-Control-Allow-Origin": "\*"' supabase/functions` | only matches remain in intentionally-public functions (see STOP) |
+| Purpose              | Command                                                                                 | Expected                                                         |
+| -------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Typecheck            | `pnpm run check`                                                                        | exit 0                                                           |
+| Function tests       | `pnpm -C supabase/functions exec vitest run` and `deno test` (cwd `supabase/functions`) | pass                                                             |
+| Confirm no stray `*` | `grep -rn '"Access-Control-Allow-Origin": "\*"' supabase/functions`                     | only matches remain in intentionally-public functions (see STOP) |
 
 ## Scope
 

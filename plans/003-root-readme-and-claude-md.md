@@ -44,6 +44,7 @@ agent-driven repo.
 ### Step 1: Write root `README.md`
 
 Cover, concisely:
+
 - **What this is**: backend for the Family Events app (regional event aggregation — Lafayette / Baton
   Rouge LA), built on Supabase (Postgres + Deno edge functions) with Railway cron + IaC.
 - **Layout**: one line each for `supabase/functions/`, `supabase/migrations/`, `supabase/functions/_shared/`,
@@ -61,6 +62,7 @@ Cover, concisely:
 ### Step 2: Write root `CLAUDE.md`
 
 Aimed at agents/contributors doing focused changes. Include:
+
 - **Architecture overview**: the cron → edge function → queue → worker → notify flow from "Current state".
 - **Key systems & where they live**: auth (`_shared/auth.ts`, `service-role-handler.ts`, `admin-handler.ts`),
   SSRF guard (`_shared/guarded-fetch.ts`, `url-validation.ts`), LLM (`_shared/llm-*.ts`, `classification.ts`),
@@ -77,10 +79,12 @@ Aimed at agents/contributors doing focused changes. Include:
 Keep `CLAUDE.md` tight (a map, not a manual). Do not duplicate the whole README.
 
 **Verify**: both files exist and all paths/scripts they mention resolve:
+
 ```
 ls README.md CLAUDE.md
 for f in $(grep -oE '(supabase|packages|config|cron|infra|tests|scripts)/[A-Za-z0-9_./-]+' README.md CLAUDE.md | sort -u); do test -e "$f" || echo "MISSING: $f"; done
 ```
+
 → no `MISSING:` lines. (Some matches may be directories or globs — sanity-check, don't blindly trust.)
 
 ## Done criteria

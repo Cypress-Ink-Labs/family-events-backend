@@ -1,25 +1,17 @@
 import { assertEquals } from "jsr:@std/assert";
-import {
-  buildCorsHeaders,
-  errorJson,
-  jsonResponse,
-  optionsResponse,
-} from "./http.ts";
+import { buildCorsHeaders, errorJson, jsonResponse, optionsResponse } from "./http.ts";
 
 Deno.test("buildCorsHeaders returns service-role defaults", () => {
   assertEquals(buildCorsHeaders(), {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers":
-      "Content-Type, Authorization, X-Client-Info, Apikey",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
   });
 });
 
 Deno.test("buildCorsHeaders supports method overrides", () => {
   assertEquals(
-    buildCorsHeaders({ methods: ["GET", "OPTIONS"] })[
-      "Access-Control-Allow-Methods"
-    ],
+    buildCorsHeaders({ methods: ["GET", "OPTIONS"] })["Access-Control-Allow-Methods"],
     "GET, OPTIONS",
   );
 });

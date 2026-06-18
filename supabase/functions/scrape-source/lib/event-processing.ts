@@ -1,8 +1,6 @@
 import type { EventProcessingMode, EventSourceRow } from "./types.ts";
 
-export function resolveProcessingMode(
-  source: EventSourceRow,
-): EventProcessingMode {
+export function resolveProcessingMode(source: EventSourceRow): EventProcessingMode {
   if (source.processing_mode) {
     return source.processing_mode;
   }

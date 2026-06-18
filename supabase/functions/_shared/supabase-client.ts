@@ -1,9 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-export function createServiceClient(
-  supabaseUrl: string,
-  serviceRoleKey: string,
-): SupabaseClient {
+export function createServiceClient(supabaseUrl: string, serviceRoleKey: string): SupabaseClient {
   return createClient(supabaseUrl, serviceRoleKey);
 }
 
@@ -13,9 +10,7 @@ export function createAnonClient(
   authorization?: string,
 ): SupabaseClient {
   return createClient(supabaseUrl, anonKey, {
-    global: authorization
-      ? { headers: { Authorization: authorization } }
-      : undefined,
+    global: authorization ? { headers: { Authorization: authorization } } : undefined,
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

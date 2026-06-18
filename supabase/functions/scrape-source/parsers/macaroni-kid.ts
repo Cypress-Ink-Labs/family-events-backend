@@ -1,9 +1,4 @@
-import {
-  cleanDescription,
-  extractPrice,
-  parseIsoDate,
-  stripHtml,
-} from "../../_shared/parsing.ts";
+import { cleanDescription, extractPrice, parseIsoDate, stripHtml } from "../../_shared/parsing.ts";
 import { validateExternalUrl } from "../../_shared/url-validation.ts";
 import type { EventSourceRow, ParsedEvent } from "../lib/types.ts";
 import type { SourceParser } from "./_lib/types.ts";
@@ -15,9 +10,7 @@ const MS_PER_DAY = 86_400_000;
 type Json = Record<string, unknown>;
 
 function asJson(value: unknown): Json | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Json)
-    : null;
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Json) : null;
 }
 
 function asString(value: unknown): string | null {
@@ -41,16 +34,12 @@ function asNumber(value: unknown): number | null {
 }
 
 function extractTownId(html: string): string | null {
-  const match = html.match(/data-town\s*=\s*"([^"]+)"/i) ??
-    html.match(/data-town\s*=\s*'([^']+)'/i);
+  const match =
+    html.match(/data-town\s*=\s*"([^"]+)"/i) ?? html.match(/data-town\s*=\s*'([^']+)'/i);
   return match?.[1]?.trim() || null;
 }
 
-function buildApiUrl(
-  townId: string,
-  windowDays: number,
-  now: Date = new Date(),
-): string {
+function buildApiUrl(townId: string, windowDays: number, now: Date = new Date()): string {
   const start = now;
   const end = new Date(start.getTime() + windowDays * MS_PER_DAY);
   const query = JSON.stringify({
@@ -66,11 +55,7 @@ function buildApiUrl(
   );
 }
 
-function buildSourceUrl(
-  sourceBase: string,
-  id: string | null,
-  slug: string | null,
-): string | null {
+function buildSourceUrl(sourceBase: string, id: string | null, slug: string | null): string | null {
   if (!id) return null;
   const base = sourceBase.replace(/\/events\/?$/, "");
   const tail = slug ? `${id}/${slug}` : id;
@@ -81,15 +66,11 @@ function buildSourceUrl(
   }
 }
 
-function joinAddress(
-  location: Json | null,
-): { venue: string | null; address: string | null } {
+function joinAddress(location: Json | null): { venue: string | null; address: string | null } {
   if (!location) return { venue: null, address: null };
-  const venue = asString(location.name) ?? asString(location.venue) ??
-    asString(location.title);
+  const venue = asString(location.name) ?? asString(location.venue) ?? asString(location.title);
   const parts = [
-    asString(location.address) ?? asString(location.address1) ??
-      asString(location.street),
+    asString(location.address) ?? asString(location.address1) ?? asString(location.street),
     asString(location.address2),
     asString(location.city),
     asString(location.state) ?? asString(location.region),
@@ -125,10 +106,7 @@ function pickImage(raw: unknown): string[] {
   return out.slice(0, 5);
 }
 
-export function mapMacaroniKidEvent(
-  raw: unknown,
-  sourceBase: string,
-): ParsedEvent | null {
+export function mapMacaroniKidEvent(raw: unknown, sourceBase: string): ParsedEvent | null {
   const node = asJson(raw);
   if (!node) return null;
 
@@ -136,8 +114,7 @@ export function mapMacaroniKidEvent(
   if (!title) return null;
 
   const startDatetime = parseIsoDate(
-    asString(node.startDateTime) ?? asString(node.start) ??
-      asString(node.startDate),
+    asString(node.startDateTime) ?? asString(node.start) ?? asString(node.startDate),
   );
   if (!startDatetime) return null;
   const endDatetime = parseIsoDate(
@@ -183,9 +160,7 @@ export function mapMacaroniKidEvent(
     .map((part) => stripHtml(part));
   const description = cleanDescription(descriptionParts.join("\n\n"));
 
-  const images = pickImage(
-    node.images ?? node.image ?? node.photo ?? node.thumbnail,
-  );
+  const images = pickImage(node.images ?? node.image ?? node.photo ?? node.thumbnail);
 
   const costText = asString(node.cost) ?? asString(node.price) ?? "";
   const numericCost = asNumber(node.cost) ?? asNumber(node.price);
@@ -226,10 +201,10 @@ export async function fetchMacaroniKidEvents(
   const rawEvents = Array.isArray(payload)
     ? payload
     : Array.isArray((payload as Json | null)?.events)
-    ? ((payload as Json).events as unknown[])
-    : Array.isArray((payload as Json | null)?.data)
-    ? ((payload as Json).data as unknown[])
-    : [];
+      ? ((payload as Json).events as unknown[])
+      : Array.isArray((payload as Json | null)?.data)
+        ? ((payload as Json).data as unknown[])
+        : [];
 
   const events: ParsedEvent[] = [];
   for (const raw of rawEvents) {
@@ -257,10 +232,10 @@ export const macaroniKidParser: SourceParser<"macaronikid"> = {
     const rawEvents = Array.isArray(payload)
       ? payload
       : Array.isArray((payload as Json | null)?.events)
-      ? ((payload as Json).events as unknown[])
-      : Array.isArray((payload as Json | null)?.data)
-      ? ((payload as Json).data as unknown[])
-      : [];
+        ? ((payload as Json).events as unknown[])
+        : Array.isArray((payload as Json | null)?.data)
+          ? ((payload as Json).data as unknown[])
+          : [];
 
     const events: ParsedEvent[] = [];
     for (const raw of rawEvents) {

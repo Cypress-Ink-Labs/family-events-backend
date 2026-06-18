@@ -22,26 +22,14 @@ const validEvent: ParsedEvent = {
 
 Deno.test("validateParsedEvents rejects invalid dates", () => {
   assertEquals(validateParsedEvents([validEvent]).length, 1);
-  assertEquals(
-    validateParsedEvents([{ ...validEvent, startDatetime: "not-a-date" }])
-      .length,
-    0,
-  );
-  assertEquals(
-    validateParsedEvents([{ ...validEvent, endDatetime: "not-a-date" }]).length,
-    0,
-  );
+  assertEquals(validateParsedEvents([{ ...validEvent, startDatetime: "not-a-date" }]).length, 0);
+  assertEquals(validateParsedEvents([{ ...validEvent, endDatetime: "not-a-date" }]).length, 0);
 });
 
 Deno.test("parseLlmParsedEvents accepts canonical events and rejects invalid rows", () => {
-  assertEquals(parseLlmParsedEvents(JSON.stringify({ events: [validEvent] })), [
-    validEvent,
-  ]);
+  assertEquals(parseLlmParsedEvents(JSON.stringify({ events: [validEvent] })), [validEvent]);
   assertThrows(
-    () =>
-      parseLlmParsedEvents(
-        JSON.stringify({ events: [{ ...validEvent, startDatetime: "" }] }),
-      ),
+    () => parseLlmParsedEvents(JSON.stringify({ events: [{ ...validEvent, startDatetime: "" }] })),
     Error,
     "invalid ParsedEvent",
   );

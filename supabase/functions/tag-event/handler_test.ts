@@ -53,8 +53,7 @@ class FakeSupabase {
 }
 
 class FakeQuery {
-  private operation: "select" | "insert" | "delete" | "update" | "upsert" =
-    "select";
+  private operation: "select" | "insert" | "delete" | "update" | "upsert" = "select";
   private filters = new Map<string, unknown>();
   private payload: unknown = null;
 
@@ -123,11 +122,7 @@ class FakeQuery {
       return Promise.resolve({
         data: this.db.eventTags
           .filter((row) => row.event_id === eventId)
-          .filter((row) =>
-            typeof manual === "boolean"
-              ? row.is_manual_override === manual
-              : true
-          )
+          .filter((row) => (typeof manual === "boolean" ? row.is_manual_override === manual : true))
           .map((row) => ({ tag_id: row.tag_id })),
         error: null,
       });
@@ -159,8 +154,8 @@ class FakeQuery {
     if (this.operation === "upsert" && this.table === "event_tags") {
       const rows = this.payload as FakeEventTag[];
       for (const row of rows) {
-        const existingIndex = this.db.eventTags.findIndex((existing) =>
-          existing.event_id === row.event_id && existing.tag_id === row.tag_id
+        const existingIndex = this.db.eventTags.findIndex(
+          (existing) => existing.event_id === row.event_id && existing.tag_id === row.tag_id,
         );
         if (existingIndex >= 0) {
           this.db.eventTags[existingIndex] = row;
@@ -179,7 +174,7 @@ class FakeQuery {
         this.db.events.set(id, event);
       }
       return Promise.resolve({
-        data: expectSingle ? event ?? null : null,
+        data: expectSingle ? (event ?? null) : null,
         error: null,
       });
     }
@@ -208,7 +203,7 @@ function makeRequest(body: unknown): Request {
 }
 
 async function readJson(response: Response) {
-  return await response.json() as Record<string, unknown>;
+  return (await response.json()) as Record<string, unknown>;
 }
 
 function authOk() {
@@ -258,26 +253,26 @@ Deno.test("resolveClassification falls back to keyword tags without provider cre
   }
 
   try {
-    const result = await resolveClassification({
-      eventId: null,
-      sourceRunId: null,
-      triggerType: "import",
-      traceStartedAt: Date.now(),
-      title: "Free outdoor storytime for ages 2 to 5 years",
-      description: "Meet at the park for a no cost library reading.",
-      currentEvent: null,
-    }, [
-      { id: "tag-storytime", slug: "storytime", name: "Storytime" },
-      { id: "tag-outdoor", slug: "outdoor", name: "Outdoor" },
-      { id: "tag-free", slug: "free", name: "Free" },
-    ]);
+    const result = await resolveClassification(
+      {
+        eventId: null,
+        sourceRunId: null,
+        triggerType: "import",
+        traceStartedAt: Date.now(),
+        title: "Free outdoor storytime for ages 2 to 5 years",
+        description: "Meet at the park for a no cost library reading.",
+        currentEvent: null,
+      },
+      [
+        { id: "tag-storytime", slug: "storytime", name: "Storytime" },
+        { id: "tag-outdoor", slug: "outdoor", name: "Outdoor" },
+        { id: "tag-free", slug: "free", name: "Free" },
+      ],
+    );
 
     assertEquals(result.llmUsage, null);
     assertEquals(result.classification.status, "fallback");
-    assertEquals(
-      result.classification.fallbackReason,
-      "AI provider is not configured",
-    );
+    assertEquals(result.classification.fallbackReason, "AI provider is not configured");
     assertEquals(result.classification.ageMin, 2);
     assertEquals(result.classification.ageMax, 5);
     assertEquals(result.classification.isFree, true);
@@ -372,12 +367,14 @@ Deno.test("handleTagEvent preserves manual tags and only fills missing event fie
     loadFeatureConfig: () => Promise.resolve(null),
   });
 
-  const response = await handler(makeRequest({
-    event_id: "evt-1",
-    title: "Fresh park meetup",
-    source_run_id: "run-1",
-    trigger_type: "reclassify",
-  }));
+  const response = await handler(
+    makeRequest({
+      event_id: "evt-1",
+      title: "Fresh park meetup",
+      source_run_id: "run-1",
+      trigger_type: "reclassify",
+    }),
+  );
 
   assertEquals(response.status, 200);
   const body = await readJson(response);
@@ -407,12 +404,11 @@ Deno.test("handleTagEvent preserves manual tags and only fills missing event fie
     venue_name: "New Venue",
   });
 
-  assertEquals(
-    db.eventTags
-      .map((row) => `${row.tag_id}:${row.is_manual_override}`)
-      .sort(),
-    ["tag-free:false", "tag-manual:true", "tag-outdoor:false"],
-  );
+  assertEquals(db.eventTags.map((row) => `${row.tag_id}:${row.is_manual_override}`).sort(), [
+    "tag-free:false",
+    "tag-manual:true",
+    "tag-outdoor:false",
+  ]);
 });
 
 Deno.test("handleTagEvent normalizes fractional AI age ranges before persistence", async () => {
@@ -454,10 +450,12 @@ Deno.test("handleTagEvent normalizes fractional AI age ranges before persistence
     loadFeatureConfig: () => Promise.resolve(null),
   });
 
-  const response = await handler(makeRequest({
-    event_id: "evt-fractional-age",
-    title: "Little Gym at the Library",
-  }));
+  const response = await handler(
+    makeRequest({
+      event_id: "evt-fractional-age",
+      title: "Little Gym at the Library",
+    }),
+  );
 
   assertEquals(response.status, 200);
   const body = await readJson(response);
@@ -501,10 +499,12 @@ Deno.test("handleTagEvent returns fallback output from classification failures",
     loadFeatureConfig: () => Promise.resolve(null),
   });
 
-  const response = await handler(makeRequest({
-    title: "Library storytime",
-    description: "Stories and songs.",
-  }));
+  const response = await handler(
+    makeRequest({
+      title: "Library storytime",
+      description: "Stories and songs.",
+    }),
+  );
 
   assertEquals(response.status, 200);
   const body = await readJson(response);

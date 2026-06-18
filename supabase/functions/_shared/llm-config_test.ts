@@ -8,10 +8,13 @@ function env(values: Record<string, string | undefined>) {
 }
 
 Deno.test("resolveSharedLlmConfig falls back unknown OpenAI models", () => {
-  const config = resolveSharedLlmConfig({
-    allowedOpenAiModels: allowed,
-    defaultOpenAiModel: "gpt-4o-mini",
-  }, env({ AI_MODEL: "bad-model", AI_API_KEY: "key" }));
+  const config = resolveSharedLlmConfig(
+    {
+      allowedOpenAiModels: allowed,
+      defaultOpenAiModel: "gpt-4o-mini",
+    },
+    env({ AI_MODEL: "bad-model", AI_API_KEY: "key" }),
+  );
   assertEquals(config.model, "gpt-4o-mini");
   assertEquals(config.provider, "openai");
   assertEquals(config.configured, true);
@@ -52,11 +55,14 @@ Deno.test("resolveSharedLlmConfig does not send OpenAI keys to ollama", () => {
 });
 
 Deno.test("resolveSharedLlmConfig honors disabled db override", () => {
-  const config = resolveSharedLlmConfig({
-    allowedOpenAiModels: allowed,
-    dbOverride: { enabled: false, modelId: "gpt-4.1-nano", provider: "openai" },
-    defaultOpenAiModel: "gpt-4o-mini",
-  }, env({ AI_API_KEY: "key" }));
+  const config = resolveSharedLlmConfig(
+    {
+      allowedOpenAiModels: allowed,
+      dbOverride: { enabled: false, modelId: "gpt-4.1-nano", provider: "openai" },
+      defaultOpenAiModel: "gpt-4o-mini",
+    },
+    env({ AI_API_KEY: "key" }),
+  );
   assertEquals(config.enabled, false);
   assertEquals(config.configured, false);
   assertEquals(config.model, "gpt-4.1-nano");

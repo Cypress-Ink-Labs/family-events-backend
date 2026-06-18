@@ -16,9 +16,7 @@ interface ServiceRoleJsonOptions {
   functionName: string;
 }
 
-type ServiceRoleJsonHandler = (
-  context: ServiceRoleJsonContext,
-) => Promise<unknown>;
+type ServiceRoleJsonHandler = (context: ServiceRoleJsonContext) => Promise<unknown>;
 
 export class ServiceRoleJsonError extends Error {
   constructor(
@@ -34,11 +32,7 @@ export function serviceRoleJsonError(status: number, message: string) {
   return new ServiceRoleJsonError(status, message);
 }
 
-function jsonResponse(
-  body: unknown,
-  status = 200,
-  corsHeaders: Record<string, string>,
-) {
+function jsonResponse(body: unknown, status = 200, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -61,11 +55,7 @@ export function serveServiceRoleJson(
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 
     if (!serviceRoleKey) {
-      return jsonResponse(
-        { error: "SUPABASE_SERVICE_ROLE_KEY not configured" },
-        500,
-        corsHeaders,
-      );
+      return jsonResponse({ error: "SUPABASE_SERVICE_ROLE_KEY not configured" }, 500, corsHeaders);
     }
 
     const auth = requireServiceRole(req, serviceRoleKey);
@@ -74,11 +64,7 @@ export function serveServiceRoleJson(
     }
 
     if (!supabaseUrl) {
-      return jsonResponse(
-        { error: "SUPABASE_URL not configured" },
-        500,
-        corsHeaders,
-      );
+      return jsonResponse({ error: "SUPABASE_URL not configured" }, 500, corsHeaders);
     }
 
     try {

@@ -17,13 +17,10 @@ interface ParsedIcalLine {
 }
 
 function unfoldIcalLines(icalContent: string): string[] {
-  const lines = icalContent.replaceAll("\r\n", "\n").replaceAll("\r", "\n")
-    .split("\n");
+  const lines = icalContent.replaceAll("\r\n", "\n").replaceAll("\r", "\n").split("\n");
   const unfolded: string[] = [];
   for (const line of lines) {
-    if (
-      (line.startsWith(" ") || line.startsWith("\t")) && unfolded.length > 0
-    ) {
+    if ((line.startsWith(" ") || line.startsWith("\t")) && unfolded.length > 0) {
       unfolded[unfolded.length - 1] += line.slice(1);
       continue;
     }
@@ -56,10 +53,7 @@ function parseIcalLine(line: string): ParsedIcalLine | null {
   return { key: key.toUpperCase(), params, value };
 }
 
-function parseIcalDateWithTz(
-  value: string | null,
-  tzid: string | null,
-): string | null {
+function parseIcalDateWithTz(value: string | null, tzid: string | null): string | null {
   if (!value) {
     return null;
   }
@@ -68,26 +62,26 @@ function parseIcalDateWithTz(
     return parseIcalDate(compact);
   }
 
-  const dateTimeMatch = compact.match(
-    /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?$/,
-  );
+  const dateTimeMatch = compact.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?$/);
   if (!dateTimeMatch || dateTimeMatch[7] === "Z") {
     return parseIcalDate(compact);
   }
 
   const [, year, month, day, hour, minute, second] = dateTimeMatch;
-  return wallClockToIso(
-    {
-      year: Number(year),
-      month: Number(month),
-      day: Number(day),
-      hour: Number(hour),
-      minute: Number(minute),
-      second: Number(second),
-    },
-    tzid,
-    { fallback: "null" },
-  ) ?? parseIcalDate(compact);
+  return (
+    wallClockToIso(
+      {
+        year: Number(year),
+        month: Number(month),
+        day: Number(day),
+        hour: Number(hour),
+        minute: Number(minute),
+        second: Number(second),
+      },
+      tzid,
+      { fallback: "null" },
+    ) ?? parseIcalDate(compact)
+  );
 }
 
 export function parseIcalFeed(icalContent: string): ParsedEvent[] {
@@ -95,10 +89,7 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
   // mid-stream (observed: libcal returned 23 bytes of a 369KB feed).
   // Without this guard the parser silently emits zero events and the
   // worker reports "no valid events" — which masks the transport bug.
-  if (
-    icalContent.includes("BEGIN:VCALENDAR") &&
-    !icalContent.includes("END:VCALENDAR")
-  ) {
+  if (icalContent.includes("BEGIN:VCALENDAR") && !icalContent.includes("END:VCALENDAR")) {
     throw new Error(
       `Truncated iCal feed (received ${icalContent.length} bytes, missing END:VCALENDAR)`,
     );
@@ -128,9 +119,7 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
   const events: ParsedEvent[] = [];
 
   for (const block of blocks) {
-    const parsedLines = block.map(parseIcalLine).filter((line) =>
-      line !== null
-    );
+    const parsedLines = block.map(parseIcalLine).filter((line) => line !== null);
     const byKey = new Map<string, ParsedIcalLine[]>();
     for (const line of parsedLines) {
       const existing = byKey.get(line.key) ?? [];
@@ -145,8 +134,7 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
     }
 
     const rawDescription = byKey.get("DESCRIPTION")?.[0]?.value.trim() ?? "";
-    const description = stripShortcodes(unescapeIcalText(rawDescription))
-      .trim();
+    const description = stripShortcodes(unescapeIcalText(rawDescription)).trim();
     const dtStart = byKey.get("DTSTART")?.[0];
     const dtEnd = byKey.get("DTEND")?.[0];
     const dtStartRaw = dtStart?.value.trim() ?? null;
@@ -169,10 +157,7 @@ export function parseIcalFeed(icalContent: string): ParsedEvent[] {
     const icalImages: string[] = [];
     for (const attach of byKey.get("ATTACH") ?? []) {
       const val = attach.value.trim();
-      if (
-        /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)/i.test(val) &&
-        validateExternalUrl(val).ok
-      ) {
+      if (/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)/i.test(val) && validateExternalUrl(val).ok) {
         icalImages.push(val);
       }
     }

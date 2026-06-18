@@ -1,56 +1,56 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export type AuthResult =
   | { ok: true; source: "service_role" | "admin"; userId: string | null }
-  | { ok: false; status: 401 | 403; message: string }
+  | { ok: false; status: 401 | 403; message: string };
 
 type UserClient = {
   auth: {
     getUser: () => Promise<{
-      data: { user: { id: string } | null }
-      error: unknown
-    }>
-  }
-}
+      data: { user: { id: string } | null };
+      error: unknown;
+    }>;
+  };
+};
 type UserClientFactory = (
   supabaseUrl: string,
   anonKey: string,
-  options: Parameters<typeof createClient>[2]
-) => UserClient
+  options: Parameters<typeof createClient>[2],
+) => UserClient;
 
 function extractBearer(req: Request): string | null {
-  const header = req.headers.get("Authorization") ?? req.headers.get("authorization")
-  if (!header) return null
-  const match = header.match(/^Bearer\s+(.+)$/i)
-  return match ? match[1].trim() : null
+  const header = req.headers.get("Authorization") ?? req.headers.get("authorization");
+  if (!header) return null;
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1].trim() : null;
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
-  const enc = new TextEncoder()
-  const bufA = enc.encode(a)
-  const bufB = enc.encode(b)
-  if (bufA.length !== bufB.length) return false
-  let diff = 0
+  const enc = new TextEncoder();
+  const bufA = enc.encode(a);
+  const bufB = enc.encode(b);
+  if (bufA.length !== bufB.length) return false;
+  let diff = 0;
   for (let i = 0; i < bufA.length; i++) {
-    diff |= bufA[i] ^ bufB[i]
+    diff |= bufA[i] ^ bufB[i];
   }
-  return diff === 0
+  return diff === 0;
 }
 
 function looksLikeLegacyJwt(value: string): boolean {
-  return value.split(".").length === 3
+  return value.split(".").length === 3;
 }
 
 function looksLikeSecretKey(value: string): boolean {
-  return value.startsWith("sb_secret_")
+  return value.startsWith("sb_secret_");
 }
 
 function isServiceRoleToken(token: string, serviceRoleKey: string): boolean {
-  const normalizedToken = token.trim()
-  const normalizedServiceRoleKey = serviceRoleKey.trim()
+  const normalizedToken = token.trim();
+  const normalizedServiceRoleKey = serviceRoleKey.trim();
 
   if (!normalizedServiceRoleKey || !normalizedToken) {
-    return false
+    return false;
   }
 
   // Keep format checks explicit so both legacy JWT and new sb_secret keys are
@@ -59,17 +59,17 @@ function isServiceRoleToken(token: string, serviceRoleKey: string): boolean {
     return (
       looksLikeSecretKey(normalizedToken) &&
       timingSafeEqual(normalizedToken, normalizedServiceRoleKey)
-    )
+    );
   }
 
   if (looksLikeLegacyJwt(normalizedServiceRoleKey)) {
     return (
       looksLikeLegacyJwt(normalizedToken) &&
       timingSafeEqual(normalizedToken, normalizedServiceRoleKey)
-    )
+    );
   }
 
-  return timingSafeEqual(normalizedToken, normalizedServiceRoleKey)
+  return timingSafeEqual(normalizedToken, normalizedServiceRoleKey);
 }
 
 /**
@@ -87,15 +87,15 @@ export async function requireAdminOrService(
   supabaseUrl: string,
   serviceRoleKey: string,
   anonKey: string,
-  userClientFactory: UserClientFactory = createClient
+  userClientFactory: UserClientFactory = createClient,
 ): Promise<AuthResult> {
-  const token = extractBearer(req)
+  const token = extractBearer(req);
   if (!token) {
-    return { ok: false, status: 401, message: "missing authorization header" }
+    return { ok: false, status: 401, message: "missing authorization header" };
   }
 
   if (isServiceRoleToken(token, serviceRoleKey)) {
-    return { ok: true, source: "service_role", userId: null }
+    return { ok: true, source: "service_role", userId: null };
   }
 
   // User-facing call: verify JWT, role, and access row. This mirrors
@@ -103,50 +103,50 @@ export async function requireAdminOrService(
   const userClient = userClientFactory(supabaseUrl, anonKey, {
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
-  })
+  });
 
   const {
     data: { user },
     error: userError,
-  } = await userClient.auth.getUser()
+  } = await userClient.auth.getUser();
 
   if (userError || !user) {
-    return { ok: false, status: 401, message: "invalid or expired token" }
+    return { ok: false, status: 401, message: "invalid or expired token" };
   }
 
   const { data: profile, error: profileError } = await serviceClient
     .from("user_profiles")
     .select("role")
     .eq("id", user.id)
-    .maybeSingle()
+    .maybeSingle();
 
   if (profileError) {
-    return { ok: false, status: 403, message: "profile lookup failed" }
+    return { ok: false, status: 403, message: "profile lookup failed" };
   }
 
   if (profile?.role !== "admin") {
-    return { ok: false, status: 403, message: "admin role required" }
+    return { ok: false, status: 403, message: "admin role required" };
   }
 
   const { data: access, error: accessError } = await serviceClient
     .from("user_access")
     .select("is_enabled, access_expires_at")
     .eq("user_id", user.id)
-    .maybeSingle()
+    .maybeSingle();
 
   if (accessError) {
-    return { ok: false, status: 403, message: "access lookup failed" }
+    return { ok: false, status: 403, message: "access lookup failed" };
   }
 
   if (access?.is_enabled !== true) {
-    return { ok: false, status: 403, message: "enabled admin access required" }
+    return { ok: false, status: 403, message: "enabled admin access required" };
   }
 
   if (access.access_expires_at && new Date(access.access_expires_at) <= new Date()) {
-    return { ok: false, status: 403, message: "enabled admin access required" }
+    return { ok: false, status: 403, message: "enabled admin access required" };
   }
 
-  return { ok: true, source: "admin", userId: user.id }
+  return { ok: true, source: "admin", userId: user.id };
 }
 
 /**
@@ -154,12 +154,12 @@ export async function requireAdminOrService(
  * Use for functions that are only called internally (function-to-function, cron).
  */
 export function requireServiceRole(req: Request, serviceRoleKey: string): AuthResult {
-  const token = extractBearer(req)
+  const token = extractBearer(req);
   if (!token) {
-    return { ok: false, status: 401, message: "missing authorization header" }
+    return { ok: false, status: 401, message: "missing authorization header" };
   }
   if (!isServiceRoleToken(token, serviceRoleKey)) {
-    return { ok: false, status: 403, message: "service role required" }
+    return { ok: false, status: 403, message: "service role required" };
   }
-  return { ok: true, source: "service_role", userId: null }
+  return { ok: true, source: "service_role", userId: null };
 }

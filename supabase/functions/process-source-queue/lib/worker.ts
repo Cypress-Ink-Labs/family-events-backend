@@ -5,9 +5,7 @@ import {
   buildParserContext,
   importParsedSourceEvents,
 } from "../../scrape-source/lib/process-source.ts";
-import {
-  validateParsedEvents,
-} from "../../scrape-source/lib/extraction-pipeline.ts";
+import { validateParsedEvents } from "../../scrape-source/lib/extraction-pipeline.ts";
 import type {
   EventSourceRow,
   ExtractionMode,
@@ -36,25 +34,18 @@ interface SourceQueueWorkerDependencies {
   extractWithLlm: typeof extractWithLlm;
 }
 
-export function shouldReleaseBeforeSourceStart(
-  elapsedMs: number,
-  budgetMs = 105_000,
-): boolean {
+export function shouldReleaseBeforeSourceStart(elapsedMs: number, budgetMs = 105_000): boolean {
   return elapsedMs >= budgetMs;
 }
 
-export function sourceRetryDelayMinutes(
-  attemptCount: number,
-): 5 | 15 | 60 | null {
+export function sourceRetryDelayMinutes(attemptCount: number): 5 | 15 | 60 | null {
   if (attemptCount >= 4) return null;
   if (attemptCount === 1) return 5;
   if (attemptCount === 2) return 15;
   return 60;
 }
 
-export function buildSourceRunInsert(
-  sourceId: string,
-): { source_id: string; status: "running" } {
+export function buildSourceRunInsert(sourceId: string): { source_id: string; status: "running" } {
   return { source_id: sourceId, status: "running" };
 }
 
@@ -101,12 +92,8 @@ export function planSourceQueueClaimHandling(
   return { start: first, release: rest };
 }
 
-export async function reapStuckSourceQueueRows(
-  supabase: SupabaseClient,
-): Promise<number> {
-  const { data, error } = await supabase.rpc(
-    "reap_stuck_source_scrape_queue_rows",
-  );
+export async function reapStuckSourceQueueRows(supabase: SupabaseClient): Promise<number> {
+  const { data, error } = await supabase.rpc("reap_stuck_source_scrape_queue_rows");
   if (error) throw error;
   return Number(data ?? 0);
 }
@@ -124,12 +111,9 @@ export async function markSkipped(
 }
 
 export async function markStarted(supabase: SupabaseClient, queueId: number) {
-  const { data, error } = await supabase.rpc(
-    "mark_source_scrape_queue_started",
-    {
-      p_queue_id: queueId,
-    },
-  );
+  const { data, error } = await supabase.rpc("mark_source_scrape_queue_started", {
+    p_queue_id: queueId,
+  });
   if (error) throw error;
   return data as SourceQueueRow;
 }
@@ -174,9 +158,7 @@ export async function persistExtractionTrace(
   supabase: SupabaseClient,
   input: Record<string, unknown>,
 ): Promise<void> {
-  const { error } = await supabase.from("source_extraction_traces").insert(
-    input,
-  );
+  const { error } = await supabase.from("source_extraction_traces").insert(input);
   if (error) throw error;
 }
 
@@ -229,11 +211,11 @@ async function handleExtractionFailure(
 
 type RunnableSourceRun =
   | {
-    status: "loaded";
-    source: EventSourceRow;
-    startedRow: SourceQueueRow;
-    runId: string;
-  }
+      status: "loaded";
+      source: EventSourceRow;
+      startedRow: SourceQueueRow;
+      runId: string;
+    }
   | { status: "skipped"; result: ProcessSourceQueueResult };
 
 type SourceExtractionResult =
@@ -297,12 +279,9 @@ async function runDeterministicExtractionPhase(
   }
 
   try {
-    const events = validateParsedEvents(
-      await parser.extractEvents(source, artifact, ctx),
-    );
-    const fallbackReason = events.length === 0
-      ? "deterministic extractor returned no events"
-      : null;
+    const events = validateParsedEvents(await parser.extractEvents(source, artifact, ctx));
+    const fallbackReason =
+      events.length === 0 ? "deterministic extractor returned no events" : null;
     await persistExtractionTrace(supabase, {
       source_queue_id: row.id,
       source_run_id: runId,
@@ -317,11 +296,7 @@ async function runDeterministicExtractionPhase(
     return {
       events,
       error: null,
-      shouldUseLlm: shouldFallbackToLlm(
-        source.extraction_mode,
-        events.length,
-        null,
-      ),
+      shouldUseLlm: shouldFallbackToLlm(source.extraction_mode, events.length, null),
       fallbackReason,
     };
   } catch (err) {
@@ -369,9 +344,7 @@ async function extractParsedEventsForSource(
   }
 
   const ctx = buildParserContext(
-    source.city_id
-      ? await resolveTimezone(supabase, source)
-      : "America/Chicago",
+    source.city_id ? await resolveTimezone(supabase, source) : "America/Chicago",
   );
   let artifact: FetchedArtifact;
   try {
@@ -403,9 +376,10 @@ async function extractParsedEventsForSource(
     source.extraction_mode === "deterministic" &&
     (deterministic.error || deterministic.events.length === 0)
   ) {
-    const message = deterministic.error instanceof Error
-      ? deterministic.error.message
-      : "Deterministic extraction returned no valid events";
+    const message =
+      deterministic.error instanceof Error
+        ? deterministic.error.message
+        : "Deterministic extraction returned no valid events";
     await markRunError(supabase, runId, message);
     await scheduleRetry(supabase, row.id, startedRow.attempt_count, message);
     return {
@@ -419,9 +393,8 @@ async function extractParsedEventsForSource(
       function: "process-source-queue",
       source_id: source.id,
       queue_row_id: row.id,
-      deterministic_error: deterministic.error instanceof Error
-        ? deterministic.error.message
-        : null,
+      deterministic_error:
+        deterministic.error instanceof Error ? deterministic.error.message : null,
     });
   }
 
@@ -518,10 +491,7 @@ export async function processSourceQueueRow(
   return { outcome: "succeeded", imported: result.eventsImported };
 }
 
-async function resolveTimezone(
-  supabase: SupabaseClient,
-  source: EventSourceRow,
-): Promise<string> {
+async function resolveTimezone(supabase: SupabaseClient, source: EventSourceRow): Promise<string> {
   if (!source.city_id) return "America/Chicago";
   const { data } = await supabase
     .from("cities")
@@ -529,7 +499,5 @@ async function resolveTimezone(
     .eq("id", source.city_id)
     .maybeSingle();
   const timezone = (data as { timezone?: unknown } | null)?.timezone;
-  return typeof timezone === "string" && timezone
-    ? timezone
-    : "America/Chicago";
+  return typeof timezone === "string" && timezone ? timezone : "America/Chicago";
 }

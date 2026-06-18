@@ -30,8 +30,11 @@ edge runtime is unaffected, hence P3.)
 ```ts
 if (results.length > 0 && supabaseUrl && serviceRoleKey) {
   const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch((err) => {
-    logEdgeEvent("warn", "source-queue kick failed",
-      errorContext(err, { function: "scrape-source", stage: "kick-source" }));
+    logEdgeEvent(
+      "warn",
+      "source-queue kick failed",
+      errorContext(err, { function: "scrape-source", stage: "kick-source" }),
+    );
   });
   if (typeof EdgeRuntime !== "undefined") {
     EdgeRuntime.waitUntil(kick);
@@ -50,8 +53,11 @@ Change the branch so the promise is always accounted for:
 ```ts
 if (results.length > 0 && supabaseUrl && serviceRoleKey) {
   const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch((err) => {
-    logEdgeEvent("warn", "source-queue kick failed",
-      errorContext(err, { function: "scrape-source", stage: "kick-source" }));
+    logEdgeEvent(
+      "warn",
+      "source-queue kick failed",
+      errorContext(err, { function: "scrape-source", stage: "kick-source" }),
+    );
   });
   if (typeof EdgeRuntime !== "undefined") {
     EdgeRuntime.waitUntil(kick);
@@ -77,10 +83,10 @@ here is independently valuable.)
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Tests | `deno test` (cwd `supabase/functions`) | pass |
+| Purpose   | Command                                | Expected |
+| --------- | -------------------------------------- | -------- |
+| Typecheck | `pnpm run check`                       | exit 0   |
+| Tests     | `deno test` (cwd `supabase/functions`) | pass     |
 
 ## Done criteria
 

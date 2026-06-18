@@ -57,15 +57,13 @@ interface AuthEmailHookPayload {
 function usernameFromUser(user: AuthEmailHookPayload["user"]): string {
   return (
     user.user_metadata?.display_name ??
-      user.user_metadata?.name ??
-      user.user_metadata?.full_name ??
-      user.email.split("@")[0]
+    user.user_metadata?.name ??
+    user.user_metadata?.full_name ??
+    user.email.split("@")[0]
   );
 }
 
-function buildVerifyLink(
-  emailData: AuthEmailHookPayload["email_data"],
-): string {
+function buildVerifyLink(emailData: AuthEmailHookPayload["email_data"]): string {
   const authBaseUrl = (Deno.env.get("SUPABASE_URL") ?? emailData.site_url)
     .replace(/\/auth\/v1\/?$/, "")
     .replace(/\/$/, "");
@@ -109,7 +107,9 @@ function buildActionEmailHtml({
   heading?: string;
   tagline?: string;
 }): string {
-  const logoUrl = (Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app").replace(/\/$/, "") + "/brand/family-events-logo.png";
+  const logoUrl =
+    (Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app").replace(/\/$/, "") +
+    "/brand/family-events-logo.png";
   const displayHeading = heading ?? actionLabel;
   const displayTagline = tagline ?? "One-click access";
 
@@ -190,9 +190,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
 async function sendEmail(
   apiKey: string,
   body: ResendBody,
-): Promise<
-  { ok: true; id: string } | { ok: false; status: number; body: string }
-> {
+): Promise<{ ok: true; id: string } | { ok: false; status: number; body: string }> {
   const response = await fetch(RESEND_API_ENDPOINT, {
     method: "POST",
     headers: {
@@ -256,8 +254,7 @@ Deno.serve(async (req: Request) => {
   const { email_action_type } = email_data;
 
   const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
-  const resendFrom = Deno.env.get("RESEND_FROM") ??
-    "Family Events <onboarding@resend.dev>";
+  const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>";
   const username = usernameFromUser(user);
 
   if (!resendApiKey) {
@@ -278,12 +275,11 @@ Deno.serve(async (req: Request) => {
       body = {
         from: resendFrom,
         to: [user.email],
-        subject: isSignup
-          ? "Confirm your Family Events email"
-          : "Your Family Events sign-in link",
+        subject: isSignup ? "Confirm your Family Events email" : "Your Family Events sign-in link",
         html: buildActionEmailHtml({
           username,
-          intro: "Click the button below to continue to Family Events. This link expires in 24 hours.",
+          intro:
+            "Click the button below to continue to Family Events. This link expires in 24 hours.",
           actionLabel: isSignup ? "Confirm email" : "Sign in to Family Events",
           actionUrl: verifyLink,
           heading: isSignup ? "Confirm Your Email" : "Sign In",
@@ -297,7 +293,8 @@ Deno.serve(async (req: Request) => {
         subject: "Reset your Family Events password",
         html: buildActionEmailHtml({
           username,
-          intro: "Click the button below to reset your Family Events password. This link expires in 24 hours.",
+          intro:
+            "Click the button below to reset your Family Events password. This link expires in 24 hours.",
           actionLabel: "Reset password",
           actionUrl: verifyLink,
           heading: "Reset Password",
@@ -330,10 +327,10 @@ Deno.serve(async (req: Request) => {
         status: result.status,
         body: result.body,
       });
-      await captureEdgeException(
-        new Error(`Resend ${result.status}: ${result.body}`),
-        { function: "send-auth-email", email_action_type },
-      );
+      await captureEdgeException(new Error(`Resend ${result.status}: ${result.body}`), {
+        function: "send-auth-email",
+        email_action_type,
+      });
       // Non-200 tells Supabase Auth the email failed (it will surface an error
       // to the user). This is intentional — a failed delivery is better than
       // silently dropping authentication emails.
@@ -347,10 +344,7 @@ Deno.serve(async (req: Request) => {
     });
     return jsonResponse({});
   } catch (err) {
-    await captureEdgeException(
-      err,
-      errorContext(err, { function: "send-auth-email" }),
-    );
+    await captureEdgeException(err, errorContext(err, { function: "send-auth-email" }));
     logEdgeEvent(
       "error",
       "send-auth-email outer failure",

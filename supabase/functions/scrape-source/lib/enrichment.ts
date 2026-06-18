@@ -21,7 +21,12 @@ const DEFAULT_IMAGE_HOST_ALLOWLIST = [
 
 function normalizeHost(value: string | null | undefined): string | null {
   if (!value) return null;
-  return value.trim().toLowerCase().replace(/^\.+|\.+$/g, "") || null;
+  return (
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/^\.+|\.+$/g, "") || null
+  );
 }
 
 function uniqueHosts(hosts: Array<string | null | undefined>): string[] {
@@ -44,15 +49,13 @@ function hostAllowed(host: string, allowlist: string[]): boolean {
   const normalizedHost = normalizeHost(host);
   if (!normalizedHost) return false;
   return allowlist.some(
-    (allowedHost) =>
-      normalizedHost === allowedHost ||
-      normalizedHost.endsWith(`.${allowedHost}`),
+    (allowedHost) => normalizedHost === allowedHost || normalizedHost.endsWith(`.${allowedHost}`),
   );
 }
 
 function configuredImageHostAllowlist(): string[] {
-  const envValue = Deno.env.get(IMAGE_HOST_ALLOWLIST_ENV) ??
-    Deno.env.get(LEGACY_IMAGE_HOST_ALLOWLIST_ENV) ?? "";
+  const envValue =
+    Deno.env.get(IMAGE_HOST_ALLOWLIST_ENV) ?? Deno.env.get(LEGACY_IMAGE_HOST_ALLOWLIST_ENV) ?? "";
   const configuredHosts = envValue
     .split(",")
     .map((entry) => normalizeHost(entry))
@@ -60,16 +63,13 @@ function configuredImageHostAllowlist(): string[] {
   return uniqueHosts([...DEFAULT_IMAGE_HOST_ALLOWLIST, ...configuredHosts]);
 }
 
-async function measureImageByteLength(
-  imageUrl: string,
-): Promise<number | null> {
+async function measureImageByteLength(imageUrl: string): Promise<number | null> {
   let response: Response;
   try {
     response = await guardedFetch(imageUrl, {
       method: "GET",
       headers: {
-        "User-Agent":
-          "family-events-ingester/1.0 (+https://family-events.local)",
+        "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
         Accept: "image/*",
       },
       signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
@@ -131,8 +131,7 @@ async function validateImageAtIngest(
     response = await guardedFetch(parsedUrl.toString(), {
       method: "HEAD",
       headers: {
-        "User-Agent":
-          "family-events-ingester/1.0 (+https://family-events.local)",
+        "User-Agent": "family-events-ingester/1.0 (+https://family-events.local)",
         Accept: "image/*",
       },
       signal: AbortSignal.timeout(IMAGE_HEAD_TIMEOUT_MS),
@@ -159,16 +158,16 @@ async function validateImageAtIngest(
   if (!contentType.startsWith("image/")) return null;
 
   const contentLengthHeader = response.headers.get("content-length");
-  const contentLength = contentLengthHeader
-    ? Number(contentLengthHeader)
-    : null;
+  const contentLength = contentLengthHeader ? Number(contentLengthHeader) : null;
   const measuredLength = contentLengthHeader
     ? null
     : await measureImageByteLength(finalUrl.toString());
   const effectiveLength = contentLength ?? measuredLength;
   if (
-    effectiveLength === null || !Number.isFinite(effectiveLength) ||
-    effectiveLength <= 0 || effectiveLength > IMAGE_MAX_BYTES
+    effectiveLength === null ||
+    !Number.isFinite(effectiveLength) ||
+    effectiveLength <= 0 ||
+    effectiveLength > IMAGE_MAX_BYTES
   ) {
     return null;
   }
@@ -176,10 +175,7 @@ async function validateImageAtIngest(
   return finalUrl.toString();
 }
 
-function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-): Promise<T | null> {
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | null> {
   return new Promise((resolve) => {
     const timeoutId = setTimeout(() => resolve(null), timeoutMs);
     promise
@@ -194,29 +190,18 @@ export async function sanitizeImagesForIngest(
   sourceUrl: string,
 ): Promise<string[]> {
   const sourceHost = hostFromUrl(sourceUrl);
-  const allowedHosts = uniqueHosts([
-    sourceHost,
-    ...configuredImageHostAllowlist(),
-  ]);
+  const allowedHosts = uniqueHosts([sourceHost, ...configuredImageHostAllowlist()]);
   if (allowedHosts.length === 0) return [];
 
   const imageCandidates = [
-    ...new Set([
-      ...parsed.images,
-      ...(parsed.imageUrl ? [parsed.imageUrl] : []),
-    ]),
+    ...new Set([...parsed.images, ...(parsed.imageUrl ? [parsed.imageUrl] : [])]),
   ];
 
   const validImages: string[] = [];
   let cursor = 0;
 
-  while (
-    cursor < imageCandidates.length && validImages.length < MAX_IMAGES_PER_EVENT
-  ) {
-    const batch = imageCandidates.slice(
-      cursor,
-      cursor + IMAGE_VALIDATION_CONCURRENCY,
-    );
+  while (cursor < imageCandidates.length && validImages.length < MAX_IMAGES_PER_EVENT) {
+    const batch = imageCandidates.slice(cursor, cursor + IMAGE_VALIDATION_CONCURRENCY);
     cursor += batch.length;
 
     const results = await Promise.all(
@@ -224,7 +209,7 @@ export async function sanitizeImagesForIngest(
         withTimeout(
           validateImageAtIngest(imageCandidate, allowedHosts),
           IMAGE_VALIDATION_TIMEOUT_MS,
-        )
+        ),
       ),
     );
 

@@ -60,12 +60,15 @@ Do NOT attempt all 18 at once. Order by likelihood-of-needing-revert × tractabi
 ## Steps (repeat per migration)
 
 ### Step A: Read the UP migration fully
+
 Open `supabase/migrations/<ts>_*.sql`. Enumerate every object/effect it creates or changes: `CREATE TABLE`,
 `ALTER TABLE`, `CREATE FUNCTION`, `CREATE POLICY`, `CREATE INDEX`, `GRANT`/`REVOKE`, `INSERT` (seed data),
 enum additions, trigger creation, materialized views.
 
 ### Step B: Write the inverse, in reverse dependency order
+
 Create `supabase/rollbacks/<ts>_<slug>_down.sql`:
+
 - `BEGIN; … COMMIT;`.
 - Drop/restore in the reverse order of creation (drop dependents before dependencies).
 - For `CREATE OR REPLACE FUNCTION`, the inverse is to restore the **previous** definition if one existed,
@@ -78,12 +81,15 @@ Create `supabase/rollbacks/<ts>_<slug>_down.sql`:
 - Header comment must note any ordering hazard (see the `032000` rollback for the pattern).
 
 ### Step C: Remove the timestamp from `LEGACY_ALLOWLIST`
+
 Delete that entry from `tests/guards/migration-rollbacks.test.mjs`. The guard test's part (2) **requires**
 this — leaving it in fails the build now that a rollback exists.
 
 ### Step D: Verify the rollback actually reverses, against a local DB
+
 This is the real test — a rollback that parses but doesn't reverse is the failure mode this plan exists to
 prevent.
+
 - `pnpm run db:start` (local Supabase).
 - Confirm the migration's objects exist (query `pg_proc`/`pg_policies`/`information_schema`).
 - Run the rollback: `psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/rollbacks/<ts>_*_down.sql`.
@@ -93,12 +99,12 @@ prevent.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Guard test | `pnpm run workspace:test` | migration-rollbacks test passes (pairing + allowlist consistent) |
-| Local DB | `pnpm run db:start` / `pnpm run db:stop` | Supabase up/down |
-| Apply a SQL file | `psql "$DB_URL" -v ON_ERROR_STOP=1 -f <file>` | exit 0 |
-| Inspect objects | `psql "$DB_URL" -c "\df+ <schema>.*"`, `\d <table>`, `select * from pg_policies where tablename='…'` | confirm before/after |
+| Purpose          | Command                                                                                              | Expected                                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Guard test       | `pnpm run workspace:test`                                                                            | migration-rollbacks test passes (pairing + allowlist consistent) |
+| Local DB         | `pnpm run db:start` / `pnpm run db:stop`                                                             | Supabase up/down                                                 |
+| Apply a SQL file | `psql "$DB_URL" -v ON_ERROR_STOP=1 -f <file>`                                                        | exit 0                                                           |
+| Inspect objects  | `psql "$DB_URL" -c "\df+ <schema>.*"`, `\d <table>`, `select * from pg_policies where tablename='…'` | confirm before/after                                             |
 
 ## Done criteria (per migration backfilled)
 
@@ -112,6 +118,7 @@ prevent.
 ## STOP conditions
 
 Stop and report (do not guess) if:
+
 - A migration's effect is genuinely irreversible (dropped column with data, added enum value that other
   rows now use) — document the irreversibility in the rollback header, revert what's safe, and flag the
   rest. Do NOT fabricate a lossy "rollback" that pretends to restore data.

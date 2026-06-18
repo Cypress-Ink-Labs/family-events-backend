@@ -11,42 +11,33 @@ const VALID_UUID_B = "aaaaaaaa-bbbb-4ccc-9ddd-eeeeeeeeeeee";
 
 if (typeof Deno !== "undefined") {
   Deno.test("extractEventIdFromRequest resolves query parameter first", () => {
-    const url = new URL(
-      `https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID_A}`,
-    );
+    const url = new URL(`https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID_A}`);
     assertEquals(extractEventIdFromRequest(url), VALID_UUID_A);
   });
 
   Deno.test("extractEventIdFromRequest resolves path segment fallback", () => {
-    const url = new URL(
-      `https://app.example.com/functions/v1/share-og/${VALID_UUID_B}`,
-    );
+    const url = new URL(`https://app.example.com/functions/v1/share-og/${VALID_UUID_B}`);
     assertEquals(extractEventIdFromRequest(url), VALID_UUID_B);
   });
 
   Deno.test("extractEventIdFromRequest rejects non-UUID input", () => {
-    const url = new URL(
-      "https://app.example.com/functions/v1/share-og?eventId=evt-not-a-uuid",
-    );
+    const url = new URL("https://app.example.com/functions/v1/share-og?eventId=evt-not-a-uuid");
     assertEquals(extractEventIdFromRequest(url), null);
   });
 
   Deno.test("pickOgImage returns first valid HTTPS image URL", () => {
     const image = pickOgImage(
-      [
-        "http://example.com/not-https.jpg",
-        "https://cdn.example.com/event.webp",
-      ],
+      ["http://example.com/not-https.jpg", "https://cdn.example.com/event.webp"],
       "https://app.example.com",
     );
     assertEquals(image, "https://cdn.example.com/event.webp");
   });
 
   Deno.test("pickOgImage falls back when candidate list is invalid", () => {
-    const image = pickOgImage([
-      "javascript:alert(1)",
-      "https://cdn.example.com/readme.txt",
-    ], "https://app.example.com");
+    const image = pickOgImage(
+      ["javascript:alert(1)", "https://cdn.example.com/readme.txt"],
+      "https://app.example.com",
+    );
     assertEquals(image, "https://app.example.com/og-fallback.png");
   });
 
@@ -64,9 +55,6 @@ if (typeof Deno !== "undefined") {
       }),
     );
     assertEquals(response.status, 200);
-    assertEquals(
-      response.headers.get("Access-Control-Allow-Methods"),
-      "GET, OPTIONS",
-    );
+    assertEquals(response.headers.get("Access-Control-Allow-Methods"), "GET, OPTIONS");
   });
 }

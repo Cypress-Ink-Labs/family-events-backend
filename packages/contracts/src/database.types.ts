@@ -1,3512 +1,3423 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   public: {
     Tables: {
       admin_audit_log: {
         Row: {
-          action: string
-          admin_user_id: string | null
-          created_at: string
-          id: string
-          metadata: Json | null
-          target_id: string | null
-          target_type: string | null
-        }
+          action: string;
+          admin_user_id: string | null;
+          created_at: string;
+          id: string;
+          metadata: Json | null;
+          target_id: string | null;
+          target_type: string | null;
+        };
         Insert: {
-          action: string
-          admin_user_id?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          target_id?: string | null
-          target_type?: string | null
-        }
+          action: string;
+          admin_user_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json | null;
+          target_id?: string | null;
+          target_type?: string | null;
+        };
         Update: {
-          action?: string
-          admin_user_id?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          target_id?: string | null
-          target_type?: string | null
-        }
-        Relationships: []
-      }
+          action?: string;
+          admin_user_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json | null;
+          target_id?: string | null;
+          target_type?: string | null;
+        };
+        Relationships: [];
+      };
       admin_event_decisions: {
         Row: {
-          admin_user_id: string | null
-          created_at: string
-          decision_type: string
-          event_id: string
-          id: number
-          new_status: Database["public"]["Enums"]["event_status"] | null
-          new_tags: Json | null
-          old_status: Database["public"]["Enums"]["event_status"] | null
-          old_tags: Json | null
-          reason: string | null
-          source_context: Json | null
-        }
+          admin_user_id: string | null;
+          created_at: string;
+          decision_type: string;
+          event_id: string;
+          id: number;
+          new_status: Database["public"]["Enums"]["event_status"] | null;
+          new_tags: Json | null;
+          old_status: Database["public"]["Enums"]["event_status"] | null;
+          old_tags: Json | null;
+          reason: string | null;
+          source_context: Json | null;
+        };
         Insert: {
-          admin_user_id?: string | null
-          created_at?: string
-          decision_type: string
-          event_id: string
-          id?: number
-          new_status?: Database["public"]["Enums"]["event_status"] | null
-          new_tags?: Json | null
-          old_status?: Database["public"]["Enums"]["event_status"] | null
-          old_tags?: Json | null
-          reason?: string | null
-          source_context?: Json | null
-        }
+          admin_user_id?: string | null;
+          created_at?: string;
+          decision_type: string;
+          event_id: string;
+          id?: number;
+          new_status?: Database["public"]["Enums"]["event_status"] | null;
+          new_tags?: Json | null;
+          old_status?: Database["public"]["Enums"]["event_status"] | null;
+          old_tags?: Json | null;
+          reason?: string | null;
+          source_context?: Json | null;
+        };
         Update: {
-          admin_user_id?: string | null
-          created_at?: string
-          decision_type?: string
-          event_id?: string
-          id?: number
-          new_status?: Database["public"]["Enums"]["event_status"] | null
-          new_tags?: Json | null
-          old_status?: Database["public"]["Enums"]["event_status"] | null
-          old_tags?: Json | null
-          reason?: string | null
-          source_context?: Json | null
-        }
+          admin_user_id?: string | null;
+          created_at?: string;
+          decision_type?: string;
+          event_id?: string;
+          id?: number;
+          new_status?: Database["public"]["Enums"]["event_status"] | null;
+          new_tags?: Json | null;
+          old_status?: Database["public"]["Enums"]["event_status"] | null;
+          old_tags?: Json | null;
+          reason?: string | null;
+          source_context?: Json | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "admin_event_decisions_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "admin_event_decisions_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "admin_event_decisions_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "admin_event_decisions_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       ai_feature_config: {
         Row: {
-          enabled: boolean
-          feature: string
-          model_id: string
-          updated_at: string
-          updated_by: string | null
-        }
+          enabled: boolean;
+          feature: string;
+          model_id: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
         Insert: {
-          enabled?: boolean
-          feature: string
-          model_id: string
-          updated_at?: string
-          updated_by?: string | null
-        }
+          enabled?: boolean;
+          feature: string;
+          model_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
         Update: {
-          enabled?: boolean
-          feature?: string
-          model_id?: string
-          updated_at?: string
-          updated_by?: string | null
-        }
+          enabled?: boolean;
+          feature?: string;
+          model_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "ai_feature_config_model_id_fkey"
-            columns: ["model_id"]
-            isOneToOne: false
-            referencedRelation: "approved_ai_models"
-            referencedColumns: ["id"]
+            foreignKeyName: "ai_feature_config_model_id_fkey";
+            columns: ["model_id"];
+            isOneToOne: false;
+            referencedRelation: "approved_ai_models";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       approved_ai_models: {
         Row: {
-          cost_tier: string
-          description: string
-          display_name: string
-          id: string
-          is_enabled: boolean
-          provider: string
-        }
+          cost_tier: string;
+          description: string;
+          display_name: string;
+          id: string;
+          is_enabled: boolean;
+          provider: string;
+        };
         Insert: {
-          cost_tier?: string
-          description?: string
-          display_name: string
-          id: string
-          is_enabled?: boolean
-          provider: string
-        }
+          cost_tier?: string;
+          description?: string;
+          display_name: string;
+          id: string;
+          is_enabled?: boolean;
+          provider: string;
+        };
         Update: {
-          cost_tier?: string
-          description?: string
-          display_name?: string
-          id?: string
-          is_enabled?: boolean
-          provider?: string
-        }
-        Relationships: []
-      }
+          cost_tier?: string;
+          description?: string;
+          display_name?: string;
+          id?: string;
+          is_enabled?: boolean;
+          provider?: string;
+        };
+        Relationships: [];
+      };
       cities: {
         Row: {
-          country: string
-          created_at: string
-          id: string
-          is_active: boolean
-          latitude: number | null
-          longitude: number | null
-          name: string
-          slug: string
-          state: string | null
-          timezone: string
-        }
+          country: string;
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          latitude: number | null;
+          longitude: number | null;
+          name: string;
+          slug: string;
+          state: string | null;
+          timezone: string;
+        };
         Insert: {
-          country?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          latitude?: number | null
-          longitude?: number | null
-          name: string
-          slug: string
-          state?: string | null
-          timezone?: string
-        }
+          country?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          latitude?: number | null;
+          longitude?: number | null;
+          name: string;
+          slug: string;
+          state?: string | null;
+          timezone?: string;
+        };
         Update: {
-          country?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          latitude?: number | null
-          longitude?: number | null
-          name?: string
-          slug?: string
-          state?: string | null
-          timezone?: string
-        }
-        Relationships: []
-      }
+          country?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          latitude?: number | null;
+          longitude?: number | null;
+          name?: string;
+          slug?: string;
+          state?: string | null;
+          timezone?: string;
+        };
+        Relationships: [];
+      };
       comments: {
         Row: {
-          body: string
-          created_at: string
-          event_id: string
-          id: string
-          is_approved: boolean
-          is_flagged: boolean
-          updated_at: string
-          user_id: string
-        }
+          body: string;
+          created_at: string;
+          event_id: string;
+          id: string;
+          is_approved: boolean;
+          is_flagged: boolean;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          body: string
-          created_at?: string
-          event_id: string
-          id?: string
-          is_approved?: boolean
-          is_flagged?: boolean
-          updated_at?: string
-          user_id: string
-        }
+          body: string;
+          created_at?: string;
+          event_id: string;
+          id?: string;
+          is_approved?: boolean;
+          is_flagged?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          body?: string
-          created_at?: string
-          event_id?: string
-          id?: string
-          is_approved?: boolean
-          is_flagged?: boolean
-          updated_at?: string
-          user_id?: string
-        }
+          body?: string;
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+          is_approved?: boolean;
+          is_flagged?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "comments_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "comments_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "comments_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "comments_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "comments_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_ai_traces: {
         Row: {
-          available_tag_slugs: Json
-          created_at: string
-          event_id: string
-          fallback_reason: string | null
-          id: string
-          input_description: string | null
-          input_title: string
-          model: string | null
-          predicted_fields: Json | null
-          predicted_tags: Json
-          processing_ms: number | null
-          prompt_version: string | null
-          provider: string | null
-          reasoning_summary: string | null
-          source_run_id: string | null
-          status: string
-          trigger_type: string
-        }
+          available_tag_slugs: Json;
+          created_at: string;
+          event_id: string;
+          fallback_reason: string | null;
+          id: string;
+          input_description: string | null;
+          input_title: string;
+          model: string | null;
+          predicted_fields: Json | null;
+          predicted_tags: Json;
+          processing_ms: number | null;
+          prompt_version: string | null;
+          provider: string | null;
+          reasoning_summary: string | null;
+          source_run_id: string | null;
+          status: string;
+          trigger_type: string;
+        };
         Insert: {
-          available_tag_slugs?: Json
-          created_at?: string
-          event_id: string
-          fallback_reason?: string | null
-          id?: string
-          input_description?: string | null
-          input_title: string
-          model?: string | null
-          predicted_fields?: Json | null
-          predicted_tags?: Json
-          processing_ms?: number | null
-          prompt_version?: string | null
-          provider?: string | null
-          reasoning_summary?: string | null
-          source_run_id?: string | null
-          status?: string
-          trigger_type?: string
-        }
+          available_tag_slugs?: Json;
+          created_at?: string;
+          event_id: string;
+          fallback_reason?: string | null;
+          id?: string;
+          input_description?: string | null;
+          input_title: string;
+          model?: string | null;
+          predicted_fields?: Json | null;
+          predicted_tags?: Json;
+          processing_ms?: number | null;
+          prompt_version?: string | null;
+          provider?: string | null;
+          reasoning_summary?: string | null;
+          source_run_id?: string | null;
+          status?: string;
+          trigger_type?: string;
+        };
         Update: {
-          available_tag_slugs?: Json
-          created_at?: string
-          event_id?: string
-          fallback_reason?: string | null
-          id?: string
-          input_description?: string | null
-          input_title?: string
-          model?: string | null
-          predicted_fields?: Json | null
-          predicted_tags?: Json
-          processing_ms?: number | null
-          prompt_version?: string | null
-          provider?: string | null
-          reasoning_summary?: string | null
-          source_run_id?: string | null
-          status?: string
-          trigger_type?: string
-        }
+          available_tag_slugs?: Json;
+          created_at?: string;
+          event_id?: string;
+          fallback_reason?: string | null;
+          id?: string;
+          input_description?: string | null;
+          input_title?: string;
+          model?: string | null;
+          predicted_fields?: Json | null;
+          predicted_tags?: Json;
+          processing_ms?: number | null;
+          prompt_version?: string | null;
+          provider?: string | null;
+          reasoning_summary?: string | null;
+          source_run_id?: string | null;
+          status?: string;
+          trigger_type?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_ai_traces_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_ai_traces_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_ai_traces_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_ai_traces_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_ai_traces_source_run_id_fkey"
-            columns: ["source_run_id"]
-            isOneToOne: false
-            referencedRelation: "source_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_ai_traces_source_run_id_fkey";
+            columns: ["source_run_id"];
+            isOneToOne: false;
+            referencedRelation: "source_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_embeddings: {
         Row: {
-          created_at: string
-          embedding: string
-          event_id: string
-          id: number
-          model: string
-        }
+          created_at: string;
+          embedding: string;
+          event_id: string;
+          id: number;
+          model: string;
+        };
         Insert: {
-          created_at?: string
-          embedding: string
-          event_id: string
-          id?: number
-          model?: string
-        }
+          created_at?: string;
+          embedding: string;
+          event_id: string;
+          id?: number;
+          model?: string;
+        };
         Update: {
-          created_at?: string
-          embedding?: string
-          event_id?: string
-          id?: number
-          model?: string
-        }
+          created_at?: string;
+          embedding?: string;
+          event_id?: string;
+          id?: number;
+          model?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_embeddings_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: true
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_embeddings_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: true;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_embeddings_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: true
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_embeddings_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: true;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_image_attributions: {
         Row: {
-          created_at: string
-          download_tracked_at: string | null
-          download_tracking_attempts: number
-          download_tracking_last_error: string | null
-          download_tracking_next_attempt_at: string
-          download_tracking_status: string
-          event_id: string
-          id: string
-          image_url: string
-          matched_tag: string | null
-          pexels_photo_id: string | null
-          pexels_photo_url: string | null
-          pexels_photographer_name: string | null
-          pexels_photographer_profile_url: string | null
-          pixabay_photo_id: string | null
-          pixabay_photo_url: string | null
-          pixabay_photographer_name: string | null
-          pixabay_photographer_username: string | null
-          provider: string
-          unsplash_download_location: string | null
-          unsplash_photo_id: string | null
-          unsplash_photo_url: string | null
-          unsplash_photographer_name: string | null
-          unsplash_photographer_profile_url: string | null
-          unsplash_photographer_username: string | null
-          updated_at: string
-        }
+          created_at: string;
+          download_tracked_at: string | null;
+          download_tracking_attempts: number;
+          download_tracking_last_error: string | null;
+          download_tracking_next_attempt_at: string;
+          download_tracking_status: string;
+          event_id: string;
+          id: string;
+          image_url: string;
+          matched_tag: string | null;
+          pexels_photo_id: string | null;
+          pexels_photo_url: string | null;
+          pexels_photographer_name: string | null;
+          pexels_photographer_profile_url: string | null;
+          pixabay_photo_id: string | null;
+          pixabay_photo_url: string | null;
+          pixabay_photographer_name: string | null;
+          pixabay_photographer_username: string | null;
+          provider: string;
+          unsplash_download_location: string | null;
+          unsplash_photo_id: string | null;
+          unsplash_photo_url: string | null;
+          unsplash_photographer_name: string | null;
+          unsplash_photographer_profile_url: string | null;
+          unsplash_photographer_username: string | null;
+          updated_at: string;
+        };
         Insert: {
-          created_at?: string
-          download_tracked_at?: string | null
-          download_tracking_attempts?: number
-          download_tracking_last_error?: string | null
-          download_tracking_next_attempt_at?: string
-          download_tracking_status?: string
-          event_id: string
-          id?: string
-          image_url: string
-          matched_tag?: string | null
-          pexels_photo_id?: string | null
-          pexels_photo_url?: string | null
-          pexels_photographer_name?: string | null
-          pexels_photographer_profile_url?: string | null
-          pixabay_photo_id?: string | null
-          pixabay_photo_url?: string | null
-          pixabay_photographer_name?: string | null
-          pixabay_photographer_username?: string | null
-          provider?: string
-          unsplash_download_location?: string | null
-          unsplash_photo_id?: string | null
-          unsplash_photo_url?: string | null
-          unsplash_photographer_name?: string | null
-          unsplash_photographer_profile_url?: string | null
-          unsplash_photographer_username?: string | null
-          updated_at?: string
-        }
+          created_at?: string;
+          download_tracked_at?: string | null;
+          download_tracking_attempts?: number;
+          download_tracking_last_error?: string | null;
+          download_tracking_next_attempt_at?: string;
+          download_tracking_status?: string;
+          event_id: string;
+          id?: string;
+          image_url: string;
+          matched_tag?: string | null;
+          pexels_photo_id?: string | null;
+          pexels_photo_url?: string | null;
+          pexels_photographer_name?: string | null;
+          pexels_photographer_profile_url?: string | null;
+          pixabay_photo_id?: string | null;
+          pixabay_photo_url?: string | null;
+          pixabay_photographer_name?: string | null;
+          pixabay_photographer_username?: string | null;
+          provider?: string;
+          unsplash_download_location?: string | null;
+          unsplash_photo_id?: string | null;
+          unsplash_photo_url?: string | null;
+          unsplash_photographer_name?: string | null;
+          unsplash_photographer_profile_url?: string | null;
+          unsplash_photographer_username?: string | null;
+          updated_at?: string;
+        };
         Update: {
-          created_at?: string
-          download_tracked_at?: string | null
-          download_tracking_attempts?: number
-          download_tracking_last_error?: string | null
-          download_tracking_next_attempt_at?: string
-          download_tracking_status?: string
-          event_id?: string
-          id?: string
-          image_url?: string
-          matched_tag?: string | null
-          pexels_photo_id?: string | null
-          pexels_photo_url?: string | null
-          pexels_photographer_name?: string | null
-          pexels_photographer_profile_url?: string | null
-          pixabay_photo_id?: string | null
-          pixabay_photo_url?: string | null
-          pixabay_photographer_name?: string | null
-          pixabay_photographer_username?: string | null
-          provider?: string
-          unsplash_download_location?: string | null
-          unsplash_photo_id?: string | null
-          unsplash_photo_url?: string | null
-          unsplash_photographer_name?: string | null
-          unsplash_photographer_profile_url?: string | null
-          unsplash_photographer_username?: string | null
-          updated_at?: string
-        }
+          created_at?: string;
+          download_tracked_at?: string | null;
+          download_tracking_attempts?: number;
+          download_tracking_last_error?: string | null;
+          download_tracking_next_attempt_at?: string;
+          download_tracking_status?: string;
+          event_id?: string;
+          id?: string;
+          image_url?: string;
+          matched_tag?: string | null;
+          pexels_photo_id?: string | null;
+          pexels_photo_url?: string | null;
+          pexels_photographer_name?: string | null;
+          pexels_photographer_profile_url?: string | null;
+          pixabay_photo_id?: string | null;
+          pixabay_photo_url?: string | null;
+          pixabay_photographer_name?: string | null;
+          pixabay_photographer_username?: string | null;
+          provider?: string;
+          unsplash_download_location?: string | null;
+          unsplash_photo_id?: string | null;
+          unsplash_photo_url?: string | null;
+          unsplash_photographer_name?: string | null;
+          unsplash_photographer_profile_url?: string | null;
+          unsplash_photographer_username?: string | null;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_image_attributions_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_image_attributions_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_image_attributions_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_image_attributions_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_llm_review_queue: {
         Row: {
-          attempt_count: number
-          created_at: string
-          enqueued_at: string
-          event_id: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          max_attempts: number
-          next_attempt_at: string
-          source_id: string | null
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["llm_event_review_queue_status"]
-          trigger_type: string
-          updated_at: string
-        }
+          attempt_count: number;
+          created_at: string;
+          enqueued_at: string;
+          event_id: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          max_attempts: number;
+          next_attempt_at: string;
+          source_id: string | null;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"];
+          trigger_type: string;
+          updated_at: string;
+        };
         Insert: {
-          attempt_count?: number
-          created_at?: string
-          enqueued_at?: string
-          event_id: string
-          finished_at?: string | null
-          id?: number
-          last_error?: string | null
-          max_attempts?: number
-          next_attempt_at?: string
-          source_id?: string | null
-          source_run_id?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["llm_event_review_queue_status"]
-          trigger_type?: string
-          updated_at?: string
-        }
+          attempt_count?: number;
+          created_at?: string;
+          enqueued_at?: string;
+          event_id: string;
+          finished_at?: string | null;
+          id?: number;
+          last_error?: string | null;
+          max_attempts?: number;
+          next_attempt_at?: string;
+          source_id?: string | null;
+          source_run_id?: string | null;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["llm_event_review_queue_status"];
+          trigger_type?: string;
+          updated_at?: string;
+        };
         Update: {
-          attempt_count?: number
-          created_at?: string
-          enqueued_at?: string
-          event_id?: string
-          finished_at?: string | null
-          id?: number
-          last_error?: string | null
-          max_attempts?: number
-          next_attempt_at?: string
-          source_id?: string | null
-          source_run_id?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["llm_event_review_queue_status"]
-          trigger_type?: string
-          updated_at?: string
-        }
+          attempt_count?: number;
+          created_at?: string;
+          enqueued_at?: string;
+          event_id?: string;
+          finished_at?: string | null;
+          id?: number;
+          last_error?: string | null;
+          max_attempts?: number;
+          next_attempt_at?: string;
+          source_id?: string | null;
+          source_run_id?: string | null;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["llm_event_review_queue_status"];
+          trigger_type?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_llm_review_queue_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_queue_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_llm_review_queue_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_queue_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_llm_review_queue_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "event_sources"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_queue_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "event_sources";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_llm_review_queue_source_run_id_fkey"
-            columns: ["source_run_id"]
-            isOneToOne: false
-            referencedRelation: "source_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_queue_source_run_id_fkey";
+            columns: ["source_run_id"];
+            isOneToOne: false;
+            referencedRelation: "source_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_llm_review_traces: {
         Row: {
-          applied_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          confidence: number | null
-          created_at: string
-          error_code: string | null
-          error_message: string | null
-          event_id: string
-          flags: string[]
-          id: number
-          input_snapshot: Json | null
-          model: string | null
-          model_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          normalized_title: string | null
-          processing_ms: number | null
-          prompt_version: string
-          provider: string | null
-          queue_id: number | null
-          raw_response: Json | null
-          reason: string | null
-          source_id: string | null
-          source_run_id: string | null
-          status: Database["public"]["Enums"]["llm_event_review_status"]
-          suggested_category: string | null
-        }
+          applied_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          confidence: number | null;
+          created_at: string;
+          error_code: string | null;
+          error_message: string | null;
+          event_id: string;
+          flags: string[];
+          id: number;
+          input_snapshot: Json | null;
+          model: string | null;
+          model_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          normalized_title: string | null;
+          processing_ms: number | null;
+          prompt_version: string;
+          provider: string | null;
+          queue_id: number | null;
+          raw_response: Json | null;
+          reason: string | null;
+          source_id: string | null;
+          source_run_id: string | null;
+          status: Database["public"]["Enums"]["llm_event_review_status"];
+          suggested_category: string | null;
+        };
         Insert: {
-          applied_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          confidence?: number | null
-          created_at?: string
-          error_code?: string | null
-          error_message?: string | null
-          event_id: string
-          flags?: string[]
-          id?: number
-          input_snapshot?: Json | null
-          model?: string | null
-          model_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          normalized_title?: string | null
-          processing_ms?: number | null
-          prompt_version: string
-          provider?: string | null
-          queue_id?: number | null
-          raw_response?: Json | null
-          reason?: string | null
-          source_id?: string | null
-          source_run_id?: string | null
-          status: Database["public"]["Enums"]["llm_event_review_status"]
-          suggested_category?: string | null
-        }
+          applied_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          confidence?: number | null;
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          event_id: string;
+          flags?: string[];
+          id?: number;
+          input_snapshot?: Json | null;
+          model?: string | null;
+          model_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          normalized_title?: string | null;
+          processing_ms?: number | null;
+          prompt_version: string;
+          provider?: string | null;
+          queue_id?: number | null;
+          raw_response?: Json | null;
+          reason?: string | null;
+          source_id?: string | null;
+          source_run_id?: string | null;
+          status: Database["public"]["Enums"]["llm_event_review_status"];
+          suggested_category?: string | null;
+        };
         Update: {
-          applied_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          confidence?: number | null
-          created_at?: string
-          error_code?: string | null
-          error_message?: string | null
-          event_id?: string
-          flags?: string[]
-          id?: number
-          input_snapshot?: Json | null
-          model?: string | null
-          model_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          normalized_title?: string | null
-          processing_ms?: number | null
-          prompt_version?: string
-          provider?: string | null
-          queue_id?: number | null
-          raw_response?: Json | null
-          reason?: string | null
-          source_id?: string | null
-          source_run_id?: string | null
-          status?: Database["public"]["Enums"]["llm_event_review_status"]
-          suggested_category?: string | null
-        }
+          applied_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          confidence?: number | null;
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          event_id?: string;
+          flags?: string[];
+          id?: number;
+          input_snapshot?: Json | null;
+          model?: string | null;
+          model_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          normalized_title?: string | null;
+          processing_ms?: number | null;
+          prompt_version?: string;
+          provider?: string | null;
+          queue_id?: number | null;
+          raw_response?: Json | null;
+          reason?: string | null;
+          source_id?: string | null;
+          source_run_id?: string | null;
+          status?: Database["public"]["Enums"]["llm_event_review_status"];
+          suggested_category?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_llm_review_traces_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_traces_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_llm_review_traces_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_traces_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_llm_review_traces_queue_id_fkey"
-            columns: ["queue_id"]
-            isOneToOne: false
-            referencedRelation: "event_llm_review_queue"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_traces_queue_id_fkey";
+            columns: ["queue_id"];
+            isOneToOne: false;
+            referencedRelation: "event_llm_review_queue";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_llm_review_traces_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "event_sources"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_traces_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "event_sources";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_llm_review_traces_source_run_id_fkey"
-            columns: ["source_run_id"]
-            isOneToOne: false
-            referencedRelation: "source_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_llm_review_traces_source_run_id_fkey";
+            columns: ["source_run_id"];
+            isOneToOne: false;
+            referencedRelation: "source_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_sources: {
         Row: {
-          auto_approve: boolean
-          city_id: string | null
-          created_at: string
-          date_window_days: number | null
-          error_count: number
-          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
-          id: string
-          is_active: boolean
-          last_scraped_at: string | null
-          last_status: string | null
-          name: string
-          notes: string | null
-          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
-          scrape_interval_hours: number
-          source_type: string
-          updated_at: string
-          url: string
-        }
+          auto_approve: boolean;
+          city_id: string | null;
+          created_at: string;
+          date_window_days: number | null;
+          error_count: number;
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"];
+          id: string;
+          is_active: boolean;
+          last_scraped_at: string | null;
+          last_status: string | null;
+          name: string;
+          notes: string | null;
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"];
+          scrape_interval_hours: number;
+          source_type: string;
+          updated_at: string;
+          url: string;
+        };
         Insert: {
-          auto_approve?: boolean
-          city_id?: string | null
-          created_at?: string
-          date_window_days?: number | null
-          error_count?: number
-          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"]
-          id?: string
-          is_active?: boolean
-          last_scraped_at?: string | null
-          last_status?: string | null
-          name: string
-          notes?: string | null
-          processing_mode?: Database["public"]["Enums"]["event_processing_mode"]
-          scrape_interval_hours?: number
-          source_type?: string
-          updated_at?: string
-          url: string
-        }
+          auto_approve?: boolean;
+          city_id?: string | null;
+          created_at?: string;
+          date_window_days?: number | null;
+          error_count?: number;
+          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"];
+          id?: string;
+          is_active?: boolean;
+          last_scraped_at?: string | null;
+          last_status?: string | null;
+          name: string;
+          notes?: string | null;
+          processing_mode?: Database["public"]["Enums"]["event_processing_mode"];
+          scrape_interval_hours?: number;
+          source_type?: string;
+          updated_at?: string;
+          url: string;
+        };
         Update: {
-          auto_approve?: boolean
-          city_id?: string | null
-          created_at?: string
-          date_window_days?: number | null
-          error_count?: number
-          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"]
-          id?: string
-          is_active?: boolean
-          last_scraped_at?: string | null
-          last_status?: string | null
-          name?: string
-          notes?: string | null
-          processing_mode?: Database["public"]["Enums"]["event_processing_mode"]
-          scrape_interval_hours?: number
-          source_type?: string
-          updated_at?: string
-          url?: string
-        }
+          auto_approve?: boolean;
+          city_id?: string | null;
+          created_at?: string;
+          date_window_days?: number | null;
+          error_count?: number;
+          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"];
+          id?: string;
+          is_active?: boolean;
+          last_scraped_at?: string | null;
+          last_status?: string | null;
+          name?: string;
+          notes?: string | null;
+          processing_mode?: Database["public"]["Enums"]["event_processing_mode"];
+          scrape_interval_hours?: number;
+          source_type?: string;
+          updated_at?: string;
+          url?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_sources_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_sources_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "cities";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_tag_queue: {
         Row: {
-          attempt_count: number
-          enqueued_at: string
-          event_id: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          next_attempt_at: string
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["event_tag_queue_status"]
-          trigger_type: string
-        }
+          attempt_count: number;
+          enqueued_at: string;
+          event_id: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          next_attempt_at: string;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["event_tag_queue_status"];
+          trigger_type: string;
+        };
         Insert: {
-          attempt_count?: number
-          enqueued_at?: string
-          event_id: string
-          finished_at?: string | null
-          id?: never
-          last_error?: string | null
-          next_attempt_at?: string
-          source_run_id?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["event_tag_queue_status"]
-          trigger_type?: string
-        }
+          attempt_count?: number;
+          enqueued_at?: string;
+          event_id: string;
+          finished_at?: string | null;
+          id?: never;
+          last_error?: string | null;
+          next_attempt_at?: string;
+          source_run_id?: string | null;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["event_tag_queue_status"];
+          trigger_type?: string;
+        };
         Update: {
-          attempt_count?: number
-          enqueued_at?: string
-          event_id?: string
-          finished_at?: string | null
-          id?: never
-          last_error?: string | null
-          next_attempt_at?: string
-          source_run_id?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["event_tag_queue_status"]
-          trigger_type?: string
-        }
+          attempt_count?: number;
+          enqueued_at?: string;
+          event_id?: string;
+          finished_at?: string | null;
+          id?: never;
+          last_error?: string | null;
+          next_attempt_at?: string;
+          source_run_id?: string | null;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["event_tag_queue_status"];
+          trigger_type?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_tag_queue_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_tag_queue_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_tag_queue_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_tag_queue_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_tag_queue_source_run_id_fkey"
-            columns: ["source_run_id"]
-            isOneToOne: false
-            referencedRelation: "source_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_tag_queue_source_run_id_fkey";
+            columns: ["source_run_id"];
+            isOneToOne: false;
+            referencedRelation: "source_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_tags: {
         Row: {
-          confidence: number
-          created_at: string
-          event_id: string
-          is_manual_override: boolean
-          tag_id: string
-        }
+          confidence: number;
+          created_at: string;
+          event_id: string;
+          is_manual_override: boolean;
+          tag_id: string;
+        };
         Insert: {
-          confidence?: number
-          created_at?: string
-          event_id: string
-          is_manual_override?: boolean
-          tag_id: string
-        }
+          confidence?: number;
+          created_at?: string;
+          event_id: string;
+          is_manual_override?: boolean;
+          tag_id: string;
+        };
         Update: {
-          confidence?: number
-          created_at?: string
-          event_id?: string
-          is_manual_override?: boolean
-          tag_id?: string
-        }
+          confidence?: number;
+          created_at?: string;
+          event_id?: string;
+          is_manual_override?: boolean;
+          tag_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "event_tags_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_tags_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_tags_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_tags_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
+            foreignKeyName: "event_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "tags";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       events: {
         Row: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          submitted_by: string | null
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }
+          address: string | null;
+          admin_last_edited_at: string | null;
+          admin_last_edited_by: string | null;
+          admin_locked_fields: string[];
+          age_max: number | null;
+          age_min: number | null;
+          ai_confidence: number | null;
+          ai_tag_model: string | null;
+          ai_tag_provider: string | null;
+          ai_tag_status: string | null;
+          city_id: string | null;
+          created_at: string;
+          description: string | null;
+          end_datetime: string | null;
+          id: string;
+          images: Json;
+          is_featured: boolean;
+          is_free: boolean;
+          is_outdoor: boolean | null;
+          last_enrichment_attempt_at: string | null;
+          latitude: number | null;
+          llm_review_confidence: number | null;
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error: string | null;
+          llm_review_flags: string[];
+          llm_review_model: string | null;
+          llm_review_prompt_version: string | null;
+          llm_review_provider: string | null;
+          llm_review_reason: string | null;
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at: string | null;
+          longitude: number | null;
+          parent_tips: Json | null;
+          parent_tips_generated_at: string | null;
+          parent_tips_model: string | null;
+          parent_tips_prompt_version: string | null;
+          parent_tips_provider: string | null;
+          price: number | null;
+          recurrence_info: Json | null;
+          search_vector: unknown;
+          source_id: string | null;
+          source_name: string | null;
+          source_url: string | null;
+          start_datetime: string;
+          status: Database["public"]["Enums"]["event_status"];
+          submitted_by: string | null;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          venue_name: string | null;
+          view_count: number;
+        };
         Insert: {
-          address?: string | null
-          admin_last_edited_at?: string | null
-          admin_last_edited_by?: string | null
-          admin_locked_fields?: string[]
-          age_max?: number | null
-          age_min?: number | null
-          ai_confidence?: number | null
-          ai_tag_model?: string | null
-          ai_tag_provider?: string | null
-          ai_tag_status?: string | null
-          city_id?: string | null
-          created_at?: string
-          description?: string | null
-          end_datetime?: string | null
-          id?: string
-          images?: Json
-          is_featured?: boolean
-          is_free?: boolean
-          is_outdoor?: boolean | null
-          last_enrichment_attempt_at?: string | null
-          latitude?: number | null
-          llm_review_confidence?: number | null
-          llm_review_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error?: string | null
-          llm_review_flags?: string[]
-          llm_review_model?: string | null
-          llm_review_prompt_version?: string | null
-          llm_review_provider?: string | null
-          llm_review_reason?: string | null
-          llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at?: string | null
-          longitude?: number | null
-          parent_tips?: Json | null
-          parent_tips_generated_at?: string | null
-          parent_tips_model?: string | null
-          parent_tips_prompt_version?: string | null
-          parent_tips_provider?: string | null
-          price?: number | null
-          recurrence_info?: Json | null
-          search_vector?: unknown
-          source_id?: string | null
-          source_name?: string | null
-          source_url?: string | null
-          start_datetime: string
-          status?: Database["public"]["Enums"]["event_status"]
-          submitted_by?: string | null
-          timezone?: string
-          title: string
-          updated_at?: string
-          venue_name?: string | null
-          view_count?: number
-        }
+          address?: string | null;
+          admin_last_edited_at?: string | null;
+          admin_last_edited_by?: string | null;
+          admin_locked_fields?: string[];
+          age_max?: number | null;
+          age_min?: number | null;
+          ai_confidence?: number | null;
+          ai_tag_model?: string | null;
+          ai_tag_provider?: string | null;
+          ai_tag_status?: string | null;
+          city_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          end_datetime?: string | null;
+          id?: string;
+          images?: Json;
+          is_featured?: boolean;
+          is_free?: boolean;
+          is_outdoor?: boolean | null;
+          last_enrichment_attempt_at?: string | null;
+          latitude?: number | null;
+          llm_review_confidence?: number | null;
+          llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error?: string | null;
+          llm_review_flags?: string[];
+          llm_review_model?: string | null;
+          llm_review_prompt_version?: string | null;
+          llm_review_provider?: string | null;
+          llm_review_reason?: string | null;
+          llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at?: string | null;
+          longitude?: number | null;
+          parent_tips?: Json | null;
+          parent_tips_generated_at?: string | null;
+          parent_tips_model?: string | null;
+          parent_tips_prompt_version?: string | null;
+          parent_tips_provider?: string | null;
+          price?: number | null;
+          recurrence_info?: Json | null;
+          search_vector?: unknown;
+          source_id?: string | null;
+          source_name?: string | null;
+          source_url?: string | null;
+          start_datetime: string;
+          status?: Database["public"]["Enums"]["event_status"];
+          submitted_by?: string | null;
+          timezone?: string;
+          title: string;
+          updated_at?: string;
+          venue_name?: string | null;
+          view_count?: number;
+        };
         Update: {
-          address?: string | null
-          admin_last_edited_at?: string | null
-          admin_last_edited_by?: string | null
-          admin_locked_fields?: string[]
-          age_max?: number | null
-          age_min?: number | null
-          ai_confidence?: number | null
-          ai_tag_model?: string | null
-          ai_tag_provider?: string | null
-          ai_tag_status?: string | null
-          city_id?: string | null
-          created_at?: string
-          description?: string | null
-          end_datetime?: string | null
-          id?: string
-          images?: Json
-          is_featured?: boolean
-          is_free?: boolean
-          is_outdoor?: boolean | null
-          last_enrichment_attempt_at?: string | null
-          latitude?: number | null
-          llm_review_confidence?: number | null
-          llm_review_decision?:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error?: string | null
-          llm_review_flags?: string[]
-          llm_review_model?: string | null
-          llm_review_prompt_version?: string | null
-          llm_review_provider?: string | null
-          llm_review_reason?: string | null
-          llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at?: string | null
-          longitude?: number | null
-          parent_tips?: Json | null
-          parent_tips_generated_at?: string | null
-          parent_tips_model?: string | null
-          parent_tips_prompt_version?: string | null
-          parent_tips_provider?: string | null
-          price?: number | null
-          recurrence_info?: Json | null
-          search_vector?: unknown
-          source_id?: string | null
-          source_name?: string | null
-          source_url?: string | null
-          start_datetime?: string
-          status?: Database["public"]["Enums"]["event_status"]
-          submitted_by?: string | null
-          timezone?: string
-          title?: string
-          updated_at?: string
-          venue_name?: string | null
-          view_count?: number
-        }
+          address?: string | null;
+          admin_last_edited_at?: string | null;
+          admin_last_edited_by?: string | null;
+          admin_locked_fields?: string[];
+          age_max?: number | null;
+          age_min?: number | null;
+          ai_confidence?: number | null;
+          ai_tag_model?: string | null;
+          ai_tag_provider?: string | null;
+          ai_tag_status?: string | null;
+          city_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          end_datetime?: string | null;
+          id?: string;
+          images?: Json;
+          is_featured?: boolean;
+          is_free?: boolean;
+          is_outdoor?: boolean | null;
+          last_enrichment_attempt_at?: string | null;
+          latitude?: number | null;
+          llm_review_confidence?: number | null;
+          llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error?: string | null;
+          llm_review_flags?: string[];
+          llm_review_model?: string | null;
+          llm_review_prompt_version?: string | null;
+          llm_review_provider?: string | null;
+          llm_review_reason?: string | null;
+          llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at?: string | null;
+          longitude?: number | null;
+          parent_tips?: Json | null;
+          parent_tips_generated_at?: string | null;
+          parent_tips_model?: string | null;
+          parent_tips_prompt_version?: string | null;
+          parent_tips_provider?: string | null;
+          price?: number | null;
+          recurrence_info?: Json | null;
+          search_vector?: unknown;
+          source_id?: string | null;
+          source_name?: string | null;
+          source_url?: string | null;
+          start_datetime?: string;
+          status?: Database["public"]["Enums"]["event_status"];
+          submitted_by?: string | null;
+          timezone?: string;
+          title?: string;
+          updated_at?: string;
+          venue_name?: string | null;
+          view_count?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "events_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
+            foreignKeyName: "events_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "cities";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "events_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "event_sources"
-            referencedColumns: ["id"]
+            foreignKeyName: "events_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "event_sources";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       favorites: {
         Row: {
-          created_at: string
-          event_id: string
-          id: string
-          user_id: string
-        }
+          created_at: string;
+          event_id: string;
+          id: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          event_id: string
-          id?: string
-          user_id: string
-        }
+          created_at?: string;
+          event_id: string;
+          id?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          event_id?: string
-          id?: string
-          user_id?: string
-        }
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "favorites_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "favorites_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "favorites_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "favorites_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "favorites_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       invite_codes: {
         Row: {
-          code_hash: string
-          created_at: string
-          created_by: string | null
-          expires_at: string | null
-          id: string
-          max_uses: number
-          notes: string | null
-          revoked_at: string | null
-          used_count: number
-        }
+          code_hash: string;
+          created_at: string;
+          created_by: string | null;
+          expires_at: string | null;
+          id: string;
+          max_uses: number;
+          notes: string | null;
+          revoked_at: string | null;
+          used_count: number;
+        };
         Insert: {
-          code_hash: string
-          created_at?: string
-          created_by?: string | null
-          expires_at?: string | null
-          id?: string
-          max_uses?: number
-          notes?: string | null
-          revoked_at?: string | null
-          used_count?: number
-        }
+          code_hash: string;
+          created_at?: string;
+          created_by?: string | null;
+          expires_at?: string | null;
+          id?: string;
+          max_uses?: number;
+          notes?: string | null;
+          revoked_at?: string | null;
+          used_count?: number;
+        };
         Update: {
-          code_hash?: string
-          created_at?: string
-          created_by?: string | null
-          expires_at?: string | null
-          id?: string
-          max_uses?: number
-          notes?: string | null
-          revoked_at?: string | null
-          used_count?: number
-        }
+          code_hash?: string;
+          created_at?: string;
+          created_by?: string | null;
+          expires_at?: string | null;
+          id?: string;
+          max_uses?: number;
+          notes?: string | null;
+          revoked_at?: string | null;
+          used_count?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "invite_codes_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "invite_codes_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       invite_redemption_attempts: {
         Row: {
-          attempted_at: string
-          email_hash: string
-          id: number
-          succeeded: boolean
-        }
+          attempted_at: string;
+          email_hash: string;
+          id: number;
+          succeeded: boolean;
+        };
         Insert: {
-          attempted_at?: string
-          email_hash: string
-          id?: never
-          succeeded: boolean
-        }
+          attempted_at?: string;
+          email_hash: string;
+          id?: never;
+          succeeded: boolean;
+        };
         Update: {
-          attempted_at?: string
-          email_hash?: string
-          id?: never
-          succeeded?: boolean
-        }
-        Relationships: []
-      }
+          attempted_at?: string;
+          email_hash?: string;
+          id?: never;
+          succeeded?: boolean;
+        };
+        Relationships: [];
+      };
       invite_request_attempts: {
         Row: {
-          attempted_at: string
-          email_hash: string
-          id: number
-          succeeded: boolean
-        }
+          attempted_at: string;
+          email_hash: string;
+          id: number;
+          succeeded: boolean;
+        };
         Insert: {
-          attempted_at?: string
-          email_hash: string
-          id?: never
-          succeeded: boolean
-        }
+          attempted_at?: string;
+          email_hash: string;
+          id?: never;
+          succeeded: boolean;
+        };
         Update: {
-          attempted_at?: string
-          email_hash?: string
-          id?: never
-          succeeded?: boolean
-        }
-        Relationships: []
-      }
+          attempted_at?: string;
+          email_hash?: string;
+          id?: never;
+          succeeded?: boolean;
+        };
+        Relationships: [];
+      };
       invite_requests: {
         Row: {
-          admin_notes: string | null
-          created_at: string
-          email: string
-          id: string
-          invite_code_id: string | null
-          message: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: Database["public"]["Enums"]["invite_request_status"]
-        }
+          admin_notes: string | null;
+          created_at: string;
+          email: string;
+          id: string;
+          invite_code_id: string | null;
+          message: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          status: Database["public"]["Enums"]["invite_request_status"];
+        };
         Insert: {
-          admin_notes?: string | null
-          created_at?: string
-          email: string
-          id?: string
-          invite_code_id?: string | null
-          message?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: Database["public"]["Enums"]["invite_request_status"]
-        }
+          admin_notes?: string | null;
+          created_at?: string;
+          email: string;
+          id?: string;
+          invite_code_id?: string | null;
+          message?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          status?: Database["public"]["Enums"]["invite_request_status"];
+        };
         Update: {
-          admin_notes?: string | null
-          created_at?: string
-          email?: string
-          id?: string
-          invite_code_id?: string | null
-          message?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: Database["public"]["Enums"]["invite_request_status"]
-        }
+          admin_notes?: string | null;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          invite_code_id?: string | null;
+          message?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          status?: Database["public"]["Enums"]["invite_request_status"];
+        };
         Relationships: [
           {
-            foreignKeyName: "invite_requests_invite_code_id_fkey"
-            columns: ["invite_code_id"]
-            isOneToOne: false
-            referencedRelation: "invite_codes"
-            referencedColumns: ["id"]
+            foreignKeyName: "invite_requests_invite_code_id_fkey";
+            columns: ["invite_code_id"];
+            isOneToOne: false;
+            referencedRelation: "invite_codes";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "invite_requests_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "invite_requests_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       notification_queue: {
         Row: {
-          change_detail: Json | null
-          change_type: string
-          created_at: string
-          event_id: string
-          id: string
-          processed: boolean
-          processed_at: string | null
-          user_id: string
-        }
+          change_detail: Json | null;
+          change_type: string;
+          created_at: string;
+          event_id: string;
+          id: string;
+          processed: boolean;
+          processed_at: string | null;
+          user_id: string;
+        };
         Insert: {
-          change_detail?: Json | null
-          change_type: string
-          created_at?: string
-          event_id: string
-          id?: string
-          processed?: boolean
-          processed_at?: string | null
-          user_id: string
-        }
+          change_detail?: Json | null;
+          change_type: string;
+          created_at?: string;
+          event_id: string;
+          id?: string;
+          processed?: boolean;
+          processed_at?: string | null;
+          user_id: string;
+        };
         Update: {
-          change_detail?: Json | null
-          change_type?: string
-          created_at?: string
-          event_id?: string
-          id?: string
-          processed?: boolean
-          processed_at?: string | null
-          user_id?: string
-        }
+          change_detail?: Json | null;
+          change_type?: string;
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+          processed?: boolean;
+          processed_at?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "notification_queue_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "notification_queue_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "notification_queue_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "notification_queue_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       pending_invite_claims: {
         Row: {
-          claimed_at: string | null
-          claimed_by: string | null
-          created_at: string
-          email: string
-          expires_at: string
-          invite_code: string
-        }
+          claimed_at: string | null;
+          claimed_by: string | null;
+          created_at: string;
+          email: string;
+          expires_at: string;
+          invite_code: string;
+        };
         Insert: {
-          claimed_at?: string | null
-          claimed_by?: string | null
-          created_at?: string
-          email: string
-          expires_at?: string
-          invite_code: string
-        }
+          claimed_at?: string | null;
+          claimed_by?: string | null;
+          created_at?: string;
+          email: string;
+          expires_at?: string;
+          invite_code: string;
+        };
         Update: {
-          claimed_at?: string | null
-          claimed_by?: string | null
-          created_at?: string
-          email?: string
-          expires_at?: string
-          invite_code?: string
-        }
+          claimed_at?: string | null;
+          claimed_by?: string | null;
+          created_at?: string;
+          email?: string;
+          expires_at?: string;
+          invite_code?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "pending_invite_claims_claimed_by_fkey"
-            columns: ["claimed_by"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "pending_invite_claims_claimed_by_fkey";
+            columns: ["claimed_by"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       push_subscriptions: {
         Row: {
-          auth_key: string | null
-          created_at: string
-          endpoint: string | null
-          id: string
-          p256dh: string | null
-          platform: string
-          token: string | null
-          updated_at: string
-          user_id: string
-        }
+          auth_key: string | null;
+          created_at: string;
+          endpoint: string | null;
+          id: string;
+          p256dh: string | null;
+          platform: string;
+          token: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          auth_key?: string | null
-          created_at?: string
-          endpoint?: string | null
-          id?: string
-          p256dh?: string | null
-          platform: string
-          token?: string | null
-          updated_at?: string
-          user_id: string
-        }
+          auth_key?: string | null;
+          created_at?: string;
+          endpoint?: string | null;
+          id?: string;
+          p256dh?: string | null;
+          platform: string;
+          token?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          auth_key?: string | null
-          created_at?: string
-          endpoint?: string | null
-          id?: string
-          p256dh?: string | null
-          platform?: string
-          token?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          auth_key?: string | null;
+          created_at?: string;
+          endpoint?: string | null;
+          id?: string;
+          p256dh?: string | null;
+          platform?: string;
+          token?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       ratings: {
         Row: {
-          created_at: string
-          event_id: string
-          id: string
-          score: number
-          user_id: string
-        }
+          created_at: string;
+          event_id: string;
+          id: string;
+          score: number;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          event_id: string
-          id?: string
-          score: number
-          user_id: string
-        }
+          created_at?: string;
+          event_id: string;
+          id?: string;
+          score: number;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          event_id?: string
-          id?: string
-          score?: number
-          user_id?: string
-        }
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+          score?: number;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "ratings_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "ratings_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "ratings_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "ratings_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "ratings_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       recommendation_signals: {
         Row: {
-          created_at: string
-          event_id: string
-          id: string
-          signal_type: string
-          user_id: string
-          weight: number
-        }
+          created_at: string;
+          event_id: string;
+          id: string;
+          signal_type: string;
+          user_id: string;
+          weight: number;
+        };
         Insert: {
-          created_at?: string
-          event_id: string
-          id?: string
-          signal_type: string
-          user_id: string
-          weight?: number
-        }
+          created_at?: string;
+          event_id: string;
+          id?: string;
+          signal_type: string;
+          user_id: string;
+          weight?: number;
+        };
         Update: {
-          created_at?: string
-          event_id?: string
-          id?: string
-          signal_type?: string
-          user_id?: string
-          weight?: number
-        }
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+          signal_type?: string;
+          user_id?: string;
+          weight?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "recommendation_signals_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "recommendation_signals_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "recommendation_signals_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "recommendation_signals_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "recommendation_signals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "recommendation_signals_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       source_extraction_traces: {
         Row: {
-          created_at: string
-          error: string | null
-          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
-          extractor: string
-          fallback_reason: string | null
-          id: number
-          input_bytes: number | null
-          latency_ms: number | null
-          model: string | null
-          parsed_event_count: number
-          provider: string | null
-          reasoning_summary: string | null
-          source_id: string | null
-          source_queue_id: number | null
-          source_run_id: string | null
-          status: string
-        }
+          created_at: string;
+          error: string | null;
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"];
+          extractor: string;
+          fallback_reason: string | null;
+          id: number;
+          input_bytes: number | null;
+          latency_ms: number | null;
+          model: string | null;
+          parsed_event_count: number;
+          provider: string | null;
+          reasoning_summary: string | null;
+          source_id: string | null;
+          source_queue_id: number | null;
+          source_run_id: string | null;
+          status: string;
+        };
         Insert: {
-          created_at?: string
-          error?: string | null
-          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
-          extractor: string
-          fallback_reason?: string | null
-          id?: never
-          input_bytes?: number | null
-          latency_ms?: number | null
-          model?: string | null
-          parsed_event_count?: number
-          provider?: string | null
-          reasoning_summary?: string | null
-          source_id?: string | null
-          source_queue_id?: number | null
-          source_run_id?: string | null
-          status: string
-        }
+          created_at?: string;
+          error?: string | null;
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"];
+          extractor: string;
+          fallback_reason?: string | null;
+          id?: never;
+          input_bytes?: number | null;
+          latency_ms?: number | null;
+          model?: string | null;
+          parsed_event_count?: number;
+          provider?: string | null;
+          reasoning_summary?: string | null;
+          source_id?: string | null;
+          source_queue_id?: number | null;
+          source_run_id?: string | null;
+          status: string;
+        };
         Update: {
-          created_at?: string
-          error?: string | null
-          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"]
-          extractor?: string
-          fallback_reason?: string | null
-          id?: never
-          input_bytes?: number | null
-          latency_ms?: number | null
-          model?: string | null
-          parsed_event_count?: number
-          provider?: string | null
-          reasoning_summary?: string | null
-          source_id?: string | null
-          source_queue_id?: number | null
-          source_run_id?: string | null
-          status?: string
-        }
+          created_at?: string;
+          error?: string | null;
+          extraction_mode?: Database["public"]["Enums"]["source_extraction_mode"];
+          extractor?: string;
+          fallback_reason?: string | null;
+          id?: never;
+          input_bytes?: number | null;
+          latency_ms?: number | null;
+          model?: string | null;
+          parsed_event_count?: number;
+          provider?: string | null;
+          reasoning_summary?: string | null;
+          source_id?: string | null;
+          source_queue_id?: number | null;
+          source_run_id?: string | null;
+          status?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "source_extraction_traces_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "event_sources"
-            referencedColumns: ["id"]
+            foreignKeyName: "source_extraction_traces_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "event_sources";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "source_extraction_traces_source_queue_id_fkey"
-            columns: ["source_queue_id"]
-            isOneToOne: false
-            referencedRelation: "source_scrape_queue"
-            referencedColumns: ["id"]
+            foreignKeyName: "source_extraction_traces_source_queue_id_fkey";
+            columns: ["source_queue_id"];
+            isOneToOne: false;
+            referencedRelation: "source_scrape_queue";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "source_extraction_traces_source_run_id_fkey"
-            columns: ["source_run_id"]
-            isOneToOne: false
-            referencedRelation: "source_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "source_extraction_traces_source_run_id_fkey";
+            columns: ["source_run_id"];
+            isOneToOne: false;
+            referencedRelation: "source_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       source_runs: {
         Row: {
-          completed_at: string | null
-          created_at: string
-          error_log: string | null
-          events_found: number
-          events_imported: number
-          events_skipped: number
-          id: string
-          source_id: string | null
-          started_at: string
-          status: string
-        }
+          completed_at: string | null;
+          created_at: string;
+          error_log: string | null;
+          events_found: number;
+          events_imported: number;
+          events_skipped: number;
+          id: string;
+          source_id: string | null;
+          started_at: string;
+          status: string;
+        };
         Insert: {
-          completed_at?: string | null
-          created_at?: string
-          error_log?: string | null
-          events_found?: number
-          events_imported?: number
-          events_skipped?: number
-          id?: string
-          source_id?: string | null
-          started_at?: string
-          status?: string
-        }
+          completed_at?: string | null;
+          created_at?: string;
+          error_log?: string | null;
+          events_found?: number;
+          events_imported?: number;
+          events_skipped?: number;
+          id?: string;
+          source_id?: string | null;
+          started_at?: string;
+          status?: string;
+        };
         Update: {
-          completed_at?: string | null
-          created_at?: string
-          error_log?: string | null
-          events_found?: number
-          events_imported?: number
-          events_skipped?: number
-          id?: string
-          source_id?: string | null
-          started_at?: string
-          status?: string
-        }
+          completed_at?: string | null;
+          created_at?: string;
+          error_log?: string | null;
+          events_found?: number;
+          events_imported?: number;
+          events_skipped?: number;
+          id?: string;
+          source_id?: string | null;
+          started_at?: string;
+          status?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "source_runs_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "event_sources"
-            referencedColumns: ["id"]
+            foreignKeyName: "source_runs_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "event_sources";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       source_scrape_queue: {
         Row: {
-          attempt_count: number
-          enqueued_at: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          next_attempt_at: string
-          skip_reason: string | null
-          source_id: string | null
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type: string
-        }
+          attempt_count: number;
+          enqueued_at: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          next_attempt_at: string;
+          skip_reason: string | null;
+          source_id: string | null;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["source_scrape_queue_status"];
+          trigger_type: string;
+        };
         Insert: {
-          attempt_count?: number
-          enqueued_at?: string
-          finished_at?: string | null
-          id?: never
-          last_error?: string | null
-          next_attempt_at?: string
-          skip_reason?: string | null
-          source_id?: string | null
-          source_run_id?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type?: string
-        }
+          attempt_count?: number;
+          enqueued_at?: string;
+          finished_at?: string | null;
+          id?: never;
+          last_error?: string | null;
+          next_attempt_at?: string;
+          skip_reason?: string | null;
+          source_id?: string | null;
+          source_run_id?: string | null;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["source_scrape_queue_status"];
+          trigger_type?: string;
+        };
         Update: {
-          attempt_count?: number
-          enqueued_at?: string
-          finished_at?: string | null
-          id?: never
-          last_error?: string | null
-          next_attempt_at?: string
-          skip_reason?: string | null
-          source_id?: string | null
-          source_run_id?: string | null
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type?: string
-        }
+          attempt_count?: number;
+          enqueued_at?: string;
+          finished_at?: string | null;
+          id?: never;
+          last_error?: string | null;
+          next_attempt_at?: string;
+          skip_reason?: string | null;
+          source_id?: string | null;
+          source_run_id?: string | null;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["source_scrape_queue_status"];
+          trigger_type?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "source_scrape_queue_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "event_sources"
-            referencedColumns: ["id"]
+            foreignKeyName: "source_scrape_queue_source_id_fkey";
+            columns: ["source_id"];
+            isOneToOne: false;
+            referencedRelation: "event_sources";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "source_scrape_queue_source_run_id_fkey"
-            columns: ["source_run_id"]
-            isOneToOne: false
-            referencedRelation: "source_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "source_scrape_queue_source_run_id_fkey";
+            columns: ["source_run_id"];
+            isOneToOne: false;
+            referencedRelation: "source_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       tags: {
         Row: {
-          category: string
-          color: string
-          created_at: string
-          id: string
-          is_system: boolean
-          name: string
-          slug: string
-        }
+          category: string;
+          color: string;
+          created_at: string;
+          id: string;
+          is_system: boolean;
+          name: string;
+          slug: string;
+        };
         Insert: {
-          category?: string
-          color?: string
-          created_at?: string
-          id?: string
-          is_system?: boolean
-          name: string
-          slug: string
-        }
+          category?: string;
+          color?: string;
+          created_at?: string;
+          id?: string;
+          is_system?: boolean;
+          name: string;
+          slug: string;
+        };
         Update: {
-          category?: string
-          color?: string
-          created_at?: string
-          id?: string
-          is_system?: boolean
-          name?: string
-          slug?: string
-        }
-        Relationships: []
-      }
+          category?: string;
+          color?: string;
+          created_at?: string;
+          id?: string;
+          is_system?: boolean;
+          name?: string;
+          slug?: string;
+        };
+        Relationships: [];
+      };
       user_access: {
         Row: {
-          access_expires_at: string | null
-          created_at: string
-          disabled_at: string | null
-          disabled_reason: string | null
-          enabled_at: string | null
-          is_enabled: boolean
-          updated_at: string
-          user_id: string
-        }
+          access_expires_at: string | null;
+          created_at: string;
+          disabled_at: string | null;
+          disabled_reason: string | null;
+          enabled_at: string | null;
+          is_enabled: boolean;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          access_expires_at?: string | null
-          created_at?: string
-          disabled_at?: string | null
-          disabled_reason?: string | null
-          enabled_at?: string | null
-          is_enabled?: boolean
-          updated_at?: string
-          user_id: string
-        }
+          access_expires_at?: string | null;
+          created_at?: string;
+          disabled_at?: string | null;
+          disabled_reason?: string | null;
+          enabled_at?: string | null;
+          is_enabled?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          access_expires_at?: string | null
-          created_at?: string
-          disabled_at?: string | null
-          disabled_reason?: string | null
-          enabled_at?: string | null
-          is_enabled?: boolean
-          updated_at?: string
-          user_id?: string
-        }
+          access_expires_at?: string | null;
+          created_at?: string;
+          disabled_at?: string | null;
+          disabled_reason?: string | null;
+          enabled_at?: string | null;
+          is_enabled?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "user_access_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "user_access_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       user_calendar_events: {
         Row: {
-          added_at: string
-          event_id: string
-          id: string
-          notes: string | null
-          user_id: string
-        }
+          added_at: string;
+          event_id: string;
+          id: string;
+          notes: string | null;
+          user_id: string;
+        };
         Insert: {
-          added_at?: string
-          event_id: string
-          id?: string
-          notes?: string | null
-          user_id: string
-        }
+          added_at?: string;
+          event_id: string;
+          id?: string;
+          notes?: string | null;
+          user_id: string;
+        };
         Update: {
-          added_at?: string
-          event_id?: string
-          id?: string
-          notes?: string | null
-          user_id?: string
-        }
+          added_at?: string;
+          event_id?: string;
+          id?: string;
+          notes?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "user_calendar_events_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "user_calendar_events_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "user_calendar_events_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "user_calendar_events_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "user_calendar_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "user_calendar_events_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_profiles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       user_notification_preferences: {
         Row: {
-          change_email: boolean
-          change_push: boolean
-          created_at: string
-          digest_email: boolean
-          digest_push: boolean
-          id: string
-          reminder_email: boolean
-          reminder_push: boolean
-          updated_at: string
-          user_id: string
-        }
+          change_email: boolean;
+          change_push: boolean;
+          created_at: string;
+          digest_email: boolean;
+          digest_push: boolean;
+          id: string;
+          reminder_email: boolean;
+          reminder_push: boolean;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          change_email?: boolean
-          change_push?: boolean
-          created_at?: string
-          digest_email?: boolean
-          digest_push?: boolean
-          id?: string
-          reminder_email?: boolean
-          reminder_push?: boolean
-          updated_at?: string
-          user_id: string
-        }
+          change_email?: boolean;
+          change_push?: boolean;
+          created_at?: string;
+          digest_email?: boolean;
+          digest_push?: boolean;
+          id?: string;
+          reminder_email?: boolean;
+          reminder_push?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          change_email?: boolean
-          change_push?: boolean
-          created_at?: string
-          digest_email?: boolean
-          digest_push?: boolean
-          id?: string
-          reminder_email?: boolean
-          reminder_push?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          change_email?: boolean;
+          change_push?: boolean;
+          created_at?: string;
+          digest_email?: boolean;
+          digest_push?: boolean;
+          id?: string;
+          reminder_email?: boolean;
+          reminder_push?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       user_notifications: {
         Row: {
-          body: string
-          created_at: string
-          event_id: string | null
-          id: string
-          read_at: string | null
-          title: string
-          type: string
-          user_id: string
-        }
+          body: string;
+          created_at: string;
+          event_id: string | null;
+          id: string;
+          read_at: string | null;
+          title: string;
+          type: string;
+          user_id: string;
+        };
         Insert: {
-          body: string
-          created_at?: string
-          event_id?: string | null
-          id?: string
-          read_at?: string | null
-          title: string
-          type: string
-          user_id: string
-        }
+          body: string;
+          created_at?: string;
+          event_id?: string | null;
+          id?: string;
+          read_at?: string | null;
+          title: string;
+          type: string;
+          user_id: string;
+        };
         Update: {
-          body?: string
-          created_at?: string
-          event_id?: string | null
-          id?: string
-          read_at?: string | null
-          title?: string
-          type?: string
-          user_id?: string
-        }
+          body?: string;
+          created_at?: string;
+          event_id?: string | null;
+          id?: string;
+          read_at?: string | null;
+          title?: string;
+          type?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "user_notifications_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "user_notifications_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "user_notifications_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "user_notifications_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       user_profiles: {
         Row: {
-          avatar_url: string | null
-          child_age: number | null
-          child_name: string | null
-          city_preference_id: string | null
-          created_at: string
-          display_name: string | null
-          email: string | null
-          id: string
-          role: string
-          updated_at: string
-        }
+          avatar_url: string | null;
+          child_age: number | null;
+          child_name: string | null;
+          city_preference_id: string | null;
+          created_at: string;
+          display_name: string | null;
+          email: string | null;
+          id: string;
+          role: string;
+          updated_at: string;
+        };
         Insert: {
-          avatar_url?: string | null
-          child_age?: number | null
-          child_name?: string | null
-          city_preference_id?: string | null
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          id: string
-          role?: string
-          updated_at?: string
-        }
+          avatar_url?: string | null;
+          child_age?: number | null;
+          child_name?: string | null;
+          city_preference_id?: string | null;
+          created_at?: string;
+          display_name?: string | null;
+          email?: string | null;
+          id: string;
+          role?: string;
+          updated_at?: string;
+        };
         Update: {
-          avatar_url?: string | null
-          child_age?: number | null
-          child_name?: string | null
-          city_preference_id?: string | null
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          id?: string
-          role?: string
-          updated_at?: string
-        }
+          avatar_url?: string | null;
+          child_age?: number | null;
+          child_name?: string | null;
+          city_preference_id?: string | null;
+          created_at?: string;
+          display_name?: string | null;
+          email?: string | null;
+          id?: string;
+          role?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "user_profiles_city_preference_id_fkey"
-            columns: ["city_preference_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
+            foreignKeyName: "user_profiles_city_preference_id_fkey";
+            columns: ["city_preference_id"];
+            isOneToOne: false;
+            referencedRelation: "cities";
+            referencedColumns: ["id"];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
       event_llm_review_queue_summary: {
         Row: {
-          avg_attempts: number | null
-          last_dead_letter_at: string | null
-          oldest_pending_enqueued_at: string | null
-          oldest_processing_started_at: string | null
-          row_count: number | null
-          status:
-            | Database["public"]["Enums"]["llm_event_review_queue_status"]
-            | null
-        }
-        Relationships: []
-      }
+          avg_attempts: number | null;
+          last_dead_letter_at: string | null;
+          oldest_pending_enqueued_at: string | null;
+          oldest_processing_started_at: string | null;
+          row_count: number | null;
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"] | null;
+        };
+        Relationships: [];
+      };
       event_rating_stats: {
         Row: {
-          avg_score: number | null
-          event_id: string | null
-          rating_count: number | null
-        }
+          avg_score: number | null;
+          event_id: string | null;
+          rating_count: number | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "ratings_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
+            foreignKeyName: "ratings_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "ratings_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "public_events"
-            referencedColumns: ["id"]
+            foreignKeyName: "ratings_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "public_events";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       event_tag_queue_summary: {
         Row: {
-          avg_attempts: number | null
-          last_dead_letter_at: string | null
-          newest_enqueued_at: string | null
-          oldest_enqueued_at: string | null
-          row_count: number | null
-          status: Database["public"]["Enums"]["event_tag_queue_status"] | null
-        }
-        Relationships: []
-      }
+          avg_attempts: number | null;
+          last_dead_letter_at: string | null;
+          newest_enqueued_at: string | null;
+          oldest_enqueued_at: string | null;
+          row_count: number | null;
+          status: Database["public"]["Enums"]["event_tag_queue_status"] | null;
+        };
+        Relationships: [];
+      };
       pg_timezone_names: {
         Row: {
-          name: string | null
-        }
-        Relationships: []
-      }
+          name: string | null;
+        };
+        Relationships: [];
+      };
       public_events: {
         Row: {
-          address: string | null
-          age_max: number | null
-          age_min: number | null
-          city_id: string | null
-          description: string | null
-          end_datetime: string | null
-          id: string | null
-          images: Json | null
-          is_featured: boolean | null
-          is_free: boolean | null
-          latitude: number | null
-          longitude: number | null
-          price: number | null
-          recurrence_info: Json | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string | null
-          timezone: string | null
-          title: string | null
-          venue_name: string | null
-        }
+          address: string | null;
+          age_max: number | null;
+          age_min: number | null;
+          city_id: string | null;
+          description: string | null;
+          end_datetime: string | null;
+          id: string | null;
+          images: Json | null;
+          is_featured: boolean | null;
+          is_free: boolean | null;
+          latitude: number | null;
+          longitude: number | null;
+          price: number | null;
+          recurrence_info: Json | null;
+          source_name: string | null;
+          source_url: string | null;
+          start_datetime: string | null;
+          timezone: string | null;
+          title: string | null;
+          venue_name: string | null;
+        };
         Insert: {
-          address?: string | null
-          age_max?: number | null
-          age_min?: number | null
-          city_id?: string | null
-          description?: string | null
-          end_datetime?: string | null
-          id?: string | null
-          images?: Json | null
-          is_featured?: boolean | null
-          is_free?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
-          price?: number | null
-          recurrence_info?: Json | null
-          source_name?: string | null
-          source_url?: string | null
-          start_datetime?: string | null
-          timezone?: string | null
-          title?: string | null
-          venue_name?: string | null
-        }
+          address?: string | null;
+          age_max?: number | null;
+          age_min?: number | null;
+          city_id?: string | null;
+          description?: string | null;
+          end_datetime?: string | null;
+          id?: string | null;
+          images?: Json | null;
+          is_featured?: boolean | null;
+          is_free?: boolean | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          price?: number | null;
+          recurrence_info?: Json | null;
+          source_name?: string | null;
+          source_url?: string | null;
+          start_datetime?: string | null;
+          timezone?: string | null;
+          title?: string | null;
+          venue_name?: string | null;
+        };
         Update: {
-          address?: string | null
-          age_max?: number | null
-          age_min?: number | null
-          city_id?: string | null
-          description?: string | null
-          end_datetime?: string | null
-          id?: string | null
-          images?: Json | null
-          is_featured?: boolean | null
-          is_free?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
-          price?: number | null
-          recurrence_info?: Json | null
-          source_name?: string | null
-          source_url?: string | null
-          start_datetime?: string | null
-          timezone?: string | null
-          title?: string | null
-          venue_name?: string | null
-        }
+          address?: string | null;
+          age_max?: number | null;
+          age_min?: number | null;
+          city_id?: string | null;
+          description?: string | null;
+          end_datetime?: string | null;
+          id?: string | null;
+          images?: Json | null;
+          is_featured?: boolean | null;
+          is_free?: boolean | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          price?: number | null;
+          recurrence_info?: Json | null;
+          source_name?: string | null;
+          source_url?: string | null;
+          start_datetime?: string | null;
+          timezone?: string | null;
+          title?: string | null;
+          venue_name?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "events_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
+            foreignKeyName: "events_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "cities";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       source_scrape_queue_summary: {
         Row: {
-          avg_attempts: number | null
-          last_dead_letter_at: string | null
-          newest_finished_at: string | null
-          oldest_enqueued_at: string | null
-          oldest_processing_started_at: string | null
-          row_count: number | null
-          status:
-            | Database["public"]["Enums"]["source_scrape_queue_status"]
-            | null
-        }
-        Relationships: []
-      }
+          avg_attempts: number | null;
+          last_dead_letter_at: string | null;
+          newest_finished_at: string | null;
+          oldest_enqueued_at: string | null;
+          oldest_processing_started_at: string | null;
+          row_count: number | null;
+          status: Database["public"]["Enums"]["source_scrape_queue_status"] | null;
+        };
+        Relationships: [];
+      };
       timezone_names: {
         Row: {
-          name: string | null
-        }
-        Relationships: []
-      }
-    }
+          name: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       admin_approve_invite_request: {
-        Args: { p_request_id: string }
+        Args: { p_request_id: string };
         Returns: {
-          code: string
-          created_at: string
-          email: string
-          invite_code_id: string
-          request_id: string
-        }[]
-      }
+          code: string;
+          created_at: string;
+          email: string;
+          invite_code_id: string;
+          request_id: string;
+        }[];
+      };
       admin_batch_set_event_status: {
-        Args: { p_event_ids: string[]; p_status: string }
-        Returns: number
-      }
+        Args: { p_event_ids: string[]; p_status: string };
+        Returns: number;
+      };
       admin_bulk_set_auto_approve: {
-        Args: { enable: boolean }
-        Returns: undefined
-      }
+        Args: { enable: boolean };
+        Returns: undefined;
+      };
       admin_bulk_set_processing_mode: {
-        Args: { p_mode: Database["public"]["Enums"]["event_processing_mode"] }
-        Returns: undefined
-      }
+        Args: { p_mode: Database["public"]["Enums"]["event_processing_mode"] };
+        Returns: undefined;
+      };
       admin_create_event: {
-        Args: { p_patch: Json; p_tag_ids?: string[] }
+        Args: { p_patch: Json; p_tag_ids?: string[] };
         Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          submitted_by: string | null
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }
+          address: string | null;
+          admin_last_edited_at: string | null;
+          admin_last_edited_by: string | null;
+          admin_locked_fields: string[];
+          age_max: number | null;
+          age_min: number | null;
+          ai_confidence: number | null;
+          ai_tag_model: string | null;
+          ai_tag_provider: string | null;
+          ai_tag_status: string | null;
+          city_id: string | null;
+          created_at: string;
+          description: string | null;
+          end_datetime: string | null;
+          id: string;
+          images: Json;
+          is_featured: boolean;
+          is_free: boolean;
+          is_outdoor: boolean | null;
+          last_enrichment_attempt_at: string | null;
+          latitude: number | null;
+          llm_review_confidence: number | null;
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error: string | null;
+          llm_review_flags: string[];
+          llm_review_model: string | null;
+          llm_review_prompt_version: string | null;
+          llm_review_provider: string | null;
+          llm_review_reason: string | null;
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at: string | null;
+          longitude: number | null;
+          parent_tips: Json | null;
+          parent_tips_generated_at: string | null;
+          parent_tips_model: string | null;
+          parent_tips_prompt_version: string | null;
+          parent_tips_provider: string | null;
+          price: number | null;
+          recurrence_info: Json | null;
+          search_vector: unknown;
+          source_id: string | null;
+          source_name: string | null;
+          source_url: string | null;
+          start_datetime: string;
+          status: Database["public"]["Enums"]["event_status"];
+          submitted_by: string | null;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          venue_name: string | null;
+          view_count: number;
+        };
         SetofOptions: {
-          from: "*"
-          to: "events"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "events";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_create_invite_code: {
-        Args: { p_expires_at?: string; p_max_uses?: number; p_notes?: string }
+        Args: { p_expires_at?: string; p_max_uses?: number; p_notes?: string };
         Returns: {
-          code: string
-          created_at: string
-          expires_at: string
-          id: string
-          max_uses: number
-          notes: string
-        }[]
-      }
+          code: string;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          max_uses: number;
+          notes: string;
+        }[];
+      };
       admin_create_source: {
-        Args: { p_source: Json }
+        Args: { p_source: Json };
         Returns: {
-          auto_approve: boolean
-          city_id: string | null
-          created_at: string
-          date_window_days: number | null
-          error_count: number
-          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
-          id: string
-          is_active: boolean
-          last_scraped_at: string | null
-          last_status: string | null
-          name: string
-          notes: string | null
-          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
-          scrape_interval_hours: number
-          source_type: string
-          updated_at: string
-          url: string
-        }
+          auto_approve: boolean;
+          city_id: string | null;
+          created_at: string;
+          date_window_days: number | null;
+          error_count: number;
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"];
+          id: string;
+          is_active: boolean;
+          last_scraped_at: string | null;
+          last_status: string | null;
+          name: string;
+          notes: string | null;
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"];
+          scrape_interval_hours: number;
+          source_type: string;
+          updated_at: string;
+          url: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "event_sources"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "event_sources";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_cron_run_history: {
-        Args: { p_job_name?: string; p_limit?: number }
+        Args: { p_job_name?: string; p_limit?: number };
         Returns: {
-          duration_ms: number
-          end_time: string
-          jobname: string
-          return_message: string
-          runid: number
-          start_time: string
-          status: string
-        }[]
-      }
-      admin_dashboard_stats: { Args: never; Returns: Json }
-      admin_db_health_snapshot: { Args: never; Returns: Json }
+          duration_ms: number;
+          end_time: string;
+          jobname: string;
+          return_message: string;
+          runid: number;
+          start_time: string;
+          status: string;
+        }[];
+      };
+      admin_dashboard_stats: { Args: never; Returns: Json };
+      admin_db_health_snapshot: { Args: never; Returns: Json };
       admin_delete_dead_source_queue: {
-        Args: { p_queue_id: number }
-        Returns: boolean
-      }
+        Args: { p_queue_id: number };
+        Returns: boolean;
+      };
       admin_delete_dead_tag_queue: {
-        Args: { p_queue_id: number }
-        Returns: boolean
-      }
-      admin_delete_events: { Args: { p_event_ids: string[] }; Returns: number }
-      admin_delete_rating: { Args: { p_id: string }; Returns: boolean }
-      admin_delete_user: { Args: { p_user_id: string }; Returns: undefined }
+        Args: { p_queue_id: number };
+        Returns: boolean;
+      };
+      admin_delete_events: { Args: { p_event_ids: string[] }; Returns: number };
+      admin_delete_rating: { Args: { p_id: string }; Returns: boolean };
+      admin_delete_user: { Args: { p_user_id: string }; Returns: undefined };
       admin_event_facets: {
-        Args: { p_keyword?: string }
+        Args: { p_keyword?: string };
         Returns: {
-          city_id: string
-          count: number
-          source_id: string
-          status: string
-        }[]
-      }
+          city_id: string;
+          count: number;
+          source_id: string;
+          status: string;
+        }[];
+      };
       admin_events_enriched: {
         Args: {
-          p_after_created_at?: string
-          p_after_id?: string
-          p_city_id?: string
-          p_city_is_null?: boolean
-          p_keyword?: string
-          p_limit?: number
-          p_llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"]
-          p_llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"]
-          p_llm_reviewed?: boolean
-          p_source_id?: string
-          p_status?: string
-        }
+          p_after_created_at?: string;
+          p_after_id?: string;
+          p_city_id?: string;
+          p_city_is_null?: boolean;
+          p_keyword?: string;
+          p_limit?: number;
+          p_llm_review_decision?: Database["public"]["Enums"]["llm_event_review_decision"];
+          p_llm_review_status?: Database["public"]["Enums"]["llm_event_review_status"];
+          p_llm_reviewed?: boolean;
+          p_source_id?: string;
+          p_status?: string;
+        };
         Returns: {
-          address: string
-          admin_last_edited_at: string
-          admin_last_edited_by: string
-          admin_locked_fields: string[]
-          age_max: number
-          age_min: number
-          ai_confidence: number
-          ai_tag_model: string
-          ai_tag_provider: string
-          ai_tag_status: string
-          city_id: string
-          created_at: string
-          description: string
-          end_datetime: string
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          latitude: number
-          llm_review_confidence: number
-          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"]
-          llm_review_error: string
-          llm_review_flags: string[]
-          llm_review_model: string
-          llm_review_prompt_version: string
-          llm_review_provider: string
-          llm_review_reason: string
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string
-          longitude: number
-          price: number
-          recurrence_info: Json
-          search_vector: unknown
-          source_id: string
-          source_name: string
-          source_url: string
-          start_datetime: string
-          status: string
-          timezone: string
-          title: string
-          total_count: number
-          updated_at: string
-          venue_name: string
-          view_count: number
-        }[]
-      }
+          address: string;
+          admin_last_edited_at: string;
+          admin_last_edited_by: string;
+          admin_locked_fields: string[];
+          age_max: number;
+          age_min: number;
+          ai_confidence: number;
+          ai_tag_model: string;
+          ai_tag_provider: string;
+          ai_tag_status: string;
+          city_id: string;
+          created_at: string;
+          description: string;
+          end_datetime: string;
+          id: string;
+          images: Json;
+          is_featured: boolean;
+          is_free: boolean;
+          latitude: number;
+          llm_review_confidence: number;
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"];
+          llm_review_error: string;
+          llm_review_flags: string[];
+          llm_review_model: string;
+          llm_review_prompt_version: string;
+          llm_review_provider: string;
+          llm_review_reason: string;
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at: string;
+          longitude: number;
+          price: number;
+          recurrence_info: Json;
+          search_vector: unknown;
+          source_id: string;
+          source_name: string;
+          source_url: string;
+          start_datetime: string;
+          status: string;
+          timezone: string;
+          title: string;
+          total_count: number;
+          updated_at: string;
+          venue_name: string;
+          view_count: number;
+        }[];
+      };
       admin_list_cron_jobs: {
-        Args: never
+        Args: never;
         Returns: {
-          active: boolean
-          command: string
-          jobid: number
-          jobname: string
-          last_run_end: string
-          last_run_message: string
-          last_run_start: string
-          last_run_status: string
-          schedule: string
-        }[]
-      }
+          active: boolean;
+          command: string;
+          jobid: number;
+          jobname: string;
+          last_run_end: string;
+          last_run_message: string;
+          last_run_start: string;
+          last_run_status: string;
+          schedule: string;
+        }[];
+      };
       admin_list_railway_cron_jobs: {
-        Args: never
+        Args: never;
         Returns: {
-          enabled: boolean
-          label: string
-          last_http_status: number
-          last_run_at: string
-          last_run_duration_s: number
-          last_run_status: string
-        }[]
-      }
+          enabled: boolean;
+          label: string;
+          last_http_status: number;
+          last_run_at: string;
+          last_run_duration_s: number;
+          last_run_status: string;
+        }[];
+      };
       admin_railway_cron_run_detail: {
-        Args: { p_run_id: number }
+        Args: { p_run_id: number };
         Returns: {
-          body: string
-          duration_s: number
-          http_status: number
-          id: number
-          label: string
-          logs: Json
-          ran_at: string
-          run_key: string
-          status: string
-        }[]
-      }
+          body: string;
+          duration_s: number;
+          http_status: number;
+          id: number;
+          label: string;
+          logs: Json;
+          ran_at: string;
+          run_key: string;
+          status: string;
+        }[];
+      };
       admin_railway_cron_run_history: {
-        Args: { p_label?: string; p_limit?: number }
+        Args: { p_label?: string; p_limit?: number };
         Returns: {
-          body: string
-          duration_s: number
-          http_status: number
-          id: number
-          label: string
-          ran_at: string
-          status: string
-        }[]
-      }
+          body: string;
+          duration_s: number;
+          http_status: number;
+          id: number;
+          label: string;
+          ran_at: string;
+          status: string;
+        }[];
+      };
       admin_reject_invite_request: {
-        Args: { p_notes?: string; p_request_id: string }
-        Returns: boolean
-      }
+        Args: { p_notes?: string; p_request_id: string };
+        Returns: boolean;
+      };
       admin_retry_dead_tag_queue: {
-        Args: { p_queue_id: number }
-        Returns: boolean
-      }
+        Args: { p_queue_id: number };
+        Returns: boolean;
+      };
       admin_retry_source_scrape_queue: {
-        Args: { p_queue_id: number }
-        Returns: boolean
-      }
-      admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean }
-      admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean }
-      admin_run_due_scrapes: { Args: never; Returns: undefined }
+        Args: { p_queue_id: number };
+        Returns: boolean;
+      };
+      admin_retry_tag_queue: { Args: { p_event_id: string }; Returns: boolean };
+      admin_revoke_invite_code: { Args: { p_id: string }; Returns: boolean };
+      admin_run_due_scrapes: { Args: never; Returns: undefined };
       admin_set_cron_enabled: {
-        Args: { p_enabled: boolean; p_label: string }
-        Returns: undefined
-      }
+        Args: { p_enabled: boolean; p_label: string };
+        Returns: undefined;
+      };
       admin_set_cron_schedule: {
-        Args: { p_job_name: string; p_schedule: string }
-        Returns: undefined
-      }
+        Args: { p_job_name: string; p_schedule: string };
+        Returns: undefined;
+      };
       admin_set_event_source_processing_mode: {
         Args: {
-          p_mode: Database["public"]["Enums"]["event_processing_mode"]
-          p_source_id: string
-        }
+          p_mode: Database["public"]["Enums"]["event_processing_mode"];
+          p_source_id: string;
+        };
         Returns: {
-          auto_approve: boolean
-          city_id: string | null
-          created_at: string
-          date_window_days: number | null
-          error_count: number
-          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
-          id: string
-          is_active: boolean
-          last_scraped_at: string | null
-          last_status: string | null
-          name: string
-          notes: string | null
-          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
-          scrape_interval_hours: number
-          source_type: string
-          updated_at: string
-          url: string
-        }
+          auto_approve: boolean;
+          city_id: string | null;
+          created_at: string;
+          date_window_days: number | null;
+          error_count: number;
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"];
+          id: string;
+          is_active: boolean;
+          last_scraped_at: string | null;
+          last_status: string | null;
+          name: string;
+          notes: string | null;
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"];
+          scrape_interval_hours: number;
+          source_type: string;
+          updated_at: string;
+          url: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "event_sources"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "event_sources";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_set_event_status: {
-        Args: { p_event_id: string; p_status: string }
+        Args: { p_event_id: string; p_status: string };
         Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          submitted_by: string | null
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }
+          address: string | null;
+          admin_last_edited_at: string | null;
+          admin_last_edited_by: string | null;
+          admin_locked_fields: string[];
+          age_max: number | null;
+          age_min: number | null;
+          ai_confidence: number | null;
+          ai_tag_model: string | null;
+          ai_tag_provider: string | null;
+          ai_tag_status: string | null;
+          city_id: string | null;
+          created_at: string;
+          description: string | null;
+          end_datetime: string | null;
+          id: string;
+          images: Json;
+          is_featured: boolean;
+          is_free: boolean;
+          is_outdoor: boolean | null;
+          last_enrichment_attempt_at: string | null;
+          latitude: number | null;
+          llm_review_confidence: number | null;
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error: string | null;
+          llm_review_flags: string[];
+          llm_review_model: string | null;
+          llm_review_prompt_version: string | null;
+          llm_review_provider: string | null;
+          llm_review_reason: string | null;
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at: string | null;
+          longitude: number | null;
+          parent_tips: Json | null;
+          parent_tips_generated_at: string | null;
+          parent_tips_model: string | null;
+          parent_tips_prompt_version: string | null;
+          parent_tips_provider: string | null;
+          price: number | null;
+          recurrence_info: Json | null;
+          search_vector: unknown;
+          source_id: string | null;
+          source_name: string | null;
+          source_url: string | null;
+          start_datetime: string;
+          status: Database["public"]["Enums"]["event_status"];
+          submitted_by: string | null;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          venue_name: string | null;
+          view_count: number;
+        };
         SetofOptions: {
-          from: "*"
-          to: "events"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "events";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_set_user_access: {
         Args: {
-          p_disabled_reason?: string
-          p_is_enabled: boolean
-          p_user_id: string
-        }
+          p_disabled_reason?: string;
+          p_is_enabled: boolean;
+          p_user_id: string;
+        };
         Returns: {
-          access_expires_at: string | null
-          created_at: string
-          disabled_at: string | null
-          disabled_reason: string | null
-          enabled_at: string | null
-          is_enabled: boolean
-          updated_at: string
-          user_id: string
-        }
+          access_expires_at: string | null;
+          created_at: string;
+          disabled_at: string | null;
+          disabled_reason: string | null;
+          enabled_at: string | null;
+          is_enabled: boolean;
+          updated_at: string;
+          user_id: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "user_access"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "user_access";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_toggle_cron_job: {
-        Args: { p_active: boolean; p_job_name: string }
-        Returns: undefined
-      }
+        Args: { p_active: boolean; p_job_name: string };
+        Returns: undefined;
+      };
       admin_unlock_event_fields: {
-        Args: { p_event_id: string }
-        Returns: boolean
-      }
+        Args: { p_event_id: string };
+        Returns: boolean;
+      };
       admin_update_event: {
         Args: {
-          p_decision_reason?: string
-          p_event_id: string
-          p_lock_edited_fields?: boolean
-          p_patch: Json
-          p_tag_ids: string[]
-        }
+          p_decision_reason?: string;
+          p_event_id: string;
+          p_lock_edited_fields?: boolean;
+          p_patch: Json;
+          p_tag_ids: string[];
+        };
         Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          submitted_by: string | null
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }
+          address: string | null;
+          admin_last_edited_at: string | null;
+          admin_last_edited_by: string | null;
+          admin_locked_fields: string[];
+          age_max: number | null;
+          age_min: number | null;
+          ai_confidence: number | null;
+          ai_tag_model: string | null;
+          ai_tag_provider: string | null;
+          ai_tag_status: string | null;
+          city_id: string | null;
+          created_at: string;
+          description: string | null;
+          end_datetime: string | null;
+          id: string;
+          images: Json;
+          is_featured: boolean;
+          is_free: boolean;
+          is_outdoor: boolean | null;
+          last_enrichment_attempt_at: string | null;
+          latitude: number | null;
+          llm_review_confidence: number | null;
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error: string | null;
+          llm_review_flags: string[];
+          llm_review_model: string | null;
+          llm_review_prompt_version: string | null;
+          llm_review_provider: string | null;
+          llm_review_reason: string | null;
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at: string | null;
+          longitude: number | null;
+          parent_tips: Json | null;
+          parent_tips_generated_at: string | null;
+          parent_tips_model: string | null;
+          parent_tips_prompt_version: string | null;
+          parent_tips_provider: string | null;
+          price: number | null;
+          recurrence_info: Json | null;
+          search_vector: unknown;
+          source_id: string | null;
+          source_name: string | null;
+          source_url: string | null;
+          start_datetime: string;
+          status: Database["public"]["Enums"]["event_status"];
+          submitted_by: string | null;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          venue_name: string | null;
+          view_count: number;
+        };
         SetofOptions: {
-          from: "*"
-          to: "events"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "events";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_update_event_status: {
-        Args: { p_event_id: string; p_reason?: string; p_status: string }
+        Args: { p_event_id: string; p_reason?: string; p_status: string };
         Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          submitted_by: string | null
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }
+          address: string | null;
+          admin_last_edited_at: string | null;
+          admin_last_edited_by: string | null;
+          admin_locked_fields: string[];
+          age_max: number | null;
+          age_min: number | null;
+          ai_confidence: number | null;
+          ai_tag_model: string | null;
+          ai_tag_provider: string | null;
+          ai_tag_status: string | null;
+          city_id: string | null;
+          created_at: string;
+          description: string | null;
+          end_datetime: string | null;
+          id: string;
+          images: Json;
+          is_featured: boolean;
+          is_free: boolean;
+          is_outdoor: boolean | null;
+          last_enrichment_attempt_at: string | null;
+          latitude: number | null;
+          llm_review_confidence: number | null;
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error: string | null;
+          llm_review_flags: string[];
+          llm_review_model: string | null;
+          llm_review_prompt_version: string | null;
+          llm_review_provider: string | null;
+          llm_review_reason: string | null;
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at: string | null;
+          longitude: number | null;
+          parent_tips: Json | null;
+          parent_tips_generated_at: string | null;
+          parent_tips_model: string | null;
+          parent_tips_prompt_version: string | null;
+          parent_tips_provider: string | null;
+          price: number | null;
+          recurrence_info: Json | null;
+          search_vector: unknown;
+          source_id: string | null;
+          source_name: string | null;
+          source_url: string | null;
+          start_datetime: string;
+          status: Database["public"]["Enums"]["event_status"];
+          submitted_by: string | null;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          venue_name: string | null;
+          view_count: number;
+        };
         SetofOptions: {
-          from: "*"
-          to: "events"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "events";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       admin_update_source: {
-        Args: { p_patch: Json; p_source_id: string }
+        Args: { p_patch: Json; p_source_id: string };
         Returns: {
-          auto_approve: boolean
-          city_id: string | null
-          created_at: string
-          date_window_days: number | null
-          error_count: number
-          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
-          id: string
-          is_active: boolean
-          last_scraped_at: string | null
-          last_status: string | null
-          name: string
-          notes: string | null
-          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
-          scrape_interval_hours: number
-          source_type: string
-          updated_at: string
-          url: string
-        }
+          auto_approve: boolean;
+          city_id: string | null;
+          created_at: string;
+          date_window_days: number | null;
+          error_count: number;
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"];
+          id: string;
+          is_active: boolean;
+          last_scraped_at: string | null;
+          last_status: string | null;
+          name: string;
+          notes: string | null;
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"];
+          scrape_interval_hours: number;
+          source_type: string;
+          updated_at: string;
+          url: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "event_sources"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "event_sources";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       apply_event_llm_review_decision: {
         Args: {
-          p_applied_decision: Database["public"]["Enums"]["llm_event_review_decision"]
-          p_confidence: number
-          p_error_code: string
-          p_error_message: string
-          p_event_id: string
-          p_flags: string[]
-          p_input_snapshot: Json
-          p_model: string
-          p_model_decision: Database["public"]["Enums"]["llm_event_review_decision"]
-          p_normalized_title: string
-          p_processing_ms: number
-          p_prompt_version: string
-          p_provider: string
-          p_queue_id: number
-          p_raw_response: Json
-          p_reason: string
-          p_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          p_source_id: string
-          p_source_run_id: string
-          p_suggested_category: string
-        }
-        Returns: boolean
-      }
+          p_applied_decision: Database["public"]["Enums"]["llm_event_review_decision"];
+          p_confidence: number;
+          p_error_code: string;
+          p_error_message: string;
+          p_event_id: string;
+          p_flags: string[];
+          p_input_snapshot: Json;
+          p_model: string;
+          p_model_decision: Database["public"]["Enums"]["llm_event_review_decision"];
+          p_normalized_title: string;
+          p_processing_ms: number;
+          p_prompt_version: string;
+          p_provider: string;
+          p_queue_id: number;
+          p_raw_response: Json;
+          p_reason: string;
+          p_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          p_source_id: string;
+          p_source_run_id: string;
+          p_suggested_category: string;
+        };
+        Returns: boolean;
+      };
       backfill_image_enrichment_in_scope: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          address: string
-          admin_locked_fields: string[]
-          city_id: string
-          description: string
-          event_id: string
-          needs_coords: boolean
-          needs_images: boolean
-          source_id: string
-          source_url: string
-          tags: string[]
-          title: string
-          venue_name: string
-        }[]
-      }
+          address: string;
+          admin_locked_fields: string[];
+          city_id: string;
+          description: string;
+          event_id: string;
+          needs_coords: boolean;
+          needs_images: boolean;
+          source_id: string;
+          source_url: string;
+          tags: string[];
+          title: string;
+          venue_name: string;
+        }[];
+      };
       bulk_import_scrape_events: {
-        Args: { p_events: Json; p_run_id: string; p_source_id: string }
-        Returns: Json
-      }
+        Args: { p_events: Json; p_run_id: string; p_source_id: string };
+        Returns: Json;
+      };
       claim_event_llm_review_queue_batch: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          attempt_count: number
-          created_at: string
-          enqueued_at: string
-          event_id: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          max_attempts: number
-          next_attempt_at: string
-          source_id: string | null
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["llm_event_review_queue_status"]
-          trigger_type: string
-          updated_at: string
-        }[]
+          attempt_count: number;
+          created_at: string;
+          enqueued_at: string;
+          event_id: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          max_attempts: number;
+          next_attempt_at: string;
+          source_id: string | null;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"];
+          trigger_type: string;
+          updated_at: string;
+        }[];
         SetofOptions: {
-          from: "*"
-          to: "event_llm_review_queue"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      claim_pending_invite_access: { Args: never; Returns: boolean }
+          from: "*";
+          to: "event_llm_review_queue";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      claim_pending_invite_access: { Args: never; Returns: boolean };
       claim_source_scrape_queue_batch: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          attempt_count: number
-          enqueued_at: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          next_attempt_at: string
-          skip_reason: string | null
-          source_id: string | null
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type: string
-        }[]
+          attempt_count: number;
+          enqueued_at: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          next_attempt_at: string;
+          skip_reason: string | null;
+          source_id: string | null;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["source_scrape_queue_status"];
+          trigger_type: string;
+        }[];
         SetofOptions: {
-          from: "*"
-          to: "source_scrape_queue"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
+          from: "*";
+          to: "source_scrape_queue";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       claim_tag_queue_batch: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          attempt_count: number
-          enqueued_at: string
-          event_id: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          next_attempt_at: string
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["event_tag_queue_status"]
-          trigger_type: string
-        }[]
+          attempt_count: number;
+          enqueued_at: string;
+          event_id: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          next_attempt_at: string;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["event_tag_queue_status"];
+          trigger_type: string;
+        }[];
         SetofOptions: {
-          from: "*"
-          to: "event_tag_queue"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      delete_my_account: { Args: never; Returns: undefined }
+          from: "*";
+          to: "event_tag_queue";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      delete_my_account: { Args: never; Returns: undefined };
       due_event_sources: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          auto_approve: boolean
-          city_id: string | null
-          created_at: string
-          date_window_days: number | null
-          error_count: number
-          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"]
-          id: string
-          is_active: boolean
-          last_scraped_at: string | null
-          last_status: string | null
-          name: string
-          notes: string | null
-          processing_mode: Database["public"]["Enums"]["event_processing_mode"]
-          scrape_interval_hours: number
-          source_type: string
-          updated_at: string
-          url: string
-        }[]
+          auto_approve: boolean;
+          city_id: string | null;
+          created_at: string;
+          date_window_days: number | null;
+          error_count: number;
+          extraction_mode: Database["public"]["Enums"]["source_extraction_mode"];
+          id: string;
+          is_active: boolean;
+          last_scraped_at: string | null;
+          last_status: string | null;
+          name: string;
+          notes: string | null;
+          processing_mode: Database["public"]["Enums"]["event_processing_mode"];
+          scrape_interval_hours: number;
+          source_type: string;
+          updated_at: string;
+          url: string;
+        }[];
         SetofOptions: {
-          from: "*"
-          to: "event_sources"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
+          from: "*";
+          to: "event_sources";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       enqueue_source_scrape: {
-        Args: { p_source_id: string; p_trigger_type?: string }
+        Args: { p_source_id: string; p_trigger_type?: string };
         Returns: {
-          deduped: boolean
-          queue_id: number
-        }[]
-      }
+          deduped: boolean;
+          queue_id: number;
+        }[];
+      };
       events_enriched: {
         Args: {
-          p_after_id?: string
-          p_after_start_datetime?: string
-          p_city_id?: string
-          p_date_from?: string
-          p_date_to?: string
-          p_event_ids?: string[]
-          p_limit?: number
-          p_status?: string
-          p_user_id?: string
-        }
+          p_after_id?: string;
+          p_after_start_datetime?: string;
+          p_city_id?: string;
+          p_date_from?: string;
+          p_date_to?: string;
+          p_event_ids?: string[];
+          p_limit?: number;
+          p_status?: string;
+          p_user_id?: string;
+        };
         Returns: {
-          address: string
-          age_max: number
-          age_min: number
-          ai_confidence: number
-          ai_tag_provider: string
-          avg_rating: number
-          city_id: string
-          created_at: string
-          description: string
-          end_datetime: string
-          id: string
-          image_attributions: Json
-          images: Json
-          is_favorited: boolean
-          is_featured: boolean
-          is_free: boolean
-          is_in_calendar: boolean
-          is_outdoor: boolean
-          latitude: number
-          longitude: number
-          parent_tips: Json
-          parent_tips_generated_at: string
-          price: number
-          rating_count: number
-          recurrence_info: Json
-          search_vector: unknown
-          source_id: string
-          source_name: string
-          source_url: string
-          start_datetime: string
-          status: string
-          tags: Json
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string
-          view_count: number
-        }[]
-      }
+          address: string;
+          age_max: number;
+          age_min: number;
+          ai_confidence: number;
+          ai_tag_provider: string;
+          avg_rating: number;
+          city_id: string;
+          created_at: string;
+          description: string;
+          end_datetime: string;
+          id: string;
+          image_attributions: Json;
+          images: Json;
+          is_favorited: boolean;
+          is_featured: boolean;
+          is_free: boolean;
+          is_in_calendar: boolean;
+          is_outdoor: boolean;
+          latitude: number;
+          longitude: number;
+          parent_tips: Json;
+          parent_tips_generated_at: string;
+          price: number;
+          rating_count: number;
+          recurrence_info: Json;
+          search_vector: unknown;
+          source_id: string;
+          source_name: string;
+          source_url: string;
+          start_datetime: string;
+          status: string;
+          tags: Json;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          venue_name: string;
+          view_count: number;
+        }[];
+      };
       find_similar_events: {
         Args: {
-          p_city_id?: string
-          p_embedding: string
-          p_exclude_event_id?: string
-          p_limit?: number
-          p_threshold?: number
-        }
+          p_city_id?: string;
+          p_embedding: string;
+          p_exclude_event_id?: string;
+          p_limit?: number;
+          p_threshold?: number;
+        };
         Returns: {
-          city_id: string
-          cosine_distance: number
-          event_id: string
-          source_id: string
-          status: Database["public"]["Enums"]["event_status"]
-          title: string
-        }[]
-      }
+          city_id: string;
+          cosine_distance: number;
+          event_id: string;
+          source_id: string;
+          status: Database["public"]["Enums"]["event_status"];
+          title: string;
+        }[];
+      };
       find_similar_events_by_id: {
-        Args: { p_city_id?: string; p_event_id: string; p_limit?: number }
+        Args: { p_city_id?: string; p_event_id: string; p_limit?: number };
         Returns: {
-          city_id: string
-          cosine_distance: number
-          event_id: string
-          source_id: string
-          status: Database["public"]["Enums"]["event_status"]
-          title: string
-        }[]
-      }
+          city_id: string;
+          cosine_distance: number;
+          event_id: string;
+          source_id: string;
+          status: Database["public"]["Enums"]["event_status"];
+          title: string;
+        }[];
+      };
       get_approved_ai_models: {
-        Args: never
+        Args: never;
         Returns: {
-          cost_tier: string
-          description: string
-          display_name: string
-          id: string
-          provider: string
-        }[]
-      }
-      invites_required: { Args: never; Returns: boolean }
-      invoke_process_event_review_queue: { Args: never; Returns: undefined }
-      invoke_process_tag_queue: { Args: never; Returns: undefined }
+          cost_tier: string;
+          description: string;
+          display_name: string;
+          id: string;
+          provider: string;
+        }[];
+      };
+      invites_required: { Args: never; Returns: boolean };
+      invoke_process_event_review_queue: { Args: never; Returns: undefined };
+      invoke_process_tag_queue: { Args: never; Returns: undefined };
       invoke_scrape_source: {
-        Args: { source_uuid: string }
-        Returns: undefined
-      }
-      is_cron_enabled: { Args: { p_label: string }; Returns: boolean }
-      is_enabled_user: { Args: never; Returns: boolean }
+        Args: { source_uuid: string };
+        Returns: undefined;
+      };
+      is_cron_enabled: { Args: { p_label: string }; Returns: boolean };
+      is_enabled_user: { Args: never; Returns: boolean };
       list_events_needing_attribution_backfill: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          event_id: string
-          image_url: string
-        }[]
-      }
+          event_id: string;
+          image_url: string;
+        }[];
+      };
       list_events_needing_embeddings: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          description: string
-          id: string
-          title: string
-        }[]
-      }
+          description: string;
+          id: string;
+          title: string;
+        }[];
+      };
       list_events_needing_enrichment: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          address: string
-          admin_locked_fields: string[]
-          city_id: string
-          description: string
-          event_id: string
-          needs_coords: boolean
-          needs_images: boolean
-          source_id: string
-          source_url: string
-          tags: string[]
-          title: string
-          venue_name: string
-        }[]
-      }
+          address: string;
+          admin_locked_fields: string[];
+          city_id: string;
+          description: string;
+          event_id: string;
+          needs_coords: boolean;
+          needs_images: boolean;
+          source_id: string;
+          source_url: string;
+          tags: string[];
+          title: string;
+          venue_name: string;
+        }[];
+      };
       list_events_needing_parent_tips: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          age_max: number
-          age_min: number
-          description: string
-          event_id: string
-          is_outdoor: boolean
-          start_datetime: string
-          tags: string[]
-          title: string
-          venue_name: string
-        }[]
-      }
+          age_max: number;
+          age_min: number;
+          description: string;
+          event_id: string;
+          is_outdoor: boolean;
+          start_datetime: string;
+          tags: string[];
+          title: string;
+          venue_name: string;
+        }[];
+      };
       list_pending_unsplash_download_tracking: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          attempts: number
-          attribution_id: string
-          download_location: string
-          event_id: string
-          image_url: string
-        }[]
-      }
+          attempts: number;
+          attribution_id: string;
+          download_location: string;
+          event_id: string;
+          image_url: string;
+        }[];
+      };
       log_cron_run_event: {
         Args: {
-          p_label: string
-          p_level: string
-          p_message: string
-          p_metadata?: Json
-          p_provider: string
-          p_run_key: string
-          p_sequence?: number
-        }
-        Returns: undefined
-      }
+          p_label: string;
+          p_level: string;
+          p_message: string;
+          p_metadata?: Json;
+          p_provider: string;
+          p_run_key: string;
+          p_sequence?: number;
+        };
+        Returns: undefined;
+      };
       log_railway_cron_run: {
         Args: {
-          p_body?: string
-          p_duration_s?: number
-          p_http_status?: number
-          p_label: string
-          p_run_key?: string
-          p_runner_log?: string
-          p_status: string
-        }
-        Returns: number
-      }
-      mark_all_notifications_read: { Args: never; Returns: undefined }
+          p_body?: string;
+          p_duration_s?: number;
+          p_http_status?: number;
+          p_label: string;
+          p_run_key?: string;
+          p_runner_log?: string;
+          p_status: string;
+        };
+        Returns: number;
+      };
+      mark_all_notifications_read: { Args: never; Returns: undefined };
       mark_event_enrichment_attempt: {
-        Args: { p_event_id: string }
-        Returns: undefined
-      }
+        Args: { p_event_id: string };
+        Returns: undefined;
+      };
       mark_event_llm_review_queue_row_started: {
-        Args: { p_queue_id: number }
+        Args: { p_queue_id: number };
         Returns: {
-          attempt_count: number
-          created_at: string
-          enqueued_at: string
-          event_id: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          max_attempts: number
-          next_attempt_at: string
-          source_id: string | null
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["llm_event_review_queue_status"]
-          trigger_type: string
-          updated_at: string
-        }
+          attempt_count: number;
+          created_at: string;
+          enqueued_at: string;
+          event_id: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          max_attempts: number;
+          next_attempt_at: string;
+          source_id: string | null;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["llm_event_review_queue_status"];
+          trigger_type: string;
+          updated_at: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "event_llm_review_queue"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "event_llm_review_queue";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       mark_notification_read: {
-        Args: { p_notification_id: string }
-        Returns: undefined
-      }
+        Args: { p_notification_id: string };
+        Returns: undefined;
+      };
       mark_source_scrape_queue_skipped: {
-        Args: { p_queue_id: number; p_skip_reason: string }
-        Returns: undefined
-      }
+        Args: { p_queue_id: number; p_skip_reason: string };
+        Returns: undefined;
+      };
       mark_source_scrape_queue_started: {
-        Args: { p_queue_id: number }
+        Args: { p_queue_id: number };
         Returns: {
-          attempt_count: number
-          enqueued_at: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          next_attempt_at: string
-          skip_reason: string | null
-          source_id: string | null
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["source_scrape_queue_status"]
-          trigger_type: string
-        }
+          attempt_count: number;
+          enqueued_at: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          next_attempt_at: string;
+          skip_reason: string | null;
+          source_id: string | null;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["source_scrape_queue_status"];
+          trigger_type: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "source_scrape_queue"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "source_scrape_queue";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       mark_tag_queue_row_started: {
-        Args: { p_queue_id: number }
+        Args: { p_queue_id: number };
         Returns: {
-          attempt_count: number
-          enqueued_at: string
-          event_id: string
-          finished_at: string | null
-          id: number
-          last_error: string | null
-          next_attempt_at: string
-          source_run_id: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["event_tag_queue_status"]
-          trigger_type: string
-        }
+          attempt_count: number;
+          enqueued_at: string;
+          event_id: string;
+          finished_at: string | null;
+          id: number;
+          last_error: string | null;
+          next_attempt_at: string;
+          source_run_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["event_tag_queue_status"];
+          trigger_type: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "event_tag_queue"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "event_tag_queue";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       mark_unsplash_download_tracking_result: {
-        Args: { p_attribution_id: string; p_error?: string; p_success: boolean }
-        Returns: undefined
-      }
+        Args: { p_attribution_id: string; p_error?: string; p_success: boolean };
+        Returns: undefined;
+      };
       pipeline_learning_stats: {
-        Args: { p_window_days?: number }
-        Returns: Json
-      }
+        Args: { p_window_days?: number };
+        Returns: Json;
+      };
       plan_events_first_nonempty_window: {
         Args: {
-          p_city_id?: string
-          p_date?: string
-          p_kid_age?: number
-          p_lat?: number
-          p_limit?: number
-          p_lng?: number
-          p_max_days?: number
-          p_user_id: string
-          p_weather_fit?: string
-        }
+          p_city_id?: string;
+          p_date?: string;
+          p_kid_age?: number;
+          p_lat?: number;
+          p_limit?: number;
+          p_lng?: number;
+          p_max_days?: number;
+          p_user_id: string;
+          p_weather_fit?: string;
+        };
         Returns: {
-          age_score: number
-          day_offset: number
-          distance_km: number
-          distance_score: number
-          event_id: string
-          history_affinity: number
-          score: number
-          weather_score: number
-        }[]
-      }
+          age_score: number;
+          day_offset: number;
+          distance_km: number;
+          distance_score: number;
+          event_id: string;
+          history_affinity: number;
+          score: number;
+          weather_score: number;
+        }[];
+      };
       plan_events_for_user: {
         Args: {
-          p_city_id?: string
-          p_date?: string
-          p_kid_age?: number
-          p_lat?: number
-          p_limit?: number
-          p_lng?: number
-          p_user_id: string
-          p_weather_fit?: string
-        }
+          p_city_id?: string;
+          p_date?: string;
+          p_kid_age?: number;
+          p_lat?: number;
+          p_limit?: number;
+          p_lng?: number;
+          p_user_id: string;
+          p_weather_fit?: string;
+        };
         Returns: {
-          age_score: number
-          distance_km: number
-          distance_score: number
-          event_id: string
-          history_affinity: number
-          score: number
-          weather_score: number
-        }[]
-      }
-      reap_stuck_event_llm_review_rows: { Args: never; Returns: number }
-      reap_stuck_source_scrape_queue_rows: { Args: never; Returns: number }
-      reap_stuck_tag_queue_rows: { Args: never; Returns: number }
-      redeem_invite: { Args: { p_code: string }; Returns: boolean }
+          age_score: number;
+          distance_km: number;
+          distance_score: number;
+          event_id: string;
+          history_affinity: number;
+          score: number;
+          weather_score: number;
+        }[];
+      };
+      reap_stuck_event_llm_review_rows: { Args: never; Returns: number };
+      reap_stuck_source_scrape_queue_rows: { Args: never; Returns: number };
+      reap_stuck_tag_queue_rows: { Args: never; Returns: number };
+      redeem_invite: { Args: { p_code: string }; Returns: boolean };
       redeem_invite_for_email: {
-        Args: { p_code: string; p_email: string }
-        Returns: boolean
-      }
+        Args: { p_code: string; p_email: string };
+        Returns: boolean;
+      };
       register_push_subscription: {
         Args: {
-          p_auth_key?: string
-          p_endpoint?: string
-          p_p256dh?: string
-          p_platform: string
-          p_token?: string
-        }
+          p_auth_key?: string;
+          p_endpoint?: string;
+          p_p256dh?: string;
+          p_platform: string;
+          p_token?: string;
+        };
         Returns: {
-          auth_key: string | null
-          created_at: string
-          endpoint: string | null
-          id: string
-          p256dh: string | null
-          platform: string
-          token: string | null
-          updated_at: string
-          user_id: string
-        }
+          auth_key: string | null;
+          created_at: string;
+          endpoint: string | null;
+          id: string;
+          p256dh: string | null;
+          platform: string;
+          token: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "push_subscriptions"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+          from: "*";
+          to: "push_subscriptions";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       release_unstarted_event_llm_review_rows: {
-        Args: { p_claimed_ids: number[] }
-        Returns: number
-      }
+        Args: { p_claimed_ids: number[] };
+        Returns: number;
+      };
       release_unstarted_source_scrape_queue_rows: {
-        Args: { p_claimed_ids: number[] }
-        Returns: number
-      }
+        Args: { p_claimed_ids: number[] };
+        Returns: number;
+      };
       release_unstarted_tag_queue_rows: {
-        Args: { p_claimed_ids: number[] }
-        Returns: number
-      }
+        Args: { p_claimed_ids: number[] };
+        Returns: number;
+      };
       request_invite: {
-        Args: { p_email: string; p_message?: string }
-        Returns: boolean
-      }
-      run_cleanup_stale_runs: { Args: never; Returns: undefined }
-      run_daily_maintenance: { Args: never; Returns: Json }
-      run_due_source_scrapes: { Args: never; Returns: undefined }
+        Args: { p_email: string; p_message?: string };
+        Returns: boolean;
+      };
+      run_cleanup_stale_runs: { Args: never; Returns: undefined };
+      run_daily_maintenance: { Args: never; Returns: Json };
+      run_due_source_scrapes: { Args: never; Returns: undefined };
       search_events: {
         Args: {
-          p_after_id?: string
-          p_after_start_datetime?: string
-          p_age_max?: number
-          p_age_min?: number
-          p_city_id?: string
-          p_date_from?: string
-          p_date_to?: string
-          p_is_featured?: boolean
-          p_is_free?: boolean
-          p_keyword?: string
-          p_lat?: number
-          p_limit?: number
-          p_lng?: number
-          p_offset?: number
-          p_radius_km?: number
-          p_status?: string
-          p_tag_slugs?: string[]
-        }
+          p_after_id?: string;
+          p_after_start_datetime?: string;
+          p_age_max?: number;
+          p_age_min?: number;
+          p_city_id?: string;
+          p_date_from?: string;
+          p_date_to?: string;
+          p_is_featured?: boolean;
+          p_is_free?: boolean;
+          p_keyword?: string;
+          p_lat?: number;
+          p_limit?: number;
+          p_lng?: number;
+          p_offset?: number;
+          p_radius_km?: number;
+          p_status?: string;
+          p_tag_slugs?: string[];
+        };
         Returns: {
-          address: string | null
-          admin_last_edited_at: string | null
-          admin_last_edited_by: string | null
-          admin_locked_fields: string[]
-          age_max: number | null
-          age_min: number | null
-          ai_confidence: number | null
-          ai_tag_model: string | null
-          ai_tag_provider: string | null
-          ai_tag_status: string | null
-          city_id: string | null
-          created_at: string
-          description: string | null
-          end_datetime: string | null
-          id: string
-          images: Json
-          is_featured: boolean
-          is_free: boolean
-          is_outdoor: boolean | null
-          last_enrichment_attempt_at: string | null
-          latitude: number | null
-          llm_review_confidence: number | null
-          llm_review_decision:
-            | Database["public"]["Enums"]["llm_event_review_decision"]
-            | null
-          llm_review_error: string | null
-          llm_review_flags: string[]
-          llm_review_model: string | null
-          llm_review_prompt_version: string | null
-          llm_review_provider: string | null
-          llm_review_reason: string | null
-          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"]
-          llm_reviewed_at: string | null
-          longitude: number | null
-          parent_tips: Json | null
-          parent_tips_generated_at: string | null
-          parent_tips_model: string | null
-          parent_tips_prompt_version: string | null
-          parent_tips_provider: string | null
-          price: number | null
-          recurrence_info: Json | null
-          search_vector: unknown
-          source_id: string | null
-          source_name: string | null
-          source_url: string | null
-          start_datetime: string
-          status: Database["public"]["Enums"]["event_status"]
-          submitted_by: string | null
-          timezone: string
-          title: string
-          updated_at: string
-          venue_name: string | null
-          view_count: number
-        }[]
+          address: string | null;
+          admin_last_edited_at: string | null;
+          admin_last_edited_by: string | null;
+          admin_locked_fields: string[];
+          age_max: number | null;
+          age_min: number | null;
+          ai_confidence: number | null;
+          ai_tag_model: string | null;
+          ai_tag_provider: string | null;
+          ai_tag_status: string | null;
+          city_id: string | null;
+          created_at: string;
+          description: string | null;
+          end_datetime: string | null;
+          id: string;
+          images: Json;
+          is_featured: boolean;
+          is_free: boolean;
+          is_outdoor: boolean | null;
+          last_enrichment_attempt_at: string | null;
+          latitude: number | null;
+          llm_review_confidence: number | null;
+          llm_review_decision: Database["public"]["Enums"]["llm_event_review_decision"] | null;
+          llm_review_error: string | null;
+          llm_review_flags: string[];
+          llm_review_model: string | null;
+          llm_review_prompt_version: string | null;
+          llm_review_provider: string | null;
+          llm_review_reason: string | null;
+          llm_review_status: Database["public"]["Enums"]["llm_event_review_status"];
+          llm_reviewed_at: string | null;
+          longitude: number | null;
+          parent_tips: Json | null;
+          parent_tips_generated_at: string | null;
+          parent_tips_model: string | null;
+          parent_tips_prompt_version: string | null;
+          parent_tips_provider: string | null;
+          price: number | null;
+          recurrence_info: Json | null;
+          search_vector: unknown;
+          source_id: string | null;
+          source_name: string | null;
+          source_url: string | null;
+          start_datetime: string;
+          status: Database["public"]["Enums"]["event_status"];
+          submitted_by: string | null;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          venue_name: string | null;
+          view_count: number;
+        }[];
         SetofOptions: {
-          from: "*"
-          to: "events"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
+          from: "*";
+          to: "events";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       should_auto_reject_source: {
         Args: {
-          p_min_events?: number
-          p_source_id: string
-          p_threshold?: number
-          p_window_days?: number
-        }
-        Returns: boolean
-      }
+          p_min_events?: number;
+          p_source_id: string;
+          p_threshold?: number;
+          p_window_days?: number;
+        };
+        Returns: boolean;
+      };
       source_scrape_queue_schedule_retry: {
-        Args: { p_attempt_count: number; p_error: string; p_queue_id: number }
-        Returns: undefined
-      }
+        Args: { p_attempt_count: number; p_error: string; p_queue_id: number };
+        Returns: undefined;
+      };
       submit_community_event: {
         Args: {
-          p_address?: string
-          p_age_max?: number
-          p_age_min?: number
-          p_city_id?: string
-          p_description?: string
-          p_end_datetime?: string
-          p_is_free?: boolean
-          p_price?: number
-          p_start_datetime?: string
-          p_title: string
-          p_venue_name?: string
-        }
-        Returns: string
-      }
+          p_address?: string;
+          p_age_max?: number;
+          p_age_min?: number;
+          p_city_id?: string;
+          p_description?: string;
+          p_end_datetime?: string;
+          p_is_free?: boolean;
+          p_price?: number;
+          p_start_datetime?: string;
+          p_title: string;
+          p_venue_name?: string;
+        };
+        Returns: string;
+      };
       unregister_push_subscription: {
-        Args: { p_subscription_id: string }
-        Returns: undefined
-      }
+        Args: { p_subscription_id: string };
+        Returns: undefined;
+      };
       update_event_enrichment: {
         Args: {
-          p_event_id: string
-          p_images: Json
-          p_latitude: number
-          p_longitude: number
-        }
-        Returns: undefined
-      }
+          p_event_id: string;
+          p_images: Json;
+          p_latitude: number;
+          p_longitude: number;
+        };
+        Returns: undefined;
+      };
       update_event_parent_tips: {
         Args: {
-          p_event_id: string
-          p_model: string
-          p_prompt_version: string
-          p_provider: string
-          p_tips: Json
-        }
-        Returns: undefined
-      }
+          p_event_id: string;
+          p_model: string;
+          p_prompt_version: string;
+          p_provider: string;
+          p_tips: Json;
+        };
+        Returns: undefined;
+      };
       upsert_ai_feature_config: {
-        Args: { p_enabled?: boolean; p_feature: string; p_model_id: string }
-        Returns: undefined
-      }
+        Args: { p_enabled?: boolean; p_feature: string; p_model_id: string };
+        Returns: undefined;
+      };
       upsert_event_image_attribution_with_enrichment: {
         Args: {
-          p_event_id: string
-          p_image_url: string
-          p_images: Json
-          p_latitude: number
-          p_longitude: number
-          p_matched_tag?: string
-          p_unsplash_download_location: string
-          p_unsplash_photo_id: string
-          p_unsplash_photo_url: string
-          p_unsplash_photographer_name: string
-          p_unsplash_photographer_profile_url: string
-          p_unsplash_photographer_username: string
-        }
-        Returns: string
-      }
+          p_event_id: string;
+          p_image_url: string;
+          p_images: Json;
+          p_latitude: number;
+          p_longitude: number;
+          p_matched_tag?: string;
+          p_unsplash_download_location: string;
+          p_unsplash_photo_id: string;
+          p_unsplash_photo_url: string;
+          p_unsplash_photographer_name: string;
+          p_unsplash_photographer_profile_url: string;
+          p_unsplash_photographer_username: string;
+        };
+        Returns: string;
+      };
       upsert_notification_preferences: {
         Args: {
-          p_change_email: boolean
-          p_change_push: boolean
-          p_digest_email: boolean
-          p_digest_push: boolean
-          p_reminder_email: boolean
-          p_reminder_push: boolean
-        }
+          p_change_email: boolean;
+          p_change_push: boolean;
+          p_digest_email: boolean;
+          p_digest_push: boolean;
+          p_reminder_email: boolean;
+          p_reminder_push: boolean;
+        };
         Returns: {
-          change_email: boolean
-          change_push: boolean
-          created_at: string
-          digest_email: boolean
-          digest_push: boolean
-          id: string
-          reminder_email: boolean
-          reminder_push: boolean
-          updated_at: string
-          user_id: string
-        }
+          change_email: boolean;
+          change_push: boolean;
+          created_at: string;
+          digest_email: boolean;
+          digest_push: boolean;
+          id: string;
+          reminder_email: boolean;
+          reminder_push: boolean;
+          updated_at: string;
+          user_id: string;
+        };
         SetofOptions: {
-          from: "*"
-          to: "user_notification_preferences"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-    }
+          from: "*";
+          to: "user_notification_preferences";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+    };
     Enums: {
-      event_processing_mode: "manual_review" | "auto_approve" | "llm_review"
-      event_status: "draft" | "published" | "rejected" | "archived"
-      event_tag_queue_status:
-        | "pending"
-        | "processing"
-        | "failed"
-        | "dead"
-        | "succeeded"
-      invite_request_status: "pending" | "approved" | "rejected"
-      llm_event_review_decision: "approve" | "reject" | "needs_admin_review"
-      llm_event_review_queue_status:
-        | "pending"
-        | "processing"
-        | "retrying"
-        | "succeeded"
-        | "dead"
-      llm_event_review_status:
-        | "not_required"
-        | "pending"
-        | "succeeded"
-        | "failed"
-        | "skipped"
-      source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm"
-      source_scrape_queue_status:
-        | "pending"
-        | "processing"
-        | "retrying"
-        | "succeeded"
-        | "dead"
-    }
+      event_processing_mode: "manual_review" | "auto_approve" | "llm_review";
+      event_status: "draft" | "published" | "rejected" | "archived";
+      event_tag_queue_status: "pending" | "processing" | "failed" | "dead" | "succeeded";
+      invite_request_status: "pending" | "approved" | "rejected";
+      llm_event_review_decision: "approve" | "reject" | "needs_admin_review";
+      llm_event_review_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead";
+      llm_event_review_status: "not_required" | "pending" | "succeeded" | "failed" | "skipped";
+      source_extraction_mode: "deterministic" | "llm" | "deterministic_then_llm";
+      source_scrape_queue_status: "pending" | "processing" | "retrying" | "succeeded" | "dead";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
     Enums: {
       event_processing_mode: ["manual_review", "auto_approve", "llm_review"],
       event_status: ["draft", "published", "rejected", "archived"],
-      event_tag_queue_status: [
-        "pending",
-        "processing",
-        "failed",
-        "dead",
-        "succeeded",
-      ],
+      event_tag_queue_status: ["pending", "processing", "failed", "dead", "succeeded"],
       invite_request_status: ["pending", "approved", "rejected"],
       llm_event_review_decision: ["approve", "reject", "needs_admin_review"],
-      llm_event_review_queue_status: [
-        "pending",
-        "processing",
-        "retrying",
-        "succeeded",
-        "dead",
-      ],
-      llm_event_review_status: [
-        "not_required",
-        "pending",
-        "succeeded",
-        "failed",
-        "skipped",
-      ],
-      source_extraction_mode: [
-        "deterministic",
-        "llm",
-        "deterministic_then_llm",
-      ],
-      source_scrape_queue_status: [
-        "pending",
-        "processing",
-        "retrying",
-        "succeeded",
-        "dead",
-      ],
+      llm_event_review_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
+      llm_event_review_status: ["not_required", "pending", "succeeded", "failed", "skipped"],
+      source_extraction_mode: ["deterministic", "llm", "deterministic_then_llm"],
+      source_scrape_queue_status: ["pending", "processing", "retrying", "succeeded", "dead"],
     },
   },
-} as const
-
+} as const;

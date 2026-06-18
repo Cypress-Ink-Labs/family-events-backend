@@ -25,9 +25,7 @@ const MONTHS: Record<string, number> = {
   december: 11,
 };
 
-function parseDayHeading(
-  text: string,
-): { y: number; m: number; d: number } | null {
+function parseDayHeading(text: string): { y: number; m: number; d: number } | null {
   // Example: "Friday, May 1, 2026"
   const match = text.match(/(?:^|,\s*)([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/);
   if (!match) return null;
@@ -40,9 +38,7 @@ function parseDayHeading(
 }
 
 function parseClock(value: string): { hour: number; minute: number } | null {
-  const match = value.trim().match(
-    /^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i,
-  );
+  const match = value.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/i);
   if (!match) return null;
   let hour = Number(match[1]);
   const minute = match[2] ? Number(match[2]) : 0;
@@ -61,10 +57,7 @@ function brecWallClockToIso(
   minute: number,
   timeZone: string,
 ): string {
-  return wallClockToIso(
-    { year: y, month: m + 1, day: d, hour, minute },
-    timeZone,
-  );
+  return wallClockToIso({ year: y, month: m + 1, day: d, hour, minute }, timeZone);
 }
 
 function parseTimeRange(
@@ -101,22 +94,10 @@ function parseTimeRange(
   );
   const endClock = parseClock(rawEnd ?? "");
   let endDatetime = endClock
-    ? brecWallClockToIso(
-      date.y,
-      date.m,
-      date.d,
-      endClock.hour,
-      endClock.minute,
-      timeZone,
-    )
+    ? brecWallClockToIso(date.y, date.m, date.d, endClock.hour, endClock.minute, timeZone)
     : null;
-  if (
-    endDatetime &&
-    new Date(endDatetime).getTime() <= new Date(startDatetime).getTime()
-  ) {
-    endDatetime = new Date(
-      new Date(endDatetime).getTime() + 24 * 60 * 60 * 1000,
-    ).toISOString();
+  if (endDatetime && new Date(endDatetime).getTime() <= new Date(startDatetime).getTime()) {
+    endDatetime = new Date(new Date(endDatetime).getTime() + 24 * 60 * 60 * 1000).toISOString();
   }
   return { startDatetime, endDatetime };
 }
@@ -146,28 +127,19 @@ function parseArticle(
   seenKeys: Set<string>,
   events: ParsedEvent[],
 ): void {
-  const title = stripHtml(
-    article.querySelector("h3")?.textContent ?? "",
-  ).trim();
+  const title = stripHtml(article.querySelector("h3")?.textContent ?? "").trim();
   if (!title) return;
 
   const timeText = article.querySelector(".time")?.textContent ?? "";
   const { startDatetime, endDatetime } = parseTimeRange(date, timeText, timeZone);
 
-  const venueName = stripHtml(
-    article.querySelector(".park")?.textContent ?? "",
-  ).trim() || null;
+  const venueName = stripHtml(article.querySelector(".park")?.textContent ?? "").trim() || null;
 
-  const linkHref = article.querySelector("a[href]")?.getAttribute("href") ??
-    null;
+  const linkHref = article.querySelector("a[href]")?.getAttribute("href") ?? null;
   const eventUrl = resolveUrl(linkHref, sourceUrl);
 
-  const dayIndex = stripHtml(
-    article.querySelector(".day-index")?.textContent ?? "",
-  ).trim();
-  const description = cleanDescription(
-    [venueName, dayIndex].filter(Boolean).join(" — "),
-  ) || title;
+  const dayIndex = stripHtml(article.querySelector(".day-index")?.textContent ?? "").trim();
+  const description = cleanDescription([venueName, dayIndex].filter(Boolean).join(" — ")) || title;
 
   const imageUrl = extractArticleImage(article, sourceUrl);
   const priceInfo = extractPrice(description);
@@ -265,8 +237,7 @@ export const brecParser: SourceParser<"brec"> = {
         const origin = new URL(source.url).origin;
         const fragments: string[] = [];
         for (let page = 1; page <= totalPages; page++) {
-          const snippetUrl =
-            `${origin}/?action=calendar.category_events.snip&categoryID=${categoryId}&pageNum=${page}`;
+          const snippetUrl = `${origin}/?action=calendar.category_events.snip&categoryID=${categoryId}&pageNum=${page}`;
           fragments.push(
             await ctx.fetchText(snippetUrl, {
               accept: "text/html,application/xhtml+xml,*/*",
@@ -285,11 +256,7 @@ export const brecParser: SourceParser<"brec"> = {
   },
   extractEvents(source, artifact, ctx) {
     return Promise.resolve(
-      parseBrecCalendar(
-        artifact.body,
-        artifact.url || source.url,
-        ctx.timezone,
-      ),
+      parseBrecCalendar(artifact.body, artifact.url || source.url, ctx.timezone),
     );
   },
 };

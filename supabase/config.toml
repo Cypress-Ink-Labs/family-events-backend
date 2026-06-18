@@ -1,33 +1,31 @@
 project_id = "family-events-ui"
 
 [api]
-enabled           = true
-port              = 55321
-schemas           = ["public", "storage", "graphql_public"]
+enabled = true
+port = 55321
+schemas = ["public", "storage", "graphql_public"]
 extra_search_path = ["public", "extensions"]
-max_rows          = 1000
+max_rows = 1000
 
 [db]
-port          = 55322
+port = 55322
 major_version = 17
 
 [db.migrations]
-enabled      = true
+enabled = true
 schema_paths = ["./migrations/*.sql"]
 
 [db.seed]
 enabled = true
-sql_paths = [
-  "./seed.sql",
-]
+sql_paths = ["./seed.sql"]
 
 [realtime]
 enabled = true
 
 [auth]
-enabled       = true
-site_url      = "https://family-events.org"
-jwt_expiry    = 3600
+enabled = true
+site_url = "https://family-events.org"
+jwt_expiry = 3600
 enable_signup = true
 # Must match the client-side checks in apps/web (sign-up.tsx,
 # reset-password.tsx). Applies to new signups and password changes only.
@@ -50,17 +48,17 @@ enabled = true
 # Services ID is public. The secret is the hosted project's existing hash so
 # config pushes do not overwrite Apple OAuth when the raw .p8/JWT is absent.
 client_id = "app.familyevents.web"
-secret    = "hash:fd39ad53627a44755fbcb4c820aa717bcfeaa1768db820d155fd5ccbf6206687"
-url              = ""
-redirect_uri     = ""
+secret = "hash:fd39ad53627a44755fbcb4c820aa717bcfeaa1768db820d155fd5ccbf6206687"
+url = ""
+redirect_uri = ""
 skip_nonce_check = false
 
 [auth.external.google]
-enabled          = true
-client_id        = "545014101545-6sdgf63hp1q1vucmio3p98qo84mojnk1.apps.googleusercontent.com,545014101545-in1qudtusha5kqlf5cben5oljjhmha6o.apps.googleusercontent.com,545014101545-nbm89gkb02g645n19ftk4pkan4kro0pl.apps.googleusercontent.com"
-secret           = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
-url              = ""
-redirect_uri     = ""
+enabled = true
+client_id = "545014101545-6sdgf63hp1q1vucmio3p98qo84mojnk1.apps.googleusercontent.com,545014101545-in1qudtusha5kqlf5cben5oljjhmha6o.apps.googleusercontent.com,545014101545-nbm89gkb02g645n19ftk4pkan4kro0pl.apps.googleusercontent.com"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+url = ""
+redirect_uri = ""
 skip_nonce_check = true
 
 [auth.mfa.totp]
@@ -68,24 +66,24 @@ enroll_enabled = true
 verify_enabled = true
 
 [storage]
-enabled         = true
+enabled = true
 file_size_limit = "50MiB"
 
 [studio]
 enabled = true
-port    = 55323
+port = 55323
 
 [inbucket]
 enabled = true
-port    = 55324
+port = 55324
 
 [analytics]
 enabled = true
-port    = 55327
+port = 55327
 
 [edge_runtime]
-enabled        = true
-policy         = "oneshot"
+enabled = true
+policy = "oneshot"
 inspector_port = 55326
 
 [functions.scrape-source]
@@ -113,6 +111,15 @@ verify_jwt = false
 [functions.sitemap]
 # Public: search engine crawlers (Googlebot, Bingbot) never carry a user JWT.
 # The function reads only the public_events view with the anon key.
+verify_jwt = false
+
+[functions.events-api]
+# Public: partner integrations and aggregators (news sites, calendar apps,
+# community blogs) never carry a user JWT. Open CORS (*) — public read API.
+# Reads published events via search_events with the anon key — RLS is the
+# security boundary. Edge function projects only public columns; internal/LLM
+# fields are excluded. See supabase/docs/PUBLIC_API.md.
+# TODO: add per-IP rate limiting before announcing publicly.
 verify_jwt = false
 
 [functions.events-feed]
@@ -209,7 +216,7 @@ verify_jwt = true
 # For local dev, configure it in Supabase Studio (port 55323) or leave it
 # unset — auth emails will fall through to Inbucket (port 55324).
 enabled = false
-uri     = "https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/send-auth-email"
+uri = "https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/send-auth-email"
 # The raw hook secret comes from root .env for config pushes; the remote config
 # stores only its hash.
 secrets = "env(SEND_EMAIL_HOOK_SECRET)"

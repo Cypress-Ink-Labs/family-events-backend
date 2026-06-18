@@ -41,8 +41,7 @@ export function buildCorsHeaders(
   const headers: Record<string, string> = {
     Vary: "Origin",
     "Access-Control-Allow-Methods": methods.join(", "),
-    "Access-Control-Allow-Headers":
-      "Content-Type, Authorization, X-Client-Info, Apikey",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
   };
   if (allowedOrigin) {
     headers["Access-Control-Allow-Origin"] = allowedOrigin;

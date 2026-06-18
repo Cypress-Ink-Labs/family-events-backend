@@ -21,22 +21,24 @@ Maps to `public.search_events(...)`.
 
 **Query parameters:**
 
-| Param | Type | Default | Notes |
-|-------|------|---------|-------|
-| `city_id` | UUID | — | Filter by city |
-| `date_from` | ISO 8601 datetime | — | Inclusive lower bound on `start_datetime` |
-| `date_to` | ISO 8601 datetime | — | Inclusive upper bound on `start_datetime` |
-| `is_free` | `true`/`false` | — | Free events only |
-| `tags` | comma-separated slugs | — | All specified tags must match |
-| `keyword` | string ≤ 100 chars | — | Full-text search |
-| `limit` | 1–100 | 20 | Page size (capped at 100 for public API; RPC allows 500) |
-| `cursor` | opaque string | — | Pagination cursor returned as `next_cursor` in a previous response |
+| Param       | Type                  | Default | Notes                                                              |
+| ----------- | --------------------- | ------- | ------------------------------------------------------------------ |
+| `city_id`   | UUID                  | —       | Filter by city                                                     |
+| `date_from` | ISO 8601 datetime     | —       | Inclusive lower bound on `start_datetime`                          |
+| `date_to`   | ISO 8601 datetime     | —       | Inclusive upper bound on `start_datetime`                          |
+| `is_free`   | `true`/`false`        | —       | Free events only                                                   |
+| `tags`      | comma-separated slugs | —       | All specified tags must match                                      |
+| `keyword`   | string ≤ 100 chars    | —       | Full-text search                                                   |
+| `limit`     | 1–100                 | 20      | Page size (capped at 100 for public API; RPC allows 500)           |
+| `cursor`    | opaque string         | —       | Pagination cursor returned as `next_cursor` in a previous response |
 
 **Response envelope:**
 
 ```json
 {
-  "data": [ /* array of event objects */ ],
+  "data": [
+    /* array of event objects */
+  ],
   "next_cursor": "eyJhZnRlcl9zdGFydCI6Ii4uLiIsImFmdGVyX2lkIjoiLi4uIn0="
 }
 ```
@@ -65,7 +67,7 @@ Maps to `public.search_events(...)`.
   "is_featured": "boolean",
   "is_outdoor": "boolean | null",
   "images": "array of strings",
-  "tags": [ { "id": "uuid", "name": "string", "slug": "string", "color": "string" } ],
+  "tags": [{ "id": "uuid", "name": "string", "slug": "string", "color": "string" }],
   "source_url": "string | null",
   "avg_rating": "number",
   "rating_count": "integer"
@@ -74,20 +76,20 @@ Maps to `public.search_events(...)`.
 
 **Columns intentionally excluded from v1 (internal / LLM / admin fields):**
 
-| Column | Reason |
-|--------|--------|
-| `search_vector` | Internal tsvector, not useful to partners |
-| `ai_confidence` | Internal LLM metadata |
-| `ai_tag_provider` | Internal LLM metadata |
-| `parent_tips` | User-facing only, not a partner contract yet |
-| `parent_tips_generated_at` | Internal bookkeeping |
-| `view_count` | Competitive intelligence risk |
-| `source_id` | Internal FK; `source_url` + `source_name` are enough |
-| `source_name` | Included: helps partners cite origin |
-| `recurrence_info` | Unstable jsonb shape; recurrence is a follow-up |
-| `is_favorited` | User-specific, always false for anon |
-| `is_in_calendar` | User-specific, always false for anon |
-| `created_at` / `updated_at` | Internal bookkeeping |
+| Column                      | Reason                                               |
+| --------------------------- | ---------------------------------------------------- |
+| `search_vector`             | Internal tsvector, not useful to partners            |
+| `ai_confidence`             | Internal LLM metadata                                |
+| `ai_tag_provider`           | Internal LLM metadata                                |
+| `parent_tips`               | User-facing only, not a partner contract yet         |
+| `parent_tips_generated_at`  | Internal bookkeeping                                 |
+| `view_count`                | Competitive intelligence risk                        |
+| `source_id`                 | Internal FK; `source_url` + `source_name` are enough |
+| `source_name`               | Included: helps partners cite origin                 |
+| `recurrence_info`           | Unstable jsonb shape; recurrence is a follow-up      |
+| `is_favorited`              | User-specific, always false for anon                 |
+| `is_in_calendar`            | User-specific, always false for anon                 |
+| `created_at` / `updated_at` | Internal bookkeeping                                 |
 
 > **STOP condition note**: `search_events` returns `SETOF events` (the raw table), which includes
 > internal columns (`ai_confidence`, `ai_tag_provider`, `search_vector`, etc.). The edge function
@@ -198,23 +200,23 @@ endpoints in v1, so CSRF via CORS is not a concern.
 
 **RPC grants (all anon-accessible, published-only):**
 
-| RPC | Exposure | Grant |
-|-----|----------|-------|
-| `public.search_events` | `SETOF events` filtered to `status = 'published'` | anon, authenticated, service_role (see migration 20260601028000) |
-| `public.events_enriched_v2` | RETURNS TABLE (explicit columns) | anon, authenticated, service_role (see migration 20260601006000) |
-| `public.find_similar_events_by_id` | Similar published events | anon, authenticated (see migration 20260601029000) |
+| RPC                                | Exposure                                          | Grant                                                            |
+| ---------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------- |
+| `public.search_events`             | `SETOF events` filtered to `status = 'published'` | anon, authenticated, service_role (see migration 20260601028000) |
+| `public.events_enriched_v2`        | RETURNS TABLE (explicit columns)                  | anon, authenticated, service_role (see migration 20260601006000) |
+| `public.find_similar_events_by_id` | Similar published events                          | anon, authenticated (see migration 20260601029000)               |
 
 **Input validation per parameter (GET /events):**
 
-| Param | Validation |
-|-------|------------|
-| `city_id` | UUID regex; reject non-UUIDs with 400 |
-| `date_from`, `date_to` | `new Date(v).getTime()` must be finite; reject with 400 |
-| `is_free` | Must be `"true"` or `"false"`; reject other values with 400 |
-| `tags` | Split on comma; each slug matches `/^[a-z0-9-]{1,50}$/`; max 10 tags |
-| `keyword` | Strip; max 100 chars (matches RPC internal cap); reject longer with 400 |
-| `limit` | Integer 1–100; reject out-of-range with 400 |
-| `cursor` | base64-decode + JSON.parse; must produce `{after_start, after_id}` with valid types |
+| Param                  | Validation                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `city_id`              | UUID regex; reject non-UUIDs with 400                                               |
+| `date_from`, `date_to` | `new Date(v).getTime()` must be finite; reject with 400                             |
+| `is_free`              | Must be `"true"` or `"false"`; reject other values with 400                         |
+| `tags`                 | Split on comma; each slug matches `/^[a-z0-9-]{1,50}$/`; max 10 tags                |
+| `keyword`              | Strip; max 100 chars (matches RPC internal cap); reject longer with 400             |
+| `limit`                | Integer 1–100; reject out-of-range with 400                                         |
+| `cursor`               | base64-decode + JSON.parse; must produce `{after_start, after_id}` with valid types |
 
 **No write surface**: all endpoints are GET-only. POST/PUT/DELETE → 405.
 

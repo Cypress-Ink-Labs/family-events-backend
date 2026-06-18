@@ -40,8 +40,7 @@ export function getTimeZoneOffset(date: Date, timeZone: string): number {
   });
 
   const parts = formatter.formatToParts(date);
-  const pick = (type: string) =>
-    Number(parts.find((part) => part.type === type)?.value);
+  const pick = (type: string) => Number(parts.find((part) => part.type === type)?.value);
 
   const asUtc = Date.UTC(
     pick("year"),

@@ -5,11 +5,11 @@ Invoked every 15 min by the `cron-enrich-events` Railway service.
 
 ## Environment
 
-| Var | Required | Purpose |
-|---|---|---|
-| `SUPABASE_SERVICE_ROLE_KEY` | yes | RPC access for `list_events_needing_enrichment`, `backfill_image_enrichment_in_scope`, `update_event_enrichment`, Unsplash attribution, and download-tracking RPCs. |
-| `SUPABASE_URL` | yes | Edge-fn → DB. |
-| `UNSPLASH_ACCESS_KEY` | optional | Enables the tag-keyed Unsplash image fallback. Get one at <https://unsplash.com/oauth/applications>. Demo tier (5000 req/hr) is sufficient at our cadence. **Blank → fallback skipped; clients render picsum placeholders.** |
+| Var                         | Required | Purpose                                                                                                                                                                                                                      |
+| --------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes      | RPC access for `list_events_needing_enrichment`, `backfill_image_enrichment_in_scope`, `update_event_enrichment`, Unsplash attribution, and download-tracking RPCs.                                                          |
+| `SUPABASE_URL`              | yes      | Edge-fn → DB.                                                                                                                                                                                                                |
+| `UNSPLASH_ACCESS_KEY`       | optional | Enables the tag-keyed Unsplash image fallback. Get one at <https://unsplash.com/oauth/applications>. Demo tier (5000 req/hr) is sufficient at our cadence. **Blank → fallback skipped; clients render picsum placeholders.** |
 
 ## What it does per tick
 

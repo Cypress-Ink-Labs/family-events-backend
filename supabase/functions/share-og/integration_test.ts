@@ -24,84 +24,59 @@ const CRAWLER_USER_AGENTS = [
 ];
 
 if (typeof Deno !== "undefined") {
-  Deno.test(
-    "handleShareOg serves OG HTML to facebookexternalhit crawler",
-    async () => {
+  Deno.test("handleShareOg serves OG HTML to facebookexternalhit crawler", async () => {
+    const response = await handleShareOg(
+      new Request(`https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID}`, {
+        method: "GET",
+        headers: { "User-Agent": "facebookexternalhit/1.1" },
+      }),
+    );
+
+    assertEquals(response.status, 200);
+    assertStringIncludes(response.headers.get("Content-Type") ?? "", "text/html");
+
+    const body = await response.text();
+    // Must be server-rendered OG, not the SPA shell.
+    assertStringIncludes(body, '<meta property="og:title"');
+    assertStringIncludes(body, '<meta property="og:description"');
+    assertStringIncludes(body, '<meta property="og:image"');
+    assertStringIncludes(body, '<meta property="og:url"');
+    // og:url must echo the human-facing /share/<id> path, not the functions URL.
+    assertStringIncludes(body, `/share/${VALID_UUID}`);
+  });
+
+  Deno.test("handleShareOg serves OG HTML to all known social-crawler UAs", async () => {
+    for (const ua of CRAWLER_USER_AGENTS) {
       const response = await handleShareOg(
-        new Request(
-          `https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID}`,
-          {
-            method: "GET",
-            headers: { "User-Agent": "facebookexternalhit/1.1" },
-          },
-        ),
+        new Request(`https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID}`, {
+          method: "GET",
+          headers: { "User-Agent": ua },
+        }),
       );
 
-      assertEquals(response.status, 200);
-      assertStringIncludes(
-        response.headers.get("Content-Type") ?? "",
-        "text/html",
-      );
-
+      assertEquals(response.status, 200, `crawler "${ua}" did not get 200`);
       const body = await response.text();
-      // Must be server-rendered OG, not the SPA shell.
-      assertStringIncludes(body, '<meta property="og:title"');
-      assertStringIncludes(body, '<meta property="og:description"');
-      assertStringIncludes(body, '<meta property="og:image"');
-      assertStringIncludes(body, '<meta property="og:url"');
-      // og:url must echo the human-facing /share/<id> path, not the functions URL.
-      assertStringIncludes(body, `/share/${VALID_UUID}`);
-    },
-  );
-
-  Deno.test(
-    "handleShareOg serves OG HTML to all known social-crawler UAs",
-    async () => {
-      for (const ua of CRAWLER_USER_AGENTS) {
-        const response = await handleShareOg(
-          new Request(
-            `https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID}`,
-            { method: "GET", headers: { "User-Agent": ua } },
-          ),
-        );
-
-        assertEquals(
-          response.status,
-          200,
-          `crawler "${ua}" did not get 200`,
-        );
-        const body = await response.text();
-        assertStringIncludes(
-          body,
-          '<meta property="og:title"',
-          `crawler "${ua}" did not receive OG metadata`,
-        );
-      }
-    },
-  );
-
-  Deno.test(
-    "handleShareOg sets a public CDN-cache header so edge nodes can hold the preview",
-    async () => {
-      const response = await handleShareOg(
-        new Request(
-          `https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID}`,
-          {
-            method: "GET",
-            headers: { "User-Agent": "facebookexternalhit/1.1" },
-          },
-        ),
+      assertStringIncludes(
+        body,
+        '<meta property="og:title"',
+        `crawler "${ua}" did not receive OG metadata`,
       );
+    }
+  });
 
-      const cacheControl = response.headers.get("Cache-Control") ?? "";
-      assert(
-        cacheControl.includes("public"),
-        `expected public Cache-Control, got "${cacheControl}"`,
-      );
-      assert(
-        cacheControl.includes("s-maxage="),
-        `expected s-maxage directive, got "${cacheControl}"`,
-      );
-    },
-  );
+  Deno.test("handleShareOg sets a public CDN-cache header so edge nodes can hold the preview", async () => {
+    const response = await handleShareOg(
+      new Request(`https://app.example.com/functions/v1/share-og?eventId=${VALID_UUID}`, {
+        method: "GET",
+        headers: { "User-Agent": "facebookexternalhit/1.1" },
+      }),
+    );
+
+    const cacheControl = response.headers.get("Cache-Control") ?? "";
+    assert(cacheControl.includes("public"), `expected public Cache-Control, got "${cacheControl}"`);
+    assert(
+      cacheControl.includes("s-maxage="),
+      `expected s-maxage directive, got "${cacheControl}"`,
+    );
+  });
 }

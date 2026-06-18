@@ -1,8 +1,5 @@
 import { assertEquals } from "jsr:@std/assert";
-import {
-  resolveTagEventAiConfig,
-  resolveTagEventOpenAiModel,
-} from "./config.ts";
+import { resolveTagEventAiConfig, resolveTagEventOpenAiModel } from "./config.ts";
 
 Deno.test("resolveTagEventOpenAiModel falls back to default", () => {
   assertEquals(resolveTagEventOpenAiModel("bad-model"), "gpt-4o-mini");

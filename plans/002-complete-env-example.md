@@ -63,10 +63,10 @@ auto-injected in deployed functions but are needed locally, so keep them (alread
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
+| Purpose                     | Command                                                                                                 | Expected                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | Re-derive the live key list | `grep -rhoE 'Deno\.env\.get\("[A-Z0-9_]+"\)' supabase/functions/ \| grep -oE '"[A-Z0-9_]+"' \| sort -u` | the set above (re-check for drift) |
-| Confirm a var's purpose | `grep -rn '"<VAR>"' supabase/functions` | shows the consuming function |
+| Confirm a var's purpose     | `grep -rn '"<VAR>"' supabase/functions`                                                                 | shows the consuming function       |
 
 ## Steps
 
@@ -154,12 +154,13 @@ comm -23 \
   <(grep -rhoE 'Deno\.env\.get\("[A-Z0-9_]+"\)' supabase/functions/ | grep -oE '[A-Z0-9_]+' | sort -u | grep -vE '^(SB_EXECUTION_ID|SB_REGION)$') \
   <(grep -oE '^[A-Z0-9_]+' .env.example | sort -u)
 ```
+
 → prints **nothing** (empty diff = every consumed var is documented).
 
 ## Done criteria
 
 - [ ] The `comm` diff above prints nothing
-- [ ] No secret *values* are written into `.env.example` (only blank keys or non-secret defaults)
+- [ ] No secret _values_ are written into `.env.example` (only blank keys or non-secret defaults)
 - [ ] Only `.env.example` changed (`git status`)
 - [ ] `plans/README.md` row for 002 updated
 

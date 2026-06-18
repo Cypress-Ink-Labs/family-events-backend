@@ -5,43 +5,43 @@
 // For local/private dev a generic identifier is fine.
 
 export interface GeocodeResult {
-  latitude: number
-  longitude: number
-  source: "nominatim" | "city-fallback"
+  latitude: number;
+  longitude: number;
+  source: "nominatim" | "city-fallback";
 }
 
 interface NominatimHit {
-  lat: string
-  lon: string
+  lat: string;
+  lon: string;
 }
 
-const NOMINATIM_UA = "family-events-ui/1.0 (geocoder)"
-const NOMINATIM_RATE_LIMIT_MS = 1_000
+const NOMINATIM_UA = "family-events-ui/1.0 (geocoder)";
+const NOMINATIM_RATE_LIMIT_MS = 1_000;
 
-let lastNominatimRequestAt = 0
-let nominatimQueue: Promise<void> = Promise.resolve()
+let lastNominatimRequestAt = 0;
+let nominatimQueue: Promise<void> = Promise.resolve();
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function waitForNominatimSlot(): Promise<void> {
-  let releaseQueue: (() => void) | undefined
+  let releaseQueue: (() => void) | undefined;
   const queueTail = new Promise<void>((resolve) => {
-    releaseQueue = resolve
-  })
-  const previousQueue = nominatimQueue
-  nominatimQueue = queueTail
+    releaseQueue = resolve;
+  });
+  const previousQueue = nominatimQueue;
+  nominatimQueue = queueTail;
 
-  await previousQueue
+  await previousQueue;
   try {
-    const elapsed = Date.now() - lastNominatimRequestAt
+    const elapsed = Date.now() - lastNominatimRequestAt;
     if (elapsed < NOMINATIM_RATE_LIMIT_MS) {
-      await sleep(NOMINATIM_RATE_LIMIT_MS - elapsed)
+      await sleep(NOMINATIM_RATE_LIMIT_MS - elapsed);
     }
-    lastNominatimRequestAt = Date.now()
+    lastNominatimRequestAt = Date.now();
   } finally {
-    releaseQueue?.()
+    releaseQueue?.();
   }
 }
 
@@ -50,32 +50,32 @@ async function waitForNominatimSlot(): Promise<void> {
  * Caller must respect the 1 req/sec rate limit.
  */
 export async function geocodeViaNominatim(query: string): Promise<GeocodeResult | null> {
-  if (!query || query.trim().length < 3) return null
+  if (!query || query.trim().length < 3) return null;
 
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
 
   try {
-    await waitForNominatimSlot()
+    await waitForNominatimSlot();
     const res = await fetch(url, {
       headers: {
         "User-Agent": NOMINATIM_UA,
         Accept: "application/json",
       },
       signal: AbortSignal.timeout(5_000),
-    })
-    if (!res.ok) return null
+    });
+    if (!res.ok) return null;
 
-    const hits = (await res.json()) as NominatimHit[]
-    const first = hits?.[0]
-    if (!first) return null
+    const hits = (await res.json()) as NominatimHit[];
+    const first = hits?.[0];
+    if (!first) return null;
 
-    const lat = Number(first.lat)
-    const lng = Number(first.lon)
-    if (Number.isNaN(lat) || Number.isNaN(lng)) return null
+    const lat = Number(first.lat);
+    const lng = Number(first.lon);
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
 
-    return { latitude: lat, longitude: lng, source: "nominatim" }
+    return { latitude: lat, longitude: lng, source: "nominatim" };
   } catch {
-    return null
+    return null;
   }
 }
 
@@ -95,33 +95,33 @@ export async function geocodeViaNominatim(query: string): Promise<GeocodeResult 
  * suffixes like '701 St. Nazaire, Broussard, LA, 70518, Lafayette, LA'.
  */
 export function buildGeocodeQuery(parts: {
-  address: string | null
-  venueName: string | null
-  cityName: string | null
-  cityState: string | null
+  address: string | null;
+  venueName: string | null;
+  cityName: string | null;
+  cityState: string | null;
 }): string | null {
-  const base = parts.address?.trim() || parts.venueName?.trim()
-  if (!base) return null
+  const base = parts.address?.trim() || parts.venueName?.trim();
+  if (!base) return null;
 
-  const baseLower = base.toLowerCase()
-  const cityMentioned = parts.cityName != null &&
-    baseLower.includes(parts.cityName.toLowerCase())
+  const baseLower = base.toLowerCase();
+  const cityMentioned = parts.cityName != null && baseLower.includes(parts.cityName.toLowerCase());
   // Use word-boundary matching so a 2-letter state abbreviation (e.g. "LA")
   // is not falsely detected as a substring of a city name (e.g. "Lafayette").
-  const stateMentioned = parts.cityState != null &&
-    new RegExp(`(?<![a-zA-Z])${parts.cityState}(?![a-zA-Z])`, "i").test(base)
+  const stateMentioned =
+    parts.cityState != null &&
+    new RegExp(`(?<![a-zA-Z])${parts.cityState}(?![a-zA-Z])`, "i").test(base);
 
   // Also skip when address already contains a state abbreviation (e.g. ", LA" or ", TX, ")
   // even if city_id points to a different city — prevents contradictory locality queries.
-  const hasInlineState = /,\s*[A-Z]{2}(\s|,|$)/.test(base)
+  const hasInlineState = /,\s*[A-Z]{2}(\s|,|$)/.test(base);
 
   if ((cityMentioned && stateMentioned) || hasInlineState) {
-    return base
+    return base;
   }
 
-  const localityParts: string[] = []
-  if (parts.cityName && !cityMentioned) localityParts.push(parts.cityName)
-  if (parts.cityState && !stateMentioned) localityParts.push(parts.cityState)
-  const locality = localityParts.join(", ")
-  return locality ? `${base}, ${locality}` : base
+  const localityParts: string[] = [];
+  if (parts.cityName && !cityMentioned) localityParts.push(parts.cityName);
+  if (parts.cityState && !stateMentioned) localityParts.push(parts.cityState);
+  const locality = localityParts.join(", ");
+  return locality ? `${base}, ${locality}` : base;
 }

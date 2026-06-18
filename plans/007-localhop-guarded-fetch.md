@@ -51,8 +51,13 @@ async fetchArtifact(source) {
 ```
 
 The guard to use — `supabase/functions/_shared/guarded-fetch.ts`:
+
 ```ts
-export async function guardedFetch(rawUrl: string, init: RequestInit = {}, opts: GuardedFetchOptions = {}): Promise<Response>
+export async function guardedFetch(
+  rawUrl: string,
+  init: RequestInit = {},
+  opts: GuardedFetchOptions = {},
+): Promise<Response>;
 // resolves+range-checks rawUrl, fetches with redirect:"manual", re-validates each Location hop (default 3).
 // Throws SsrfRejectedError on a private/loopback/link-local/reserved target. Caller's init.redirect is ignored.
 ```
@@ -86,10 +91,10 @@ valuable): a 302 → private-IP `Location` must throw `SsrfRejectedError`; a 302
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Tests | `deno test` (cwd `supabase/functions`) and `pnpm -C supabase/functions exec vitest run` | pass |
+| Purpose   | Command                                                                                 | Expected |
+| --------- | --------------------------------------------------------------------------------------- | -------- |
+| Typecheck | `pnpm run check`                                                                        | exit 0   |
+| Tests     | `deno test` (cwd `supabase/functions`) and `pnpm -C supabase/functions exec vitest run` | pass     |
 
 ## Scope
 

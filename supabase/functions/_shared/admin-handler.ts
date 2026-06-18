@@ -1,16 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { AuthResult } from "./auth.ts";
 import { requireAdminOrService } from "./auth.ts";
-import {
-  buildCorsHeaders,
-  resolveAllowedOrigin,
-} from "./cors.ts";
-import {
-  type CorsOptions,
-  errorJson,
-  jsonResponse,
-  optionsResponse,
-} from "./http.ts";
+import { buildCorsHeaders, resolveAllowedOrigin } from "./cors.ts";
+import { type CorsOptions, errorJson, jsonResponse, optionsResponse } from "./http.ts";
 import { errorContext } from "./logger.ts";
 import { captureEdgeException } from "./sentry.ts";
 import { createServiceClient } from "./supabase-client.ts";
@@ -31,9 +23,7 @@ export interface AdminJsonOptions {
   methods?: string[];
 }
 
-export type AdminJsonHandler = (
-  context: AdminJsonContext,
-) => Promise<Response | unknown>;
+export type AdminJsonHandler = (context: AdminJsonContext) => Promise<Response | unknown>;
 
 export class AdminJsonError extends Error {
   constructor(
@@ -57,12 +47,7 @@ export interface AdminJsonDependencies {
 }
 
 export function createAdminJsonHandler(
-  {
-    cors,
-    errorStage = "handler",
-    functionName,
-    methods = ["POST"],
-  }: AdminJsonOptions,
+  { cors, errorStage = "handler", functionName, methods = ["POST"] }: AdminJsonOptions,
   handler: AdminJsonHandler,
   deps: AdminJsonDependencies = {},
 ): (req: Request) => Promise<Response> {
@@ -89,24 +74,14 @@ export function createAdminJsonHandler(
       return errorJson("SUPABASE_URL not configured", 500, corsHeaders);
     }
     if (!serviceRoleKey) {
-      return errorJson(
-        "SUPABASE_SERVICE_ROLE_KEY not configured",
-        500,
-        corsHeaders,
-      );
+      return errorJson("SUPABASE_SERVICE_ROLE_KEY not configured", 500, corsHeaders);
     }
     if (!anonKey) {
       return errorJson("SUPABASE_ANON_KEY not configured", 500, corsHeaders);
     }
 
     const supabase = serviceClientFactory(supabaseUrl, serviceRoleKey);
-    const auth = await requireAuth(
-      req,
-      supabase,
-      supabaseUrl,
-      serviceRoleKey,
-      anonKey,
-    );
+    const auth = await requireAuth(req, supabase, supabaseUrl, serviceRoleKey, anonKey);
     if (!auth.ok) return errorJson(auth.message, auth.status, corsHeaders);
 
     try {
@@ -134,10 +109,7 @@ export function createAdminJsonHandler(
       if (err instanceof AdminJsonError) {
         return errorJson(err.message, err.status, corsHeaders);
       }
-      await captureException(
-        err,
-        errorContext(err, { function: functionName, stage: errorStage }),
-      );
+      await captureException(err, errorContext(err, { function: functionName, stage: errorStage }));
       // Do not leak DB/PostgREST detail (code=/details=) to callers. Full detail
       // is logged + sent to Sentry above.
       return errorJson("Internal error", 500, corsHeaders);
@@ -145,9 +117,6 @@ export function createAdminJsonHandler(
   };
 }
 
-export function serveAdminJson(
-  options: AdminJsonOptions,
-  handler: AdminJsonHandler,
-) {
+export function serveAdminJson(options: AdminJsonOptions, handler: AdminJsonHandler) {
   Deno.serve(createAdminJsonHandler(options, handler));
 }

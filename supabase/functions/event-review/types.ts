@@ -16,8 +16,7 @@ export const LLM_EVENT_REVIEW_STATUS = {
   NOT_REQUIRED: "not_required",
 } as const;
 
-export type LlmEventReviewDecision =
-  (typeof LLM_EVENT_REVIEW_DECISIONS)[number];
+export type LlmEventReviewDecision = (typeof LLM_EVENT_REVIEW_DECISIONS)[number];
 
 export type LlmEventReviewStatus =
   (typeof LLM_EVENT_REVIEW_STATUS)[keyof typeof LLM_EVENT_REVIEW_STATUS];
@@ -101,10 +100,7 @@ export interface LlmReviewProviderOutput {
 }
 
 export interface LlmReviewProvider {
-  review(
-    input: LlmReviewProviderInput,
-    signal: AbortSignal,
-  ): Promise<LlmReviewProviderOutput>;
+  review(input: LlmReviewProviderInput, signal: AbortSignal): Promise<LlmReviewProviderOutput>;
 }
 
 export interface AppliedLlmEventReviewDecision {

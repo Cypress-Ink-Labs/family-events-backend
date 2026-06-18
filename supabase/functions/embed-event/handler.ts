@@ -46,10 +46,7 @@ export interface EmbedEventDeps {
 
 // ── Core logic ───────────────────────────────────────────────────────────────
 
-function buildEmbeddingInput(
-  title: string,
-  description?: string | null,
-): string {
+function buildEmbeddingInput(title: string, description?: string | null): string {
   const parts = [title.trim()];
   if (description) {
     parts.push(description.trim());
@@ -62,9 +59,7 @@ export async function generateEmbedding(
   text: string,
   apiKey: string,
   fetchImpl: typeof fetch = fetch,
-): Promise<
-  { embedding: number[]; usage: { promptTokens: number; totalTokens: number } }
-> {
+): Promise<{ embedding: number[]; usage: { promptTokens: number; totalTokens: number } }> {
   const response = await fetchImpl(OPENAI_EMBEDDINGS_URL, {
     method: "POST",
     headers: {
@@ -82,9 +77,7 @@ export async function generateEmbedding(
   if (!response.ok) {
     const errorBody = await response.text().catch(() => "");
     throw new EmbedEventUpstreamError(
-      `OpenAI embeddings failed (${response.status}): ${
-        errorBody.slice(0, 200)
-      }`,
+      `OpenAI embeddings failed (${response.status}): ${errorBody.slice(0, 200)}`,
     );
   }
 
@@ -92,11 +85,7 @@ export async function generateEmbedding(
   const vector = result.data?.[0]?.embedding;
 
   if (!Array.isArray(vector) || vector.length !== EMBEDDING_DIMENSIONS) {
-    throw new Error(
-      `OpenAI returned unexpected embedding dimensions: ${
-        vector?.length ?? "null"
-      }`,
-    );
+    throw new Error(`OpenAI returned unexpected embedding dimensions: ${vector?.length ?? "null"}`);
   }
 
   return {
@@ -116,17 +105,15 @@ export async function storeEmbedding(
 ): Promise<boolean> {
   // Upsert: if re-embedding (model change, re-classification), replace.
   const vectorStr = `[${embedding.join(",")}]`;
-  const { error } = await supabase
-    .from("event_embeddings")
-    .upsert(
-      {
-        event_id: eventId,
-        embedding: vectorStr,
-        model,
-        created_at: new Date().toISOString(),
-      },
-      { onConflict: "event_id" },
-    );
+  const { error } = await supabase.from("event_embeddings").upsert(
+    {
+      event_id: eventId,
+      embedding: vectorStr,
+      model,
+      created_at: new Date().toISOString(),
+    },
+    { onConflict: "event_id" },
+  );
 
   if (error) throw error;
   return true;
@@ -139,18 +126,9 @@ export async function embedEvent(
   const startedAt = Date.now();
   const text = buildEmbeddingInput(input.title, input.description);
 
-  const { embedding, usage } = await generateEmbedding(
-    text,
-    deps.openAiApiKey,
-    deps.fetchImpl,
-  );
+  const { embedding, usage } = await generateEmbedding(text, deps.openAiApiKey, deps.fetchImpl);
 
-  const stored = await storeEmbedding(
-    deps.supabase,
-    input.event_id,
-    embedding,
-    EMBEDDING_MODEL,
-  );
+  const stored = await storeEmbedding(deps.supabase, input.event_id, embedding, EMBEDDING_MODEL);
 
   const processingMs = Date.now() - startedAt;
 
@@ -185,13 +163,9 @@ export async function handleEmbedEventRequest(
       ? (body as Record<string, unknown>)
       : {};
 
-  const eventId = typeof payload.event_id === "string"
-    ? payload.event_id
-    : null;
+  const eventId = typeof payload.event_id === "string" ? payload.event_id : null;
   const title = typeof payload.title === "string" ? payload.title.trim() : "";
-  const description = typeof payload.description === "string"
-    ? payload.description
-    : null;
+  const description = typeof payload.description === "string" ? payload.description : null;
 
   if (!eventId) {
     throw new EmbedEventRequestError("event_id is required", 400);
@@ -220,7 +194,10 @@ export async function handleEmbedEventRequest(
 }
 
 export class EmbedEventRequestError extends Error {
-  constructor(message: string, readonly status = 400) {
+  constructor(
+    message: string,
+    readonly status = 400,
+  ) {
     super(message);
   }
 }
@@ -241,8 +218,7 @@ import { requireServiceRole } from "../_shared/auth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -271,10 +247,7 @@ export async function handleRequest(req: Request): Promise<Response> {
   }
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return jsonResponse(
-      { error: "Supabase service configuration missing" },
-      500,
-    );
+    return jsonResponse({ error: "Supabase service configuration missing" }, 500);
   }
 
   try {
@@ -306,10 +279,7 @@ export async function handleRequest(req: Request): Promise<Response> {
       return jsonResponse({ error: err.message }, err.status);
     }
 
-    await captureEdgeException(
-      err,
-      errorContext(err, { function: "embed-event" }),
-    );
+    await captureEdgeException(err, errorContext(err, { function: "embed-event" }));
     logEdgeEvent(
       "error",
       "embed-event handler failed",

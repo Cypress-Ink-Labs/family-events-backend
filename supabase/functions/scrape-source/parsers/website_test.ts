@@ -1,31 +1,31 @@
-import { parseWebsite } from "./website.ts"
+import { parseWebsite } from "./website.ts";
 
 function assertEquals<T>(actual: T, expected: T): void {
   if (!Object.is(actual, expected)) {
-    throw new Error(`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`)
+    throw new Error(`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
   }
 }
 
 async function readFixture(relativePath: string): Promise<string> {
-  return await Deno.readTextFile(new URL(`../__fixtures__/${relativePath}`, import.meta.url))
+  return await Deno.readTextFile(new URL(`../__fixtures__/${relativePath}`, import.meta.url));
 }
 
 if (typeof Deno !== "undefined") {
   Deno.test("parseWebsite extracts schema.org Event JSON-LD and rejects date-less events", async () => {
-    const html = await readFixture("html/events-page.html")
-    const events = parseWebsite(html, "https://events.example.com/calendar")
+    const html = await readFixture("html/events-page.html");
+    const events = parseWebsite(html, "https://events.example.com/calendar");
 
-    assertEquals(events.length, 1)
-    assertEquals(events[0].title, "City Science Fair")
-    assertEquals(events[0].startDatetime, "2026-08-11T15:00:00.000Z")
-    assertEquals(events[0].endDatetime, "2026-08-11T19:00:00.000Z")
-    assertEquals(events[0].sourceUrl, "https://events.example.com/events/science-fair")
-    assertEquals(events[0].venueName, "Riverfront Hall")
-    assertEquals(events[0].address, "101 Main St")
-    assertEquals(events[0].imageUrl, "https://events.example.com/science-fair.jpg")
-    assertEquals(events[0].price, 0)
-    assertEquals(events[0].isFree, true)
-  })
+    assertEquals(events.length, 1);
+    assertEquals(events[0].title, "City Science Fair");
+    assertEquals(events[0].startDatetime, "2026-08-11T15:00:00.000Z");
+    assertEquals(events[0].endDatetime, "2026-08-11T19:00:00.000Z");
+    assertEquals(events[0].sourceUrl, "https://events.example.com/events/science-fair");
+    assertEquals(events[0].venueName, "Riverfront Hall");
+    assertEquals(events[0].address, "101 Main St");
+    assertEquals(events[0].imageUrl, "https://events.example.com/science-fair.jpg");
+    assertEquals(events[0].price, 0);
+    assertEquals(events[0].isFree, true);
+  });
 
   Deno.test("parseWebsite prefers Modern Events Calendar DOM titles and local times", () => {
     const html = `
@@ -58,26 +58,26 @@ if (typeof Deno !== "undefined") {
           </script>
         </body>
       </html>
-    `
+    `;
 
-    const events = parseWebsite(html, "https://moncuspark.org/events/", "America/Chicago")
+    const events = parseWebsite(html, "https://moncuspark.org/events/", "America/Chicago");
 
-    assertEquals(events.length, 1)
-    assertEquals(events[0].title, "Garden Talks")
-    assertEquals(events[0].startDatetime, "2026-04-28T22:30:00.000Z")
-    assertEquals(events[0].endDatetime, "2026-04-28T23:30:00.000Z")
-    assertEquals(events[0].description.includes("🌱"), true)
-    assertEquals(events[0].description.includes("May 26 Time: 5:30-6:30 PM What to Bring"), true)
-    assertEquals(events[0].isFree, true)
-  })
+    assertEquals(events.length, 1);
+    assertEquals(events[0].title, "Garden Talks");
+    assertEquals(events[0].startDatetime, "2026-04-28T22:30:00.000Z");
+    assertEquals(events[0].endDatetime, "2026-04-28T23:30:00.000Z");
+    assertEquals(events[0].description.includes("🌱"), true);
+    assertEquals(events[0].description.includes("May 26 Time: 5:30-6:30 PM What to Bring"), true);
+    assertEquals(events[0].isFree, true);
+  });
 
   Deno.test("parseWebsite returns [] when no structured event data exists", () => {
     const events = parseWebsite(
       '<html><body><a href="/x">Link only</a></body></html>',
-      "https://example.com"
-    )
-    assertEquals(events.length, 0)
-  })
+      "https://example.com",
+    );
+    assertEquals(events.length, 0);
+  });
 
   Deno.test("parseWebsite extracts Events nested inside ItemList.itemListElement (Eventbrite shape)", () => {
     // Eventbrite serves JSON-LD as ItemList -> ListItem.item where item is @type:Event.
@@ -114,13 +114,16 @@ if (typeof Deno !== "undefined") {
         }
         </script>
       </body></html>
-    `
-    const events = parseWebsite(html, "https://www.eventbrite.com/d/la--baton-rouge/family-events/")
-    assertEquals(events.length, 2)
-    assertEquals(events[0].title, "Family Meditation")
-    assertEquals(events[0].sourceUrl, "https://www.eventbrite.com/e/family-meditation-tickets-1")
-    assertEquals(events[1].title, "Kid Fest")
-  })
+    `;
+    const events = parseWebsite(
+      html,
+      "https://www.eventbrite.com/d/la--baton-rouge/family-events/",
+    );
+    assertEquals(events.length, 2);
+    assertEquals(events[0].title, "Family Meditation");
+    assertEquals(events[0].sourceUrl, "https://www.eventbrite.com/e/family-meditation-tickets-1");
+    assertEquals(events[1].title, "Kid Fest");
+  });
 
   Deno.test("parseSchemaOrgEvents reads structured PostalAddress sub-fields", () => {
     const html = `
@@ -145,12 +148,12 @@ if (typeof Deno !== "undefined") {
         }
         </script>
       </body></html>
-    `
-    const events = parseWebsite(html, "https://example.com/events/")
-    assertEquals(events.length, 1)
-    assertEquals(events[0].venueName, "Acadiana Center for the Arts")
-    assertEquals(events[0].address, "101 W Vermilion St, Lafayette, LA, 70501")
-  })
+    `;
+    const events = parseWebsite(html, "https://example.com/events/");
+    assertEquals(events.length, 1);
+    assertEquals(events[0].venueName, "Acadiana Center for the Arts");
+    assertEquals(events[0].address, "101 W Vermilion St, Lafayette, LA, 70501");
+  });
 
   Deno.test("parseWebsite extracts Baton Rouge Zoo event cards", () => {
     const html = `
@@ -170,17 +173,20 @@ if (typeof Deno !== "undefined") {
           </div>
         </div>
       </section>
-    `
+    `;
 
-    const events = parseWebsite(html, "https://brzoo.org/", "America/Chicago")
+    const events = parseWebsite(html, "https://brzoo.org/", "America/Chicago");
 
-    assertEquals(events.length, 1)
-    assertEquals(events[0].title, "Twilight Tour")
-    assertEquals(events[0].startDatetime, "2026-06-02T23:00:00.000Z")
-    assertEquals(events[0].endDatetime, "2026-06-03T00:30:00.000Z")
-    assertEquals(events[0].sourceUrl, "https://brzoo.org/events-rentals/calendar/twilight-tour?occdate=2026-06-02")
-    assertEquals(events[0].imageUrl, "https://brzoo.org/twilight.jpg")
-  })
+    assertEquals(events.length, 1);
+    assertEquals(events[0].title, "Twilight Tour");
+    assertEquals(events[0].startDatetime, "2026-06-02T23:00:00.000Z");
+    assertEquals(events[0].endDatetime, "2026-06-03T00:30:00.000Z");
+    assertEquals(
+      events[0].sourceUrl,
+      "https://brzoo.org/events-rentals/calendar/twilight-tour?occdate=2026-06-02",
+    );
+    assertEquals(events[0].imageUrl, "https://brzoo.org/twilight.jpg");
+  });
 
   Deno.test("parseWebsite extracts All-in-One Event Calendar popovers", () => {
     const html = `
@@ -202,16 +208,16 @@ if (typeof Deno !== "undefined") {
           <div class="ai1ec-event-description">Bring your friends and get a glimpse of the sky.</div>
         </div>
       </main>
-    `
+    `;
 
-    const events = parseWebsite(html, "https://perkinsrowe.com/happenings/", "America/Chicago")
+    const events = parseWebsite(html, "https://perkinsrowe.com/happenings/", "America/Chicago");
 
-    assertEquals(events.length, 1)
-    assertEquals(events[0].title, "Sidewalk Astronomy")
-    assertEquals(events[0].startDatetime, "2026-05-27T00:00:00.000Z")
-    assertEquals(events[0].endDatetime, "2026-05-27T02:00:00.000Z")
-    assertEquals(events[0].venueName, "Perkins Rowe")
-  })
+    assertEquals(events.length, 1);
+    assertEquals(events[0].title, "Sidewalk Astronomy");
+    assertEquals(events[0].startDatetime, "2026-05-27T00:00:00.000Z");
+    assertEquals(events[0].endDatetime, "2026-05-27T02:00:00.000Z");
+    assertEquals(events[0].venueName, "Perkins Rowe");
+  });
 
   Deno.test("parseWebsite extracts Squarespace summary event cards", () => {
     const html = `
@@ -226,14 +232,14 @@ if (typeof Deno !== "undefined") {
           </div>
         </div>
       </div>
-    `
+    `;
 
-    const events = parseWebsite(html, "https://manshiptheatre.org/", "America/Chicago")
+    const events = parseWebsite(html, "https://manshiptheatre.org/", "America/Chicago");
 
-    assertEquals(events.length, 1)
-    assertEquals(events[0].title, "Sunset Boulevard - $5 Movie")
-    assertEquals(events[0].startDatetime, "2026-05-30T05:00:00.000Z")
-    assertEquals(events[0].sourceUrl, "https://manshiptheatre.org/comingsoon/sunsetblvd")
-    assertEquals(events[0].imageUrl, "https://images.squarespace-cdn.com/sunset.png")
-  })
+    assertEquals(events.length, 1);
+    assertEquals(events[0].title, "Sunset Boulevard - $5 Movie");
+    assertEquals(events[0].startDatetime, "2026-05-30T05:00:00.000Z");
+    assertEquals(events[0].sourceUrl, "https://manshiptheatre.org/comingsoon/sunsetblvd");
+    assertEquals(events[0].imageUrl, "https://images.squarespace-cdn.com/sunset.png");
+  });
 }

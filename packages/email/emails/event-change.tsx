@@ -12,7 +12,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email"
+} from "react-email";
 
 /**
  * Event Change email — "Dusk-Meadow" theme.
@@ -50,7 +50,7 @@ const tailwindConfig = {
       },
     },
   },
-}
+};
 
 export default function EventChangeEmail() {
   return (
@@ -196,5 +196,5 @@ export default function EventChangeEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

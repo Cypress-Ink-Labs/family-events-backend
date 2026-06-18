@@ -1,7 +1,4 @@
-import {
-  resolveSharedLlmConfig,
-  type SharedLlmProvider,
-} from "../_shared/llm-config.ts";
+import { resolveSharedLlmConfig, type SharedLlmProvider } from "../_shared/llm-config.ts";
 
 export const TAG_EVENT_PROMPT_VERSION = "v2";
 export const AI_TIMEOUT_MS = 30_000;
@@ -37,11 +34,14 @@ export function resolveTagEventAiConfig(
 ): TagEventLlmConfig {
   const config = resolveSharedLlmConfig({
     allowedOpenAiModels: ALLOWED_OPENAI_MODELS,
-    dbOverride: dbConfig == null ? null : {
-      enabled: dbConfig.enabled,
-      modelId: dbConfig.modelId,
-      provider: dbConfig.provider,
-    },
+    dbOverride:
+      dbConfig == null
+        ? null
+        : {
+            enabled: dbConfig.enabled,
+            modelId: dbConfig.modelId,
+            provider: dbConfig.provider,
+          },
     defaultOpenAiBaseUrl: DEFAULT_AI_BASE_URL,
     defaultOpenAiModel: DEFAULT_OPENAI_MODEL,
     selfHostedDefaultModel: DEFAULT_OLLAMA_MODEL,
@@ -56,7 +56,5 @@ export function resolveTagEventAiConfig(
 }
 
 export function resolveTagEventOpenAiModel(configuredModel: string): string {
-  return ALLOWED_OPENAI_MODELS.has(configuredModel)
-    ? configuredModel
-    : DEFAULT_OPENAI_MODEL;
+  return ALLOWED_OPENAI_MODELS.has(configuredModel) ? configuredModel : DEFAULT_OPENAI_MODEL;
 }

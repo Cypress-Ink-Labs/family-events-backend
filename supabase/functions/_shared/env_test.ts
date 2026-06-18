@@ -14,11 +14,7 @@ Deno.test("requiredEnv returns trimmed value", () => {
 });
 
 Deno.test("requiredEnv throws configured message", () => {
-  assertThrows(
-    () => requiredEnv("NAME", env({})),
-    Error,
-    "NAME not configured",
-  );
+  assertThrows(() => requiredEnv("NAME", env({})), Error, "NAME not configured");
 });
 
 Deno.test("optionalEnv returns empty string for missing values", () => {
@@ -38,8 +34,5 @@ Deno.test("boolEnv parses true and false", () => {
 });
 
 Deno.test("urlEnv returns fallback for blank values", () => {
-  assertEquals(
-    urlEnv("URL", "https://example.com", env({ URL: " " })),
-    "https://example.com",
-  );
+  assertEquals(urlEnv("URL", "https://example.com", env({ URL: " " })), "https://example.com");
 });

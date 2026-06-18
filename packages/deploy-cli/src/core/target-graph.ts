@@ -1,5 +1,5 @@
-import { ValidationError } from "./errors"
-import type { DeployConfig, DeployTarget } from "./types"
+import { ValidationError } from "./errors";
+import type { DeployConfig, DeployTarget } from "./types";
 
 export function allTargets(config: DeployConfig): DeployTarget[] {
   return [
@@ -27,31 +27,31 @@ export function allTargets(config: DeployConfig): DeployTarget[] {
       kind: "railway:service" as const,
       name: service.name,
     })),
-  ]
+  ];
 }
 
 export function resolveTargets(
   config: DeployConfig,
   requested: string[],
-  all: boolean
+  all: boolean,
 ): DeployTarget[] {
-  const byId = new Map(allTargets(config).map((target) => [target.id, target]))
+  const byId = new Map(allTargets(config).map((target) => [target.id, target]));
   const selected = all
     ? [byId.get("supabase:migrations"), byId.get("supabase:functions:all"), byId.get("railway:all")]
-    : requested.map((id) => byId.get(normalizeTargetId(id)))
+    : requested.map((id) => byId.get(normalizeTargetId(id)));
 
-  const missing = requested.map(normalizeTargetId).filter((id) => !byId.has(id))
+  const missing = requested.map(normalizeTargetId).filter((id) => !byId.has(id));
   if (missing.length > 0) {
-    throw new ValidationError(`Unknown deploy target(s): ${missing.join(", ")}`)
+    throw new ValidationError(`Unknown deploy target(s): ${missing.join(", ")}`);
   }
 
   const deduped = dedupeTargets(
-    selected.filter((target): target is DeployTarget => Boolean(target))
-  )
+    selected.filter((target): target is DeployTarget => Boolean(target)),
+  );
   if (deduped.length === 0) {
-    throw new ValidationError("No deployment targets selected")
+    throw new ValidationError("No deployment targets selected");
   }
-  return deduped
+  return deduped;
 }
 
 export function expandTarget(config: DeployConfig, target: DeployTarget): DeployTarget[] {
@@ -61,7 +61,7 @@ export function expandTarget(config: DeployConfig, target: DeployTarget): Deploy
       label: `Supabase function: ${name}`,
       kind: "supabase:function",
       name,
-    }))
+    }));
   }
   if (target.kind === "railway:all") {
     return config.railway.allOrder.map((name) => ({
@@ -69,7 +69,7 @@ export function expandTarget(config: DeployConfig, target: DeployTarget): Deploy
       label: `Railway service: ${name}`,
       kind: "railway:service",
       name,
-    }))
+    }));
   }
   if (target.kind === "railway:crons") {
     return config.railway.allOrder
@@ -79,35 +79,35 @@ export function expandTarget(config: DeployConfig, target: DeployTarget): Deploy
         label: `Railway service: ${name}`,
         kind: "railway:service" as const,
         name,
-      }))
+      }));
   }
-  return [target]
+  return [target];
 }
 
 export function normalizeTargetId(input: string): string {
-  const value = input.trim()
+  const value = input.trim();
   if (value.startsWith("supabase:") || value.startsWith("railway:")) {
-    return value
+    return value;
   }
-  return `railway:${value}`
+  return `railway:${value}`;
 }
 
 function dedupeTargets(targets: DeployTarget[]): DeployTarget[] {
-  const hasSupabaseAll = targets.some((target) => target.kind === "supabase:functions:all")
-  const hasRailwayAll = targets.some((target) => target.kind === "railway:all")
-  const hasRailwayCrons = targets.some((target) => target.kind === "railway:crons")
-  const seen = new Set<string>()
-  const output: DeployTarget[] = []
+  const hasSupabaseAll = targets.some((target) => target.kind === "supabase:functions:all");
+  const hasRailwayAll = targets.some((target) => target.kind === "railway:all");
+  const hasRailwayCrons = targets.some((target) => target.kind === "railway:crons");
+  const seen = new Set<string>();
+  const output: DeployTarget[] = [];
 
   for (const target of targets) {
-    if (hasSupabaseAll && target.kind === "supabase:function") continue
-    if (hasRailwayAll && target.kind === "railway:service") continue
-    if (hasRailwayAll && target.kind === "railway:crons") continue
-    if (hasRailwayCrons && target.kind === "railway:service" && target.name !== "web") continue
-    if (seen.has(target.id)) continue
-    seen.add(target.id)
-    output.push(target)
+    if (hasSupabaseAll && target.kind === "supabase:function") continue;
+    if (hasRailwayAll && target.kind === "railway:service") continue;
+    if (hasRailwayAll && target.kind === "railway:crons") continue;
+    if (hasRailwayCrons && target.kind === "railway:service" && target.name !== "web") continue;
+    if (seen.has(target.id)) continue;
+    seen.add(target.id);
+    output.push(target);
   }
 
-  return output
+  return output;
 }

@@ -12,7 +12,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email"
+} from "react-email";
 
 /**
  * Community Event Status email — "Dusk-Meadow" theme.
@@ -45,7 +45,7 @@ const tailwindConfig = {
       },
     },
   },
-}
+};
 
 export default function CommunityEventStatusEmail() {
   return (
@@ -122,5 +122,5 @@ export default function CommunityEventStatusEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

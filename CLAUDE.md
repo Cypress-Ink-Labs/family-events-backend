@@ -28,16 +28,16 @@ per-dir copies are synced by `scripts/sync-cron-runner.sh`; drift is caught by
 
 ## Key systems and where they live
 
-| System | Files |
-|--------|-------|
-| Auth helpers | `supabase/functions/_shared/auth.ts`, `_shared/service-role-handler.ts`, `_shared/admin-handler.ts` |
-| SSRF guard | `supabase/functions/_shared/guarded-fetch.ts`, `_shared/url-validation.ts` |
-| LLM (OpenAI + local) | `supabase/functions/_shared/llm-config.ts`, `_shared/llm-openai.ts`, `_shared/classification.ts` |
-| Geocoding | `supabase/functions/_shared/geocode.ts` |
-| CORS allowlist | `supabase/functions/_shared/cors.ts` |
-| Generated DB types | `packages/contracts/src/database.types.ts` — **never hand-edit** |
-| Deploy config | `config/deploy.config.json` — canonical list of functions + Railway services + JWT settings |
-| Plans | `plans/` — active implementation plans |
+| System               | Files                                                                                               |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| Auth helpers         | `supabase/functions/_shared/auth.ts`, `_shared/service-role-handler.ts`, `_shared/admin-handler.ts` |
+| SSRF guard           | `supabase/functions/_shared/guarded-fetch.ts`, `_shared/url-validation.ts`                          |
+| LLM (OpenAI + local) | `supabase/functions/_shared/llm-config.ts`, `_shared/llm-openai.ts`, `_shared/classification.ts`    |
+| Geocoding            | `supabase/functions/_shared/geocode.ts`                                                             |
+| CORS allowlist       | `supabase/functions/_shared/cors.ts`                                                                |
+| Generated DB types   | `packages/contracts/src/database.types.ts` — **never hand-edit**                                    |
+| Deploy config        | `config/deploy.config.json` — canonical list of functions + Railway services + JWT settings         |
+| Plans                | `plans/` — active implementation plans                                                              |
 
 ## Conventions
 

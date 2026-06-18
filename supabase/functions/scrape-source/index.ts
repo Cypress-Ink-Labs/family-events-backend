@@ -11,9 +11,7 @@ import {
 } from "./lib/source-queue.ts";
 import type { EventSourceRow } from "./lib/types.ts";
 
-declare const EdgeRuntime:
-  | { waitUntil<T>(promise: Promise<T>): Promise<T> }
-  | undefined;
+declare const EdgeRuntime: { waitUntil<T>(promise: Promise<T>): Promise<T> } | undefined;
 
 function dueSourceLimit(): number {
   const parsed = Number(Deno.env.get("DUE_SOURCE_LIMIT") ?? "200");
@@ -41,13 +39,7 @@ Deno.serve(async (req: Request) => {
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const supabase = createClient(supabaseUrl, serviceRoleKey);
   let requestedSourceId: string | null = null;
-  const auth = await requireAdminOrService(
-    req,
-    supabase,
-    supabaseUrl,
-    serviceRoleKey,
-    anonKey,
-  );
+  const auth = await requireAdminOrService(req, supabase, supabaseUrl, serviceRoleKey, anonKey);
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.message }), {
       status: auth.status,
@@ -56,21 +48,18 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const body = req.method === "POST"
-      ? await req.json().catch(() => ({}))
-      : {};
-    requestedSourceId = typeof body?.source_id === "string"
-      ? body.source_id
-      : null;
+    const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+    requestedSourceId = typeof body?.source_id === "string" ? body.source_id : null;
 
     let sourcesRaw: unknown[] | null = null;
     let sourceError: unknown = null;
 
     if (requestedSourceId) {
-      const response = await supabase.from("event_sources").select("*").eq(
-        "is_active",
-        true,
-      ).eq("id", requestedSourceId);
+      const response = await supabase
+        .from("event_sources")
+        .select("*")
+        .eq("is_active", true)
+        .eq("id", requestedSourceId);
       sourcesRaw = response.data;
       sourceError = response.error;
     } else {
@@ -94,10 +83,7 @@ Deno.serve(async (req: Request) => {
         source.id,
         requestedSourceId ? "manual" : "scheduled",
       );
-      await supabase
-        .from("event_sources")
-        .update({ last_status: "pending" })
-        .eq("id", source.id);
+      await supabase.from("event_sources").update({ last_status: "pending" }).eq("id", source.id);
       results.push({
         source_id: source.id,
         queue_id: enqueue.queue_id,
@@ -106,18 +92,16 @@ Deno.serve(async (req: Request) => {
     }
 
     if (results.length > 0 && supabaseUrl && serviceRoleKey) {
-      const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch(
-        (err) => {
-          logEdgeEvent(
-            "warn",
-            "source-queue kick failed",
-            errorContext(err, {
-              function: "scrape-source",
-              stage: "kick-source",
-            }),
-          );
-        },
-      );
+      const kick = kickProcessSourceQueue(supabaseUrl, serviceRoleKey).catch((err) => {
+        logEdgeEvent(
+          "warn",
+          "source-queue kick failed",
+          errorContext(err, {
+            function: "scrape-source",
+            stage: "kick-source",
+          }),
+        );
+      });
       if (typeof EdgeRuntime !== "undefined") {
         EdgeRuntime.waitUntil(kick);
       } else {
@@ -125,16 +109,13 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    return new Response(
-      JSON.stringify(buildScrapeSourceResponse(results)),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+    return new Response(JSON.stringify(buildScrapeSourceResponse(results)), {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
       },
-    );
+    });
   } catch (error) {
     await captureEdgeException(
       error,
@@ -154,9 +135,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({
-        error: error instanceof Error
-          ? error.message
-          : "Unexpected scrape failure.",
+        error: error instanceof Error ? error.message : "Unexpected scrape failure.",
       }),
       {
         status: 500,

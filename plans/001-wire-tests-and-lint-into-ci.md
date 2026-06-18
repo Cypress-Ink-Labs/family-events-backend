@@ -44,7 +44,7 @@ later plans' new tests actually protect the codebase.
   ```ts
   export default defineConfig({
     test: { include: ["_shared/**/*.test.ts"], environment: "node", includeTaskLocation: true },
-  })
+  });
   ```
   But vitest `.test.ts` files also exist under `send-push/`, `send-reminders/`, `send-weekly-digest/`
   (run `find supabase/functions -name '*.test.ts'` → 8 files in 4 dirs), so the current glob misses 4 of them.
@@ -57,14 +57,14 @@ later plans' new tests actually protect the codebase.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---------|---------|---------------------|
-| Install | `pnpm install --frozen-lockfile` | exit 0 |
-| Typecheck | `pnpm run check` | exit 0 |
-| Guard tests | `pnpm run workspace:test` | all pass |
-| Deno present? | `deno --version` | prints a version (install if missing — see Step 1) |
-| Deno tests | `deno test --allow-env --allow-net --allow-read` (cwd `supabase/functions`) | tests run; see Step 1 for permission tuning |
-| vitest | `pnpm -C supabase/functions exec vitest run` | tests run |
+| Purpose       | Command                                                                     | Expected on success                                |
+| ------------- | --------------------------------------------------------------------------- | -------------------------------------------------- |
+| Install       | `pnpm install --frozen-lockfile`                                            | exit 0                                             |
+| Typecheck     | `pnpm run check`                                                            | exit 0                                             |
+| Guard tests   | `pnpm run workspace:test`                                                   | all pass                                           |
+| Deno present? | `deno --version`                                                            | prints a version (install if missing — see Step 1) |
+| Deno tests    | `deno test --allow-env --allow-net --allow-read` (cwd `supabase/functions`) | tests run; see Step 1 for permission tuning        |
+| vitest        | `pnpm -C supabase/functions exec vitest run`                                | tests run                                          |
 
 ## Steps
 
@@ -124,7 +124,7 @@ and unchanged from today).
   (`node_modules`, `**/dist`, `packages/contracts/src/database.types.ts`, `graphify-out`,
   `.understand-anything`, `supabase/migrations`) and set the lint to report (not fail) only if the
   remaining set is large — record the count in your report and leave a follow-up note. The goal is a
-  *running* lint gate, not a clean-up of the whole repo (that is a separate effort).
+  _running_ lint gate, not a clean-up of the whole repo (that is a separate effort).
 
 **Verify**: `pnpm run lint` exits 0 (or reports a documented, ignored-by-config set);
 `pnpm run test:functions` and `pnpm run test:deno` both pass.
@@ -149,7 +149,7 @@ in an `if: always()` step.
 
 ## Test plan
 
-- No new product tests in this plan — it *enables* the existing ones. The "test" is that the suites
+- No new product tests in this plan — it _enables_ the existing ones. The "test" is that the suites
   now execute and the new CI jobs are well-formed.
 - After this lands, every later plan (004–011) adds its tests under `supabase/functions/**` and they
   run automatically.

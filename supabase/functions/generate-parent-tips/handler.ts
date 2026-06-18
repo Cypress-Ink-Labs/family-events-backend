@@ -3,10 +3,7 @@ import { requireServiceRole } from "../_shared/auth.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
 import { resolveSharedLlmConfig } from "../_shared/llm-config.ts";
-import {
-  parseJsonContent,
-  postOpenAiChatCompletion,
-} from "../_shared/llm-openai.ts";
+import { parseJsonContent, postOpenAiChatCompletion } from "../_shared/llm-openai.ts";
 import {
   ALLOWED_PARENT_TIP_CATEGORIES,
   buildSystemPrompt,
@@ -20,8 +17,7 @@ import {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 const AI_TIMEOUT_MS = 30_000;
@@ -59,7 +55,10 @@ interface ParentTipRecord {
 }
 
 class GenerateParentTipsRequestError extends Error {
-  constructor(message: string, readonly status = 400) {
+  constructor(
+    message: string,
+    readonly status = 400,
+  ) {
     super(message);
   }
 }
@@ -162,9 +161,7 @@ async function loadEventContext(
 ): Promise<ParentTipsEventContext> {
   const { data: eventRow, error: eventError } = await supabase
     .from("events")
-    .select(
-      "id, title, description, age_min, age_max, is_outdoor, venue_name, start_datetime",
-    )
+    .select("id, title, description, age_min, age_max, is_outdoor, venue_name, start_datetime")
     .eq("id", eventId)
     .maybeSingle();
 
@@ -185,16 +182,17 @@ async function loadEventContext(
 
   // The implicit join `tags(slug)` from Supabase-js is typed as an array by
   // the generator even though FK side is single. Normalize both shapes.
-  const tagSlugs = ((tagRows ?? []) as Array<{
-    tags: { slug: string } | { slug: string }[] | null;
-  }>)
-    .flatMap((row) => {
-      if (!row.tags) return [] as string[];
-      if (Array.isArray(row.tags)) {
-        return row.tags.map((t) => t.slug).filter(Boolean);
-      }
-      return row.tags.slug ? [row.tags.slug] : [];
-    });
+  const tagSlugs = (
+    (tagRows ?? []) as Array<{
+      tags: { slug: string } | { slug: string }[] | null;
+    }>
+  ).flatMap((row) => {
+    if (!row.tags) return [] as string[];
+    if (Array.isArray(row.tags)) {
+      return row.tags.map((t) => t.slug).filter(Boolean);
+    }
+    return row.tags.slug ? [row.tags.slug] : [];
+  });
 
   return {
     title: event.title,
@@ -230,16 +228,17 @@ async function generateWithLlm(
     body: {
       model: config.model,
       temperature: 0.2,
-      response_format: config.provider === "openai"
-        ? {
-          type: "json_schema" as const,
-          json_schema: {
-            name: "parent_tips",
-            strict: true,
-            schema: PARENT_TIPS_JSON_SCHEMA,
-          },
-        }
-        : { type: "json_object" as const },
+      response_format:
+        config.provider === "openai"
+          ? {
+              type: "json_schema" as const,
+              json_schema: {
+                name: "parent_tips",
+                strict: true,
+                schema: PARENT_TIPS_JSON_SCHEMA,
+              },
+            }
+          : { type: "json_object" as const },
       ...(config.provider === "ollama" ? { reasoning_effort: "none" } : {}),
       messages: [
         { role: "system", content: systemPrompt },
@@ -327,9 +326,7 @@ export function createGenerateParentTipsHandler(
     try {
       const supabase = deps.createSupabaseClient(supabaseUrl, serviceRoleKey);
       const body = await req.json().catch(() => ({}));
-      const eventId = isRecord(body) && typeof body.event_id === "string"
-        ? body.event_id
-        : null;
+      const eventId = isRecord(body) && typeof body.event_id === "string" ? body.event_id : null;
       if (!eventId) {
         throw new GenerateParentTipsRequestError("event_id is required");
       }
@@ -338,35 +335,26 @@ export function createGenerateParentTipsHandler(
       const llmConfig = resolveAiConfig(featureConfig);
 
       if (!llmConfig.featureEnabled) {
-        return jsonResponse(
-          { error: "parent-tips feature disabled" },
-          503,
-        );
+        return jsonResponse({ error: "parent-tips feature disabled" }, 503);
       }
       if (!llmConfig.configured) {
         // Bump attempt timestamp so the row rotates out of the claim queue.
         await supabase.rpc("mark_event_enrichment_attempt", {
           p_event_id: eventId,
         });
-        return jsonResponse(
-          { error: "AI provider not configured" },
-          503,
-        );
+        return jsonResponse({ error: "AI provider not configured" }, 503);
       }
 
       const ctx = await deps.loadEventContext(supabase, eventId);
       const result = await deps.generateWithLlm(llmConfig, ctx);
 
-      const { error: updateError } = await supabase.rpc(
-        "update_event_parent_tips",
-        {
-          p_event_id: eventId,
-          p_tips: result.tips,
-          p_provider: llmConfig.provider,
-          p_model: llmConfig.model,
-          p_prompt_version: LLM_PARENT_TIPS_PROMPT_VERSION,
-        },
-      );
+      const { error: updateError } = await supabase.rpc("update_event_parent_tips", {
+        p_event_id: eventId,
+        p_tips: result.tips,
+        p_provider: llmConfig.provider,
+        p_model: llmConfig.model,
+        p_prompt_version: LLM_PARENT_TIPS_PROMPT_VERSION,
+      });
       if (updateError) throw updateError;
 
       logEdgeEvent("log", "generate-parent-tips success", {

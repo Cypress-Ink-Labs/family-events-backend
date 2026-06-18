@@ -1,8 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import {
-  type CronRunContext,
-  logCronRunEvent,
-} from "../../_shared/cron-run-log.ts";
+import { type CronRunContext, logCronRunEvent } from "../../_shared/cron-run-log.ts";
 import {
   type AppliedLlmEventReviewDecision,
   LLM_EVENT_REVIEW_DECISION,
@@ -84,9 +81,7 @@ function nowIso(): string {
 }
 
 function resolveBatchSize(): number {
-  const parsed = Number(
-    Deno.env.get("LLM_REVIEW_BATCH_SIZE") ?? DEFAULT_BATCH_SIZE,
-  );
+  const parsed = Number(Deno.env.get("LLM_REVIEW_BATCH_SIZE") ?? DEFAULT_BATCH_SIZE);
   if (!Number.isFinite(parsed)) return DEFAULT_BATCH_SIZE;
   return Math.max(1, Math.min(Math.floor(parsed), MAX_BATCH_SIZE));
 }
@@ -96,9 +91,7 @@ function shouldStopBeforeStartingNextRow(elapsedMs: number): boolean {
 }
 
 async function reapStuckRows(supabase: SupabaseClient): Promise<number> {
-  const { data, error } = await supabase.rpc(
-    "reap_stuck_event_llm_review_rows",
-  );
+  const { data, error } = await supabase.rpc("reap_stuck_event_llm_review_rows");
   if (error) throw error;
   return Number(data ?? 0);
 }
@@ -107,12 +100,9 @@ async function claimRows(
   supabase: SupabaseClient,
   limit: number,
 ): Promise<EventLlmReviewQueueRow[]> {
-  const { data, error } = await supabase.rpc(
-    "claim_event_llm_review_queue_batch",
-    {
-      p_limit: limit,
-    },
-  );
+  const { data, error } = await supabase.rpc("claim_event_llm_review_queue_batch", {
+    p_limit: limit,
+  });
   if (error) throw error;
   return (data ?? []) as EventLlmReviewQueueRow[];
 }
@@ -122,12 +112,9 @@ async function releaseUnstartedRows(
   rows: EventLlmReviewQueueRow[],
 ): Promise<void> {
   if (rows.length === 0) return;
-  const { error } = await supabase.rpc(
-    "release_unstarted_event_llm_review_rows",
-    {
-      p_claimed_ids: rows.map((row) => row.id),
-    },
-  );
+  const { error } = await supabase.rpc("release_unstarted_event_llm_review_rows", {
+    p_claimed_ids: rows.map((row) => row.id),
+  });
   if (error) throw error;
 }
 
@@ -135,18 +122,14 @@ async function markRowStarted(
   supabase: SupabaseClient,
   queueId: number,
 ): Promise<EventLlmReviewQueueRow> {
-  const { data, error } = await supabase.rpc(
-    "mark_event_llm_review_queue_row_started",
-    { p_queue_id: queueId },
-  );
+  const { data, error } = await supabase.rpc("mark_event_llm_review_queue_row_started", {
+    p_queue_id: queueId,
+  });
   if (error) throw error;
   return data as EventLlmReviewQueueRow;
 }
 
-async function markQueueSucceeded(
-  supabase: SupabaseClient,
-  queueId: number,
-): Promise<void> {
+async function markQueueSucceeded(supabase: SupabaseClient, queueId: number): Promise<void> {
   const { error } = await supabase
     .from("event_llm_review_queue")
     .update({
@@ -189,8 +172,7 @@ async function markQueueRetrying(
 ): Promise<void> {
   const nextAttemptAt = new Date(
     Date.now() + backoffMs(row.attempt_count, retryBaseMs),
-  )
-    .toISOString();
+  ).toISOString();
   const { error } = await supabase
     .from("event_llm_review_queue")
     .update({
@@ -263,31 +245,28 @@ async function applyEventDecision(
   queueRow: EventLlmReviewQueueRow,
   review: AppliedLlmEventReviewDecision,
 ): Promise<boolean> {
-  const { data, error } = await supabase.rpc(
-    "apply_event_llm_review_decision",
-    {
-      p_queue_id: queueRow.id,
-      p_event_id: event.id,
-      p_source_id: queueRow.source_id,
-      p_source_run_id: queueRow.source_run_id,
-      p_provider: review.provider,
-      p_model: review.model,
-      p_prompt_version: review.promptVersion,
-      p_review_status: review.status,
-      p_model_decision: review.modelDecision,
-      p_applied_decision: review.appliedDecision,
-      p_confidence: review.confidence,
-      p_reason: review.reason,
-      p_flags: review.flags,
-      p_suggested_category: review.suggestedCategory,
-      p_normalized_title: review.normalizedTitle,
-      p_raw_response: review.rawResponse,
-      p_error_code: review.errorCode,
-      p_error_message: review.errorMessage,
-      p_input_snapshot: traceInputSnapshot(event),
-      p_processing_ms: review.processingMs,
-    },
-  );
+  const { data, error } = await supabase.rpc("apply_event_llm_review_decision", {
+    p_queue_id: queueRow.id,
+    p_event_id: event.id,
+    p_source_id: queueRow.source_id,
+    p_source_run_id: queueRow.source_run_id,
+    p_provider: review.provider,
+    p_model: review.model,
+    p_prompt_version: review.promptVersion,
+    p_review_status: review.status,
+    p_model_decision: review.modelDecision,
+    p_applied_decision: review.appliedDecision,
+    p_confidence: review.confidence,
+    p_reason: review.reason,
+    p_flags: review.flags,
+    p_suggested_category: review.suggestedCategory,
+    p_normalized_title: review.normalizedTitle,
+    p_raw_response: review.rawResponse,
+    p_error_code: review.errorCode,
+    p_error_message: review.errorMessage,
+    p_input_snapshot: traceInputSnapshot(event),
+    p_processing_ms: review.processingMs,
+  });
   if (error) throw error;
   return Boolean(data);
 }
@@ -322,9 +301,11 @@ function traceInputSnapshot(event: EventReviewRow): Record<string, unknown> {
 }
 
 function isReviewable(event: EventReviewRow): boolean {
-  return event.status === "draft" &&
+  return (
+    event.status === "draft" &&
     (event.llm_review_status === REVIEWABLE_LLM_REVIEW_STATUS_PENDING ||
-      event.llm_review_status === LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED);
+      event.llm_review_status === LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED)
+  );
 }
 
 async function logReviewEvent(
@@ -334,13 +315,7 @@ async function logReviewEvent(
   metadata: Record<string, unknown>,
 ): Promise<void> {
   if (deps.cronContext) {
-    await logCronRunEvent(
-      deps.supabase,
-      deps.cronContext,
-      level,
-      message,
-      metadata,
-    );
+    await logCronRunEvent(deps.supabase, deps.cronContext, level, message, metadata);
     return;
   }
 
@@ -351,11 +326,7 @@ async function handleMissingEvent(
   deps: ReviewQueueDeps,
   startedRow: EventLlmReviewQueueRow,
 ): Promise<EventReviewQueueRowResult> {
-  await markQueueDead(
-    deps.supabase,
-    startedRow.id,
-    "event missing before review",
-  );
+  await markQueueDead(deps.supabase, startedRow.id, "event missing before review");
   await logReviewEvent(deps, "error", "event_review_dead_lettered", {
     function: "process-event-review-queue",
     queue_id: startedRow.id,
@@ -373,8 +344,7 @@ async function handleNonReviewableEvent(
   deps: ReviewQueueDeps,
   startedRow: EventLlmReviewQueueRow,
   event: EventReviewRow,
-  reason =
-    `Event no longer reviewable (status=${event.status}, llm_status=${event.llm_review_status}).`,
+  reason = `Event no longer reviewable (status=${event.status}, llm_status=${event.llm_review_status}).`,
 ): Promise<EventReviewQueueRowResult> {
   const skipped = buildSkippedReview(reason);
   await insertTrace(deps.supabase, {
@@ -424,10 +394,7 @@ async function logReviewSignals(
       error_code: review.errorCode,
       error_message: review.errorMessage,
     });
-    if (
-      review.errorCode === "malformed_json" ||
-      review.errorCode === "schema_validation_error"
-    ) {
+    if (review.errorCode === "malformed_json" || review.errorCode === "schema_validation_error") {
       await logReviewEvent(deps, "warn", "event_review_malformed_response", {
         function: "process-event-review-queue",
         queue_id: startedRow.id,
@@ -515,12 +482,7 @@ async function reviewAndApplyEvent(
     memoryCtx,
   );
 
-  const applied = await applyEventDecision(
-    deps.supabase,
-    event,
-    startedRow,
-    review,
-  );
+  const applied = await applyEventDecision(deps.supabase, event, startedRow, review);
 
   await logReviewSignals(deps, startedRow, event, review);
 
@@ -578,8 +540,10 @@ export async function processReviewQueueRow(
       try {
         const autoRejectEnabled = await isMemoryFeatureEnabled(deps.supabase, "source-auto-reject");
         if (autoRejectEnabled) {
-          const { data: shouldReject, error: arErr } = await deps.supabase
-            .rpc("should_auto_reject_source", { p_source_id: startedRow.source_id });
+          const { data: shouldReject, error: arErr } = await deps.supabase.rpc(
+            "should_auto_reject_source",
+            { p_source_id: startedRow.source_id },
+          );
 
           if (!arErr && shouldReject === true) {
             // Auto-reject without LLM review
@@ -588,7 +552,8 @@ export async function processReviewQueueRow(
               modelDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
               appliedDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
               confidence: 0.95,
-              reason: "Source has consistently high rejection rate; auto-rejected without LLM review.",
+              reason:
+                "Source has consistently high rejection rate; auto-rejected without LLM review.",
               flags: ["source_auto_rejected"],
               suggestedCategory: null,
               normalizedTitle: null,
@@ -602,7 +567,10 @@ export async function processReviewQueueRow(
             };
 
             const applied = await applyEventDecision(
-              deps.supabase, event, startedRow, autoRejectReview,
+              deps.supabase,
+              event,
+              startedRow,
+              autoRejectReview,
             );
 
             if (applied) {
@@ -612,7 +580,11 @@ export async function processReviewQueueRow(
                 event_id: event.id,
                 source_id: startedRow.source_id,
               });
-              return { outcome: "succeeded", appliedDecision: LLM_EVENT_REVIEW_DECISION.REJECT, failed: false };
+              return {
+                outcome: "succeeded",
+                appliedDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
+                failed: false,
+              };
             }
           }
         }
@@ -639,12 +611,7 @@ export async function processReviewQueueRow(
       };
     }
 
-    await markQueueRetrying(
-      deps.supabase,
-      startedRow,
-      message,
-      deps.config.retryBaseMs,
-    );
+    await markQueueRetrying(deps.supabase, startedRow, message, deps.config.retryBaseMs);
     return {
       outcome: "retrying",
       appliedDecision: null,
@@ -698,9 +665,7 @@ export async function processReviewQueueBatch(
       if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT) {
         summary.rejected += 1;
       }
-      if (
-        result.appliedDecision === LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW
-      ) {
+      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW) {
         summary.needsAdminReview += 1;
       }
       if (result.failed) summary.failed += 1;
@@ -727,9 +692,7 @@ export async function processReviewQueueBatch(
 
 async function loadEventReviewFeatureConfig(
   supabase: SupabaseClient,
-): Promise<
-  { model: string; enabled: boolean; provider: string | null } | null
-> {
+): Promise<{ model: string; enabled: boolean; provider: string | null } | null> {
   try {
     const { data, error } = await supabase
       .from("ai_feature_config")
@@ -752,9 +715,7 @@ async function loadEventReviewFeatureConfig(
   }
 }
 
-export async function buildReviewQueueDeps(
-  supabase: SupabaseClient,
-): Promise<ReviewQueueDeps> {
+export async function buildReviewQueueDeps(supabase: SupabaseClient): Promise<ReviewQueueDeps> {
   const dbOverrides = await loadEventReviewFeatureConfig(supabase);
   return {
     supabase,

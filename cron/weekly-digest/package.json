@@ -1,6 +1,6 @@
 {
   "name": "@cypress-ink-labs/cron-weekly-digest",
-  "private": true,
   "version": "0.0.1",
+  "private": true,
   "description": "Railway cron service that sends weekly digest emails every Monday at 8am CT."
 }

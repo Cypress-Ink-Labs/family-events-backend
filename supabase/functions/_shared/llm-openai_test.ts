@@ -10,10 +10,12 @@ Deno.test("postOpenAiChatCompletion posts to chat completions", async () => {
     fetchImpl: (async (input) => {
       url = String(input);
       return Response.json({
-        choices: [{
-          finish_reason: "stop",
-          message: { content: '{"ok":true}' },
-        }],
+        choices: [
+          {
+            finish_reason: "stop",
+            message: { content: '{"ok":true}' },
+          },
+        ],
         usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
       });
     }) as typeof fetch,
@@ -30,8 +32,7 @@ Deno.test("postOpenAiChatCompletion reports non-2xx body", async () => {
         apiKey: "key",
         baseUrl: "https://api.example.com/v1",
         body: {},
-        fetchImpl: (async () =>
-          new Response("x".repeat(250), { status: 500 })) as typeof fetch,
+        fetchImpl: (async () => new Response("x".repeat(250), { status: 500 })) as typeof fetch,
         providerName: "openai",
       }),
     Error,
@@ -41,9 +42,5 @@ Deno.test("postOpenAiChatCompletion reports non-2xx body", async () => {
 
 Deno.test("parseJsonContent returns objects and throws on arrays", () => {
   assertEquals(parseJsonContent('{"ok":true}'), { ok: true });
-  assertThrows(
-    () => parseJsonContent("[1]"),
-    Error,
-    "provider_json_content_not_object",
-  );
+  assertThrows(() => parseJsonContent("[1]"), Error, "provider_json_content_not_object");
 });

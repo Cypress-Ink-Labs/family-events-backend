@@ -13,6 +13,7 @@ psql "$DB_URL" -f scripts/db/collect-db-evidence.sql 2>&1 | tee /tmp/db-evidence
 **Never commit captured output** — it may contain query text with sensitive data.
 
 ### Sections
+
 1. `pg_stat_statements` — top queries by total time and call count
 2. `pg_stat_user_indexes` — index usage statistics (low idx_scan = unused index)
 3. `pg_stat_user_tables` — table sizes, vacuum/analyze status
@@ -20,5 +21,6 @@ psql "$DB_URL" -f scripts/db/collect-db-evidence.sql 2>&1 | tee /tmp/db-evidence
 5. EXPLAIN templates — commented out; fill in params before running
 
 ### Prerequisites
+
 - `pg_stat_statements` extension must be enabled (Supabase Cloud: enabled by default)
 - Run during low-traffic window for accurate buffer hit counts

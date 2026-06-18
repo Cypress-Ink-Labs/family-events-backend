@@ -94,16 +94,11 @@ async function callTagEvent(
   );
 
   if (!response.ok) {
-    throw new Error(
-      `tag-event ${response.status}: ${response.truncatedBodyText}`,
-    );
+    throw new Error(`tag-event ${response.status}: ${response.truncatedBodyText}`);
   }
 }
 
-async function markSuccess(
-  supabase: SupabaseClient,
-  rowId: number,
-): Promise<void> {
+async function markSuccess(supabase: SupabaseClient, rowId: number): Promise<void> {
   const { error } = await supabase
     .from("event_tag_queue")
     .update({
@@ -170,34 +165,23 @@ export async function processTagQueueBatch(
     duration_ms: 0,
   };
 
-  const { data: reaped, error: reapError } = await supabase.rpc(
-    "reap_stuck_tag_queue_rows",
-  );
+  const { data: reaped, error: reapError } = await supabase.rpc("reap_stuck_tag_queue_rows");
   if (reapError) throw reapError;
   summary.reaped = Number(reaped ?? 0);
 
-  const { data: claimed, error: claimError } = await supabase.rpc(
-    "claim_tag_queue_batch",
-    {
-      p_limit: BATCH_SIZE,
-    },
-  );
+  const { data: claimed, error: claimError } = await supabase.rpc("claim_tag_queue_batch", {
+    p_limit: BATCH_SIZE,
+  });
   if (claimError) throw claimError;
 
   const rows = (claimed ?? []) as QueueRow[];
   summary.claimed = rows.length;
   if (rows.length === 0) {
     summary.duration_ms = Date.now() - batchStart;
-    await logCronRunEvent(
-      supabase,
-      cronContext,
-      "log",
-      "tag-queue batch done",
-      {
-        function: "process-tag-queue",
-        ...summary,
-      },
-    );
+    await logCronRunEvent(supabase, cronContext, "log", "tag-queue batch done", {
+      function: "process-tag-queue",
+      ...summary,
+    });
     return summary;
   }
 
@@ -246,38 +230,30 @@ export async function processTagQueueBatch(
       await callTagEvent(supabaseUrl, serviceRoleKey, activeRow, inputs);
       await markSuccess(supabase, activeRow.id);
       summary.succeeded += 1;
-      await logCronRunEvent(
-        supabase,
-        cronContext,
-        "log",
-        "tag-queue row processed",
-        {
-          function: "process-tag-queue",
-          queue_row_id: activeRow.id,
-          event_id: activeRow.event_id,
-          attempt: activeRow.attempt_count,
-          duration_ms: Date.now() - rowStart,
-          title_chars: inputs.title.length,
-          description_chars: inputs.description.length,
-          outcome: "succeeded",
-        },
-      );
+      await logCronRunEvent(supabase, cronContext, "log", "tag-queue row processed", {
+        function: "process-tag-queue",
+        queue_row_id: activeRow.id,
+        event_id: activeRow.event_id,
+        attempt: activeRow.attempt_count,
+        duration_ms: Date.now() - rowStart,
+        title_chars: inputs.title.length,
+        description_chars: inputs.description.length,
+        outcome: "succeeded",
+      });
     } catch (err) {
-      const { dead } = await markFailureOrDead(supabase, activeRow, err).catch(
-        (markErr) => {
-          // Updating the row itself failed — log loudly so we notice in Sentry.
-          void captureEdgeException(
-            markErr,
-            errorContext(markErr, {
-              function: "process-tag-queue",
-              queue_row_id: activeRow.id,
-              event_id: activeRow.event_id,
-              stage: "mark-failure",
-            }),
-          );
-          return { dead: false };
-        },
-      );
+      const { dead } = await markFailureOrDead(supabase, activeRow, err).catch((markErr) => {
+        // Updating the row itself failed — log loudly so we notice in Sentry.
+        void captureEdgeException(
+          markErr,
+          errorContext(markErr, {
+            function: "process-tag-queue",
+            queue_row_id: activeRow.id,
+            event_id: activeRow.event_id,
+            stage: "mark-failure",
+          }),
+        );
+        return { dead: false };
+      });
 
       if (dead) {
         summary.dead += 1;
@@ -310,21 +286,15 @@ export async function processTagQueueBatch(
         // Transient failures intentionally NOT captured to Sentry to avoid
         // noise during OpenAI/edge outages. The queue_row itself preserves
         // last_error for inspection.
-        await logCronRunEvent(
-          supabase,
-          cronContext,
-          "warn",
-          "tag-queue row retry scheduled",
-          {
-            function: "process-tag-queue",
-            queue_row_id: activeRow.id,
-            event_id: activeRow.event_id,
-            attempt: activeRow.attempt_count,
-            duration_ms: Date.now() - rowStart,
-            error: errorMessage(err).slice(0, 300),
-            outcome: "retry",
-          },
-        );
+        await logCronRunEvent(supabase, cronContext, "warn", "tag-queue row retry scheduled", {
+          function: "process-tag-queue",
+          queue_row_id: activeRow.id,
+          event_id: activeRow.event_id,
+          attempt: activeRow.attempt_count,
+          duration_ms: Date.now() - rowStart,
+          error: errorMessage(err).slice(0, 300),
+          outcome: "retry",
+        });
       }
     }
   }
@@ -371,26 +341,14 @@ export async function processTagQueueBatch(
   //   - require pending_after > 0 (no work → stop chain)
   //   - require claimed > 0 (no progress this tick → stop chain, let cron retry)
   //   - require failed < claimed (don't loop on persistent errors)
-  if (
-    (summary.pending_after ?? 0) > 0 &&
-    summary.claimed > 0 &&
-    summary.failed < summary.claimed
-  ) {
-    const { error: chainError } = await supabase.rpc(
-      "invoke_process_tag_queue",
-    );
+  if ((summary.pending_after ?? 0) > 0 && summary.claimed > 0 && summary.failed < summary.claimed) {
+    const { error: chainError } = await supabase.rpc("invoke_process_tag_queue");
     if (chainError) {
-      await logCronRunEvent(
-        supabase,
-        cronContext,
-        "warn",
-        "tag-queue self-chain kick failed",
-        {
-          function: "process-tag-queue",
-          pending_after: summary.pending_after,
-          error: chainError.message,
-        },
-      );
+      await logCronRunEvent(supabase, cronContext, "warn", "tag-queue self-chain kick failed", {
+        function: "process-tag-queue",
+        pending_after: summary.pending_after,
+        error: chainError.message,
+      });
     }
   }
 

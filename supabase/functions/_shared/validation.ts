@@ -1,7 +1,6 @@
 export type ReadStringOptions = { maxLength?: number; required?: boolean };
 
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -38,10 +37,7 @@ export function readString(
   return trimmed;
 }
 
-export function readEmail(
-  value: Record<string, unknown>,
-  key: string,
-): string | null {
+export function readEmail(value: Record<string, unknown>, key: string): string | null {
   const email = readString(value, key, { maxLength: 320 });
   if (email == null) return null;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -50,10 +46,7 @@ export function readEmail(
   return email.toLowerCase();
 }
 
-export function readUuid(
-  value: Record<string, unknown>,
-  key: string,
-): string | null {
+export function readUuid(value: Record<string, unknown>, key: string): string | null {
   const uuid = readString(value, key);
   if (uuid == null) return null;
   if (!UUID_PATTERN.test(uuid)) throw new Error(`invalid ${key}`);

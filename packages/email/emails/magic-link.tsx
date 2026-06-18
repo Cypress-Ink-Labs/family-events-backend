@@ -11,7 +11,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email"
+} from "react-email";
 
 /**
  * Magic Link email — "Dusk-Meadow" theme.
@@ -44,7 +44,7 @@ const tailwindConfig = {
       },
     },
   },
-}
+};
 
 export default function MagicLinkEmail() {
   return (
@@ -150,5 +150,5 @@ export default function MagicLinkEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

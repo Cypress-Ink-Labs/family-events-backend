@@ -23,101 +23,101 @@
 //   - Pixabay: show attribution when displaying search results (API terms)
 //   - Unsplash: track downloads + photographer attribution required
 
-export type StockProvider = "pexels" | "pixabay" | "unsplash"
+export type StockProvider = "pexels" | "pixabay" | "unsplash";
 
 export interface StockImageAttribution {
-  photoId: string
-  photographerName: string
-  photographerUsername?: string
-  photographerProfileUrl: string
-  photoUrl: string
-  downloadLocation?: string // Only Unsplash requires download tracking
-  provider: StockProvider
+  photoId: string;
+  photographerName: string;
+  photographerUsername?: string;
+  photographerProfileUrl: string;
+  photoUrl: string;
+  downloadLocation?: string; // Only Unsplash requires download tracking
+  provider: StockProvider;
 }
 
 export interface StockImageResult {
-  url: string
+  url: string;
   /** Search term we matched on (for logging). May be a title-derived term or a tag slug. */
-  matchedTag: string
-  attribution: StockImageAttribution
+  matchedTag: string;
+  attribution: StockImageAttribution;
 }
 
 export interface StockImageTrackingResult {
-  ok: boolean
-  error: string | null
+  ok: boolean;
+  error: string | null;
 }
 
-const PEXELS_SEARCH_ENDPOINT = "https://api.pexels.com/v1/search"
-const PIXABAY_SEARCH_ENDPOINT = "https://pixabay.com/api/"
-const UNSPLASH_SEARCH_ENDPOINT = "https://api.unsplash.com/search/photos"
+const PEXELS_SEARCH_ENDPOINT = "https://api.pexels.com/v1/search";
+const PIXABAY_SEARCH_ENDPOINT = "https://pixabay.com/api/";
+const UNSPLASH_SEARCH_ENDPOINT = "https://api.unsplash.com/search/photos";
 
 // Pexels response types
 interface PexelsPhoto {
-  id: number
-  url: string
-  photographer: string
-  photographer_url: string
+  id: number;
+  url: string;
+  photographer: string;
+  photographer_url: string;
   src: {
-    large: string
-    large2x: string
-    medium: string
-    original: string
-  }
+    large: string;
+    large2x: string;
+    medium: string;
+    original: string;
+  };
 }
 
 interface PexelsSearchResponse {
-  page?: number
-  per_page?: number
-  photos?: PexelsPhoto[]
-  total_results?: number
+  page?: number;
+  per_page?: number;
+  photos?: PexelsPhoto[];
+  total_results?: number;
 }
 
 // Pixabay response types
 interface PixabayHit {
-  id: number
-  pageURL: string
-  largeImageURL: string
-  fullHDURL?: string
-  imageURL?: string
-  user: string
-  user_id: number
+  id: number;
+  pageURL: string;
+  largeImageURL: string;
+  fullHDURL?: string;
+  imageURL?: string;
+  user: string;
+  user_id: number;
 }
 
 interface PixabaySearchResponse {
-  total?: number
-  totalHits?: number
-  hits?: PixabayHit[]
+  total?: number;
+  totalHits?: number;
+  hits?: PixabayHit[];
 }
 
 // Unsplash response types (kept for compatibility)
 interface UnsplashSearchHit {
-  id?: string
+  id?: string;
   urls?: {
-    regular?: string
-  }
+    regular?: string;
+  };
   links?: {
-    html?: string
-    download_location?: string
-  }
+    html?: string;
+    download_location?: string;
+  };
   user?: {
-    name?: string
-    username?: string
+    name?: string;
+    username?: string;
     links?: {
-      html?: string
-    }
-  }
+      html?: string;
+    };
+  };
 }
 
 interface UnsplashSearchResponse {
-  results?: UnsplashSearchHit[]
+  results?: UnsplashSearchHit[];
 }
 
 function firstString(...values: Array<string | undefined | null>): string | null {
   for (const value of values) {
-    const trimmed = value?.trim()
-    if (trimmed) return trimmed
+    const trimmed = value?.trim();
+    if (trimmed) return trimmed;
   }
-  return null
+  return null;
 }
 
 /**
@@ -141,7 +141,7 @@ const NOISE_WORDS = new Set([
   "for",
   "with",
   "in",
-])
+]);
 
 /**
  * Derive a 2-4 word search term from an event title.
@@ -159,7 +159,7 @@ const NOISE_WORDS = new Set([
  */
 export function deriveTitleSearchTerm(title: string): string | null {
   // Preserve venue keywords that provide essential activity context
-  const hasLibrary = /\blibrary\b/i.test(title)
+  const hasLibrary = /\blibrary\b/i.test(title);
 
   const normalized = title
     // For library events, DON'T strip "at Library" — it's essential context.
@@ -168,7 +168,7 @@ export function deriveTitleSearchTerm(title: string): string | null {
       hasLibrary
         ? /\s+(?:presented by|hosted by|sponsored by)\b.*/i
         : /\s+(?:at|presented by|hosted by|sponsored by)\b.*/i,
-      ""
+      "",
     )
     // Strip remaining punctuation (keep spaces and word chars)
     .replace(/[^\w\s]/g, " ")
@@ -178,10 +178,10 @@ export function deriveTitleSearchTerm(title: string): string | null {
     .filter(Boolean)
     .filter((w) => !NOISE_WORDS.has(w))
     .slice(0, 4)
-    .join(" ")
+    .join(" ");
 
   // Require at least 4 characters (filters out single-char noise after stripping)
-  return normalized.length >= 4 ? normalized : null
+  return normalized.length >= 4 ? normalized : null;
 }
 
 async function searchPexels(
@@ -189,8 +189,8 @@ async function searchPexels(
   apiKey: string,
   options: { fetchImpl?: typeof fetch } = {},
 ): Promise<StockImageResult | null> {
-  const fetcher = options.fetchImpl ?? fetch
-  const url = `${PEXELS_SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=15`
+  const fetcher = options.fetchImpl ?? fetch;
+  const url = `${PEXELS_SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=15`;
 
   try {
     const res = await fetcher(url, {
@@ -198,16 +198,16 @@ async function searchPexels(
         Authorization: apiKey,
       },
       signal: AbortSignal.timeout(5_000),
-    })
-    if (!res.ok) return null
+    });
+    if (!res.ok) return null;
 
-    const body = (await res.json()) as PexelsSearchResponse
-    const photos = body.photos ?? []
-    if (photos.length === 0) return null
+    const body = (await res.json()) as PexelsSearchResponse;
+    const photos = body.photos ?? [];
+    if (photos.length === 0) return null;
 
     // Pick randomly among results to avoid always getting the same photo
-    const photo = photos[Math.floor(Math.random() * photos.length)]
-    if (!photo) return null
+    const photo = photos[Math.floor(Math.random() * photos.length)];
+    if (!photo) return null;
 
     return {
       url: photo.src.large,
@@ -219,9 +219,9 @@ async function searchPexels(
         photoUrl: photo.url,
         provider: "pexels",
       },
-    }
+    };
   } catch {
-    return null
+    return null;
   }
 }
 
@@ -230,22 +230,22 @@ async function searchPixabay(
   apiKey: string,
   options: { fetchImpl?: typeof fetch } = {},
 ): Promise<StockImageResult | null> {
-  const fetcher = options.fetchImpl ?? fetch
-  const url = `${PIXABAY_SEARCH_ENDPOINT}?key=${apiKey}&q=${encodeURIComponent(query)}&orientation=horizontal&per_page=20&safesearch=true`
+  const fetcher = options.fetchImpl ?? fetch;
+  const url = `${PIXABAY_SEARCH_ENDPOINT}?key=${apiKey}&q=${encodeURIComponent(query)}&orientation=horizontal&per_page=20&safesearch=true`;
 
   try {
     const res = await fetcher(url, {
       signal: AbortSignal.timeout(5_000),
-    })
-    if (!res.ok) return null
+    });
+    if (!res.ok) return null;
 
-    const body = (await res.json()) as PixabaySearchResponse
-    const hits = body.hits ?? []
-    if (hits.length === 0) return null
+    const body = (await res.json()) as PixabaySearchResponse;
+    const hits = body.hits ?? [];
+    if (hits.length === 0) return null;
 
     // Pick randomly among results
-    const hit = hits[Math.floor(Math.random() * hits.length)]
-    if (!hit) return null
+    const hit = hits[Math.floor(Math.random() * hits.length)];
+    if (!hit) return null;
 
     return {
       url: hit.largeImageURL,
@@ -258,9 +258,9 @@ async function searchPixabay(
         photoUrl: hit.pageURL,
         provider: "pixabay",
       },
-    }
+    };
   } catch {
-    return null
+    return null;
   }
 }
 
@@ -269,8 +269,8 @@ async function searchUnsplash(
   accessKey: string,
   options: { fetchImpl?: typeof fetch } = {},
 ): Promise<StockImageResult | null> {
-  const fetcher = options.fetchImpl ?? fetch
-  const url = `${UNSPLASH_SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=5&content_filter=high`
+  const fetcher = options.fetchImpl ?? fetch;
+  const url = `${UNSPLASH_SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=5&content_filter=high`;
 
   try {
     const res = await fetcher(url, {
@@ -279,23 +279,23 @@ async function searchUnsplash(
         "Accept-Version": "v1",
       },
       signal: AbortSignal.timeout(5_000),
-    })
-    if (!res.ok) return null
+    });
+    if (!res.ok) return null;
 
-    const body = (await res.json()) as UnsplashSearchResponse
-    const results = body.results ?? []
-    if (results.length === 0) return null
+    const body = (await res.json()) as UnsplashSearchResponse;
+    const results = body.results ?? [];
+    if (results.length === 0) return null;
 
-    const hit = results[Math.floor(Math.random() * results.length)]
-    const photoUrl = hit?.urls?.regular
-    if (!hit || !photoUrl) return null
+    const hit = results[Math.floor(Math.random() * results.length)];
+    const photoUrl = hit?.urls?.regular;
+    if (!hit || !photoUrl) return null;
 
-    const photoId = firstString(hit.id)
-    const photographerUsername = firstString(hit.user?.username)
-    const photographerName = firstString(hit.user?.name, photographerUsername)
-    const photographerProfileUrl = firstString(hit.user?.links?.html)
-    const photoPageUrl = firstString(hit.links?.html)
-    const downloadLocation = firstString(hit.links?.download_location)
+    const photoId = firstString(hit.id);
+    const photographerUsername = firstString(hit.user?.username);
+    const photographerName = firstString(hit.user?.name, photographerUsername);
+    const photographerProfileUrl = firstString(hit.user?.links?.html);
+    const photoPageUrl = firstString(hit.links?.html);
+    const downloadLocation = firstString(hit.links?.download_location);
 
     if (
       !photoId ||
@@ -305,7 +305,7 @@ async function searchUnsplash(
       !photoPageUrl ||
       !downloadLocation
     ) {
-      return null
+      return null;
     }
 
     return {
@@ -320,16 +320,16 @@ async function searchUnsplash(
         downloadLocation,
         provider: "unsplash",
       },
-    }
+    };
   } catch {
-    return null
+    return null;
   }
 }
 
 export interface StockImageProviderKeys {
-  pexels?: string
-  pixabay?: string
-  unsplash?: string
+  pexels?: string;
+  pixabay?: string;
+  unsplash?: string;
 }
 
 /**
@@ -360,38 +360,38 @@ export async function findFallbackImage(
   options: { fetchImpl?: typeof fetch; title?: string } = {},
 ): Promise<StockImageResult | null> {
   // Build the ordered search queue: title-derived term first, tag slugs after.
-  const queue: Array<{ searchTerm: string }> = []
+  const queue: Array<{ searchTerm: string }> = [];
 
   if (options.title) {
-    const term = deriveTitleSearchTerm(options.title)
-    if (term) queue.push({ searchTerm: term })
+    const term = deriveTitleSearchTerm(options.title);
+    if (term) queue.push({ searchTerm: term });
   }
 
   for (const rawTag of tags) {
-    const tag = rawTag.trim()
-    if (tag) queue.push({ searchTerm: tag })
+    const tag = rawTag.trim();
+    if (tag) queue.push({ searchTerm: tag });
   }
 
-  if (queue.length === 0) return null
+  if (queue.length === 0) return null;
 
   // Provider fallback chain
   const providers: Array<{
-    name: StockProvider
-    key: string
-    search: (query: string, key: string, opts: typeof options) => Promise<StockImageResult | null>
-  }> = []
+    name: StockProvider;
+    key: string;
+    search: (query: string, key: string, opts: typeof options) => Promise<StockImageResult | null>;
+  }> = [];
 
   if (providerKeys.pexels) {
-    providers.push({ name: "pexels", key: providerKeys.pexels, search: searchPexels })
+    providers.push({ name: "pexels", key: providerKeys.pexels, search: searchPexels });
   }
   if (providerKeys.pixabay) {
-    providers.push({ name: "pixabay", key: providerKeys.pixabay, search: searchPixabay })
+    providers.push({ name: "pixabay", key: providerKeys.pixabay, search: searchPixabay });
   }
   if (providerKeys.unsplash) {
-    providers.push({ name: "unsplash", key: providerKeys.unsplash, search: searchUnsplash })
+    providers.push({ name: "unsplash", key: providerKeys.unsplash, search: searchUnsplash });
   }
 
-  if (providers.length === 0) return null
+  if (providers.length === 0) return null;
 
   // Try each provider in order
   for (const provider of providers) {
@@ -399,18 +399,18 @@ export async function findFallbackImage(
       // Two-pass strategy for each term:
       // 1. Try bare term first (more specific for activity searches)
       // 2. Fall back to "{term} family" only when bare returns empty
-      const attempts = [searchTerm, `${searchTerm} family`]
+      const attempts = [searchTerm, `${searchTerm} family`];
 
       for (const query of attempts) {
-        const result = await provider.search(query, provider.key, options)
+        const result = await provider.search(query, provider.key, options);
         if (result) {
-          return result
+          return result;
         }
       }
     }
   }
 
-  return null
+  return null;
 }
 
 /**
@@ -422,10 +422,10 @@ export async function trackUnsplashDownload(
   accessKey: string,
   options: { fetchImpl?: typeof fetch } = {},
 ): Promise<StockImageTrackingResult> {
-  if (!accessKey) return { ok: false, error: "UNSPLASH_ACCESS_KEY is not configured" }
-  if (!downloadLocation.trim()) return { ok: false, error: "download location is empty" }
+  if (!accessKey) return { ok: false, error: "UNSPLASH_ACCESS_KEY is not configured" };
+  if (!downloadLocation.trim()) return { ok: false, error: "download location is empty" };
 
-  const fetcher = options.fetchImpl ?? fetch
+  const fetcher = options.fetchImpl ?? fetch;
 
   try {
     const res = await fetcher(downloadLocation, {
@@ -434,10 +434,10 @@ export async function trackUnsplashDownload(
         "Accept-Version": "v1",
       },
       signal: AbortSignal.timeout(3_000),
-    })
-    if (!res.ok) return { ok: false, error: `Unsplash tracking failed with HTTP ${res.status}` }
-    return { ok: true, error: null }
+    });
+    if (!res.ok) return { ok: false, error: `Unsplash tracking failed with HTTP ${res.status}` };
+    return { ok: true, error: null };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

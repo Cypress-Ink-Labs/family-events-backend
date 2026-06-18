@@ -37,17 +37,13 @@ class FakeSupabase {
       return Promise.resolve({
         data: {
           ...(row ?? {}),
-          attempt_count: this.startedAttempts.get(id) ??
-            ((row?.attempt_count ?? 0) + 1),
+          attempt_count: this.startedAttempts.get(id) ?? (row?.attempt_count ?? 0) + 1,
         },
         error: null,
       });
     }
 
-    if (
-      name === "release_unstarted_tag_queue_rows" ||
-      name === "invoke_process_tag_queue"
-    ) {
+    if (name === "release_unstarted_tag_queue_rows" || name === "invoke_process_tag_queue") {
       return Promise.resolve({ data: null, error: null });
     }
 
@@ -124,10 +120,7 @@ class FakeQuery {
   }
 }
 
-function row(
-  id: number,
-  overrides: Partial<QueueRow> = {},
-): QueueRow {
+function row(id: number, overrides: Partial<QueueRow> = {}): QueueRow {
   return {
     id,
     event_id: `evt-${id}`,
@@ -138,10 +131,7 @@ function row(
   };
 }
 
-async function withFetch(
-  fakeFetch: typeof fetch,
-  fn: () => Promise<void>,
-) {
+async function withFetch(fakeFetch: typeof fetch, fn: () => Promise<void>) {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = fakeFetch;
   try {
@@ -155,19 +145,12 @@ Deno.test("processTagQueueBatch returns after an empty claim", async () => {
   const db = new FakeSupabase();
   db.reaped = 2;
 
-  const summary = await processTagQueueBatch(
-    db as never,
-    "http://local",
-    "key",
-  );
+  const summary = await processTagQueueBatch(db as never, "http://local", "key");
 
   assertEquals(summary.claimed, 0);
   assertEquals(summary.reaped, 2);
   assertEquals(summary.pending_after, null);
-  assertEquals(db.rpcNames(), [
-    "reap_stuck_tag_queue_rows",
-    "claim_tag_queue_batch",
-  ]);
+  assertEquals(db.rpcNames(), ["reap_stuck_tag_queue_rows", "claim_tag_queue_batch"]);
 });
 
 Deno.test("processTagQueueBatch tags a claimed row and self-chains when work remains", async () => {
@@ -177,31 +160,24 @@ Deno.test("processTagQueueBatch tags a claimed row and self-chains when work rem
   db.pendingCount = 3;
   const requests: Array<{ input: URL | RequestInfo; init?: RequestInit }> = [];
 
-  await withFetch((input, init) => {
-    requests.push({ input, init });
-    return Promise.resolve(new Response("ok"));
-  }, async () => {
-    const summary = await processTagQueueBatch(
-      db as never,
-      "http://local",
-      "service-key",
-    );
+  await withFetch(
+    (input, init) => {
+      requests.push({ input, init });
+      return Promise.resolve(new Response("ok"));
+    },
+    async () => {
+      const summary = await processTagQueueBatch(db as never, "http://local", "service-key");
 
-    assertEquals(summary.claimed, 1);
-    assertEquals(summary.succeeded, 1);
-    assertEquals(summary.failed, 0);
-    assertEquals(summary.dead, 0);
-  });
+      assertEquals(summary.claimed, 1);
+      assertEquals(summary.succeeded, 1);
+      assertEquals(summary.failed, 0);
+      assertEquals(summary.dead, 0);
+    },
+  );
 
   assertEquals(requests.length, 1);
-  assertEquals(
-    String(requests[0].input),
-    "http://local/functions/v1/tag-event",
-  );
-  assertEquals(
-    new Headers(requests[0].init?.headers).get("Authorization"),
-    "Bearer service-key",
-  );
+  assertEquals(String(requests[0].input), "http://local/functions/v1/tag-event");
+  assertEquals(new Headers(requests[0].init?.headers).get("Authorization"), "Bearer service-key");
   assertEquals(db.updates.get(1)?.status, "succeeded");
   assert(db.rpcNames().includes("invoke_process_tag_queue"));
 });
@@ -212,19 +188,18 @@ Deno.test("processTagQueueBatch treats missing titles as soft success", async ()
   db.events.set("evt-1", { title: "", description: "No usable title" });
   let fetchCount = 0;
 
-  await withFetch(() => {
-    fetchCount += 1;
-    return Promise.resolve(new Response("should not be called"));
-  }, async () => {
-    const summary = await processTagQueueBatch(
-      db as never,
-      "http://local",
-      "key",
-    );
+  await withFetch(
+    () => {
+      fetchCount += 1;
+      return Promise.resolve(new Response("should not be called"));
+    },
+    async () => {
+      const summary = await processTagQueueBatch(db as never, "http://local", "key");
 
-    assertEquals(summary.succeeded, 1);
-    assertEquals(summary.failed, 0);
-  });
+      assertEquals(summary.succeeded, 1);
+      assertEquals(summary.failed, 0);
+    },
+  );
 
   assertEquals(fetchCount, 0);
   assertEquals(db.updates.get(1)?.status, "succeeded");
@@ -240,11 +215,7 @@ Deno.test("processTagQueueBatch schedules retry with backoff fields after transi
   await withFetch(
     () => Promise.resolve(new Response("upstream", { status: 503 })),
     async () => {
-      const summary = await processTagQueueBatch(
-        db as never,
-        "http://local",
-        "key",
-      );
+      const summary = await processTagQueueBatch(db as never, "http://local", "key");
 
       assertEquals(summary.failed, 1);
       assertEquals(summary.dead, 0);
@@ -265,16 +236,15 @@ Deno.test("processTagQueueBatch dead-letters exhausted rows", async () => {
   db.startedAttempts.set(1, 5);
   db.events.set("evt-1", { title: "Storytime", description: "Books" });
 
-  await withFetch(() => Promise.reject(new Error("timeout")), async () => {
-    const summary = await processTagQueueBatch(
-      db as never,
-      "http://local",
-      "key",
-    );
+  await withFetch(
+    () => Promise.reject(new Error("timeout")),
+    async () => {
+      const summary = await processTagQueueBatch(db as never, "http://local", "key");
 
-    assertEquals(summary.failed, 0);
-    assertEquals(summary.dead, 1);
-  });
+      assertEquals(summary.failed, 0);
+      assertEquals(summary.dead, 1);
+    },
+  );
 
   const update = db.updates.get(1);
   assertEquals(update?.status, "dead");
@@ -294,24 +264,21 @@ Deno.test("processTagQueueBatch releases unstarted rows when the wall budget is 
   Date.now = () => now;
 
   try {
-    await withFetch(() => {
-      now += 106_000;
-      return Promise.resolve(new Response("ok"));
-    }, async () => {
-      const summary = await processTagQueueBatch(
-        db as never,
-        "http://local",
-        "key",
-      );
+    await withFetch(
+      () => {
+        now += 106_000;
+        return Promise.resolve(new Response("ok"));
+      },
+      async () => {
+        const summary = await processTagQueueBatch(db as never, "http://local", "key");
 
-      assertEquals(summary.succeeded, 4);
-    });
+        assertEquals(summary.succeeded, 4);
+      },
+    );
   } finally {
     Date.now = originalNow;
   }
 
-  const release = db.rpcCalls.find((call) =>
-    call.name === "release_unstarted_tag_queue_rows"
-  );
+  const release = db.rpcCalls.find((call) => call.name === "release_unstarted_tag_queue_rows");
   assertEquals(release?.args?.p_claimed_ids, [5]);
 });

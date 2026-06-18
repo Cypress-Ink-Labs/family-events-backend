@@ -47,9 +47,14 @@ export default defineRailway(() => {
   const cronScrapeSources = cronService("cron-scrape-sources", "cron/scrape-sources", "0 * * * *", {
     SCRAPE_DUE_SOURCES_URL: preserve(),
   });
-  const cronDbMaintenance = cronService("cron-db-maintenance", "cron/db-maintenance", "15 3 * * *", {
-    DB_MAINTENANCE_URL: preserve(),
-  });
+  const cronDbMaintenance = cronService(
+    "cron-db-maintenance",
+    "cron/db-maintenance",
+    "15 3 * * *",
+    {
+      DB_MAINTENANCE_URL: preserve(),
+    },
+  );
   const cronCleanupStale = cronService("cron-cleanup-stale", "cron/cleanup-stale", "*/30 * * * *", {
     CLEANUP_STALE_RUNS_URL: preserve(),
   });
@@ -57,11 +62,16 @@ export default defineRailway(() => {
     BACKFILL_EVENT_ENRICHMENT_URL: preserve(),
     UNSPLASH_ACCESS_KEY: preserve(),
   });
-  const cronSendReminders = cronService("cron-send-reminders", "cron/send-reminders", "0 11 * * *", {
-    SEND_REMINDERS_URL: preserve(),
-    VITE_VAPID_PRIVATE_KEY: preserve(),
-    VITE_VAPID_PUBLIC_KEY: preserve(),
-  });
+  const cronSendReminders = cronService(
+    "cron-send-reminders",
+    "cron/send-reminders",
+    "0 11 * * *",
+    {
+      SEND_REMINDERS_URL: preserve(),
+      VITE_VAPID_PRIVATE_KEY: preserve(),
+      VITE_VAPID_PUBLIC_KEY: preserve(),
+    },
+  );
   const cronWeeklyDigest = cronService("cron-weekly-digest", "cron/weekly-digest", "0 13 * * 1", {
     SEND_WEEKLY_DIGEST_URL: preserve(),
   });

@@ -35,10 +35,7 @@ Deno.test("planSourceQueueClaimHandling starts one row and releases the rest", (
 Deno.test("shouldFallbackToLlm only falls back in hybrid mode", () => {
   assertEquals(shouldFallbackToLlm("deterministic_then_llm", 0, null), true);
   assertEquals(shouldFallbackToLlm("deterministic_then_llm", 2, null), false);
-  assertEquals(
-    shouldFallbackToLlm("deterministic", 0, new Error("parser failed")),
-    false,
-  );
+  assertEquals(shouldFallbackToLlm("deterministic", 0, new Error("parser failed")), false);
   assertEquals(shouldFallbackToLlm("llm", 0, null), false);
 });
 
@@ -57,9 +54,7 @@ interface TableUpdate {
   payload: Record<string, unknown>;
 }
 
-function queueRow(
-  overrides: Partial<Parameters<typeof processSourceQueueRow>[1]> = {},
-) {
+function queueRow(overrides: Partial<Parameters<typeof processSourceQueueRow>[1]> = {}) {
   return {
     id: 42,
     source_id: "source-1",
@@ -121,23 +116,23 @@ function parser(overrides: Partial<SourceParser> = {}): SourceParser {
   } as SourceParser;
 }
 
-function createDependencies(overrides: {
-  parser?: SourceParser;
-  importParsedSourceEvents?: (
-    parsedEvents: ParsedEvent[],
-  ) => Promise<SourceResult>;
-  extractWithLlm?: () => Promise<{
-    events: ParsedEvent[];
-    config: {
-      provider: string;
-      model: string;
-      baseUrl: string;
-      apiKey: string;
-      configured: boolean;
-    };
-    latencyMs: number;
-  }>;
-} = {}) {
+function createDependencies(
+  overrides: {
+    parser?: SourceParser;
+    importParsedSourceEvents?: (parsedEvents: ParsedEvent[]) => Promise<SourceResult>;
+    extractWithLlm?: () => Promise<{
+      events: ParsedEvent[];
+      config: {
+        provider: string;
+        model: string;
+        baseUrl: string;
+        apiKey: string;
+        configured: boolean;
+      };
+      latencyMs: number;
+    }>;
+  } = {},
+) {
   return {
     parsers: {
       website: overrides.parser ?? parser(),
@@ -157,27 +152,27 @@ function createDependencies(overrides: {
       parsedEvents: ParsedEvent[],
     ) =>
       overrides.importParsedSourceEvents?.(parsedEvents) ??
-        Promise.resolve({
-          sourceId: sourceRow.id,
-          status: "success",
-          eventsFound: parsedEvents.length,
-          eventsImported: parsedEvents.length,
-          eventsSkipped: 0,
-          error: null,
-        }),
+      Promise.resolve({
+        sourceId: sourceRow.id,
+        status: "success",
+        eventsFound: parsedEvents.length,
+        eventsImported: parsedEvents.length,
+        eventsSkipped: 0,
+        error: null,
+      }),
     extractWithLlm: () =>
       overrides.extractWithLlm?.() ??
-        Promise.resolve({
-          events: [parsedEvent({ title: "LLM Event" })],
-          config: {
-            provider: "test",
-            model: "test-model",
-            baseUrl: "https://llm.test",
-            apiKey: "test",
-            configured: true,
-          },
-          latencyMs: 12,
-        }),
+      Promise.resolve({
+        events: [parsedEvent({ title: "LLM Event" })],
+        config: {
+          provider: "test",
+          model: "test-model",
+          baseUrl: "https://llm.test",
+          apiKey: "test",
+          configured: true,
+        },
+        latencyMs: 12,
+      }),
   };
 }
 
@@ -311,12 +306,16 @@ Deno.test("processSourceQueueRow marks successful deterministic imports succeede
   );
 
   assertEquals(result, { outcome: "succeeded", imported: 1 });
-  assertEquals(processedEvents.map((event) => event.title), ["Story Time"]);
   assertEquals(
-    db.updates.some((update) =>
-      update.table === "source_scrape_queue" &&
-      update.payload.status === "succeeded" &&
-      update.payload.last_error === null
+    processedEvents.map((event) => event.title),
+    ["Story Time"],
+  );
+  assertEquals(
+    db.updates.some(
+      (update) =>
+        update.table === "source_scrape_queue" &&
+        update.payload.status === "succeeded" &&
+        update.payload.last_error === null,
     ),
     true,
   );
@@ -360,17 +359,12 @@ Deno.test("processSourceQueueRow schedules retry when deterministic extraction r
   );
 
   assertEquals(result, { outcome: "retry", imported: 0 });
-  assertEquals(
-    (db.inserts.at(-1)?.payload as { status?: string }).status,
-    "fallback",
-  );
+  assertEquals((db.inserts.at(-1)?.payload as { status?: string }).status, "fallback");
   assertEquals(db.rpcCalls.at(-1)?.name, "source_scrape_queue_schedule_retry");
 });
 
 Deno.test("processSourceQueueRow records deterministic-to-LLM fallback traces", async () => {
-  const db = createFakeSupabase(
-    source({ extraction_mode: "deterministic_then_llm" }),
-  );
+  const db = createFakeSupabase(source({ extraction_mode: "deterministic_then_llm" }));
 
   const result = await processSourceQueueRow(
     db.client as never,
@@ -384,21 +378,20 @@ Deno.test("processSourceQueueRow records deterministic-to-LLM fallback traces", 
   assertEquals(
     db.inserts
       .filter((insert) => insert.table === "source_extraction_traces")
-      .map((insert) =>
-        (insert.payload as { extractor?: string; status?: string }).status
-      ),
+      .map((insert) => (insert.payload as { extractor?: string; status?: string }).status),
     ["fallback", "success"],
   );
   assertEquals(
-    (db.inserts.at(-1)?.payload as {
-      extractor?: string;
-      fallback_reason?: string;
-    }).extractor,
+    (
+      db.inserts.at(-1)?.payload as {
+        extractor?: string;
+        fallback_reason?: string;
+      }
+    ).extractor,
     "llm",
   );
   assertEquals(
-    (db.inserts.at(-1)?.payload as { fallback_reason?: string })
-      .fallback_reason,
+    (db.inserts.at(-1)?.payload as { fallback_reason?: string }).fallback_reason,
     "deterministic extractor returned no events",
   );
 });

@@ -17,6 +17,7 @@
 ## Why this matters
 
 Three small version-hygiene issues reduce reproducibility:
+
 1. `packages/email/package.json` pins `@types/node`, `@types/react`, `@types/react-dom`, and `tsx` to
    **`latest`** — every reinstall can silently pull a new major and break typecheck non-deterministically.
 2. `packages/deploy-cli/package.json` uses `oxfmt@^0.54.0` and `vitest@4.1.8` while root uses
@@ -43,31 +44,35 @@ None is a vulnerability; together they're the difference between reproducible an
 ## Steps
 
 ### Step 1: Pin email package types + tsx
+
 Replace the four `latest` constraints in `packages/email/package.json` with concrete ranges matching the
 workspace: `@types/node` → `^25.9.3` (root), `tsx` → `^4.22.4` (root). For `@types/react` /
 `@types/react-dom`, pin to the currently-resolved versions (read them from `pnpm-lock.yaml` after a dry
 resolve, or `pnpm why @types/react`) using a caret range, e.g. `^19.x.y` to match `react@^19.2.7`.
 
 ### Step 2: Align deploy-cli tool versions
+
 In `packages/deploy-cli/package.json` set `oxfmt` → `^0.55.0` and `vitest` → `4.1.9` to match root.
 
 ### Step 3: Align deno.json supabase-js pin
+
 Bump all `supabase/functions/*/deno.json` `@supabase/supabase-js` imports from `^2.108.1` to `^2.108.2`
 (match root). This is a mechanical find/replace across the 22 files; confirm the count:
 `grep -rl 'supabase-js@\^2.108.1' supabase/functions | wc -l` before and after (after → 0).
 
 ### Step 4: Reinstall + verify
+
 `pnpm install` (updates `pnpm-lock.yaml`), then `pnpm run check`. The lockfile change should be reviewed.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Resolve react types | `pnpm why @types/react` | shows resolved version to pin |
-| Install | `pnpm install` | exit 0; lockfile updates |
-| Typecheck | `pnpm run check` | exit 0 |
-| Confirm deno pins | `grep -rl 'supabase-js@\^2.108.1' supabase/functions` | no matches |
-| Deno typecheck (optional) | `deno check` in `supabase/functions` (or `pnpm run check`) | no new errors |
+| Purpose                   | Command                                                    | Expected                      |
+| ------------------------- | ---------------------------------------------------------- | ----------------------------- |
+| Resolve react types       | `pnpm why @types/react`                                    | shows resolved version to pin |
+| Install                   | `pnpm install`                                             | exit 0; lockfile updates      |
+| Typecheck                 | `pnpm run check`                                           | exit 0                        |
+| Confirm deno pins         | `grep -rl 'supabase-js@\^2.108.1' supabase/functions`      | no matches                    |
+| Deno typecheck (optional) | `deno check` in `supabase/functions` (or `pnpm run check`) | no new errors                 |
 
 ## Done criteria
 

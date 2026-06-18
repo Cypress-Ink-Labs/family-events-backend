@@ -1,11 +1,5 @@
-import {
-  assertEquals,
-  assertThrows,
-} from "jsr:@std/assert";
-import {
-  applyConfidenceThreshold,
-  parseLlmDecisionJson,
-} from "./schema.ts";
+import { assertEquals, assertThrows } from "jsr:@std/assert";
+import { applyConfidenceThreshold, parseLlmDecisionJson } from "./schema.ts";
 
 Deno.test("parseLlmDecisionJson accepts valid decision JSON", () => {
   const parsed = parseLlmDecisionJson(
@@ -85,11 +79,7 @@ Deno.test("parseLlmDecisionJson rejects missing reason", () => {
 });
 
 Deno.test("parseLlmDecisionJson rejects malformed JSON", () => {
-  assertThrows(
-    () => parseLlmDecisionJson("{invalid-json"),
-    Error,
-    "invalid_json",
-  );
+  assertThrows(() => parseLlmDecisionJson("{invalid-json"), Error, "invalid_json");
 });
 
 Deno.test("applyConfidenceThreshold converts low-confidence to needs_admin_review", () => {

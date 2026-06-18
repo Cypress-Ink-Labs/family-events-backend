@@ -8,9 +8,7 @@ export function selectExtractionPlan(
 ): ExtractorName[] {
   if (mode === "deterministic") return ["deterministic"];
   if (mode === "llm") return ["llm"];
-  return deterministicValidCount > 0
-    ? ["deterministic"]
-    : ["deterministic", "llm"];
+  return deterministicValidCount > 0 ? ["deterministic"] : ["deterministic", "llm"];
 }
 
 export function validateParsedEvents(events: ParsedEvent[]): ParsedEvent[] {
@@ -29,8 +27,8 @@ export function parseLlmParsedEvents(rawJson: string): ParsedEvent[] {
   const rows = Array.isArray(parsed)
     ? parsed
     : Array.isArray((parsed as { events?: unknown })?.events)
-    ? (parsed as { events: unknown[] }).events
-    : null;
+      ? (parsed as { events: unknown[] }).events
+      : null;
 
   if (!rows) {
     throw new Error("LLM output must be an array of ParsedEvent rows");
@@ -41,30 +39,21 @@ export function parseLlmParsedEvents(rawJson: string): ParsedEvent[] {
       throw new Error("LLM event row is not an object");
     }
     const record = row as Record<string, unknown>;
-    if (
-      typeof record.title !== "string" ||
-      typeof record.startDatetime !== "string"
-    ) {
+    if (typeof record.title !== "string" || typeof record.startDatetime !== "string") {
       throw new Error("LLM event row missing required ParsedEvent fields");
     }
 
     return {
       title: record.title,
-      description: typeof record.description === "string"
-        ? record.description
-        : "",
+      description: typeof record.description === "string" ? record.description : "",
       startDatetime: record.startDatetime,
-      endDatetime: typeof record.endDatetime === "string"
-        ? record.endDatetime
-        : null,
+      endDatetime: typeof record.endDatetime === "string" ? record.endDatetime : null,
       venueName: typeof record.venueName === "string" ? record.venueName : null,
       address: typeof record.address === "string" ? record.address : null,
       sourceUrl: typeof record.sourceUrl === "string" ? record.sourceUrl : null,
       imageUrl: typeof record.imageUrl === "string" ? record.imageUrl : null,
       images: Array.isArray(record.images)
-        ? record.images.filter((value): value is string =>
-          typeof value === "string"
-        )
+        ? record.images.filter((value): value is string => typeof value === "string")
         : [],
       price: typeof record.price === "number" ? record.price : null,
       isFree: record.isFree === true,

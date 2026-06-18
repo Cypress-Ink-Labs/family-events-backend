@@ -1,60 +1,60 @@
-import type { ExitCode } from "./types"
+import type { ExitCode } from "./types";
 
 export class CliError extends Error {
-  readonly exitCode: ExitCode
+  readonly exitCode: ExitCode;
 
   constructor(message: string, exitCode: ExitCode, options?: { cause?: unknown }) {
-    super(message, options)
-    this.name = "CliError"
-    this.exitCode = exitCode
+    super(message, options);
+    this.name = "CliError";
+    this.exitCode = exitCode;
   }
 }
 
 export class ValidationError extends CliError {
   constructor(message: string, options?: { cause?: unknown }) {
-    super(message, 2, options)
-    this.name = "ValidationError"
+    super(message, 2, options);
+    this.name = "ValidationError";
   }
 }
 
 export class DeployFailureError extends CliError {
   constructor(message: string, options?: { cause?: unknown }) {
-    super(message, 1, options)
-    this.name = "DeployFailureError"
+    super(message, 1, options);
+    this.name = "DeployFailureError";
   }
 }
 
 export class AuthError extends CliError {
   constructor(message: string, options?: { cause?: unknown }) {
-    super(message, 4, options)
-    this.name = "AuthError"
+    super(message, 4, options);
+    this.name = "AuthError";
   }
 }
 
 export class CancelledError extends CliError {
   constructor(message = "Deployment cancelled") {
-    super(message, 3)
-    this.name = "CancelledError"
+    super(message, 3);
+    this.name = "CancelledError";
   }
 }
 
 export class SmokeError extends CliError {
   constructor(message: string, options?: { cause?: unknown }) {
-    super(message, 5, options)
-    this.name = "SmokeError"
+    super(message, 5, options);
+    this.name = "SmokeError";
   }
 }
 
 export function exitCodeFor(error: unknown): ExitCode {
   if (error instanceof CliError) {
-    return error.exitCode
+    return error.exitCode;
   }
-  return 1
+  return 1;
 }
 
 export function messageFor(error: unknown): string {
   if (error instanceof Error) {
-    return error.message
+    return error.message;
   }
-  return String(error)
+  return String(error);
 }

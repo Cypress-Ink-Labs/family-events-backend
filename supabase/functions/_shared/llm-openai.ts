@@ -39,35 +39,26 @@ export async function postOpenAiChatCompletion(
 ): Promise<ChatCompletionResult> {
   const fetchImpl = options.fetchImpl ?? fetch;
   const startedAt = Date.now();
-  const response = await fetchImpl(
-    `${options.baseUrl.replace(/\/+$/, "")}/chat/completions`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${options.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(options.body),
-      signal: options.timeoutMs == null
-        ? undefined
-        : AbortSignal.timeout(options.timeoutMs),
+  const response = await fetchImpl(`${options.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.apiKey}`,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify(options.body),
+    signal: options.timeoutMs == null ? undefined : AbortSignal.timeout(options.timeoutMs),
+  });
 
   if (!response.ok) {
     const errorBody = await response.text().catch(() => "");
-    const prefix = options.failureMessagePrefix ??
-      `${options.providerName ?? "provider"} call failed`;
-    throw new Error(
-      `${prefix} (${response.status}): ${errorBody.slice(0, 200)}`,
-    );
+    const prefix =
+      options.failureMessagePrefix ?? `${options.providerName ?? "provider"} call failed`;
+    throw new Error(`${prefix} (${response.status}): ${errorBody.slice(0, 200)}`);
   }
 
   const raw = await response.json();
   const payload = raw as {
-    choices?: Array<
-      { finish_reason?: unknown; message?: { content?: unknown } }
-    >;
+    choices?: Array<{ finish_reason?: unknown; message?: { content?: unknown } }>;
     usage?: {
       completion_tokens?: unknown;
       prompt_tokens?: unknown;
@@ -76,9 +67,7 @@ export async function postOpenAiChatCompletion(
   };
   const content = payload.choices?.[0]?.message?.content;
   if (typeof content !== "string" || !content) {
-    throw new Error(
-      `${options.providerName ?? "provider"} returned an empty response`,
-    );
+    throw new Error(`${options.providerName ?? "provider"} returned an empty response`);
   }
   const usageRaw = payload.usage ?? {};
   return {
@@ -87,9 +76,10 @@ export async function postOpenAiChatCompletion(
     raw,
     usage: {
       completionTokens: readTokenCount(usageRaw.completion_tokens),
-      finishReason: typeof payload.choices?.[0]?.finish_reason === "string"
-        ? payload.choices[0].finish_reason
-        : null,
+      finishReason:
+        typeof payload.choices?.[0]?.finish_reason === "string"
+          ? payload.choices[0].finish_reason
+          : null,
       promptTokens: readTokenCount(usageRaw.prompt_tokens),
       totalTokens: readTokenCount(usageRaw.total_tokens),
     },

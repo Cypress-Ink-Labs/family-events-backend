@@ -12,7 +12,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email"
+} from "react-email";
 
 /**
  * Welcome email — "Dusk-Meadow" theme.
@@ -44,7 +44,7 @@ const tailwindConfig = {
       },
     },
   },
-}
+};
 
 export default function WelcomeEmail() {
   return (
@@ -187,5 +187,5 @@ export default function WelcomeEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

@@ -14,16 +14,12 @@ function request(method = "POST") {
 }
 
 Deno.test("createAdminJsonHandler returns OPTIONS preflight", async () => {
-  const handler = createAdminJsonHandler(
-    { functionName: "admin-test" },
-    async () => ({ ok: true }),
-  );
+  const handler = createAdminJsonHandler({ functionName: "admin-test" }, async () => ({
+    ok: true,
+  }));
   const response = await handler(request("OPTIONS"));
   assertEquals(response.status, 200);
-  assertEquals(
-    response.headers.get("Access-Control-Allow-Methods"),
-    "POST, OPTIONS",
-  );
+  assertEquals(response.headers.get("Access-Control-Allow-Methods"), "POST, OPTIONS");
 });
 
 Deno.test("createAdminJsonHandler validates required env", async () => {
@@ -85,10 +81,7 @@ Deno.test("createAdminJsonHandler merges CORS headers into handler Response retu
   );
   const response = await handler(request());
   assertEquals(response.status, 200);
-  assertEquals(
-    response.headers.get("Access-Control-Allow-Methods"),
-    "POST, OPTIONS",
-  );
+  assertEquals(response.headers.get("Access-Control-Allow-Methods"), "POST, OPTIONS");
   assertEquals(await response.json(), { ok: true });
 });
 

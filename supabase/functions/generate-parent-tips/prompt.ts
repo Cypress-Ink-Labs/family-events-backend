@@ -47,10 +47,7 @@ export function buildSystemPrompt(): string {
 
 export function buildUserPrompt(ctx: ParentTipsEventContext): string {
   const safeTitle = ctx.title.slice(0, MAX_TITLE_CHARS);
-  const safeDescription = (ctx.description ?? "").slice(
-    0,
-    MAX_DESCRIPTION_CHARS,
-  );
+  const safeDescription = (ctx.description ?? "").slice(0, MAX_DESCRIPTION_CHARS);
 
   return [
     "<event_data>",

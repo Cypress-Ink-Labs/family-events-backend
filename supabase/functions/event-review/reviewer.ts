@@ -9,10 +9,7 @@ import type {
   ReviewEventDeps,
   ReviewEventInput,
 } from "./types.ts";
-import {
-  LLM_EVENT_REVIEW_DECISION,
-  LLM_EVENT_REVIEW_STATUS,
-} from "./types.ts";
+import { LLM_EVENT_REVIEW_DECISION, LLM_EVENT_REVIEW_STATUS } from "./types.ts";
 
 function failedDecision(
   config: LlmReviewConfig,
@@ -113,17 +110,17 @@ export async function reviewEventWithLlm(
     );
 
     const parsed = parseLlmDecisionJson(providerOutput.rawText);
-    const applied = applyConfidenceThreshold(
-      parsed,
-      config.confidenceThreshold,
-    );
+    const applied = applyConfidenceThreshold(parsed, config.confidenceThreshold);
     const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
 
     // Apply memory-based confidence adjustment
     let adjustedConfidence = applied.confidence;
     const memoryFlags: string[] = [];
     if (memoryContext && memoryContext.confidenceDelta !== 0 && adjustedConfidence !== null) {
-      adjustedConfidence = Math.max(0, Math.min(1, adjustedConfidence + memoryContext.confidenceDelta));
+      adjustedConfidence = Math.max(
+        0,
+        Math.min(1, adjustedConfidence + memoryContext.confidenceDelta),
+      );
       memoryFlags.push("memory_context_used");
       if (memoryContext.confidenceDelta > 0) memoryFlags.push("memory_confidence_boosted");
       if (memoryContext.confidenceDelta < 0) memoryFlags.push("memory_confidence_penalized");
@@ -151,9 +148,7 @@ export async function reviewEventWithLlm(
       provider: providerOutput.provider,
       model: providerOutput.model,
       promptVersion: config.promptVersion,
-      rawResponse: config.persistRawResponse
-        ? providerOutput.rawResponse
-        : null,
+      rawResponse: config.persistRawResponse ? providerOutput.rawResponse : null,
       errorCode: null,
       errorMessage: null,
       processingMs: elapsed,
@@ -164,12 +159,12 @@ export async function reviewEventWithLlm(
     const errorCode = message.includes("timeout")
       ? "provider_timeout"
       : message.startsWith("provider_http_")
-      ? "provider_http_error"
-      : message === "invalid_json"
-      ? "malformed_json"
-      : message.startsWith("invalid_") || message.startsWith("unexpected_key")
-      ? "schema_validation_error"
-      : "provider_error";
+        ? "provider_http_error"
+        : message === "invalid_json"
+          ? "malformed_json"
+          : message.startsWith("invalid_") || message.startsWith("unexpected_key")
+            ? "schema_validation_error"
+            : "provider_error";
 
     return failedDecision(
       config,

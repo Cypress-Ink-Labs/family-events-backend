@@ -1,8 +1,8 @@
-import { ExecaProcessRunner } from "../core/exec"
-import { createLogger } from "../core/logger"
-import { createRunId, writeRunArtifact } from "../core/run-artifacts"
-import { createAbortController } from "../core/signals"
-import { expandTarget, resolveTargets } from "../core/target-graph"
+import { ExecaProcessRunner } from "../core/exec";
+import { createLogger } from "../core/logger";
+import { createRunId, writeRunArtifact } from "../core/run-artifacts";
+import { createAbortController } from "../core/signals";
+import { expandTarget, resolveTargets } from "../core/target-graph";
 import type {
   DeployConfig,
   DeployOptions,
@@ -10,40 +10,40 @@ import type {
   DeployTarget,
   SmokeResult,
   TargetResult,
-} from "../core/types"
-import { SupabaseProvider } from "../providers/supabase"
-import { RailwayProvider } from "../providers/railway"
-import { finishTarget } from "../core/result"
-import { DeployFailureError, messageFor, SmokeError, ValidationError } from "../core/errors"
-import { runSmokeChecks } from "./smoke-checks"
-import { rollbackGuidance } from "./rollback"
-import { createSpinner } from "../ui/progress"
+} from "../core/types";
+import { SupabaseProvider } from "../providers/supabase";
+import { RailwayProvider } from "../providers/railway";
+import { finishTarget } from "../core/result";
+import { DeployFailureError, messageFor, SmokeError, ValidationError } from "../core/errors";
+import { runSmokeChecks } from "./smoke-checks";
+import { rollbackGuidance } from "./rollback";
+import { createSpinner } from "../ui/progress";
 
 export async function runDeploy(
   rootDir: string,
   config: DeployConfig,
-  options: DeployOptions
+  options: DeployOptions,
 ): Promise<DeployRunResult> {
-  const logger = createLogger(options)
-  const startedAt = new Date()
-  const runId = createRunId(startedAt)
-  const controller = createAbortController()
+  const logger = createLogger(options);
+  const startedAt = new Date();
+  const runId = createRunId(startedAt);
+  const controller = createAbortController();
   const preflightRunner = new ExecaProcessRunner(
     rootDir,
     options.dryRun,
     controller.signal,
-    options.showOutput && !options.json
-  )
-  const supabase = new SupabaseProvider(rootDir, config, preflightRunner)
-  const railway = new RailwayProvider(rootDir, config, preflightRunner)
-  const selected = resolveTargets(config, options.targets, options.all)
-  const expanded = selected.flatMap((target) => expandTarget(config, target))
-  const results = new Array<TargetResult>(expanded.length)
+    options.showOutput && !options.json,
+  );
+  const supabase = new SupabaseProvider(rootDir, config, preflightRunner);
+  const railway = new RailwayProvider(rootDir, config, preflightRunner);
+  const selected = resolveTargets(config, options.targets, options.all);
+  const expanded = selected.flatMap((target) => expandTarget(config, target));
+  const results = new Array<TargetResult>(expanded.length);
 
   if (options.dryRun) {
     const dryRunResults = expanded.map((target) =>
-      finishTarget(baseResult(target.id), "success", { rollback: rollbackGuidance(target) })
-    )
+      finishTarget(baseResult(target.id), "success", { rollback: rollbackGuidance(target) }),
+    );
     return writeAndReturn(rootDir, {
       runId,
       env: options.env,
@@ -52,46 +52,46 @@ export async function runDeploy(
       finishedAt: new Date().toISOString(),
       targets: dryRunResults,
       smoke: [],
-    })
+    });
   }
 
   if (expanded.some((target) => target.kind.startsWith("supabase"))) {
-    const spinner = createSpinner("Checking Supabase deploy prerequisites", useSpinner(options))
+    const spinner = createSpinner("Checking Supabase deploy prerequisites", useSpinner(options));
     try {
-      await supabase.preflight()
-      supabase.validateFunctionDrift()
-      supabase.resolveProjectRef(options.env)
-      spinner?.succeed("Supabase deploy prerequisites ready")
+      await supabase.preflight();
+      supabase.validateFunctionDrift();
+      supabase.resolveProjectRef(options.env);
+      spinner?.succeed("Supabase deploy prerequisites ready");
     } catch (error) {
-      spinner?.fail("Supabase deploy prerequisites failed")
-      throw error
+      spinner?.fail("Supabase deploy prerequisites failed");
+      throw error;
     }
   }
   if (expanded.some((target) => target.kind.startsWith("railway"))) {
-    const spinner = createSpinner("Checking Railway deploy prerequisites", useSpinner(options))
+    const spinner = createSpinner("Checking Railway deploy prerequisites", useSpinner(options));
     try {
-      await railway.preflight()
-      spinner?.succeed("Railway deploy prerequisites ready")
+      await railway.preflight();
+      spinner?.succeed("Railway deploy prerequisites ready");
     } catch (error) {
-      spinner?.fail("Railway deploy prerequisites failed")
-      throw error
+      spinner?.fail("Railway deploy prerequisites failed");
+      throw error;
     }
   }
 
   if (expanded.some((target) => target.kind.startsWith("railway"))) {
-    const spinner = createSpinner("Applying Railway config", useSpinner(options))
+    const spinner = createSpinner("Applying Railway config", useSpinner(options));
     try {
-      await railway.applyConfig()
-      spinner?.succeed("Railway config applied")
+      await railway.applyConfig();
+      spinner?.succeed("Railway config applied");
     } catch (error) {
-      spinner?.fail("Railway config apply failed")
-      throw error
+      spinner?.fail("Railway config apply failed");
+      throw error;
     }
   }
 
   expanded.forEach((target, index) => {
-    results[index] = baseResult(target.id)
-  })
+    results[index] = baseResult(target.id);
+  });
 
   await deployStage(
     "Supabase migrations",
@@ -102,8 +102,8 @@ export async function runDeploy(
     options,
     controller.signal,
     results,
-    logger
-  )
+    logger,
+  );
   await deployStage(
     "Supabase functions",
     indexedTargets(expanded, "supabase:function"),
@@ -113,15 +113,15 @@ export async function runDeploy(
     options,
     controller.signal,
     results,
-    logger
-  )
-  const railwayTargets = indexedTargets(expanded, "railway:service")
+    logger,
+  );
+  const railwayTargets = indexedTargets(expanded, "railway:service");
   const railwayIndependent = railwayTargets.filter(
-    ({ target }) => !hasSelectedBootstrapDependency(target, railwayTargets, config)
-  )
+    ({ target }) => !hasSelectedBootstrapDependency(target, railwayTargets, config),
+  );
   const railwayDependent = railwayTargets.filter(({ target }) =>
-    hasSelectedBootstrapDependency(target, railwayTargets, config)
-  )
+    hasSelectedBootstrapDependency(target, railwayTargets, config),
+  );
 
   await deployStage(
     "Railway services",
@@ -132,8 +132,8 @@ export async function runDeploy(
     options,
     controller.signal,
     results,
-    logger
-  )
+    logger,
+  );
   await deployStage(
     "Railway dependent services",
     railwayDependent,
@@ -143,18 +143,18 @@ export async function runDeploy(
     options,
     controller.signal,
     results,
-    logger
-  )
+    logger,
+  );
 
-  let smoke: SmokeResult[] = []
+  let smoke: SmokeResult[] = [];
   if (options.smoke || process.env.DEPLOY_SMOKE === "1") {
     try {
-      smoke = await runSmokeChecks(config, supabase)
+      smoke = await runSmokeChecks(config, supabase);
     } catch (error) {
       if (error instanceof SmokeError) {
-        smoke = await runSmokeChecks(config, supabase).catch(() => [])
+        smoke = await runSmokeChecks(config, supabase).catch(() => []);
       } else {
-        throw error
+        throw error;
       }
     }
   }
@@ -167,17 +167,17 @@ export async function runDeploy(
     finishedAt: new Date().toISOString(),
     targets: compactResults(results),
     smoke,
-  })
+  });
 
   if (results.some((target) => target.status === "failed")) {
     throw new DeployFailureError(
-      `Deploy finished with ${results.filter((target) => target.status === "failed").length} failure(s)`
-    )
+      `Deploy finished with ${results.filter((target) => target.status === "failed").length} failure(s)`,
+    );
   }
   if (smoke.some((item) => item.status === "failed")) {
-    throw new SmokeError("Deploy succeeded but smoke checks failed")
+    throw new SmokeError("Deploy succeeded but smoke checks failed");
   }
-  return result
+  return result;
 }
 
 async function deployStage(
@@ -189,142 +189,142 @@ async function deployStage(
   options: DeployOptions,
   signal: AbortSignal,
   results: TargetResult[],
-  logger: ReturnType<typeof createLogger>
+  logger: ReturnType<typeof createLogger>,
 ): Promise<void> {
-  if (targets.length === 0) return
+  if (targets.length === 0) return;
 
-  const parallel = concurrency > 1 && targets.length > 1
+  const parallel = concurrency > 1 && targets.length > 1;
   const spinner = createSpinner(
     parallel ? `${label}: deploying ${targets.length} targets` : undefined,
-    parallel && useSpinner(options)
-  )
+    parallel && useSpinner(options),
+  );
 
   await mapLimit(targets, concurrency, async ({ target, index }) => {
     if (options.showOutput || options.verbose || options.debug) {
-      logger.info(`deploying ${target.id}`)
+      logger.info(`deploying ${target.id}`);
     }
-    const targetSpinner = createSpinner(`Deploying ${target.id}`, !parallel && useSpinner(options))
+    const targetSpinner = createSpinner(`Deploying ${target.id}`, !parallel && useSpinner(options));
     const runner = new ExecaProcessRunner(
       rootDir,
       options.dryRun,
       signal,
-      options.showOutput && !options.json
-    )
-    const supabase = new SupabaseProvider(rootDir, config, runner)
-    const railway = new RailwayProvider(rootDir, config, runner)
-    const result = baseResult(target.id)
+      options.showOutput && !options.json,
+    );
+    const supabase = new SupabaseProvider(rootDir, config, runner);
+    const railway = new RailwayProvider(rootDir, config, runner);
+    const result = baseResult(target.id);
 
     try {
-      await deployTarget(target, options, supabase, railway)
-      targetSpinner?.succeed(`${target.id} deployed`)
+      await deployTarget(target, options, supabase, railway);
+      targetSpinner?.succeed(`${target.id} deployed`);
       results[index] = finishTarget(result, "success", {
         commands: runner.records,
         rollback: rollbackGuidance(target),
-      })
-      if (!targetSpinner && !parallel) logger.success(`${target.id} deployed`)
+      });
+      if (!targetSpinner && !parallel) logger.success(`${target.id} deployed`);
     } catch (error) {
-      targetSpinner?.fail(`${target.id} failed`)
+      targetSpinner?.fail(`${target.id} failed`);
       results[index] = finishTarget(result, "failed", {
         commands: runner.records,
         error: messageFor(error),
         rollback: rollbackGuidance(target),
-      })
-      logger.warn(`${target.id} failed: ${messageFor(error)}`)
+      });
+      logger.warn(`${target.id} failed: ${messageFor(error)}`);
     }
-  })
+  });
 
-  const failed = targets.filter(({ index }) => results[index]?.status === "failed").length
+  const failed = targets.filter(({ index }) => results[index]?.status === "failed").length;
   if (failed > 0) {
-    spinner?.fail(`${label}: ${failed}/${targets.length} failed`)
+    spinner?.fail(`${label}: ${failed}/${targets.length} failed`);
   } else {
-    spinner?.succeed(`${label}: ${targets.length}/${targets.length} deployed`)
+    spinner?.succeed(`${label}: ${targets.length}/${targets.length} deployed`);
   }
 }
 
-type IndexedTarget = { target: DeployTarget; index: number }
+type IndexedTarget = { target: DeployTarget; index: number };
 
 function indexedTargets(targets: DeployTarget[], kind: DeployTarget["kind"]): IndexedTarget[] {
   return targets
     .map((target, index) => ({ target, index }))
-    .filter(({ target }) => target.kind === kind)
+    .filter(({ target }) => target.kind === kind);
 }
 
 function hasSelectedBootstrapDependency(
   target: DeployTarget,
   selected: IndexedTarget[],
-  config: DeployConfig
+  config: DeployConfig,
 ): boolean {
-  if (target.kind !== "railway:service" || !target.name) return false
-  const service = config.railway.services.find((candidate) => candidate.name === target.name)
-  if (!service?.bootstrapFromService) return false
-  return selected.some(({ target: candidate }) => candidate.name === service.bootstrapFromService)
+  if (target.kind !== "railway:service" || !target.name) return false;
+  const service = config.railway.services.find((candidate) => candidate.name === target.name);
+  if (!service?.bootstrapFromService) return false;
+  return selected.some(({ target: candidate }) => candidate.name === service.bootstrapFromService);
 }
 
 async function mapLimit<T>(
   items: T[],
   concurrency: number,
-  worker: (item: T) => Promise<void>
+  worker: (item: T) => Promise<void>,
 ): Promise<void> {
-  let cursor = 0
+  let cursor = 0;
   const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
     while (cursor < items.length) {
-      const item = items[cursor]
-      cursor += 1
-      if (item) await worker(item)
+      const item = items[cursor];
+      cursor += 1;
+      if (item) await worker(item);
     }
-  })
-  await Promise.all(workers)
+  });
+  await Promise.all(workers);
 }
 
 function compactResults(results: TargetResult[]): TargetResult[] {
-  return results.filter((result): result is TargetResult => Boolean(result))
+  return results.filter((result): result is TargetResult => Boolean(result));
 }
 
 async function deployTarget(
   target: DeployTarget,
   options: DeployOptions,
   supabase: SupabaseProvider,
-  railway: RailwayProvider
+  railway: RailwayProvider,
 ): Promise<void> {
   switch (target.kind) {
     case "supabase:migrations":
-      await supabase.deployMigrations()
-      return
+      await supabase.deployMigrations();
+      return;
     case "supabase:function":
-      if (!target.name) throw new ValidationError(`Missing function name for target ${target.id}`)
-      await supabase.deployFunction(target.name, options.env)
-      return
+      if (!target.name) throw new ValidationError(`Missing function name for target ${target.id}`);
+      await supabase.deployFunction(target.name, options.env);
+      return;
     case "railway:service":
-      if (!target.name) throw new ValidationError(`Missing service name for target ${target.id}`)
+      if (!target.name) throw new ValidationError(`Missing service name for target ${target.id}`);
       await railway.deployService(target.name, {
         poll: options.poll,
         pollTimeoutSeconds: options.pollTimeoutSeconds,
         noPollSuccess: !options.poll,
-      })
-      return
+      });
+      return;
     case "supabase:functions:all":
     case "railway:all":
     case "railway:crons":
-      throw new ValidationError(`Unexpected unexpanded target: ${target.id}`)
+      throw new ValidationError(`Unexpected unexpanded target: ${target.id}`);
   }
 }
 
 function baseResult(targetId: string): TargetResult {
-  const now = new Date().toISOString()
+  const now = new Date().toISOString();
   return {
     targetId,
     status: "skipped",
     startedAt: now,
     finishedAt: now,
     commands: [],
-  }
+  };
 }
 
 function writeAndReturn(rootDir: string, result: DeployRunResult): DeployRunResult {
-  const artifactPath = writeRunArtifact(rootDir, result)
-  return { ...result, artifactPath }
+  const artifactPath = writeRunArtifact(rootDir, result);
+  return { ...result, artifactPath };
 }
 
 function useSpinner(options: DeployOptions): boolean {
-  return !options.json && !options.showOutput && !options.dryRun
+  return !options.json && !options.showOutput && !options.dryRun;
 }

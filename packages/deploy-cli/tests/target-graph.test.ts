@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest"
-import type { DeployConfig } from "../src/core/types"
-import { resolveTargets } from "../src/core/target-graph"
+import { describe, expect, it } from "vitest";
+import type { DeployConfig } from "../src/core/types";
+import { resolveTargets } from "../src/core/target-graph";
 
 const config: DeployConfig = {
   environments: {
@@ -15,26 +15,26 @@ const config: DeployConfig = {
     ],
   },
   smoke: { functionDrift: true, cronEnabledProbe: { enabledWhenEnvPresent: true, label: "cron" } },
-}
+};
 
 describe("target graph", () => {
   it("deduplicates all-function and child function targets", () => {
     expect(
       resolveTargets(config, ["supabase:functions:all", "supabase:function:a"], false).map(
-        (target) => target.id
-      )
-    ).toEqual(["supabase:functions:all"])
-  })
+        (target) => target.id,
+      ),
+    ).toEqual(["supabase:functions:all"]);
+  });
 
   it("normalizes bare service names as Railway targets", () => {
-    expect(resolveTargets(config, ["web"], false)[0]?.id).toBe("railway:web")
-  })
+    expect(resolveTargets(config, ["web"], false)[0]?.id).toBe("railway:web");
+  });
 
   it("resolves all to top-level grouped targets", () => {
     expect(resolveTargets(config, [], true).map((target) => target.id)).toEqual([
       "supabase:migrations",
       "supabase:functions:all",
       "railway:all",
-    ])
-  })
-})
+    ]);
+  });
+});

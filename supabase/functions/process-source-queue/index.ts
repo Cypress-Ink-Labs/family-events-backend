@@ -13,9 +13,7 @@ function sourceClaimLimit(): number {
   return 1;
 }
 
-export async function processSourceQueueBatch(
-  supabase: SupabaseClient,
-): Promise<{
+export async function processSourceQueueBatch(supabase: SupabaseClient): Promise<{
   claimed: number;
   started: number;
   released: number;

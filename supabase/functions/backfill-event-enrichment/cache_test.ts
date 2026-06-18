@@ -3,10 +3,7 @@
  * batch when two rows share the same address/venue and the same tag set.
  */
 import { assertEquals } from "jsr:@std/assert";
-import {
-  buildGeocodeQuery,
-  type GeocodeResult,
-} from "../_shared/geocode.ts";
+import { buildGeocodeQuery, type GeocodeResult } from "../_shared/geocode.ts";
 import { type StockImageResult } from "../_shared/stock-images.ts";
 
 // ---------------------------------------------------------------------------

@@ -30,9 +30,7 @@ export async function invokeFunction(
         ...(options.headers ?? {}),
       },
       body: JSON.stringify(body),
-      signal: options.timeoutMs == null
-        ? undefined
-        : AbortSignal.timeout(options.timeoutMs),
+      signal: options.timeoutMs == null ? undefined : AbortSignal.timeout(options.timeoutMs),
     },
   );
   const bodyText = await response.text().catch(() => "");

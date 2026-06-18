@@ -12,7 +12,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email"
+} from "react-email";
 
 /**
  * Event Reminder email — "Dusk-Meadow" theme.
@@ -48,7 +48,7 @@ const tailwindConfig = {
       },
     },
   },
-}
+};
 
 export default function EventReminderEmail() {
   return (
@@ -188,5 +188,5 @@ export default function EventReminderEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

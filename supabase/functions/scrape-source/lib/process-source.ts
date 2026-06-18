@@ -1,56 +1,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { captureEdgeException } from "../../_shared/sentry.ts";
-import {
-  errorContext,
-  errorMessage as formatError,
-  logEdgeEvent,
-} from "../../_shared/logger.ts";
+import { errorContext, errorMessage as formatError, logEdgeEvent } from "../../_shared/logger.ts";
 import { guardedFetch } from "../../_shared/guarded-fetch.ts";
 import type { ParserContext } from "./parser-context.ts";
 import { resolveCityTimezone } from "./schedule.ts";
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
 // scrape-source now just enqueues, returning immediately.
-import type {
-  EventSourceRow,
-  ParsedEvent,
-  RunStatus,
-  SourceResult,
-} from "./types.ts";
+import type { EventSourceRow, ParsedEvent, RunStatus, SourceResult } from "./types.ts";
 export { sanitizeImagesForIngest } from "./enrichment.ts";
 
 const SOURCE_FETCH_TIMEOUT_MS = 10_000;
 const SOURCE_MAX_BYTES = 5 * 1024 * 1024; // 5 MB cap on feed body to prevent OOM
 
-const OUTDOOR_TAG_HINTS = [
-  "park",
-  "outdoor",
-  "hike",
-  "nature",
-  "trail",
-  "playground",
-];
+const OUTDOOR_TAG_HINTS = ["park", "outdoor", "hike", "nature", "trail", "playground"];
 const INDOOR_TAG_HINTS = ["museum", "indoor", "library", "theater", "theatre"];
 const MAX_RAW_IMAGE_CANDIDATES = 20;
 
-export function deriveIsOutdoorFromParsedEvent(
-  parsed: ParsedEvent,
-): boolean | null {
-  const text = [
-    parsed.title,
-    parsed.description,
-    parsed.venueName,
-    parsed.address,
-  ]
+export function deriveIsOutdoorFromParsedEvent(parsed: ParsedEvent): boolean | null {
+  const text = [parsed.title, parsed.description, parsed.venueName, parsed.address]
     .filter((value): value is string => Boolean(value))
     .join(" ")
     .toLowerCase();
 
-  const hasOutdoorSignal = OUTDOOR_TAG_HINTS.some((keyword) =>
-    text.includes(keyword)
-  );
-  const hasIndoorSignal = INDOOR_TAG_HINTS.some((keyword) =>
-    text.includes(keyword)
-  );
+  const hasOutdoorSignal = OUTDOOR_TAG_HINTS.some((keyword) => text.includes(keyword));
+  const hasIndoorSignal = INDOOR_TAG_HINTS.some((keyword) => text.includes(keyword));
 
   if (hasOutdoorSignal && !hasIndoorSignal) {
     return true;
@@ -89,10 +62,7 @@ async function fetchCityCentroid(
   return data ?? null;
 }
 
-async function readResponseBodyCapped(
-  response: Response,
-  maxBytes: number,
-): Promise<string> {
+async function readResponseBodyCapped(response: Response, maxBytes: number): Promise<string> {
   if (!response.body) return "";
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
@@ -153,16 +123,9 @@ async function guardedFetchText(url: string, accept: string): Promise<string> {
 export function buildParserContext(timezone: string): ParserContext {
   return {
     timezone,
-    fetchText: (url, opts) =>
-      guardedFetchText(url, opts?.accept ?? DEFAULT_FETCH_ACCEPT),
-    fetchJson: async <T = unknown>(
-      url: string,
-      opts?: { accept?: string },
-    ): Promise<T> => {
-      const body = await guardedFetchText(
-        url,
-        opts?.accept ?? "application/json,*/*",
-      );
+    fetchText: (url, opts) => guardedFetchText(url, opts?.accept ?? DEFAULT_FETCH_ACCEPT),
+    fetchJson: async <T = unknown>(url: string, opts?: { accept?: string }): Promise<T> => {
+      const body = await guardedFetchText(url, opts?.accept ?? "application/json,*/*");
       return JSON.parse(body) as T;
     },
   };
@@ -210,9 +173,7 @@ export async function importParsedSourceEvents(
     addressNullCount = parsedEvents.filter(
       (e) => e.address === null && e.venueName === null,
     ).length;
-    const addressNullRate = eventsFound > 0
-      ? addressNullCount / eventsFound
-      : 0;
+    const addressNullRate = eventsFound > 0 ? addressNullCount / eventsFound : 0;
     // Warn when >50% of a batch has no address data — possible parser regression
     if (eventsFound > 0 && addressNullRate > 0.5) {
       logEdgeEvent("warn", "high address null rate — possible parser regression", {
@@ -240,9 +201,7 @@ export async function importParsedSourceEvents(
     if (validEvents.length === 0) {
       await flushProgress();
     } else {
-      function prepEventPayload(
-        parsed: ParsedEvent,
-      ): Record<string, unknown> {
+      function prepEventPayload(parsed: ParsedEvent): Record<string, unknown> {
         const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed);
         const imageCandidates = deriveRawImageCandidates(parsed);
 
@@ -392,9 +351,7 @@ export async function importParsedSourceEvents(
           // Only reset error_count on full success. A 'partial' run (events
           // found, none imported) used to clear the counter and mask persistent
           // failures; keep accumulating until a clean success.
-          error_count: status === "success"
-            ? 0
-            : source.error_count + (status === "error" ? 1 : 0),
+          error_count: status === "success" ? 0 : source.error_count + (status === "error" ? 1 : 0),
         })
         .eq("id", source.id);
       // Kick the tag-queue worker if we imported anything. Each RPC call
@@ -414,25 +371,18 @@ export async function importParsedSourceEvents(
           MAX_KICKS,
         );
         const results = await Promise.allSettled(
-          Array.from(
-            { length: kicks },
-            () => supabase.rpc("invoke_process_tag_queue"),
-          ),
+          Array.from({ length: kicks }, () => supabase.rpc("invoke_process_tag_queue")),
         );
         const failed = results.filter((r) => r.status === "rejected").length;
         if (failed > 0) {
-          logEdgeEvent(
-            "warn",
-            "tag-queue kick(s) failed after source processing",
-            {
-              function: "process-source",
-              source_id: source.id,
-              run_id: runId,
-              events_imported: eventsImported,
-              kicks_attempted: kicks,
-              kicks_failed: failed,
-            },
-          );
+          logEdgeEvent("warn", "tag-queue kick(s) failed after source processing", {
+            function: "process-source",
+            source_id: source.id,
+            run_id: runId,
+            events_imported: eventsImported,
+            kicks_attempted: kicks,
+            kicks_failed: failed,
+          });
         }
       }
     } catch (finalizeError) {

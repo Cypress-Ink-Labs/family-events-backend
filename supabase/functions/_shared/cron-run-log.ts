@@ -6,8 +6,7 @@ export interface CronRunContext {
   label: string | null;
 }
 
-const RUN_KEY_RE =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+const RUN_KEY_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 export function cronRunContextFromRequest(req: Request): CronRunContext {
   const headerRunKey = req.headers.get("x-cron-run-key");

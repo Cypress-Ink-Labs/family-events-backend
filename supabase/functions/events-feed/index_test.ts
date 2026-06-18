@@ -18,7 +18,7 @@ const SAMPLE_EVENTS = [
   },
   {
     id: "aaaaaaaa-bbbb-4ccc-9ddd-eeeeeeeeeeee",
-    title: "Storytime <Books> & \"Crafts\"",
+    title: 'Storytime <Books> & "Crafts"',
     description: null,
     start_datetime: "2026-07-10T10:00:00.000Z",
     end_datetime: null,
@@ -114,7 +114,7 @@ if (typeof Deno !== "undefined") {
     assertEquals(itemCount, 2);
   });
 
-  Deno.test("serializeRss XML-escapes title containing < > & \" characters", () => {
+  Deno.test('serializeRss XML-escapes title containing < > & " characters', () => {
     const rss = serializeRss([SAMPLE_EVENTS[1]], "Test Feed", "https://example.com/feed");
     // Title: 'Storytime <Books> & "Crafts"' → XML escaped
     assertStringIncludes(rss, "&lt;Books&gt;");
@@ -174,7 +174,7 @@ if (typeof Deno !== "undefined") {
     assertEquals(res.status, 200);
     assertMatch(res.headers.get("Content-Type") ?? "", /application\/rss\+xml/);
     const body = await res.text();
-    assertStringIncludes(body, "<rss version=\"2.0\">");
+    assertStringIncludes(body, '<rss version="2.0">');
   });
 
   Deno.test("handleEventsFeed defaults to RSS when format param is absent", async () => {

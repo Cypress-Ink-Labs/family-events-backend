@@ -11,12 +11,12 @@ invite-related functions read this value at runtime via
 
 ## Affected Functions
 
-| Function | Role | How it uses the GUC |
-|----------|------|---------------------|
-| `private.invites_required()` | Helper | Returns `true` when the GUC is `'true'`. Defaults to `false` when unset. Single source of truth for gate status. |
-| `public.invites_required()` | Public wrapper | Thin invoker wrapper — calls `private.invites_required()`. Safe to call from the client. |
-| `private.enforce_invited_oauth_signup()` | Trigger (`BEFORE INSERT` on `auth.users`) | Blocks OAuth sign-ups (Google/Apple) when gating is enabled, unless a `pending_invite_claims` row exists for the email. |
-| `public.handle_new_user()` | Trigger (`AFTER INSERT` on `auth.users`) | Creates the `user_profiles` row. When gating is enabled, checks for a matching `invite_codes` redemption and sets the profile accordingly. |
+| Function                                 | Role                                      | How it uses the GUC                                                                                                                        |
+| ---------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `private.invites_required()`             | Helper                                    | Returns `true` when the GUC is `'true'`. Defaults to `false` when unset. Single source of truth for gate status.                           |
+| `public.invites_required()`              | Public wrapper                            | Thin invoker wrapper — calls `private.invites_required()`. Safe to call from the client.                                                   |
+| `private.enforce_invited_oauth_signup()` | Trigger (`BEFORE INSERT` on `auth.users`) | Blocks OAuth sign-ups (Google/Apple) when gating is enabled, unless a `pending_invite_claims` row exists for the email.                    |
+| `public.handle_new_user()`               | Trigger (`AFTER INSERT` on `auth.users`)  | Creates the `user_profiles` row. When gating is enabled, checks for a matching `invite_codes` redemption and sets the profile accordingly. |
 
 ## Current State
 
@@ -37,7 +37,7 @@ SELECT set_config('app.settings.require_invite', 'true', false);
 ```
 
 > **Note:** `ALTER ROLE` is supported on Supabase Cloud (unlike `ALTER
-> DATABASE` which is blocked for custom GUCs). New connections will inherit
+DATABASE` which is blocked for custom GUCs). New connections will inherit
 > the updated value. Existing pooled connections keep the old value until
 > they reconnect.
 
@@ -65,9 +65,9 @@ tab to get a fresh connection):
 SELECT public.invites_required();
 ```
 
-| Gate state | Result |
-|------------|--------|
-| Enabled    | `true` |
+| Gate state | Result  |
+| ---------- | ------- |
+| Enabled    | `true`  |
 | Disabled   | `false` |
 
 ## Local Development

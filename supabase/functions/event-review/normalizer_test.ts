@@ -56,9 +56,7 @@ Deno.test("normalizeReviewEventInput preserves source URL as data", () => {
 });
 
 Deno.test("normalizeReviewEventInput routes insufficient source context to admin review", () => {
-  const result = normalizeReviewEventInput(
-    buildInput({ sourceName: null, sourceUrl: null }),
-  );
+  const result = normalizeReviewEventInput(buildInput({ sourceName: null, sourceUrl: null }));
 
   assertEquals(result.normalized, null);
   assertEquals(result.fallback?.code, "missing_source_reference");

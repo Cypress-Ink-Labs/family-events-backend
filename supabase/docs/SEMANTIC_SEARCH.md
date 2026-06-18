@@ -15,9 +15,9 @@ before shipping an anon (unauthenticated) path.
 
 ```ts
 const { data, error } = await supabase.rpc("find_similar_events_by_id", {
-  p_event_id: eventId,   // uuid — the source event
-  p_limit:    5,         // int  — max results (default 5); no server-side clamp — see below
-  p_city_id:  null,      // uuid | null — restrict to same city (null = all cities)
+  p_event_id: eventId, // uuid — the source event
+  p_limit: 5, // int  — max results (default 5); no server-side clamp — see below
+  p_city_id: null, // uuid | null — restrict to same city (null = all cities)
 });
 ```
 
@@ -29,14 +29,14 @@ source event has no embedding.
 
 ## Return shape
 
-| Column           | Type           | Notes                                    |
-|------------------|----------------|------------------------------------------|
-| `event_id`       | `uuid`         | Matching event ID                        |
-| `title`          | `text`         | Event title (public)                     |
-| `status`         | `event_status` | Always `'published'` — filter is enforced server-side |
-| `cosine_distance`| `float8`       | `0` = identical, up to `0.3` (threshold) |
-| `source_id`      | `uuid \| null` | Upstream source ID                       |
-| `city_id`        | `uuid \| null` | City the event belongs to                |
+| Column            | Type           | Notes                                                 |
+| ----------------- | -------------- | ----------------------------------------------------- |
+| `event_id`        | `uuid`         | Matching event ID                                     |
+| `title`           | `text`         | Event title (public)                                  |
+| `status`          | `event_status` | Always `'published'` — filter is enforced server-side |
+| `cosine_distance` | `float8`       | `0` = identical, up to `0.3` (threshold)              |
+| `source_id`       | `uuid \| null` | Upstream source ID                                    |
+| `city_id`         | `uuid \| null` | City the event belongs to                             |
 
 No PII, internal flags, or user data appear in the return set.
 
@@ -51,6 +51,7 @@ public.find_similar_events_by_id   (SECURITY INVOKER, owner=postgres)
 ```
 
 Grants on `public.find_similar_events_by_id`:
+
 ```
 anon          EXECUTE
 authenticated EXECUTE
@@ -155,6 +156,7 @@ fixed in a migration.
 ## Embeddings pipeline
 
 Embeddings are populated by:
+
 - `embed-event` edge function (on-demand, triggered when an event is created/updated)
 - `backfill-embeddings` cron (fills events missing embeddings)
 

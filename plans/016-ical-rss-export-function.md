@@ -108,13 +108,13 @@ Create `supabase/functions/events-feed/index.ts` modeled on `sitemap/index.ts`:
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Guard tests | `pnpm run workspace:test` | deploy-cli + auth-config guards pass (function registered) |
-| Function tests | `deno test` (cwd `supabase/functions`) / `pnpm -C supabase/functions exec vitest run` | serializer tests pass |
-| Serve locally | `pnpm run db:functions:serve` then curl `?format=ics` / `?format=rss` | valid feed output |
-| Validate iCal | paste output into an RFC 5545 validator or import into a calendar app | parses |
+| Purpose        | Command                                                                               | Expected                                                   |
+| -------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Typecheck      | `pnpm run check`                                                                      | exit 0                                                     |
+| Guard tests    | `pnpm run workspace:test`                                                             | deploy-cli + auth-config guards pass (function registered) |
+| Function tests | `deno test` (cwd `supabase/functions`) / `pnpm -C supabase/functions exec vitest run` | serializer tests pass                                      |
+| Serve locally  | `pnpm run db:functions:serve` then curl `?format=ics` / `?format=rss`                 | valid feed output                                          |
+| Validate iCal  | paste output into an RFC 5545 validator or import into a calendar app                 | parses                                                     |
 
 ## Deliverable / Done criteria
 

@@ -46,7 +46,10 @@ export interface ReviewPrompt {
   userPrompt: string;
 }
 
-export function buildReviewPrompt(input: NormalizedReviewEventInput, memoryPrompt?: string): ReviewPrompt {
+export function buildReviewPrompt(
+  input: NormalizedReviewEventInput,
+  memoryPrompt?: string,
+): ReviewPrompt {
   const systemPrompt = [
     "You are an event moderation reviewer for a family-events import pipeline.",
     `Prompt version: ${LLM_EVENT_REVIEW_PROMPT_VERSION}`,
@@ -55,25 +58,25 @@ export function buildReviewPrompt(input: NormalizedReviewEventInput, memoryPromp
     "Review the event payload between BEGIN_UNTRUSTED_EVENT_JSON and END_UNTRUSTED_EVENT_JSON and decide whether it should be approved, rejected, or sent for admin review.",
     "",
     "Return JSON ONLY using this exact schema:",
-    '{',
+    "{",
     '  "decision": "approve|reject|needs_admin_review",',
     '  "confidence": 0,',
     '  "reason": "string",',
     '  "flags": ["string"],',
     '  "suggestedCategory": "string|null",',
     '  "normalizedTitle": "string|null"',
-    '}',
+    "}",
     "",
     "Output rules:",
     "- Return valid JSON only.",
     "- Do not include markdown, comments, prose, explanations, or extra keys.",
-    '- `decision` must be exactly one of: `approve`, `reject`, `needs_admin_review`.',
+    "- `decision` must be exactly one of: `approve`, `reject`, `needs_admin_review`.",
     "- `confidence` must be a number from 0 to 1.",
     "- `reason` must be concise, human-readable, and based only on the event content.",
-    '- `flags` must contain short machine-readable strings such as:',
+    "- `flags` must contain short machine-readable strings such as:",
     ...FLAGS.map((f) => `  - "${f}"`),
-    '- `suggestedCategory` should be a short category label when clear, otherwise null.',
-    '- `normalizedTitle` should be a cleaned, concise event title when available, otherwise null.',
+    "- `suggestedCategory` should be a short category label when clear, otherwise null.",
+    "- `normalizedTitle` should be a cleaned, concise event title when available, otherwise null.",
     "",
     "Decision criteria:",
     "",

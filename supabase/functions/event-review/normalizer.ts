@@ -34,9 +34,7 @@ function normalizeTags(values: string[]): string[] {
   return [...deduped];
 }
 
-export function normalizeReviewEventInput(
-  input: ReviewEventInput,
-): ReviewNormalizerOutput {
+export function normalizeReviewEventInput(input: ReviewEventInput): ReviewNormalizerOutput {
   const title = trimToMax(input.title, FIELD_LIMITS.title);
   if (!title) {
     return {
@@ -66,8 +64,7 @@ export function normalizeReviewEventInput(
       normalized: null,
       fallback: {
         code: "missing_source_reference",
-        reason:
-          "Event is missing both source URL and source name; routing to admin review.",
+        reason: "Event is missing both source URL and source name; routing to admin review.",
       },
     };
   }

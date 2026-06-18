@@ -24,7 +24,7 @@ round-trips where one batched invocation carrying N user_ids would do. Each invo
 failure path, so N invokes multiply latency and partial-failure surface. Batching the push path cuts
 round-trips and makes the worker finish more of its queue within the wall-clock budget.
 
-> **Scope note (corrects an over-broad audit claim):** the email path is *not* batchable into one Resend
+> **Scope note (corrects an over-broad audit claim):** the email path is _not_ batchable into one Resend
 > call here, because each email is personalized (`USERNAME`, per-user `EVENT_*` template vars) and goes to
 > a distinct recipient. Leave email as one-send-per-user. This plan is about the push fan-out only.
 
@@ -40,25 +40,34 @@ if (userPrefs.change_push) {
     const pushResponse = await fetch(`${supabaseUrl}/functions/v1/send-push`, {
       method: "POST",
       headers: { Authorization: `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: entry.user_id, title: notifTitle, body: summary, url: eventUrl }),
+      body: JSON.stringify({
+        user_id: entry.user_id,
+        title: notifTitle,
+        body: summary,
+        url: eventUrl,
+      }),
       signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
     });
     if (pushResponse.ok) {
-      const result = await pushResponse.json().catch(() => ({})) as { sent?: number };
+      const result = (await pushResponse.json().catch(() => ({}))) as { sent?: number };
       sentPush += result.sent ?? 0;
-    } else { failedPush++; }
-  } catch (err) { /* log + failedPush++ */ }
+    } else {
+      failedPush++;
+    }
+  } catch (err) {
+    /* log + failedPush++ */
+  }
 }
 ```
 
 Each entry carries its own `notifTitle`/`summary`/`eventUrl` (derived from the entry's event + change),
-so the natural batching unit is **(event_id, change_type)**: all users getting the *same* notification
+so the natural batching unit is **(event_id, change_type)**: all users getting the _same_ notification
 text for the same event.
 
 You must check what `send-push` accepts. Read `supabase/functions/send-push/index.ts` (and its handler):
 it currently takes a single `{ user_id, title, body, url }`. To batch you will either (a) extend `send-push`
 to also accept `{ user_ids: string[], title, body, url }` (preferred — keeps one source of truth for push
-delivery), or (b) keep `send-push` per-user but stop re-invoking it per *queue entry* when entries share
+delivery), or (b) keep `send-push` per-user but stop re-invoking it per _queue entry_ when entries share
 identical payloads. Decide based on what `send-push` does internally (it likely loops subscriptions per user).
 
 ## Steps
@@ -93,11 +102,11 @@ created per user. Add a case where two different events are in the same batch �
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Tests | `pnpm -C supabase/functions exec vitest run process-notification-queue send-push` (+ `deno test`) | pass |
-| Find send-push callers | `grep -rn "functions/v1/send-push" supabase/functions` | enumerate before changing contract |
+| Purpose                | Command                                                                                           | Expected                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Typecheck              | `pnpm run check`                                                                                  | exit 0                             |
+| Tests                  | `pnpm -C supabase/functions exec vitest run process-notification-queue send-push` (+ `deno test`) | pass                               |
+| Find send-push callers | `grep -rn "functions/v1/send-push" supabase/functions`                                            | enumerate before changing contract |
 
 ## Scope
 
@@ -118,6 +127,7 @@ claiming/marking logic.
 ## STOP conditions
 
 Stop and report if:
+
 - `send-push` has per-user logic (e.g. per-user rate limits, per-user `url` deep-links) that makes a
   batch payload semantically different from N single sends — report; fall back to path (b) (dedup
   re-invocation) without changing the payload shape.
@@ -128,6 +138,6 @@ Stop and report if:
 
 ## Maintenance notes
 
-- Reviewer: the correctness risk is *dropping or doubling* a user. Scrutinize the grouping + the
+- Reviewer: the correctness risk is _dropping or doubling_ a user. Scrutinize the grouping + the
   `sentPush`/`failedPush` accounting against the per-entry behavior it replaces.
-- Deferred: batching the *email* path is not worth it (personalized) — explicitly out of scope.
+- Deferred: batching the _email_ path is not worth it (personalized) — explicitly out of scope.

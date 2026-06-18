@@ -1,6 +1,6 @@
 {
   "name": "@cypress-ink-labs/cron-send-reminders",
-  "private": true,
   "version": "0.0.1",
+  "private": true,
   "description": "Railway cron service that triggers send-reminders daily. Sends day-before and morning-of event reminders."
 }

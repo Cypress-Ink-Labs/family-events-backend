@@ -9,10 +9,7 @@ import {
   isMemoryFeatureEnabled,
   type SimilarEventTagContext,
 } from "../_shared/memory-context.ts";
-import {
-  parseJsonContent,
-  postOpenAiChatCompletion,
-} from "../_shared/llm-openai.ts";
+import { parseJsonContent, postOpenAiChatCompletion } from "../_shared/llm-openai.ts";
 import {
   clampConfidence,
   computeTags,
@@ -35,8 +32,7 @@ import {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 type TagEventSupabaseClient = SupabaseClient;
@@ -100,7 +96,10 @@ interface ClassificationOutput {
 }
 
 class TagEventRequestError extends Error {
-  constructor(message: string, readonly status = 400) {
+  constructor(
+    message: string,
+    readonly status = 400,
+  ) {
     super(message);
   }
 }
@@ -213,49 +212,50 @@ async function classifyWithLlm(
     body: {
       model: config.model,
       temperature: 0.1,
-      response_format: config.provider === "openai"
-        ? {
-          type: "json_schema" as const,
-          json_schema: {
-            name: "event_classification",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                tags: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      slug: { type: "string" },
-                      confidence: { type: "number" },
-                      reason: { type: ["string", "null"] },
+      response_format:
+        config.provider === "openai"
+          ? {
+              type: "json_schema" as const,
+              json_schema: {
+                name: "event_classification",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    tags: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          slug: { type: "string" },
+                          confidence: { type: "number" },
+                          reason: { type: ["string", "null"] },
+                        },
+                        required: ["slug", "confidence", "reason"],
+                        additionalProperties: false,
+                      },
                     },
-                    required: ["slug", "confidence", "reason"],
-                    additionalProperties: false,
+                    age_min: { type: ["number", "null"] },
+                    age_max: { type: ["number", "null"] },
+                    price: { type: ["number", "null"] },
+                    is_free: { type: "boolean" },
+                    venue_name: { type: ["string", "null"] },
+                    reasoning_summary: { type: ["string", "null"] },
                   },
+                  required: [
+                    "tags",
+                    "age_min",
+                    "age_max",
+                    "price",
+                    "is_free",
+                    "venue_name",
+                    "reasoning_summary",
+                  ],
+                  additionalProperties: false,
                 },
-                age_min: { type: ["number", "null"] },
-                age_max: { type: ["number", "null"] },
-                price: { type: ["number", "null"] },
-                is_free: { type: "boolean" },
-                venue_name: { type: ["string", "null"] },
-                reasoning_summary: { type: ["string", "null"] },
               },
-              required: [
-                "tags",
-                "age_min",
-                "age_max",
-                "price",
-                "is_free",
-                "venue_name",
-                "reasoning_summary",
-              ],
-              additionalProperties: false,
-            },
-          },
-        }
-        : { type: "json_object" as const },
+            }
+          : { type: "json_object" as const },
       ...(config.provider === "ollama" ? { reasoning_effort: "none" } : {}),
       messages: [
         { role: "system", content: systemPrompt },
@@ -278,28 +278,21 @@ async function classifyWithLlm(
   const parsed = parseJsonContent(completion.content);
   const tags = Array.isArray(parsed?.tags)
     ? parsed.tags
-      .map((
-        tag: { slug?: string; confidence?: number; reason?: string | null },
-      ) => ({
-        slug: String(tag?.slug ?? ""),
-        confidence: clampConfidence(Number(tag?.confidence ?? 0.5)),
-        reason: typeof tag?.reason === "string" ? tag.reason : null,
-      }))
-      .filter((
-        tag: { slug: string; confidence: number; reason: string | null },
-      ) => tag.slug)
+        .map((tag: { slug?: string; confidence?: number; reason?: string | null }) => ({
+          slug: String(tag?.slug ?? ""),
+          confidence: clampConfidence(Number(tag?.confidence ?? 0.5)),
+          reason: typeof tag?.reason === "string" ? tag.reason : null,
+        }))
+        .filter((tag: { slug: string; confidence: number; reason: string | null }) => tag.slug)
     : [];
 
   const ageMin = typeof parsed?.age_min === "number" ? parsed.age_min : null;
   const ageMax = typeof parsed?.age_max === "number" ? parsed.age_max : null;
   const price = typeof parsed?.price === "number" ? parsed.price : null;
   const isFree = parsed?.is_free === true;
-  const venueName = typeof parsed?.venue_name === "string"
-    ? parsed.venue_name
-    : null;
-  const reasoningSummary = typeof parsed?.reasoning_summary === "string"
-    ? parsed.reasoning_summary
-    : null;
+  const venueName = typeof parsed?.venue_name === "string" ? parsed.venue_name : null;
+  const reasoningSummary =
+    typeof parsed?.reasoning_summary === "string" ? parsed.reasoning_summary : null;
 
   return {
     tags,
@@ -333,18 +326,12 @@ async function loadTagEventInput(
   body: unknown,
 ): Promise<TagEventInput> {
   const payload = isRecord(body) ? body : {};
-  const eventId = typeof payload.event_id === "string"
-    ? payload.event_id
-    : null;
-  const sourceRunId = typeof payload.source_run_id === "string"
-    ? payload.source_run_id
-    : null;
+  const eventId = typeof payload.event_id === "string" ? payload.event_id : null;
+  const sourceRunId = typeof payload.source_run_id === "string" ? payload.source_run_id : null;
   const triggerType = parseTriggerType(payload.trigger_type);
 
   let title = typeof payload.title === "string" ? payload.title.trim() : "";
-  let description = typeof payload.description === "string"
-    ? payload.description
-    : "";
+  let description = typeof payload.description === "string" ? payload.description : "";
   let currentEvent: CurrentEvent | null = null;
 
   if (eventId) {
@@ -380,9 +367,7 @@ async function loadTagEventInput(
   };
 }
 
-async function loadAvailableTags(
-  supabase: TagEventSupabaseClient,
-): Promise<AvailableTag[]> {
+async function loadAvailableTags(supabase: TagEventSupabaseClient): Promise<AvailableTag[]> {
   const { data: availableTags, error: tagsError } = await supabase
     .from("tags")
     .select("id, slug, name");
@@ -403,15 +388,11 @@ function normalizeAiConfigForUse(aiConfig: LlmConfig): LlmConfig {
       });
     }
   } else if (Deno.env.get("OPENAI_MODEL") && !Deno.env.get("AI_MODEL")) {
-    logEdgeEvent(
-      "warn",
-      "OPENAI_MODEL is being used for a self-hosted AI provider",
-      {
-        function: "tag-event",
-        provider: aiConfig.provider,
-        model: aiConfig.model,
-      },
-    );
+    logEdgeEvent("warn", "OPENAI_MODEL is being used for a self-hosted AI provider", {
+      function: "tag-event",
+      provider: aiConfig.provider,
+      model: aiConfig.model,
+    });
   }
 
   return aiConfig;
@@ -508,11 +489,7 @@ export async function resolveClassification(
       status: "fallback",
     });
     await captureEdgeException(aiError, context);
-    logEdgeEvent(
-      "warn",
-      "AI classification failed, falling back to keyword matching",
-      context,
-    );
+    logEdgeEvent("warn", "AI classification failed, falling back to keyword matching", context);
 
     return {
       classification: classifyWithKeywords({
@@ -521,9 +498,7 @@ export async function resolveClassification(
         provider: aiConfig.provider,
         model: aiConfig.model,
         aiConfigured: true,
-        fallbackReason: aiError instanceof Error
-          ? aiError.message
-          : String(aiError),
+        fallbackReason: aiError instanceof Error ? aiError.message : String(aiError),
       }),
       llmUsage: null,
     };
@@ -535,23 +510,16 @@ function normalizeClassificationTags(
   availableTags: AvailableTag[],
 ): ClassificationTag[] {
   return tags
-    .filter((tag) =>
-      availableTags.some((candidate) => candidate.slug === tag.slug)
-    )
+    .filter((tag) => availableTags.some((candidate) => candidate.slug === tag.slug))
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 6);
 }
 
 function averageConfidence(tags: ClassificationTag[]): number {
-  return tags.length > 0
-    ? tags.reduce((total, tag) => total + tag.confidence, 0) / tags.length
-    : 0;
+  return tags.length > 0 ? tags.reduce((total, tag) => total + tag.confidence, 0) / tags.length : 0;
 }
 
-function normalizeAgeBound(
-  value: number | null,
-  direction: "min" | "max",
-): number | null {
+function normalizeAgeBound(value: number | null, direction: "min" | "max"): number | null {
   if (value === null || !Number.isFinite(value)) return null;
   const normalized = direction === "min" ? Math.floor(value) : Math.ceil(value);
   return Math.max(0, normalized);
@@ -595,29 +563,28 @@ async function persistTagTrace(
     };
   }
 
-  const { error: traceInsertError } = await supabase.from("event_ai_traces")
-    .insert({
-      event_id: eventId,
-      source_run_id: input.sourceRunId,
-      trigger_type: input.triggerType,
-      provider: classification.provider,
-      model: classification.model,
-      status: classification.status,
-      prompt_version: TAG_EVENT_PROMPT_VERSION,
-      input_title: input.title,
-      input_description: input.description || null,
-      available_tag_slugs: availableTags.map((tag) => tag.slug),
-      predicted_tags: normalizedTags.map((tag) => ({
-        slug: tag.slug,
-        confidence: tag.confidence,
-        reason: tag.reason,
-        matched_keywords: tag.matchedKeywords ?? [],
-      })),
-      predicted_fields: predictedFields,
-      reasoning_summary: classification.reasoningSummary,
-      fallback_reason: classification.fallbackReason,
-      processing_ms: Date.now() - input.traceStartedAt,
-    });
+  const { error: traceInsertError } = await supabase.from("event_ai_traces").insert({
+    event_id: eventId,
+    source_run_id: input.sourceRunId,
+    trigger_type: input.triggerType,
+    provider: classification.provider,
+    model: classification.model,
+    status: classification.status,
+    prompt_version: TAG_EVENT_PROMPT_VERSION,
+    input_title: input.title,
+    input_description: input.description || null,
+    available_tag_slugs: availableTags.map((tag) => tag.slug),
+    predicted_tags: normalizedTags.map((tag) => ({
+      slug: tag.slug,
+      confidence: tag.confidence,
+      reason: tag.reason,
+      matched_keywords: tag.matchedKeywords ?? [],
+    })),
+    predicted_fields: predictedFields,
+    reasoning_summary: classification.reasoningSummary,
+    fallback_reason: classification.fallbackReason,
+    processing_ms: Date.now() - input.traceStartedAt,
+  });
 
   if (!traceInsertError) return;
 
@@ -647,9 +614,7 @@ async function persistTagAssignments(
 
   if (manualOverridesError) throw manualOverridesError;
 
-  const manualOverrideTagIds = new Set(
-    (manualOverrides ?? []).map((row) => row.tag_id),
-  );
+  const manualOverrideTagIds = new Set((manualOverrides ?? []).map((row) => row.tag_id));
 
   const { error: deleteError } = await supabase
     .from("event_tags")
@@ -688,8 +653,7 @@ async function resolveMissingCoordinates(
   classification: ClassificationResult,
   geocode: GeocodeLookup,
 ): Promise<{ latitude: number; longitude: number } | null> {
-  const needsGeocode = currentEvent?.latitude == null ||
-    currentEvent?.longitude == null;
+  const needsGeocode = currentEvent?.latitude == null || currentEvent?.longitude == null;
   if (!needsGeocode) return null;
 
   const resolvedVenue = currentEvent?.venue_name ?? classification.venueName;
@@ -868,10 +832,7 @@ function buildTagEventResponse(
 }
 
 interface TagEventHandlerDeps {
-  createSupabaseClient: (
-    supabaseUrl: string,
-    serviceRoleKey: string,
-  ) => TagEventSupabaseClient;
+  createSupabaseClient: (supabaseUrl: string, serviceRoleKey: string) => TagEventSupabaseClient;
   requireServiceRole: typeof requireServiceRole;
   getEnv: (name: string) => string | undefined;
   classify: typeof resolveClassification;
@@ -882,8 +843,7 @@ interface TagEventHandlerDeps {
 }
 
 const defaultHandlerDeps: TagEventHandlerDeps = {
-  createSupabaseClient: (supabaseUrl, serviceRoleKey) =>
-    createClient(supabaseUrl, serviceRoleKey),
+  createSupabaseClient: (supabaseUrl, serviceRoleKey) => createClient(supabaseUrl, serviceRoleKey),
   requireServiceRole,
   getEnv: (name) => Deno.env.get(name),
   classify: resolveClassification,
@@ -908,10 +868,7 @@ export function createTagEventHandler(
     }
 
     try {
-      const supabase = deps.createSupabaseClient(
-        deps.getEnv("SUPABASE_URL") ?? "",
-        serviceRoleKey,
-      );
+      const supabase = deps.createSupabaseClient(deps.getEnv("SUPABASE_URL") ?? "", serviceRoleKey);
       const featureConfig = await deps.loadFeatureConfig(supabase);
       const input = await loadTagEventInput(supabase, await req.json());
       const availableTags = await loadAvailableTags(supabase);
@@ -968,10 +925,7 @@ export function createTagEventHandler(
         classificationOutput.classification,
       );
 
-      const normalizedTags = normalizeClassificationTags(
-        classification.tags,
-        availableTags,
-      );
+      const normalizedTags = normalizeClassificationTags(classification.tags, availableTags);
       const topConfidence = averageConfidence(normalizedTags);
 
       if (input.eventId) {
@@ -1024,9 +978,7 @@ export function createTagEventHandler(
         llmUsage,
       });
 
-      return jsonResponse(
-        buildTagEventResponse(classification, normalizedTags, topConfidence),
-      );
+      return jsonResponse(buildTagEventResponse(classification, normalizedTags, topConfidence));
     } catch (err) {
       if (err instanceof TagEventRequestError) {
         return jsonResponse({ error: err.message }, err.status);

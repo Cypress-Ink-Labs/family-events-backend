@@ -11,7 +11,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "react-email"
+} from "react-email";
 
 /**
  * Event Invite email — "Dusk-Meadow" theme.
@@ -47,7 +47,7 @@ const tailwindConfig = {
       },
     },
   },
-}
+};
 
 export default function EventInviteEmail() {
   return (
@@ -178,5 +178,5 @@ export default function EventInviteEmail() {
         </Body>
       </Tailwind>
     </Html>
-  )
+  );
 }

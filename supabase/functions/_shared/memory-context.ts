@@ -98,14 +98,13 @@ export async function fetchSimilarEventTagContext(
 ): Promise<SimilarEventTagContext[]> {
   const vectorStr = `[${embedding.join(",")}]`;
 
-  const { data: similar, error: simError } = await supabase
-    .rpc("find_similar_events", {
-      p_embedding: vectorStr,
-      p_limit: limit,
-      p_threshold: 0.3,
-      p_exclude_event_id: excludeEventId,
-      p_city_id: cityId,
-    });
+  const { data: similar, error: simError } = await supabase.rpc("find_similar_events", {
+    p_embedding: vectorStr,
+    p_limit: limit,
+    p_threshold: 0.3,
+    p_exclude_event_id: excludeEventId,
+    p_city_id: cityId,
+  });
 
   if (simError) throw simError;
   if (!similar || (similar as SimilarEventRow[]).length === 0) return [];
@@ -132,7 +131,7 @@ export async function fetchSimilarEventTagContext(
       .map((t) => ({
         slug: t.tags!.slug,
         name: t.tags!.name,
-        source: t.is_manual_override ? "admin" as const : "ai" as const,
+        source: t.is_manual_override ? ("admin" as const) : ("ai" as const),
         confidence: t.confidence,
       }))
       .sort((a, b) => {
@@ -173,17 +172,19 @@ export async function fetchSimilarReviewContext(
   excludeEventId: string | null,
   cityId: string | null,
   limit = 5,
-): Promise<{ contexts: SimilarEventReviewContext[]; confidenceAdjustment: ReviewConfidenceAdjustment }> {
+): Promise<{
+  contexts: SimilarEventReviewContext[];
+  confidenceAdjustment: ReviewConfidenceAdjustment;
+}> {
   const vectorStr = `[${embedding.join(",")}]`;
 
-  const { data: similar, error: simError } = await supabase
-    .rpc("find_similar_events", {
-      p_embedding: vectorStr,
-      p_limit: limit,
-      p_threshold: 0.3,
-      p_exclude_event_id: excludeEventId,
-      p_city_id: cityId,
-    });
+  const { data: similar, error: simError } = await supabase.rpc("find_similar_events", {
+    p_embedding: vectorStr,
+    p_limit: limit,
+    p_threshold: 0.3,
+    p_exclude_event_id: excludeEventId,
+    p_city_id: cityId,
+  });
 
   if (simError) throw simError;
 
@@ -191,7 +192,13 @@ export async function fetchSimilarReviewContext(
   if (similarRows.length === 0) {
     return {
       contexts: [],
-      confidenceAdjustment: { delta: 0, reason: "no similar events found", approvedCount: 0, rejectedCount: 0, totalSimilar: 0 },
+      confidenceAdjustment: {
+        delta: 0,
+        reason: "no similar events found",
+        approvedCount: 0,
+        rejectedCount: 0,
+        totalSimilar: 0,
+      },
     };
   }
 
@@ -220,11 +227,14 @@ export async function fetchSimilarReviewContext(
       .order("created_at", { ascending: false })
       .limit(1);
 
-    const latestAdminDecision = (decisions as Array<{
-      decision_type: string;
-      new_status: string;
-      reason: string | null;
-    }> | null)?.[0] ?? null;
+    const latestAdminDecision =
+      (
+        decisions as Array<{
+          decision_type: string;
+          new_status: string;
+          reason: string | null;
+        }> | null
+      )?.[0] ?? null;
 
     const adminOverridden = latestAdminDecision !== null;
 
@@ -272,16 +282,15 @@ export async function fetchSimilarReviewContext(
 export function formatTagMemoryPrompt(contexts: SimilarEventTagContext[]): string {
   if (contexts.length === 0) return "";
 
-  const lines = [
-    "",
-    "MEMORY CONTEXT — similar events previously processed:",
-  ];
+  const lines = ["", "MEMORY CONTEXT — similar events previously processed:"];
 
   for (const ctx of contexts) {
-    const tagList = ctx.tags.map((t) => {
-      const suffix = t.source === "admin" ? " (admin-corrected)" : "";
-      return `${t.slug}${suffix}`;
-    }).join(", ");
+    const tagList = ctx.tags
+      .map((t) => {
+        const suffix = t.source === "admin" ? " (admin-corrected)" : "";
+        return `${t.slug}${suffix}`;
+      })
+      .join(", ");
 
     const correctionNote = ctx.adminCorrected ? " [ADMIN CORRECTED]" : "";
     lines.push(`- "${ctx.title}" → tags: [${tagList}]${correctionNote}`);
@@ -291,7 +300,9 @@ export function formatTagMemoryPrompt(contexts: SimilarEventTagContext[]): strin
   }
 
   lines.push("");
-  lines.push("Use these examples as reference when classifying the current event. Admin-corrected tags are higher-quality signals.");
+  lines.push(
+    "Use these examples as reference when classifying the current event. Admin-corrected tags are higher-quality signals.",
+  );
 
   return lines.join("\n");
 }
@@ -299,10 +310,7 @@ export function formatTagMemoryPrompt(contexts: SimilarEventTagContext[]): strin
 export function formatReviewMemoryPrompt(contexts: SimilarEventReviewContext[]): string {
   if (contexts.length === 0) return "";
 
-  const lines = [
-    "",
-    "MEMORY CONTEXT — similar events previously reviewed:",
-  ];
+  const lines = ["", "MEMORY CONTEXT — similar events previously reviewed:"];
 
   for (const ctx of contexts) {
     const overrideNote = ctx.adminOverridden ? " (admin-overridden)" : "";
@@ -313,7 +321,9 @@ export function formatReviewMemoryPrompt(contexts: SimilarEventReviewContext[]):
   }
 
   lines.push("");
-  lines.push("Use these prior decisions as reference. Admin-overridden decisions are stronger signals than LLM-only decisions.");
+  lines.push(
+    "Use these prior decisions as reference. Admin-overridden decisions are stronger signals than LLM-only decisions.",
+  );
 
   return lines.join("\n");
 }

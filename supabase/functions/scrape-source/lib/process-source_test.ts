@@ -1,10 +1,10 @@
-import { assertEquals } from "jsr:@std/assert"
+import { assertEquals } from "jsr:@std/assert";
 import {
   deriveIsOutdoorFromParsedEvent,
   deriveRawImageCandidates,
   sanitizeImagesForIngest,
-} from "./process-source.ts"
-import type { ParsedEvent } from "./types.ts"
+} from "./process-source.ts";
+import type { ParsedEvent } from "./types.ts";
 
 function buildParsedEvent(overrides: Partial<ParsedEvent> = {}): ParsedEvent {
   return {
@@ -20,7 +20,7 @@ function buildParsedEvent(overrides: Partial<ParsedEvent> = {}): ParsedEvent {
     price: null,
     isFree: false,
     ...overrides,
-  }
+  };
 }
 
 if (typeof Deno !== "undefined") {
@@ -28,23 +28,23 @@ if (typeof Deno !== "undefined") {
     const parsed = buildParsedEvent({
       description: "Outdoor meetup in the neighborhood park with a short hike.",
       venueName: "River Walk",
-    })
-    assertEquals(deriveIsOutdoorFromParsedEvent(parsed), true)
-  })
+    });
+    assertEquals(deriveIsOutdoorFromParsedEvent(parsed), true);
+  });
 
   Deno.test("deriveIsOutdoorFromParsedEvent returns false for indoor keyword signals", () => {
     const parsed = buildParsedEvent({
       description: "Hands-on museum program inside the library annex.",
-    })
-    assertEquals(deriveIsOutdoorFromParsedEvent(parsed), false)
-  })
+    });
+    assertEquals(deriveIsOutdoorFromParsedEvent(parsed), false);
+  });
 
   Deno.test("deriveIsOutdoorFromParsedEvent returns null for conflicting signals", () => {
     const parsed = buildParsedEvent({
       description: "Start at the museum, then head outside to the park playground.",
-    })
-    assertEquals(deriveIsOutdoorFromParsedEvent(parsed), null)
-  })
+    });
+    assertEquals(deriveIsOutdoorFromParsedEvent(parsed), null);
+  });
 
   Deno.test("deriveRawImageCandidates keeps parser-discovered URLs and imageUrl fallback", () => {
     const parsed = buildParsedEvent({
@@ -54,29 +54,29 @@ if (typeof Deno !== "undefined") {
         "https://cdn.example.com/a.jpg",
         "javascript:alert(1)",
       ],
-    })
+    });
 
     assertEquals(deriveRawImageCandidates(parsed), [
       "https://cdn.example.com/a.jpg",
       "https://cdn.example.com/hero.jpg",
-    ])
-  })
+    ]);
+  });
 
   Deno.test("deriveRawImageCandidates caps candidates at 20", () => {
     const parsed = buildParsedEvent({
       images: Array.from({ length: 25 }, (_, i) => `https://cdn.example.com/${i}.jpg`),
-    })
+    });
 
-    assertEquals(deriveRawImageCandidates(parsed).length, 20)
-  })
+    assertEquals(deriveRawImageCandidates(parsed).length, 20);
+  });
 
   Deno.test("sanitizeImagesForIngest enforces 2MB size cap and image content-type", async () => {
-    const originalFetch = globalThis.fetch
+    const originalFetch = globalThis.fetch;
     try {
       globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) => {
         const url = new URL(
-          typeof input === "string" ? input : input instanceof URL ? input : input.url
-        )
+          typeof input === "string" ? input : input instanceof URL ? input : input.url,
+        );
         if (url.pathname === "/too-big.jpg") {
           return Promise.resolve(
             new Response(null, {
@@ -85,24 +85,24 @@ if (typeof Deno !== "undefined") {
                 "content-type": "image/jpeg",
                 "content-length": String(2 * 1024 * 1024 + 1),
               },
-            })
-          )
+            }),
+          );
         }
         if (url.pathname === "/wrong-type.jpg") {
           return Promise.resolve(
             new Response(null, {
               status: 200,
               headers: { "content-type": "text/html", "content-length": "1024" },
-            })
-          )
+            }),
+          );
         }
         if (url.pathname === "/ok.jpg") {
           return Promise.resolve(
             new Response(null, {
               status: 200,
               headers: { "content-type": "image/jpeg", "content-length": "1024" },
-            })
-          )
+            }),
+          );
         }
         if (url.pathname === "/ok-no-length.jpg") {
           if (init?.method === "HEAD") {
@@ -110,18 +110,18 @@ if (typeof Deno !== "undefined") {
               new Response(null, {
                 status: 200,
                 headers: { "content-type": "image/jpeg" },
-              })
-            )
+              }),
+            );
           }
           return Promise.resolve(
             new Response(new Uint8Array(1024), {
               status: 200,
               headers: { "content-type": "image/jpeg" },
-            })
-          )
+            }),
+          );
         }
-        return Promise.resolve(new Response(null, { status: 404 }))
-      }) as typeof fetch
+        return Promise.resolve(new Response(null, { status: 404 }));
+      }) as typeof fetch;
 
       const parsed = buildParsedEvent({
         images: [
@@ -130,62 +130,62 @@ if (typeof Deno !== "undefined") {
           "https://events.example.com/ok.jpg",
           "https://events.example.com/ok-no-length.jpg",
         ],
-      })
+      });
 
-      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
+      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed");
       assertEquals(images, [
         "https://events.example.com/ok.jpg",
         "https://events.example.com/ok-no-length.jpg",
-      ])
+      ]);
     } finally {
-      globalThis.fetch = originalFetch
+      globalThis.fetch = originalFetch;
     }
-  })
+  });
 
   Deno.test("sanitizeImagesForIngest rejects hosts outside source/config allowlist", async () => {
-    const originalFetch = globalThis.fetch
-    let fetchCalls = 0
+    const originalFetch = globalThis.fetch;
+    let fetchCalls = 0;
     try {
       globalThis.fetch = (() => {
-        fetchCalls += 1
+        fetchCalls += 1;
         return Promise.resolve(
           new Response(null, {
             status: 200,
             headers: { "content-type": "image/jpeg", "content-length": "1024" },
-          })
-        )
-      }) as typeof fetch
+          }),
+        );
+      }) as typeof fetch;
 
       const parsed = buildParsedEvent({
         images: ["https://evil.example.net/bad.jpg"],
-      })
+      });
 
-      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
-      assertEquals(images, [])
-      assertEquals(fetchCalls, 0)
+      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed");
+      assertEquals(images, []);
+      assertEquals(fetchCalls, 0);
     } finally {
-      globalThis.fetch = originalFetch
+      globalThis.fetch = originalFetch;
     }
-  })
+  });
 
   Deno.test("sanitizeImagesForIngest validates image candidates with bounded concurrency", async () => {
-    const originalFetch = globalThis.fetch
-    let active = 0
-    let maxActive = 0
+    const originalFetch = globalThis.fetch;
+    let active = 0;
+    let maxActive = 0;
     try {
       globalThis.fetch = (async (input: string | URL | Request) => {
         const url = new URL(
-          typeof input === "string" ? input : input instanceof URL ? input : input.url
-        )
-        active += 1
-        maxActive = Math.max(maxActive, active)
-        await new Promise((resolve) => setTimeout(resolve, 20))
-        active -= 1
+          typeof input === "string" ? input : input instanceof URL ? input : input.url,
+        );
+        active += 1;
+        maxActive = Math.max(maxActive, active);
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        active -= 1;
         return new Response(null, {
           status: 200,
           headers: { "content-type": "image/jpeg", "content-length": "1024" },
-        })
-      }) as typeof fetch
+        });
+      }) as typeof fetch;
 
       const parsed = buildParsedEvent({
         images: [
@@ -194,14 +194,13 @@ if (typeof Deno !== "undefined") {
           "https://events.example.com/3.jpg",
           "https://events.example.com/4.jpg",
         ],
-      })
+      });
 
-      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed")
-      assertEquals(images.length, 4)
-      assertEquals(maxActive, 2)
+      const images = await sanitizeImagesForIngest(parsed, "https://events.example.com/feed");
+      assertEquals(images.length, 4);
+      assertEquals(maxActive, 2);
     } finally {
-      globalThis.fetch = originalFetch
+      globalThis.fetch = originalFetch;
     }
-  })
-
+  });
 }

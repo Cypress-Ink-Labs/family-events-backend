@@ -41,7 +41,10 @@ conserves scarce provider quota.
   ```ts
   if (row.needs_images && images.length === 0 && row.tags.length > 0) {
     stockResult = await findFallbackImage(row.tags, providerKeys, { title: row.title });
-    if (stockResult) { images = [stockResult.url]; imageSource = stockResult.attribution.provider; }
+    if (stockResult) {
+      images = [stockResult.url];
+      imageSource = stockResult.attribution.provider;
+    }
   }
   ```
 - Geocoding happens inside `enrichOne` as well (search the function for `geocodeViaNominatim` /
@@ -53,12 +56,15 @@ conserves scarce provider quota.
 ### Step 1: Add a geocode cache keyed on the query string
 
 In the batch loop (next to `cityCache`/`sourceCache`), add:
+
 ```ts
 const geocodeCache = new Map<string, GeocodeResult | null>();
 ```
+
 Thread it into `enrichOne` (add a parameter). Inside `enrichOne`, where it currently calls
 `geocodeViaNominatim(query)`, first build the query string (it already does, via `buildGeocodeQuery`),
 then:
+
 ```ts
 if (geocodeCache.has(query)) {
   result = geocodeCache.get(query)!;
@@ -67,18 +73,22 @@ if (geocodeCache.has(query)) {
   geocodeCache.set(query, result);
 }
 ```
+
 Cache **both** hits and misses (`null`) — a venue that doesn't geocode shouldn't be retried per event in
 the same batch. Use the exact `query` string (already normalized by `buildGeocodeQuery`) as the key.
 
 ### Step 2: Add a stock-image cache keyed on the tag set
 
 In the batch loop add:
+
 ```ts
 const imageCache = new Map<string, Awaited<ReturnType<typeof findFallbackImage>>>();
 ```
+
 Thread it into `enrichOne`. Before calling `findFallbackImage(row.tags, providerKeys, { title: row.title })`,
 compute a stable key. The image search is driven by `row.tags` (and falls back to title-derived terms), so
 key on the sorted tag slugs: `const imageKey = [...row.tags].sort().join(",");`. Then:
+
 ```ts
 let stockResult = imageCache.get(imageKey);
 if (stockResult === undefined) {
@@ -86,6 +96,7 @@ if (stockResult === undefined) {
   imageCache.set(imageKey, stockResult);
 }
 ```
+
 Note: `findFallbackImage`'s third arg includes `{ title }`, which varies per event — but the **tag-keyed**
 fallback is the dominant path and the cache is a best-effort dedup within one batch. If two events share
 the exact tag set, reusing the image is acceptable (they're thematically identical). Document this in a
@@ -101,10 +112,10 @@ the counters stay accurate. Confirm `enrichOne` returns the cached provider/sour
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Tests | `pnpm -C supabase/functions exec vitest run backfill-event-enrichment` and/or `deno test` | pass |
+| Purpose   | Command                                                                                   | Expected |
+| --------- | ----------------------------------------------------------------------------------------- | -------- |
+| Typecheck | `pnpm run check`                                                                          | exit 0   |
+| Tests     | `pnpm -C supabase/functions exec vitest run backfill-event-enrichment` and/or `deno test` | pass     |
 
 ## Scope
 

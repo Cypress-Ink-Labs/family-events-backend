@@ -17,26 +17,23 @@ export class OpenAiCompatibleReviewProvider implements LlmReviewProvider {
     input: LlmReviewProviderInput,
     signal: AbortSignal,
   ): Promise<LlmReviewProviderOutput> {
-    const response = await this.fetchImpl(
-      `${this.config.baseUrl}/chat/completions`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.config.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: input.model,
-          temperature: 0,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: input.systemPrompt },
-            { role: "user", content: input.userPrompt },
-          ],
-        }),
-        signal,
+    const response = await this.fetchImpl(`${this.config.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.config.apiKey}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        model: input.model,
+        temperature: 0,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: input.systemPrompt },
+          { role: "user", content: input.userPrompt },
+        ],
+      }),
+      signal,
+    });
 
     if (!response.ok) {
       const body = await response.text().catch(() => "");

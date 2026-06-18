@@ -1,17 +1,10 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "../_shared/auth.ts";
-import {
-  cronRunContextFromRequest,
-  logCronRunEvent,
-} from "../_shared/cron-run-log.ts";
+import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, errorMessage } from "../_shared/logger.ts";
-import {
-  buildGeocodeQuery,
-  geocodeViaNominatim,
-  type GeocodeResult,
-} from "../_shared/geocode.ts";
+import { buildGeocodeQuery, geocodeViaNominatim, type GeocodeResult } from "../_shared/geocode.ts";
 import {
   findFallbackImage,
   trackUnsplashDownload,
@@ -26,8 +19,7 @@ import { runParentTipsPass } from "./parent-tips-pass.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 // Cap batch so per-tick wall stays under 90s with headroom under the 150s
@@ -137,10 +129,7 @@ async function enrichOne(
     let cityCtx: SourceCityContext | null = null;
     if (row.city_id) {
       if (!cityCache.has(row.city_id)) {
-        cityCache.set(
-          row.city_id,
-          await fetchCityContext(supabase, row.city_id),
-        );
+        cityCache.set(row.city_id, await fetchCityContext(supabase, row.city_id));
       }
       cityCtx = cityCache.get(row.city_id) ?? null;
     }
@@ -239,10 +228,7 @@ async function enrichOne(
 
   if (row.needs_images && row.source_id) {
     if (!sourceCache.has(row.source_id)) {
-      sourceCache.set(
-        row.source_id,
-        await fetchSourceUrl(supabase, row.source_id),
-      );
+      sourceCache.set(row.source_id, await fetchSourceUrl(supabase, row.source_id));
     }
     const sourceUrl = sourceCache.get(row.source_id) ?? null;
     if (sourceUrl) {
@@ -302,10 +288,9 @@ async function enrichOne(
   // sit at the top of the ORDER BY tiebreaker forever, starving the rest
   // of the backlog.
   if (!gotCoords && !gotImages) {
-    const { error: markErr } = await supabase.rpc(
-      "mark_event_enrichment_attempt",
-      { p_event_id: row.event_id },
-    );
+    const { error: markErr } = await supabase.rpc("mark_event_enrichment_attempt", {
+      p_event_id: row.event_id,
+    });
     if (markErr) throw markErr;
     return {
       updated: false,
@@ -329,21 +314,21 @@ async function enrichOne(
         p_images: images,
         p_image_url: stockResult.url,
         p_unsplash_photo_id: stockResult.attribution.photoId,
-        p_unsplash_photographer_name:
-          stockResult.attribution.photographerName,
-        p_unsplash_photographer_username:
-          stockResult.attribution.photographerUsername ?? "",
-        p_unsplash_photographer_profile_url:
-          stockResult.attribution.photographerProfileUrl,
+        p_unsplash_photographer_name: stockResult.attribution.photographerName,
+        p_unsplash_photographer_username: stockResult.attribution.photographerUsername ?? "",
+        p_unsplash_photographer_profile_url: stockResult.attribution.photographerProfileUrl,
         p_unsplash_photo_url: stockResult.attribution.photoUrl,
-        p_unsplash_download_location:
-          stockResult.attribution.downloadLocation ?? "",
+        p_unsplash_download_location: stockResult.attribution.downloadLocation ?? "",
         p_matched_tag: stockResult.matchedTag,
       },
     );
     if (error) throw error;
 
-    if (typeof attributionId === "string" && attributionId.length > 0 && stockResult.attribution.downloadLocation) {
+    if (
+      typeof attributionId === "string" &&
+      attributionId.length > 0 &&
+      stockResult.attribution.downloadLocation
+    ) {
       const tracking = await trackUnsplashDownload(
         stockResult.attribution.downloadLocation,
         providerKeys.unsplash ?? "",
@@ -369,25 +354,27 @@ async function enrichOne(
     if (updateErr) throw updateErr;
 
     // Then insert attribution (Pexels/Pixabay don't need download tracking)
-    const { error: attrErr } = await supabase
-      .from("event_image_attributions")
-      .upsert(
-        {
-          event_id: row.event_id,
-          image_url: stockResult.url,
-          provider: stockResult.attribution.provider,
-          matched_tag: stockResult.matchedTag,
-          pexels_photo_id: imageSource === "pexels" ? stockResult.attribution.photoId : null,
-          pexels_photographer_name: imageSource === "pexels" ? stockResult.attribution.photographerName : null,
-          pexels_photographer_profile_url: imageSource === "pexels" ? stockResult.attribution.photographerProfileUrl : null,
-          pexels_photo_url: imageSource === "pexels" ? stockResult.attribution.photoUrl : null,
-          pixabay_photo_id: imageSource === "pixabay" ? stockResult.attribution.photoId : null,
-          pixabay_photographer_name: imageSource === "pixabay" ? stockResult.attribution.photographerName : null,
-          pixabay_photographer_username: imageSource === "pixabay" ? stockResult.attribution.photographerUsername : null,
-          pixabay_photo_url: imageSource === "pixabay" ? stockResult.attribution.photoUrl : null,
-        },
-        { onConflict: "event_id,image_url" },
-      );
+    const { error: attrErr } = await supabase.from("event_image_attributions").upsert(
+      {
+        event_id: row.event_id,
+        image_url: stockResult.url,
+        provider: stockResult.attribution.provider,
+        matched_tag: stockResult.matchedTag,
+        pexels_photo_id: imageSource === "pexels" ? stockResult.attribution.photoId : null,
+        pexels_photographer_name:
+          imageSource === "pexels" ? stockResult.attribution.photographerName : null,
+        pexels_photographer_profile_url:
+          imageSource === "pexels" ? stockResult.attribution.photographerProfileUrl : null,
+        pexels_photo_url: imageSource === "pexels" ? stockResult.attribution.photoUrl : null,
+        pixabay_photo_id: imageSource === "pixabay" ? stockResult.attribution.photoId : null,
+        pixabay_photographer_name:
+          imageSource === "pixabay" ? stockResult.attribution.photographerName : null,
+        pixabay_photographer_username:
+          imageSource === "pixabay" ? stockResult.attribution.photographerUsername : null,
+        pixabay_photo_url: imageSource === "pixabay" ? stockResult.attribution.photoUrl : null,
+      },
+      { onConflict: "event_id,image_url" },
+    );
     if (attrErr) throw attrErr;
   } else {
     const { error } = await supabase.rpc("update_event_enrichment", {
@@ -414,30 +401,21 @@ async function runPendingUnsplashTrackingPass(
 
   if (!unsplashAccessKey) return summary;
 
-  const { data, error } = await supabase.rpc(
-    "list_pending_unsplash_download_tracking",
-    {
-      p_limit: 25,
-    },
-  );
+  const { data, error } = await supabase.rpc("list_pending_unsplash_download_tracking", {
+    p_limit: 25,
+  });
   if (error) throw error;
 
   const rows = (data ?? []) as PendingUnsplashTrackingRow[];
   summary.pending_claimed = rows.length;
 
   for (const row of rows) {
-    const result = await trackUnsplashDownload(
-      row.download_location,
-      unsplashAccessKey,
-    );
-    const { error: markError } = await supabase.rpc(
-      "mark_unsplash_download_tracking_result",
-      {
-        p_attribution_id: row.attribution_id,
-        p_success: result.ok,
-        p_error: result.error,
-      },
-    );
+    const result = await trackUnsplashDownload(row.download_location, unsplashAccessKey);
+    const { error: markError } = await supabase.rpc("mark_unsplash_download_tracking_result", {
+      p_attribution_id: row.attribution_id,
+      p_success: result.ok,
+      p_error: result.error,
+    });
     if (markError) throw markError;
     if (result.ok) summary.tracked += 1;
     else summary.failed += 1;
@@ -473,10 +451,9 @@ async function runUnsplashAttributionBackfillPass(
 
   if (!unsplashAccessKey) return summary;
 
-  const { data, error } = await supabase.rpc(
-    "list_events_needing_attribution_backfill",
-    { p_limit: ATTRIBUTION_BACKFILL_BATCH },
-  );
+  const { data, error } = await supabase.rpc("list_events_needing_attribution_backfill", {
+    p_limit: ATTRIBUTION_BACKFILL_BATCH,
+  });
   if (error) throw error;
 
   const rows = (data ?? []) as AttributionBackfillRow[];
@@ -484,36 +461,30 @@ async function runUnsplashAttributionBackfillPass(
 
   for (const row of rows) {
     try {
-      const attribution = await lookupUnsplashPhotoFromUrl(
-        row.image_url,
-        unsplashAccessKey,
-      );
+      const attribution = await lookupUnsplashPhotoFromUrl(row.image_url, unsplashAccessKey);
 
       if (!attribution) {
         summary.skipped += 1;
         continue;
       }
 
-      const { error: upsertErr } = await supabase
-        .from("event_image_attributions")
-        .upsert(
-          {
-            event_id: row.event_id,
-            image_url: row.image_url,
-            provider: "unsplash",
-            matched_tag: null,
-            unsplash_photo_id: attribution.photoId,
-            unsplash_photographer_name: attribution.photographerName,
-            unsplash_photographer_username: attribution.photographerUsername,
-            unsplash_photographer_profile_url:
-              attribution.photographerProfileUrl,
-            unsplash_photo_url: attribution.photoUrl,
-            unsplash_download_location: attribution.downloadLocation,
-            download_tracking_status: "pending",
-            download_tracking_next_attempt_at: new Date().toISOString(),
-          },
-          { onConflict: "event_id,image_url" },
-        );
+      const { error: upsertErr } = await supabase.from("event_image_attributions").upsert(
+        {
+          event_id: row.event_id,
+          image_url: row.image_url,
+          provider: "unsplash",
+          matched_tag: null,
+          unsplash_photo_id: attribution.photoId,
+          unsplash_photographer_name: attribution.photographerName,
+          unsplash_photographer_username: attribution.photographerUsername,
+          unsplash_photographer_profile_url: attribution.photographerProfileUrl,
+          unsplash_photo_url: attribution.photoUrl,
+          unsplash_download_location: attribution.downloadLocation,
+          download_tracking_status: "pending",
+          download_tracking_next_attempt_at: new Date().toISOString(),
+        },
+        { onConflict: "event_id,image_url" },
+      );
 
       if (upsertErr) {
         summary.errors += 1;
@@ -548,18 +519,15 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!supabaseUrl) {
-    return new Response(
-      JSON.stringify({ error: "SUPABASE_URL not configured" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "SUPABASE_URL not configured" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    
+
     // Load all three provider keys
     const providerKeys: StockImageProviderKeys = {
       pexels: Deno.env.get("PEXELS_API_KEY"),
@@ -584,13 +552,13 @@ Deno.serve(async (req: Request) => {
 
     const seen = new Set<string>();
     const rows: EventNeedingEnrichment[] = [];
-    for (const r of ((legacyResp.data ?? []) as EventNeedingEnrichment[])) {
+    for (const r of (legacyResp.data ?? []) as EventNeedingEnrichment[]) {
       if (!seen.has(r.event_id)) {
         seen.add(r.event_id);
         rows.push(r);
       }
     }
-    for (const r of ((scopedResp.data ?? []) as EventNeedingEnrichment[])) {
+    for (const r of (scopedResp.data ?? []) as EventNeedingEnrichment[]) {
       if (!seen.has(r.event_id)) {
         seen.add(r.event_id);
         rows.push(r);
@@ -638,17 +606,11 @@ Deno.serve(async (req: Request) => {
         }
       } catch (rowErr) {
         summary.errors += 1;
-        await logCronRunEvent(
-          supabase,
-          cronContext,
-          "warn",
-          "enrich row failed",
-          {
-            function: "backfill-event-enrichment",
-            event_id: row.event_id,
-            error: errorMessage(rowErr),
-          },
-        );
+        await logCronRunEvent(supabase, cronContext, "warn", "enrich row failed", {
+          function: "backfill-event-enrichment",
+          event_id: row.event_id,
+          error: errorMessage(rowErr),
+        });
       }
     }
 
@@ -669,19 +631,13 @@ Deno.serve(async (req: Request) => {
       cronContext,
     });
 
-    await logCronRunEvent(
-      supabase,
-      cronContext,
-      "log",
-      "backfill-event-enrichment done",
-      {
-        function: "backfill-event-enrichment",
-        ...summary,
-        unsplash_tracking: unsplashTrackingSummary,
-        attribution_backfill: attributionBackfillSummary,
-        parent_tips: parentTipsSummary,
-      },
-    );
+    await logCronRunEvent(supabase, cronContext, "log", "backfill-event-enrichment done", {
+      function: "backfill-event-enrichment",
+      ...summary,
+      unsplash_tracking: unsplashTrackingSummary,
+      attribution_backfill: attributionBackfillSummary,
+      parent_tips: parentTipsSummary,
+    });
     return new Response(
       JSON.stringify({
         ok: true,

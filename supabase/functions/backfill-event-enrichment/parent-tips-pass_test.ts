@@ -47,10 +47,7 @@ class FakeSupabase {
   }
 }
 
-async function withFetch(
-  fetchImpl: typeof fetch,
-  fn: () => Promise<void>,
-): Promise<void> {
+async function withFetch(fetchImpl: typeof fetch, fn: () => Promise<void>): Promise<void> {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = fetchImpl;
   try {
@@ -92,10 +89,7 @@ Deno.test("runParentTipsPass invokes generate-parent-tips", async () => {
         supabase: supabase as never,
         supabaseUrl: "https://project.supabase.co",
       });
-      assertEquals(
-        invokedUrl,
-        "https://project.supabase.co/functions/v1/generate-parent-tips",
-      );
+      assertEquals(invokedUrl, "https://project.supabase.co/functions/v1/generate-parent-tips");
       assertEquals(summary.generated, 1);
     },
   );
@@ -124,9 +118,7 @@ Deno.test("runParentTipsPass marks non-503 failures and continues", async () => 
   await withFetch(
     (async () => {
       callCount += 1;
-      return callCount === 1
-        ? new Response("bad", { status: 500 })
-        : Response.json({ ok: true });
+      return callCount === 1 ? new Response("bad", { status: 500 }) : Response.json({ ok: true });
     }) as typeof fetch,
     async () => {
       const supabase = new FakeSupabase();

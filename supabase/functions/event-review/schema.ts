@@ -1,11 +1,5 @@
-import type {
-  LlmEventReviewDecision,
-  LlmEventReviewDecisionPayload,
-} from "./types.ts";
-import {
-  LLM_EVENT_REVIEW_DECISION,
-  LLM_EVENT_REVIEW_DECISIONS,
-} from "./types.ts";
+import type { LlmEventReviewDecision, LlmEventReviewDecisionPayload } from "./types.ts";
+import { LLM_EVENT_REVIEW_DECISION, LLM_EVENT_REVIEW_DECISIONS } from "./types.ts";
 
 const ALLOWED_KEYS = new Set([
   "decision",
@@ -66,9 +60,7 @@ export function parseLlmDecisionJson(rawJson: string): LlmEventReviewDecisionPay
   const decisionRaw = object.decision;
   if (
     typeof decisionRaw !== "string" ||
-    !LLM_EVENT_REVIEW_DECISIONS.includes(
-      decisionRaw as LlmEventReviewDecision,
-    )
+    !LLM_EVENT_REVIEW_DECISIONS.includes(decisionRaw as LlmEventReviewDecision)
   ) {
     throw new Error("invalid_decision");
   }
@@ -120,9 +112,7 @@ export function applyConfidenceThreshold(
   const forceReview = lowConfidence || flaggedForReview;
   return {
     modelDecision: payload.decision,
-    appliedDecision: forceReview
-      ? LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW
-      : payload.decision,
+    appliedDecision: forceReview ? LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW : payload.decision,
     confidence: payload.confidence,
     reason: payload.reason,
     flags,

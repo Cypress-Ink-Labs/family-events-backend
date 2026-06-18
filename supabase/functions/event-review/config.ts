@@ -44,50 +44,33 @@ export function resolveLlmReviewConfig(
   env: Pick<typeof Deno.env, "get"> = Deno.env,
   dbOverrides?: { model: string; enabled: boolean; provider?: string | null } | null,
 ): LlmReviewConfig {
-  const enabled = dbOverrides != null
-    ? dbOverrides.enabled
-    : parseBoolean(env.get("LLM_REVIEW_ENABLED"), false);
-  const provider = dbOverrides?.provider ??
-    env.get("LLM_REVIEW_PROVIDER") ?? env.get("AI_PROVIDER") ??
+  const enabled =
+    dbOverrides != null ? dbOverrides.enabled : parseBoolean(env.get("LLM_REVIEW_ENABLED"), false);
+  const provider =
+    dbOverrides?.provider ??
+    env.get("LLM_REVIEW_PROVIDER") ??
+    env.get("AI_PROVIDER") ??
     "openai-compatible";
-  const baseUrl = normalizeBaseUrl(
-    env.get("LLM_REVIEW_BASE_URL") ?? env.get("AI_BASE_URL"),
-  );
+  const baseUrl = normalizeBaseUrl(env.get("LLM_REVIEW_BASE_URL") ?? env.get("AI_BASE_URL"));
   const model = (
     dbOverrides?.model ??
     env.get("LLM_REVIEW_MODEL") ??
     env.get("AI_MODEL") ??
     ""
   ).trim();
-  const apiKey = (env.get("LLM_REVIEW_API_KEY") ?? env.get("AI_API_KEY") ?? "")
-    .trim();
+  const apiKey = (env.get("LLM_REVIEW_API_KEY") ?? env.get("AI_API_KEY") ?? "").trim();
   const promptVersion =
-    (env.get("LLM_REVIEW_PROMPT_VERSION") ?? LLM_EVENT_REVIEW_PROMPT_VERSION)
-      .trim() || LLM_EVENT_REVIEW_PROMPT_VERSION;
-  const parsedThreshold = parseThreshold(
-    env.get("LLM_REVIEW_CONFIDENCE_THRESHOLD"),
-    0.75,
-  );
-  const parsedTimeoutMs = parsePositiveInt(
-    env.get("LLM_REVIEW_TIMEOUT_MS"),
-    30_000,
-  );
-  const parsedMaxAttempts = parsePositiveInt(
-    env.get("LLM_REVIEW_MAX_ATTEMPTS"),
-    3,
-  );
-  const parsedRetryBaseMs = parsePositiveInt(
-    env.get("LLM_REVIEW_RETRY_BASE_MS"),
-    60_000,
-  );
+    (env.get("LLM_REVIEW_PROMPT_VERSION") ?? LLM_EVENT_REVIEW_PROMPT_VERSION).trim() ||
+    LLM_EVENT_REVIEW_PROMPT_VERSION;
+  const parsedThreshold = parseThreshold(env.get("LLM_REVIEW_CONFIDENCE_THRESHOLD"), 0.75);
+  const parsedTimeoutMs = parsePositiveInt(env.get("LLM_REVIEW_TIMEOUT_MS"), 30_000);
+  const parsedMaxAttempts = parsePositiveInt(env.get("LLM_REVIEW_MAX_ATTEMPTS"), 3);
+  const parsedRetryBaseMs = parsePositiveInt(env.get("LLM_REVIEW_RETRY_BASE_MS"), 60_000);
   const confidenceThreshold = parsedThreshold.value;
   const timeoutMs = parsedTimeoutMs.value;
   const maxAttempts = parsedMaxAttempts.value;
   const retryBaseMs = parsedRetryBaseMs.value;
-  const persistRawResponse = parseBoolean(
-    env.get("LLM_REVIEW_PERSIST_RAW_RESPONSE"),
-    false,
-  );
+  const persistRawResponse = parseBoolean(env.get("LLM_REVIEW_PERSIST_RAW_RESPONSE"), false);
 
   let valid = true;
   let invalidReason: string | null = null;
@@ -102,10 +85,7 @@ export function resolveLlmReviewConfig(
     } else if (!baseUrl) {
       valid = false;
       invalidReason = "missing_base_url";
-    } else if (
-      !parsedThreshold.valid ||
-      !(confidenceThreshold >= 0 && confidenceThreshold <= 1)
-    ) {
+    } else if (!parsedThreshold.valid || !(confidenceThreshold >= 0 && confidenceThreshold <= 1)) {
       valid = false;
       invalidReason = "invalid_confidence_threshold";
     } else if (!parsedTimeoutMs.valid || timeoutMs <= 0) {

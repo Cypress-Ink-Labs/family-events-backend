@@ -86,9 +86,7 @@ async function callJson(url, init = {}) {
           "This RPC is service-role only. Verify SUPABASE_SERVICE_ROLE_KEY / SERVICE_ROLE_KEY is correct.",
       );
     }
-    throw new Error(
-      `${response.status} ${response.statusText}: ${detail ?? "empty body"}`,
-    );
+    throw new Error(`${response.status} ${response.statusText}: ${detail ?? "empty body"}`);
   }
 
   return body;
@@ -106,16 +104,13 @@ async function callFunction(functionName) {
 }
 
 async function callRpc(functionName, args = {}) {
-  const response = await fetch(
-    `${envUrl}/rest/v1/rpc/${encodeURIComponent(functionName)}`,
-    {
-      method: "POST",
-      headers: {
-        ...baseHeaders,
-      },
-      body: JSON.stringify(args),
+  const response = await fetch(`${envUrl}/rest/v1/rpc/${encodeURIComponent(functionName)}`, {
+    method: "POST",
+    headers: {
+      ...baseHeaders,
     },
-  );
+    body: JSON.stringify(args),
+  });
 
   const text = await response.text();
   if (!response.ok) {
@@ -209,8 +204,7 @@ async function drainSourceQueue() {
       break;
     }
 
-    if (round < options.rounds)
-      await new Promise((r) => setTimeout(r, options.pauseMs));
+    if (round < options.rounds) await new Promise((r) => setTimeout(r, options.pauseMs));
   }
 }
 
@@ -225,9 +219,7 @@ async function drainTagQueue() {
 
   for (let round = 1; round <= options.rounds; round++) {
     const summary = await getSummary(summaryView, statuses);
-    console.log(
-      `[tag] round=${round} pending=${summary.pending} processing=${summary.processing}`,
-    );
+    console.log(`[tag] round=${round} pending=${summary.pending} processing=${summary.processing}`);
 
     const hasQueuedWork = hasWork(summary);
     let result = null;
@@ -262,14 +254,11 @@ async function drainTagQueue() {
       break;
     }
 
-    if (round < options.rounds)
-      await new Promise((r) => setTimeout(r, options.pauseMs));
+    if (round < options.rounds) await new Promise((r) => setTimeout(r, options.pauseMs));
   }
 }
 
-for (const queue of options.mode === "all"
-  ? ["source", "tag"]
-  : [options.mode]) {
+for (const queue of options.mode === "all" ? ["source", "tag"] : [options.mode]) {
   if (queue === "source") {
     await drainSourceQueue();
   } else {

@@ -1,24 +1,24 @@
-import { render } from "@react-email/render"
-import { Resend } from "resend"
-import EventChangeEmail from "../emails/event-change.tsx"
-import EventInviteEmail from "../emails/event-invite.tsx"
-import EventReminderEmail from "../emails/event-reminder.tsx"
-import MagicLinkEmail from "../emails/magic-link.tsx"
-import WeeklyDigestEmail from "../emails/weekly-digest.tsx"
-import WelcomeEmail from "../emails/welcome.tsx"
+import { render } from "@react-email/render";
+import { Resend } from "resend";
+import EventChangeEmail from "../emails/event-change.tsx";
+import EventInviteEmail from "../emails/event-invite.tsx";
+import EventReminderEmail from "../emails/event-reminder.tsx";
+import MagicLinkEmail from "../emails/magic-link.tsx";
+import WeeklyDigestEmail from "../emails/weekly-digest.tsx";
+import WelcomeEmail from "../emails/welcome.tsx";
 
-const apiKey = process.env["RESEND_API_KEY"]
+const apiKey = process.env["RESEND_API_KEY"];
 if (!apiKey) {
-  throw new Error("RESEND_API_KEY environment variable is required")
+  throw new Error("RESEND_API_KEY environment variable is required");
 }
 
-const resend = new Resend(apiKey)
+const resend = new Resend(apiKey);
 
 const str = (key: string, fallbackValue?: string) => ({
   key,
   type: "string" as const,
   fallbackValue,
-})
+});
 
 const templates = [
   {
@@ -105,38 +105,38 @@ const templates = [
       str("UNSUBSCRIBE_URL", "https://familyevents.app/profile?tab=notifications"),
     ],
   },
-]
+];
 
 // Fetch all existing templates once to avoid per-template API calls
-console.log("Fetching existing templates...")
-const existingTemplates = await resend.templates.list()
-const existingByAlias = new Map<string, string>()
+console.log("Fetching existing templates...");
+const existingTemplates = await resend.templates.list();
+const existingByAlias = new Map<string, string>();
 for (const t of existingTemplates.data?.data ?? []) {
-  if (t.alias) existingByAlias.set(t.alias, t.id)
+  if (t.alias) existingByAlias.set(t.alias, t.id);
 }
-console.log(`Found ${existingByAlias.size} existing templates`)
+console.log(`Found ${existingByAlias.size} existing templates`);
 
 for (const template of templates) {
-  console.log(`Deploying template: ${template.name}`)
+  console.log(`Deploying template: ${template.name}`);
 
   // Render the React Email template to HTML
-  const html = await render(template.react)
+  const html = await render(template.react);
 
-  const existingId = existingByAlias.get(template.alias)
+  const existingId = existingByAlias.get(template.alias);
 
   if (existingId) {
     // Update existing template
-    console.log(`  Updating existing template (id: ${existingId})...`)
+    console.log(`  Updating existing template (id: ${existingId})...`);
     const result = await resend.templates.update(existingId, {
       name: template.name,
       subject: template.subject,
       variables: template.variables,
       html,
-    })
-    console.log(`  Updated template id: ${result.data?.id ?? existingId}`)
+    });
+    console.log(`  Updated template id: ${result.data?.id ?? existingId}`);
   } else {
     // Create new template
-    console.log("  Creating new template...")
+    console.log("  Creating new template...");
     const result = await resend.templates
       .create({
         name: template.name,
@@ -145,9 +145,9 @@ for (const template of templates) {
         variables: template.variables,
         html,
       })
-      .publish()
-    console.log(`  Created template id: ${result.data?.id ?? "unknown"}`)
+      .publish();
+    console.log(`  Created template id: ${result.data?.id ?? "unknown"}`);
   }
 }
 
-console.log("All templates deployed.")
+console.log("All templates deployed.");

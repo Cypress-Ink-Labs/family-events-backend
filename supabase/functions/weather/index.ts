@@ -16,13 +16,11 @@ interface WeatherSnapshot {
 }
 
 function isValidLat(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= -90 &&
-    value <= 90;
+  return typeof value === "number" && Number.isFinite(value) && value >= -90 && value <= 90;
 }
 
 function isValidLon(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= -180 &&
-    value <= 180;
+  return typeof value === "number" && Number.isFinite(value) && value >= -180 && value <= 180;
 }
 
 Deno.serve(async (req: Request) => {
@@ -60,9 +58,10 @@ Deno.serve(async (req: Request) => {
   let body: Record<string, unknown>;
   try {
     const parsed = await req.json();
-    body = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
-      ? parsed as Record<string, unknown>
-      : {};
+    body =
+      parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
   } catch {
     body = {};
   }
@@ -98,9 +97,7 @@ Deno.serve(async (req: Request) => {
     if (!response.ok) {
       // Map upstream auth/rate errors to a generic status without leaking the
       // upstream body or the API key.
-      const status = response.status === 429 || response.status >= 500
-        ? 502
-        : 503;
+      const status = response.status === 429 || response.status >= 500 ? 502 : 503;
       return new Response(JSON.stringify({ error: "weather unavailable" }), {
         status,
         headers: jsonHeaders,
@@ -109,15 +106,10 @@ Deno.serve(async (req: Request) => {
 
     const payload = await response.json();
     const snapshot: WeatherSnapshot = {
-      condition: typeof payload?.weather?.[0]?.main === "string"
-        ? payload.weather[0].main
-        : null,
-      temperatureC: typeof payload?.main?.temp === "number"
-        ? payload.main.temp
-        : null,
-      observedAt: typeof payload?.dt === "number"
-        ? new Date(payload.dt * 1000).toISOString()
-        : null,
+      condition: typeof payload?.weather?.[0]?.main === "string" ? payload.weather[0].main : null,
+      temperatureC: typeof payload?.main?.temp === "number" ? payload.main.temp : null,
+      observedAt:
+        typeof payload?.dt === "number" ? new Date(payload.dt * 1000).toISOString() : null,
     };
 
     return new Response(JSON.stringify(snapshot), {

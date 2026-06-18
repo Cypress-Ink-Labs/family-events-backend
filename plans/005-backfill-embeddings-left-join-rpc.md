@@ -29,14 +29,21 @@ with O(events) server-side work.
 `supabase/functions/backfill-embeddings/index.ts:31-65`:
 
 ```ts
-async function findEventsWithoutEmbeddings(supabase: SupabaseClient, limit: number): Promise<EventRow[]> {
+async function findEventsWithoutEmbeddings(
+  supabase: SupabaseClient,
+  limit: number,
+): Promise<EventRow[]> {
   // Supabase JS doesn't support LEFT JOIN directly, so we use a NOT IN subquery approach.
   const { data: embeddedIds, error: embError } = await supabase
-    .from("event_embeddings").select("event_id");
+    .from("event_embeddings")
+    .select("event_id");
   if (embError) throw embError;
   const excludeIds = (embeddedIds ?? []).map((row: { event_id: string }) => row.event_id);
-  let query = supabase.from("events").select("id, title, description")
-    .order("created_at", { ascending: true }).limit(limit);
+  let query = supabase
+    .from("events")
+    .select("id, title, description")
+    .order("created_at", { ascending: true })
+    .limit(limit);
   if (excludeIds.length > 0) {
     // For large sets this could be slow … For production scale we'd use an RPC with a proper LEFT JOIN.
     query = query.not("id", "in", `(${excludeIds.join(",")})`);
@@ -90,6 +97,7 @@ Match the exact column types of `events.id/title/description` (verify against
 declare one; if not, add it in this migration).
 
 Create the paired rollback `supabase/rollbacks/<new-ts>_list_events_needing_embeddings_rpc_down.sql`:
+
 ```sql
 DROP FUNCTION IF EXISTS public.list_events_needing_embeddings(int);
 ```
@@ -99,7 +107,10 @@ DROP FUNCTION IF EXISTS public.list_events_needing_embeddings(int);
 Rewrite `findEventsWithoutEmbeddings` to call the RPC:
 
 ```ts
-async function findEventsWithoutEmbeddings(supabase: SupabaseClient, limit: number): Promise<EventRow[]> {
+async function findEventsWithoutEmbeddings(
+  supabase: SupabaseClient,
+  limit: number,
+): Promise<EventRow[]> {
   const { data, error } = await supabase.rpc("list_events_needing_embeddings", { p_limit: limit });
   if (error) throw error;
   return (data ?? []) as EventRow[];
@@ -114,13 +125,13 @@ called with `{ p_limit: <batchSize> }`. Keep the rest of the backfill behavior c
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Function tests | `pnpm -C supabase/functions exec vitest run backfill-embeddings` (or `deno test` if it's a `*_test.ts`) | pass |
-| Rollback guard | `pnpm run workspace:test` | migration-rollbacks test passes (new migration is paired) |
-| DB test (optional) | `pnpm run db:start && pnpm run db:test` | existing DB tests pass; type drift check still green |
-| Regenerate types | `pnpm run db:types` then `git diff packages/contracts/src/database.types.ts` | new RPC appears; commit it |
+| Purpose            | Command                                                                                                 | Expected                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Typecheck          | `pnpm run check`                                                                                        | exit 0                                                    |
+| Function tests     | `pnpm -C supabase/functions exec vitest run backfill-embeddings` (or `deno test` if it's a `*_test.ts`) | pass                                                      |
+| Rollback guard     | `pnpm run workspace:test`                                                                               | migration-rollbacks test passes (new migration is paired) |
+| DB test (optional) | `pnpm run db:start && pnpm run db:test`                                                                 | existing DB tests pass; type drift check still green      |
+| Regenerate types   | `pnpm run db:types` then `git diff packages/contracts/src/database.types.ts`                            | new RPC appears; commit it                                |
 
 ## Done criteria
 

@@ -35,12 +35,13 @@ that's done.
   `find_similar_events_by_id`. These already enforce published-only + grants.
 - Registration: new functions need `config.toml` `verify_jwt` + `config/deploy.config.json`
   (`functions` + `noVerifyJwtFunctions`), enforced by `tests/guards/deploy-cli-boundary.test.mjs`.
-- CORS allowlist module `_shared/cors.ts` (see plan 006) — a public API may want a *wider* CORS policy than
+- CORS allowlist module `_shared/cors.ts` (see plan 006) — a public API may want a _wider_ CORS policy than
   the app allowlist (public read API ≈ open GET), a decision to make explicitly.
 
 ## Steps (produce a design doc, then a PoC)
 
 ### Step 1: Write `supabase/docs/PUBLIC_API.md` covering the design decisions
+
 - **Endpoints (v1, read-only)**: `GET /events` (list/search → maps to `search_events`),
   `GET /events/:id` (→ `events_enriched_v2` / `share-og`-style lookup), optionally
   `GET /events/:id/similar` (→ `find_similar_events_by_id`, composes with plan 017),
@@ -59,23 +60,26 @@ that's done.
   admin/`private` RPCs); list input validation per param.
 
 ### Step 2: Build a PoC for ONE endpoint
+
 Implement `GET /events` only, as an edge function (`public-api` or `events-api`), thin over `search_events`:
+
 - Parse + validate query params (city, date range, tags, keyword, limit, cursor) — reject malformed input
   with 400 (model validation on the careful patterns in `share-og`).
 - Call the RPC, shape the public JSON envelope, set cache headers.
 - Register the function (config.toml + deploy.config.json); add a unit test for param validation + envelope.
 
 ### Step 3: Record open questions
+
 API-key store? Analytics/quotas? OpenAPI spec generation? Write-API later? List them in `PUBLIC_API.md`.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Typecheck | `pnpm run check` | exit 0 |
-| Guards | `pnpm run workspace:test` | deploy-cli + auth-config guards pass (PoC function registered) |
-| Function tests | `deno test` / `pnpm -C supabase/functions exec vitest run` | PoC validation tests pass |
-| Serve + curl | `pnpm run db:functions:serve` then curl `/events?city=...&limit=5` | JSON envelope |
+| Purpose        | Command                                                            | Expected                                                       |
+| -------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Typecheck      | `pnpm run check`                                                   | exit 0                                                         |
+| Guards         | `pnpm run workspace:test`                                          | deploy-cli + auth-config guards pass (PoC function registered) |
+| Function tests | `deno test` / `pnpm -C supabase/functions exec vitest run`         | PoC validation tests pass                                      |
+| Serve + curl   | `pnpm run db:functions:serve` then curl `/events?city=...&limit=5` | JSON envelope                                                  |
 
 ## Deliverable / Done criteria
 

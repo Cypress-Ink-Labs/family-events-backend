@@ -1,6 +1,6 @@
 {
   "name": "@cypress-ink-labs/cron-db-maintenance",
-  "private": true,
   "version": "0.0.1",
+  "private": true,
   "description": "Railway cron service that hits db-maintenance daily at 03:15 UTC. Replaces several broken Supabase pg_cron prune jobs."
 }

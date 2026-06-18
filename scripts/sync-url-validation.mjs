@@ -1,24 +1,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-const repoRoot = path.resolve(
-  path.dirname(new URL(import.meta.url).pathname),
-  "..",
-);
-const sharedPath = path.join(
-  repoRoot,
-  "packages",
-  "shared",
-  "src",
-  "url-validation.ts",
-);
-const edgePath = path.join(
-  repoRoot,
-  "supabase",
-  "functions",
-  "_shared",
-  "url-validation.ts",
-);
+const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const sharedPath = path.join(repoRoot, "packages", "shared", "src", "url-validation.ts");
+const edgePath = path.join(repoRoot, "supabase", "functions", "_shared", "url-validation.ts");
 
 const sharedSource = readFileSync(sharedPath, "utf8");
 const edgeSource = readFileSync(edgePath, "utf8");

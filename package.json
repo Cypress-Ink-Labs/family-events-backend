@@ -1,8 +1,7 @@
 {
   "name": "family-events-backend",
-  "private": true,
   "version": "0.0.1",
-  "packageManager": "pnpm@11.7.0",
+  "private": true,
   "scripts": {
     "changeset": "changeset",
     "changeset:version": "changeset version",
@@ -43,5 +42,6 @@
     "tsx": "^4.22.4",
     "typescript": "~6.0.3",
     "vitest": "4.1.9"
-  }
+  },
+  "packageManager": "pnpm@11.7.0"
 }

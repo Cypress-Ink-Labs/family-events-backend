@@ -1,11 +1,11 @@
 {
   "name": "@cypress-ink-labs/deploy-cli",
-  "private": true,
   "version": "0.0.1",
-  "type": "module",
+  "private": true,
   "bin": {
     "family-events-deploy": "./src/cli.ts"
   },
+  "type": "module",
   "scripts": {
     "cli": "tsx src/cli.ts",
     "check": "tsc -p tsconfig.json --noEmit",

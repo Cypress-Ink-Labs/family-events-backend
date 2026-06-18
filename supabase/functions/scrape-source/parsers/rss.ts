@@ -20,7 +20,7 @@ const xmlParser = new XMLParser({
 
 function localName(tagName: string): string {
   const lower = tagName.toLowerCase();
-  return lower.includes(":") ? lower.split(":").at(-1) ?? lower : lower;
+  return lower.includes(":") ? (lower.split(":").at(-1) ?? lower) : lower;
 }
 
 function asArray<T>(value: T | T[] | null | undefined): T[] {
@@ -31,10 +31,7 @@ function asArray<T>(value: T | T[] | null | undefined): T[] {
 }
 
 function textFromValue(value: unknown): string | null {
-  if (
-    typeof value === "string" || typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     const text = String(value).trim();
     return text.length > 0 ? text : null;
   }
@@ -73,10 +70,7 @@ function pickValue(node: XmlObject, keys: string[]): unknown {
   return null;
 }
 
-function normalizeUrl(
-  value: string | null | undefined,
-  baseUrl: string,
-): string | null {
+function normalizeUrl(value: string | null | undefined, baseUrl: string): string | null {
   if (!value) {
     return null;
   }
@@ -101,11 +95,7 @@ function addValidatedImage(
   }
 }
 
-function extractImages(
-  item: XmlObject,
-  baseUrl: string,
-  descriptionHtml: string,
-): string[] {
+function extractImages(item: XmlObject, baseUrl: string, descriptionHtml: string): string[] {
   const urls = new Set<string>();
 
   for (const [key, value] of Object.entries(item)) {
@@ -116,11 +106,7 @@ function extractImages(
     ) {
       for (const media of asArray(value)) {
         if (media && typeof media === "object") {
-          addValidatedImage(
-            urls,
-            textFromValue((media as XmlObject).url),
-            baseUrl,
-          );
+          addValidatedImage(urls, textFromValue((media as XmlObject).url), baseUrl);
         }
       }
       continue;
@@ -140,11 +126,7 @@ function extractImages(
     }
   }
 
-  for (
-    const match of descriptionHtml.matchAll(
-      /<img[^>]+src=["']([^"']+)["'][^>]*>/gi,
-    )
-  ) {
+  for (const match of descriptionHtml.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)) {
     addValidatedImage(urls, match[1], baseUrl);
   }
 
@@ -154,19 +136,17 @@ function extractImages(
 function collectEntries(parsedXml: XmlObject): XmlObject[] {
   const entries: XmlObject[] = [];
 
-  const rssItems = (parsedXml.rss as XmlObject | undefined)?.channel as
-    | XmlObject
-    | undefined;
+  const rssItems = (parsedXml.rss as XmlObject | undefined)?.channel as XmlObject | undefined;
   entries.push(
-    ...asArray(rssItems?.item).filter((item): item is XmlObject =>
-      !!item && typeof item === "object"
+    ...asArray(rssItems?.item).filter(
+      (item): item is XmlObject => !!item && typeof item === "object",
     ),
   );
 
   const atomFeed = parsedXml.feed as XmlObject | undefined;
   entries.push(
-    ...asArray(atomFeed?.entry).filter((item): item is XmlObject =>
-      !!item && typeof item === "object"
+    ...asArray(atomFeed?.entry).filter(
+      (item): item is XmlObject => !!item && typeof item === "object",
     ),
   );
 
@@ -236,14 +216,9 @@ export function parseRssFeed(xml: string, sourceUrl: string): ParsedEvent[] {
       continue;
     }
 
-    const rawDescription = textFromValue(
-      pickValue(item, [
-        "description",
-        "summary",
-        "content:encoded",
-        "content",
-      ]),
-    ) ?? "";
+    const rawDescription =
+      textFromValue(pickValue(item, ["description", "summary", "content:encoded", "content"])) ??
+      "";
     const description = cleanDescription(rawDescription);
 
     const dateValue = textFromValue(
@@ -279,14 +254,11 @@ export const rssParser: SourceParser<"rss"> = {
   type: "rss",
   async fetchArtifact(source, ctx) {
     const xml = await ctx.fetchText(source.url, {
-      accept:
-        "application/rss+xml,application/atom+xml,application/xml,text/xml,*/*",
+      accept: "application/rss+xml,application/atom+xml,application/xml,text/xml,*/*",
     });
     return { url: source.url, contentType: "application/rss+xml", body: xml };
   },
   extractEvents(source, artifact) {
-    return Promise.resolve(
-      parseRssFeed(artifact.body, artifact.url || source.url),
-    );
+    return Promise.resolve(parseRssFeed(artifact.body, artifact.url || source.url));
   },
 };

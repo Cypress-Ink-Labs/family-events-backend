@@ -6,16 +6,16 @@ isn't being delivered.
 
 ## What sends what
 
-| Email kind                                    | Triggered by                       | Sent by                             |
-| --------------------------------------------- | ---------------------------------- | ----------------------------------- |
-| Signup confirmation                           | `supabase.auth.signUp()`           | **Supabase Auth** (via Resend SMTP) |
-| Password reset                                | `supabase.auth.resetPasswordFor…`  | **Supabase Auth** (via Resend SMTP) |
-| Magic link / OTP                              | `supabase.auth.signInWithOtp()`    | **Supabase Auth** (via Resend SMTP) |
-| Magic link (invite-gated, sign-in page)       | `useAuth().sendMagicLink(...)`     | **Supabase Auth** (via Resend SMTP) |
-| Email change confirmation                     | `supabase.auth.updateUser({email})`| **Supabase Auth** (via Resend SMTP) |
-| Admin notification: "new invite request"      | `public.request_invite(...)` RPC   | **`notify-email` edge function**    |
-| Requester notification: "your code is XYZ"    | `admin_approve_invite_request` RPC | **`notify-email` edge function**    |
-| Requester notification: "request not approved"| `admin_reject_invite_request` RPC  | **`notify-email` edge function**    |
+| Email kind                                     | Triggered by                        | Sent by                             |
+| ---------------------------------------------- | ----------------------------------- | ----------------------------------- |
+| Signup confirmation                            | `supabase.auth.signUp()`            | **Supabase Auth** (via Resend SMTP) |
+| Password reset                                 | `supabase.auth.resetPasswordFor…`   | **Supabase Auth** (via Resend SMTP) |
+| Magic link / OTP                               | `supabase.auth.signInWithOtp()`     | **Supabase Auth** (via Resend SMTP) |
+| Magic link (invite-gated, sign-in page)        | `useAuth().sendMagicLink(...)`      | **Supabase Auth** (via Resend SMTP) |
+| Email change confirmation                      | `supabase.auth.updateUser({email})` | **Supabase Auth** (via Resend SMTP) |
+| Admin notification: "new invite request"       | `public.request_invite(...)` RPC    | **`notify-email` edge function**    |
+| Requester notification: "your code is XYZ"     | `admin_approve_invite_request` RPC  | **`notify-email` edge function**    |
+| Requester notification: "request not approved" | `admin_reject_invite_request` RPC   | **`notify-email` edge function**    |
 
 The first four are **Auth-flow emails** — built into Supabase Auth, with
 templates editable in the dashboard. The bottom two are **application
@@ -97,11 +97,11 @@ additional secrets are needed for the DB → function hop.
 `notify-email` is designed to never break the user-facing flow if email is
 misconfigured. The cascade:
 
-| Missing             | Function returns                            | User impact |
-| ------------------- | ------------------------------------------- | ----------- |
-| `RESEND_API_KEY`    | `200 {sent:false, dev:true}` (logs payload) | None        |
-| `ADMIN_NOTIFY_EMAIL`| `200 {sent:false, reason:"no_admin_email"}` | None        |
-| Resend returns 5xx  | `502 {sent:false, error:"resend_5xx"}`      | None        |
+| Missing              | Function returns                            | User impact |
+| -------------------- | ------------------------------------------- | ----------- |
+| `RESEND_API_KEY`     | `200 {sent:false, dev:true}` (logs payload) | None        |
+| `ADMIN_NOTIFY_EMAIL` | `200 {sent:false, reason:"no_admin_email"}` | None        |
+| Resend returns 5xx   | `502 {sent:false, error:"resend_5xx"}`      | None        |
 
 The RPCs `request_invite` and `admin_approve_invite_request` always succeed
 as long as the DB write succeeds. The async `pg_net` call to `notify-email`
@@ -136,8 +136,8 @@ For Auth emails, check Supabase dashboard → Authentication → Logs. The
 
 - **Auth emails:** Supabase dashboard → Authentication → Emails →
   Templates. Each template (Confirm signup, Reset password, etc.) has HTML
-  + plain-text fields with `{{ .ConfirmationURL }}`-style mustache
-  variables.
+  - plain-text fields with `{{ .ConfirmationURL }}`-style mustache
+    variables.
 - **Application emails:** edit `renderAdminRequest` and
   `renderRequestApproved` in
   `supabase/functions/notify-email/index.ts`. Plain inline HTML strings —

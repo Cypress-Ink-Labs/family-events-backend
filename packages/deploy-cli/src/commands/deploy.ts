@@ -1,30 +1,30 @@
-import type { Command } from "commander"
-import { loadConfig, repoRootFrom } from "../core/config"
-import { exitCodeFor, messageFor, ValidationError } from "../core/errors"
-import type { DeployOptions, EnvironmentName } from "../core/types"
-import { runDeploy } from "../workflows/deploy-runner"
-import { pickTargets } from "../ui/interactive"
-import { printDeployResult } from "../ui/output"
+import type { Command } from "commander";
+import { loadConfig, repoRootFrom } from "../core/config";
+import { exitCodeFor, messageFor, ValidationError } from "../core/errors";
+import type { DeployOptions, EnvironmentName } from "../core/types";
+import { runDeploy } from "../workflows/deploy-runner";
+import { pickTargets } from "../ui/interactive";
+import { printDeployResult } from "../ui/output";
 
 interface CommanderDeployOptions {
-  env?: EnvironmentName
-  all?: boolean
-  target?: string[]
-  dryRun?: boolean
-  yes?: boolean
-  interactive?: boolean
-  json?: boolean
-  showOutput?: boolean
-  concurrency?: string
-  functionConcurrency?: string
-  railwayConcurrency?: string
-  verbose?: boolean
-  debug?: boolean
-  color?: boolean
-  poll?: boolean
-  pollTimeout?: string
-  smoke?: boolean
-  allowProdSmoke?: boolean
+  env?: EnvironmentName;
+  all?: boolean;
+  target?: string[];
+  dryRun?: boolean;
+  yes?: boolean;
+  interactive?: boolean;
+  json?: boolean;
+  showOutput?: boolean;
+  concurrency?: string;
+  functionConcurrency?: string;
+  railwayConcurrency?: string;
+  verbose?: boolean;
+  debug?: boolean;
+  color?: boolean;
+  poll?: boolean;
+  pollTimeout?: string;
+  smoke?: boolean;
+  allowProdSmoke?: boolean;
 }
 
 export function registerDeployCommand(program: Command): void {
@@ -51,11 +51,11 @@ export function registerDeployCommand(program: Command): void {
     .option("--allow-prod-smoke", "allow production smoke probes that require service keys")
     .action(async (targets: string[], raw: CommanderDeployOptions) => {
       try {
-        const rootDir = repoRootFrom()
-        const config = loadConfig(rootDir)
-        const requestedTargets = [...(raw.target ?? []), ...targets]
+        const rootDir = repoRootFrom();
+        const config = loadConfig(rootDir);
+        const requestedTargets = [...(raw.target ?? []), ...targets];
         if (!raw.all && requestedTargets.length === 0 && (raw.interactive || process.stdin.isTTY)) {
-          requestedTargets.push(...(await pickTargets(config)))
+          requestedTargets.push(...(await pickTargets(config)));
         }
 
         const options: DeployOptions = {
@@ -70,12 +70,12 @@ export function registerDeployCommand(program: Command): void {
           functionConcurrency: parseConcurrency(
             raw.functionConcurrency ?? raw.concurrency,
             "function concurrency",
-            4
+            4,
           ),
           railwayConcurrency: parseConcurrency(
             raw.railwayConcurrency ?? raw.concurrency,
             "Railway concurrency",
-            2
+            2,
           ),
           verbose: raw.verbose ?? false,
           debug: raw.debug ?? false,
@@ -84,30 +84,30 @@ export function registerDeployCommand(program: Command): void {
           pollTimeoutSeconds: raw.pollTimeout ? Number.parseInt(raw.pollTimeout, 10) : undefined,
           smoke: raw.smoke ?? false,
           allowProdSmoke: raw.allowProdSmoke ?? false,
-        }
+        };
 
-        const result = await runDeploy(rootDir, config, options)
-        printDeployResult(result, options.json)
+        const result = await runDeploy(rootDir, config, options);
+        printDeployResult(result, options.json);
       } catch (error) {
         if (raw.json) {
-          console.error(JSON.stringify({ error: messageFor(error), exitCode: exitCodeFor(error) }))
+          console.error(JSON.stringify({ error: messageFor(error), exitCode: exitCodeFor(error) }));
         } else {
-          console.error(`error: ${messageFor(error)}`)
+          console.error(`error: ${messageFor(error)}`);
         }
-        process.exitCode = exitCodeFor(error)
+        process.exitCode = exitCodeFor(error);
       }
-    })
+    });
 }
 
 function collect(value: string, previous: string[]): string[] {
-  return [...previous, value]
+  return [...previous, value];
 }
 
 function parseConcurrency(value: string | undefined, label: string, fallback: number): number {
-  if (!value) return fallback
-  const parsed = Number.parseInt(value, 10)
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
   if (!Number.isInteger(parsed) || parsed < 1) {
-    throw new ValidationError(`${label} must be a positive integer`)
+    throw new ValidationError(`${label} must be a positive integer`);
   }
-  return parsed
+  return parsed;
 }

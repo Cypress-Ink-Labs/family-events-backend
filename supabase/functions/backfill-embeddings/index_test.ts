@@ -75,7 +75,12 @@ class FakeQuery {
 Deno.test("backfillEmbeddings - processes events without embeddings", async () => {
   const fake = new FakeSupabase();
   fake.events = [
-    { id: "evt-1", title: "Kids Music Class", description: "Fun for all ages", created_at: "2026-01-01T00:00:00Z" },
+    {
+      id: "evt-1",
+      title: "Kids Music Class",
+      description: "Fun for all ages",
+      created_at: "2026-01-01T00:00:00Z",
+    },
     { id: "evt-2", title: "Art Workshop", description: null, created_at: "2026-01-02T00:00:00Z" },
   ];
 
@@ -194,8 +199,18 @@ Deno.test("backfillEmbeddings - handles embedding failures gracefully", async ()
 Deno.test("backfillEmbeddings - RPC called with correct p_limit", async () => {
   const fake = new FakeSupabase();
   fake.events = [
-    { id: "evt-1", title: "Already Embedded (handled server-side)", description: null, created_at: "2026-01-01T00:00:00Z" },
-    { id: "evt-2", title: "Needs Embedding", description: null, created_at: "2026-01-02T00:00:00Z" },
+    {
+      id: "evt-1",
+      title: "Already Embedded (handled server-side)",
+      description: null,
+      created_at: "2026-01-01T00:00:00Z",
+    },
+    {
+      id: "evt-2",
+      title: "Needs Embedding",
+      description: null,
+      created_at: "2026-01-02T00:00:00Z",
+    },
   ];
 
   const result = await backfillEmbeddings(

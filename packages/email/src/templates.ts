@@ -5,6 +5,6 @@ export const TEMPLATES = {
   eventReminder: "family-events-event-reminder",
   eventChange: "family-events-event-change",
   weeklyDigest: "family-events-weekly-digest",
-} as const
+} as const;
 
-export type TemplateAlias = (typeof TEMPLATES)[keyof typeof TEMPLATES]
+export type TemplateAlias = (typeof TEMPLATES)[keyof typeof TEMPLATES];

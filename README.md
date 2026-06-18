@@ -7,19 +7,19 @@ IaC for infrastructure management.
 
 ## Repository layout
 
-| Path | Description |
-|------|-------------|
-| `supabase/functions/` | 23 Deno edge functions (scraping, tagging, notifications, admin) |
-| `supabase/functions/_shared/` | Shared utilities imported across functions (auth, SSRF guard, LLM, geocode, CORS) |
-| `supabase/migrations/` | 42 append-only SQL migrations; each must have a paired rollback in `supabase/rollbacks/` |
-| `supabase/tests/` | pgTAP SQL test files for DB logic |
-| `packages/contracts/` | Generated TypeScript types (`database.types.ts`) + shared contracts |
-| `packages/deploy-cli/` | Internal CLI for deploying edge functions and Railway services |
-| `cron/` | Alpine Docker containers; each runs `cron-runner.sh` to curl an edge function on a schedule |
-| `infra/` | Terraform IaC for Railway infrastructure |
-| `config/deploy.config.json` | Canonical list of edge functions + Railway cron services + JWT settings |
-| `tests/guards/` | Node `node:test` guard tests (migration rollbacks, auth config, cron-runner boundary) |
-| `scripts/` | Bash/Node helper scripts for local development |
+| Path                          | Description                                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------------- |
+| `supabase/functions/`         | 23 Deno edge functions (scraping, tagging, notifications, admin)                            |
+| `supabase/functions/_shared/` | Shared utilities imported across functions (auth, SSRF guard, LLM, geocode, CORS)           |
+| `supabase/migrations/`        | 42 append-only SQL migrations; each must have a paired rollback in `supabase/rollbacks/`    |
+| `supabase/tests/`             | pgTAP SQL test files for DB logic                                                           |
+| `packages/contracts/`         | Generated TypeScript types (`database.types.ts`) + shared contracts                         |
+| `packages/deploy-cli/`        | Internal CLI for deploying edge functions and Railway services                              |
+| `cron/`                       | Alpine Docker containers; each runs `cron-runner.sh` to curl an edge function on a schedule |
+| `infra/`                      | Terraform IaC for Railway infrastructure                                                    |
+| `config/deploy.config.json`   | Canonical list of edge functions + Railway cron services + JWT settings                     |
+| `tests/guards/`               | Node `node:test` guard tests (migration rollbacks, auth config, cron-runner boundary)       |
+| `scripts/`                    | Bash/Node helper scripts for local development                                              |
 
 ## Local setup
 
@@ -82,22 +82,22 @@ authoritative list of required variables.
 
 Key variables:
 
-| Variable | Purpose |
-|----------|---------|
-| `SUPABASE_URL` | Your Supabase project URL |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key |
+| Variable                    | Purpose                                             |
+| --------------------------- | --------------------------------------------------- |
+| `SUPABASE_URL`              | Your Supabase project URL                           |
+| `SUPABASE_ANON_KEY`         | Supabase anonymous key                              |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service-role key (never expose to clients) |
-| `RESEND_API_KEY` | Resend API key for transactional email |
-| `RAILWAY_TOKEN` | Railway API token for deployment |
-| `NODE_AUTH_TOKEN` | GitHub PAT (`read:packages`) for npm packages |
+| `RESEND_API_KEY`            | Resend API key for transactional email              |
+| `RAILWAY_TOKEN`             | Railway API token for deployment                    |
+| `NODE_AUTH_TOKEN`           | GitHub PAT (`read:packages`) for npm packages       |
 
 ## Docs
 
-| Doc | Description |
-|-----|-------------|
-| [`supabase/docs/PRODUCTION_SETUP.md`](supabase/docs/PRODUCTION_SETUP.md) | Full production bring-up: migrations, bootstrap admin, deploy edge functions, email, Railway |
-| [`supabase/docs/EMAIL.md`](supabase/docs/EMAIL.md) | Resend setup for Auth emails + `notify-email` application emails |
-| [`supabase/docs/INVITE_GATE.md`](supabase/docs/INVITE_GATE.md) | Invite-only registration GUC — how to enable/disable and verify |
-| [`supabase/docs/LOCAL_LLM_TAGGING.md`](supabase/docs/LOCAL_LLM_TAGGING.md) | Running a self-hosted Qwen3/Ollama model on Railway as an OpenAI-compatible tag provider |
-| [`scripts/db/README.md`](scripts/db/README.md) | DB helper scripts reference |
-| [`plans/README.md`](plans/README.md) | Active implementation plans and their status |
+| Doc                                                                        | Description                                                                                  |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [`supabase/docs/PRODUCTION_SETUP.md`](supabase/docs/PRODUCTION_SETUP.md)   | Full production bring-up: migrations, bootstrap admin, deploy edge functions, email, Railway |
+| [`supabase/docs/EMAIL.md`](supabase/docs/EMAIL.md)                         | Resend setup for Auth emails + `notify-email` application emails                             |
+| [`supabase/docs/INVITE_GATE.md`](supabase/docs/INVITE_GATE.md)             | Invite-only registration GUC — how to enable/disable and verify                              |
+| [`supabase/docs/LOCAL_LLM_TAGGING.md`](supabase/docs/LOCAL_LLM_TAGGING.md) | Running a self-hosted Qwen3/Ollama model on Railway as an OpenAI-compatible tag provider     |
+| [`scripts/db/README.md`](scripts/db/README.md)                             | DB helper scripts reference                                                                  |
+| [`plans/README.md`](plans/README.md)                                       | Active implementation plans and their status                                                 |
