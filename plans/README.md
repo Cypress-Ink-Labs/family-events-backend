@@ -28,8 +28,8 @@ suites + lint into CI. Several later plans assume those gates exist so their new
 | 013 | Pin `deno.json` supabase-js + email `@types` versions | P3 | S | LOW | — | DONE |
 | 014 | `event-review` deploy-config drift | — | — | — | — | REJECTED — not a drift (see below) |
 | 015 | Backfill rollbacks for grandfathered migrations | P3 | L | HIGH | — | TODO |
-| 016 | (spike) iCal + RSS export edge function | P3 | M | LOW | — | TODO |
-| 017 | (spike) Verify + document public semantic-search RPC | P3 | S | LOW | — | TODO |
+| 016 | (spike) iCal + RSS export edge function | P3 | M | LOW | — | DONE |
+| 017 | (spike) Verify + document public semantic-search RPC | P3 | S | LOW | — | DONE |
 | 018 | (spike) Design public read REST API | P3 | L | — | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale)

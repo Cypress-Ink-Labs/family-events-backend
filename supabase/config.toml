@@ -115,6 +115,12 @@ verify_jwt = false
 # The function reads only the public_events view with the anon key.
 verify_jwt = false
 
+[functions.events-feed]
+# Public: calendar and feed clients (Apple Calendar, Google Calendar, RSS
+# readers) never carry a user JWT. Reads published events via events_enriched_v2
+# with the anon key — RLS on the underlying view is the security boundary.
+verify_jwt = false
+
 [functions.notify-email]
 # Triggered by dispatch_email_notification / pg_net with sb_secret_* bearer.
 # App-layer requireServiceRole still enforces auth.

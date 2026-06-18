@@ -15,6 +15,29 @@
 - **Depends on**: none
 - **Category**: direction
 - **Planned at**: commit `6c0db23`, 2026-06-17
+- **Implemented at**: 2026-06-18
+
+## Open questions / spike findings
+
+### Feed scope decision
+
+Chose: global published upcoming events (start_datetime >= now), with optional `?city=<uuid>` filter. User-scoped (saved events) feeds require auth — explicitly out of spike scope and noted here for follow-up.
+
+### Which RPC was reused
+
+`events_enriched_v2` — best fit. It: returns all needed fields (id, title, description, start_datetime, end_datetime, timezone, venue_name, address, recurrence_info, source_url), supports `p_city_id` for per-city filtering, is granted to `anon`, and respects `p_date_from` for upcoming-only filtering. Max limit is 200 (matches FEED_LIMIT). No new query was added.
+
+### Recurrence mapping feasibility
+
+`recurrence_info` is jsonb. Observed shape in migrations: `{ "rrule": "FREQ=WEEKLY;COUNT=4" }` (from spike fixture). The field is populated by the scraper/ingest pipeline. Direct RRULE pass-through would work for simple cases (FREQ=WEEKLY/DAILY/MONTHLY + COUNT/UNTIL). Blockers for full support:
+
+1. Not all scrapers populate `recurrence_info` consistently — shape validation would be needed.
+2. RFC 5545 RRULE requires the RRULE value line, but also individual occurrences may need `EXDATE` for cancelled instances — that data doesn't exist yet.
+3. For the spike: single-occurrence emission is safe and correct; calendar clients show one instance. Follow-up: add `RRULE:` mapping when `recurrence_info.rrule` is present (straightforward pass-through).
+
+### iCal escaping vs XML escaping
+
+Confirmed: separate implementations. iCal text escaping (`\,` `\;` `\\` `\n`) is distinct from XML/HTML escaping (`&amp;` `&lt;` etc). The test suite covers this with a cross-format assertion.
 
 ## Why this matters (product)
 
@@ -44,6 +67,7 @@ engagement. Grounding: `sitemap` and `share-og` already prove the public-HTTP-ov
 ## Steps
 
 ### Step 1: Decide the feed scope (investigate, then record)
+
 - Which events does a feed contain? Options: all published events in a city (`?city=<uuid>`), all
   published events globally, or a user's saved events (would require auth — out of spike scope, note it).
   Recommend: **per-city published upcoming events** (`?city=<slug-or-uuid>`), matching `search_events`/
@@ -51,7 +75,9 @@ engagement. Grounding: `sitemap` and `share-og` already prove the public-HTTP-ov
 - Which existing RPC returns the needed columns? Prefer reusing one (`events_enriched_v2`?) over a new query.
 
 ### Step 2: Build the function skeleton
+
 Create `supabase/functions/events-feed/index.ts` modeled on `sitemap/index.ts`:
+
 - Public GET, `verify_jwt = false`, edge cache headers (use sitemap's `CACHE_CONTROL`; events mutate, so a
   ~1h TTL with stale-while-revalidate is appropriate).
 - Route on a `format` query param or path suffix: `?format=ics` → `text/calendar`, `?format=rss` →
@@ -59,6 +85,7 @@ Create `supabase/functions/events-feed/index.ts` modeled on `sitemap/index.ts`:
 - Query published events via the chosen RPC (service-role or anon client per how sitemap does it).
 
 ### Step 3: iCal serialization (RFC 5545)
+
 - Emit a `VCALENDAR` with one `VEVENT` per event: `UID` (use event id + a stable domain),
   `DTSTART`/`DTEND` (use `events.timezone`; emit as UTC `Z` times or with `TZID` — UTC is simpler and
   correct), `SUMMARY`, `DESCRIPTION`, `LOCATION`, `URL` (the app event page).
@@ -68,10 +95,12 @@ Create `supabase/functions/events-feed/index.ts` modeled on `sitemap/index.ts`:
   is feasible as a follow-up. Do not block the spike on full recurrence support.
 
 ### Step 4: RSS serialization
+
 - Emit an RSS 2.0 `channel` with one `item` per event: `title`, `link` (app event page), `description`,
   `pubDate` (event start, W3C/RFC-822), `guid` (event id). Reuse the XML-escaping approach from `sitemap`.
 
 ### Step 5: Register + smoke test
+
 - Add `events-feed` to `config/deploy.config.json` `functions` and `noVerifyJwtFunctions`, and a
   `[functions.events-feed]` block with `verify_jwt = false` in `supabase/config.toml`.
 - Add a unit test for the serializers (feed-shape from fixture rows → valid iCal/RSS strings; assert
@@ -89,12 +118,12 @@ Create `supabase/functions/events-feed/index.ts` modeled on `sitemap/index.ts`:
 
 ## Deliverable / Done criteria
 
-- [ ] `events-feed` function returns valid `text/calendar` and `application/rss+xml` for published events
-- [ ] Serializers are unit-tested incl. escaping
-- [ ] Function registered in `config.toml` + `deploy.config.json`; guard tests pass
-- [ ] `pnpm run check` exits 0
-- [ ] "Open questions" recorded: recurrence mapping feasibility, feed scope decision, which RPC was reused
-- [ ] `plans/README.md` row for 016 updated
+- [x] `events-feed` function returns valid `text/calendar` and `application/rss+xml` for published events
+- [x] Serializers are unit-tested incl. escaping
+- [x] Function registered in `config.toml` + `deploy.config.json`; guard tests pass
+- [x] `pnpm run check` exits 0
+- [x] "Open questions" recorded: recurrence mapping feasibility, feed scope decision, which RPC was reused
+- [x] `plans/README.md` row for 016 updated
 
 ## STOP conditions
 
