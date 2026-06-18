@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@b-fuze/deno-dom@0.1.56": "0.1.56",
     "jsr:@std/assert@*": "1.0.19",
+    "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@supabase/functions-js@2.108.1": "2.108.1",
     "npm:@supabase/supabase-js@^2.108.1": "2.108.1",

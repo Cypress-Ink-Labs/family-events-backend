@@ -1,4 +1,5 @@
 import { assertEquals } from "jsr:@std/assert"
+import { zonedDayStartUtc } from "../_shared/zoned-time.ts"
 
 // ---------------------------------------------------------------------------
 // Extracted business logic for testing
@@ -475,6 +476,54 @@ Deno.test("date boundaries compute correctly", () => {
   assertEquals(todayEnd.toISOString(), "2026-06-07T00:00:00.000Z")
   assertEquals(tomorrowStart.toISOString(), "2026-06-07T00:00:00.000Z")
   assertEquals(tomorrowEnd.toISOString(), "2026-06-08T00:00:00.000Z")
+})
+
+// ---------------------------------------------------------------------------
+// Tests: zonedDayStartUtc — timezone-aware calendar-day boundary helper
+// ---------------------------------------------------------------------------
+
+Deno.test("zonedDayStartUtc: standard time CST (UTC-6) start of today", () => {
+  // 2026-01-15T12:00:00Z = Jan 15 06:00 CST.  Chicago midnight Jan 15 = 06:00Z.
+  const now = new Date("2026-01-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 0)
+  assertEquals(result.toISOString(), "2026-01-15T06:00:00.000Z")
+})
+
+Deno.test("zonedDayStartUtc: daylight time CDT (UTC-5) start of today", () => {
+  // 2026-07-15T12:00:00Z = Jul 15 07:00 CDT.  Chicago midnight Jul 15 = 05:00Z.
+  const now = new Date("2026-07-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 0)
+  assertEquals(result.toISOString(), "2026-07-15T05:00:00.000Z")
+})
+
+Deno.test("zonedDayStartUtc: cross-UTC-midnight — 03:00Z is still Jan 14 in Chicago", () => {
+  // 2026-01-15T03:00:00Z = Jan 14 21:00 CST.  Start of that zone-local day =
+  // Jan 14 00:00 CST = 2026-01-14T06:00:00Z (NOT Jan 15).
+  const now = new Date("2026-01-15T03:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 0)
+  assertEquals(result.toISOString(), "2026-01-14T06:00:00.000Z")
+})
+
+Deno.test("zonedDayStartUtc: dayOffset 1 returns tomorrow midnight", () => {
+  const now = new Date("2026-01-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 1)
+  assertEquals(result.toISOString(), "2026-01-16T06:00:00.000Z")
+})
+
+Deno.test("zonedDayStartUtc: dayOffset 2 returns day-after-tomorrow midnight", () => {
+  const now = new Date("2026-01-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 2)
+  assertEquals(result.toISOString(), "2026-01-17T06:00:00.000Z")
+})
+
+Deno.test("zonedDayStartUtc: consecutive offsets are 24h apart in standard time", () => {
+  const now = new Date("2026-01-15T12:00:00Z")
+  const day0 = zonedDayStartUtc(now, "America/Chicago", 0)
+  const day1 = zonedDayStartUtc(now, "America/Chicago", 1)
+  const day2 = zonedDayStartUtc(now, "America/Chicago", 2)
+  const ms24h = 24 * 60 * 60 * 1000
+  assertEquals(day1.getTime() - day0.getTime(), ms24h)
+  assertEquals(day2.getTime() - day1.getTime(), ms24h)
 })
 
 // ---------------------------------------------------------------------------

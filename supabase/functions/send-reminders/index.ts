@@ -4,6 +4,12 @@ import {
 } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
+import { zonedDayStartUtc } from "../_shared/zoned-time.ts"
+
+// NOTE: This app is single-region (Lafayette / Baton Rouge, LA).  If multi-region
+// support is ever added, REMINDER_TZ must become per-event (events.timezone column)
+// and the single-global-window query approach will need to change.
+const REMINDER_TZ = "America/Chicago"
 
 // send-reminders
 // ----------------------------------------------------------------
@@ -60,12 +66,13 @@ serveServiceRoleJson(
   async ({ request, supabase, supabaseUrl, serviceRoleKey }) => {
     const cronCtx = cronRunContextFromRequest(request)
 
-    // Compute date boundaries in UTC
+    // Compute date boundaries in the event timezone (America/Chicago) so that
+    // "today" and "tomorrow" match the local calendar day, not the UTC day.
     const now = new Date()
-    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
-    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
-    const tomorrowStart = new Date(todayEnd)
-    const tomorrowEnd = new Date(tomorrowStart.getTime() + 24 * 60 * 60 * 1000)
+    const todayStart = zonedDayStartUtc(now, REMINDER_TZ, 0)
+    const todayEnd = zonedDayStartUtc(now, REMINDER_TZ, 1)
+    const tomorrowStart = todayEnd
+    const tomorrowEnd = zonedDayStartUtc(now, REMINDER_TZ, 2)
 
     // Query favorites (saved events) joined with events.
     // PostgREST cannot embed user_notification_preferences through
