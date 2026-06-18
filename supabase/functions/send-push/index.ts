@@ -1,6 +1,6 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import { serveServiceRoleJson, serviceRoleJsonError } from "../_shared/service-role-handler.ts";
-import { logEdgeEvent } from "../_shared/logger.ts";
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { serveServiceRoleJson, serviceRoleJsonError } from "../_shared/service-role-handler.ts"
+import { logEdgeEvent } from "../_shared/logger.ts"
 import {
   buildApnsRequest,
   buildFcmMessage,
@@ -12,7 +12,7 @@ import {
   type ApnsCredentials,
   type MobilePushCredentials,
   type PushSubscriptionRow,
-} from "./lib/mobile-push.ts";
+} from "./lib/mobile-push.ts"
 
 // send-push
 // ----------------------------------------------------------------
@@ -32,29 +32,29 @@ import {
 
 /** Base64url-encode a Uint8Array. */
 function base64urlEncode(data: Uint8Array): string {
-  let binary = "";
+  let binary = ""
   for (const byte of data) {
-    binary += String.fromCharCode(byte);
+    binary += String.fromCharCode(byte)
   }
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
 }
 
 /** Decode a base64url string to Uint8Array. */
 function base64urlDecode(input: string): Uint8Array {
-  const padded = input.replace(/-/g, "+").replace(/_/g, "/");
-  const paddedLen = padded + "=".repeat((4 - (padded.length % 4)) % 4);
-  const binary = atob(paddedLen);
-  const bytes = new Uint8Array(binary.length);
+  const padded = input.replace(/-/g, "+").replace(/_/g, "/")
+  const paddedLen = padded + "=".repeat((4 - (padded.length % 4)) % 4)
+  const binary = atob(paddedLen)
+  const bytes = new Uint8Array(binary.length)
   for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+    bytes[i] = binary.charCodeAt(i)
   }
-  return bytes;
+  return bytes
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-  const copy = new Uint8Array(bytes.byteLength);
-  copy.set(bytes);
-  return copy.buffer;
+  const copy = new Uint8Array(bytes.byteLength)
+  copy.set(bytes)
+  return copy.buffer
 }
 
 /** Build a signed VAPID Authorization header (JWT signed with ES256). */
@@ -62,29 +62,29 @@ async function buildVapidAuth(
   endpoint: string,
   vapidPrivateKey: string,
   vapidPublicKey: string,
-  subject: string,
+  subject: string
 ): Promise<{ authorization: string; cryptoKey: string }> {
-  const audience = new URL(endpoint).origin;
+  const audience = new URL(endpoint).origin
 
   const header = base64urlEncode(
-    new TextEncoder().encode(JSON.stringify({ typ: "JWT", alg: "ES256" })),
-  );
+    new TextEncoder().encode(JSON.stringify({ typ: "JWT", alg: "ES256" }))
+  )
 
-  const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(Date.now() / 1000)
   const payload = base64urlEncode(
     new TextEncoder().encode(
       JSON.stringify({
         aud: audience,
         exp: now + 12 * 60 * 60, // 12 hours
         sub: subject,
-      }),
-    ),
-  );
+      })
+    )
+  )
 
-  const signingInput = `${header}.${payload}`;
+  const signingInput = `${header}.${payload}`
 
   // Import VAPID private key (base64url-encoded raw P-256 private key)
-  const rawKey = base64urlDecode(vapidPrivateKey);
+  const rawKey = base64urlDecode(vapidPrivateKey)
   const jwk: JsonWebKey = {
     kty: "EC",
     crv: "P-256",
@@ -92,61 +92,61 @@ async function buildVapidAuth(
     // Public key is 65 bytes: 0x04 || x (32) || y (32)
     x: base64urlEncode(base64urlDecode(vapidPublicKey).slice(1, 33)),
     y: base64urlEncode(base64urlDecode(vapidPublicKey).slice(33, 65)),
-  };
+  }
 
   // Fallback: if vapidPublicKey is only 32 bytes (just x), handle gracefully
   // but typically VAPID public keys are the full 65-byte uncompressed point.
-  void rawKey; // used for length validation context
+  void rawKey // used for length validation context
 
   const cryptoKey = await crypto.subtle.importKey(
     "jwk",
     jwk,
     { name: "ECDSA", namedCurve: "P-256" },
     false,
-    ["sign"],
-  );
+    ["sign"]
+  )
 
   const signatureBuffer = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
     cryptoKey,
-    new TextEncoder().encode(signingInput),
-  );
+    new TextEncoder().encode(signingInput)
+  )
 
   // Convert DER-encoded signature to raw r||s format expected by WebPush
-  const signature = derToRaw(new Uint8Array(signatureBuffer));
-  const token = `${signingInput}.${base64urlEncode(signature)}`;
+  const signature = derToRaw(new Uint8Array(signatureBuffer))
+  const token = `${signingInput}.${base64urlEncode(signature)}`
 
   return {
     authorization: `vapid t=${token}, k=${vapidPublicKey}`,
     cryptoKey: vapidPublicKey,
-  };
+  }
 }
 
 /** Convert a DER-encoded ECDSA signature to raw 64-byte r||s format. */
 function derToRaw(der: Uint8Array): Uint8Array {
   // DER: 0x30 <len> 0x02 <rlen> <r> 0x02 <slen> <s>
   // But Web Crypto may return raw r||s directly (64 bytes)
-  if (der.length === 64) return der;
+  if (der.length === 64) return der
 
-  const raw = new Uint8Array(64);
-  let offset = 2; // skip 0x30 <len>
+  const raw = new Uint8Array(64)
+  let offset = 2 // skip 0x30 <len>
 
   // r
-  offset++; // skip 0x02
-  const rLen = der[offset++];
-  const rStart = rLen > 32 ? offset + (rLen - 32) : offset;
-  const rDest = rLen < 32 ? 32 - rLen : 0;
-  raw.set(der.slice(rStart, offset + rLen), rDest);
-  offset += rLen;
+  offset++ // skip 0x02
+  const rLen = der[offset++]
+  const rStart = rLen > 32 ? offset + (rLen - 32) : offset
+  const rDest = rLen < 32 ? 32 - rLen : 0
+  raw.set(der.slice(rStart, offset + rLen), rDest)
+  offset += rLen
 
   // s
-  offset++; // skip 0x02
-  const sLen = der[offset++];
-  const sStart = sLen > 32 ? offset + (sLen - 32) : offset;
-  const sDest = sLen < 32 ? 64 - sLen : 32;
-  raw.set(der.slice(sStart, offset + sLen), sDest);
+  offset++ // skip 0x02
+  const sLen = der[offset++]
+  const sStart = sLen > 32 ? offset + (sLen - 32) : offset
+  const sDest = sLen < 32 ? 64 - sLen : 32
+  raw.set(der.slice(sStart, offset + sLen), sDest)
 
-  return raw;
+  return raw
 }
 
 // ─── Encryption (aes128gcm) ─────────────────────────────────────────────────
@@ -155,56 +155,56 @@ function derToRaw(der: Uint8Array): Uint8Array {
 async function encryptPayload(
   payload: string,
   p256dhKey: string,
-  authSecret: string,
+  authSecret: string
 ): Promise<{ body: Uint8Array; salt: Uint8Array; localPublicKey: Uint8Array }> {
-  const encoder = new TextEncoder();
+  const encoder = new TextEncoder()
 
   // Generate ephemeral ECDH key pair
   const localKeyPair = await crypto.subtle.generateKey(
     { name: "ECDH", namedCurve: "P-256" },
     true,
-    ["deriveBits"],
-  );
+    ["deriveBits"]
+  )
 
   // Import subscriber's public key
-  const subscriberKeyBytes = base64urlDecode(p256dhKey);
+  const subscriberKeyBytes = base64urlDecode(p256dhKey)
   const subscriberKey = await crypto.subtle.importKey(
     "raw",
     subscriberKeyBytes.buffer as ArrayBuffer,
     { name: "ECDH", namedCurve: "P-256" },
     false,
-    [],
-  );
+    []
+  )
 
   // ECDH shared secret
   const sharedSecret = await crypto.subtle.deriveBits(
     { name: "ECDH", public: subscriberKey },
     localKeyPair.privateKey,
-    256,
-  );
+    256
+  )
 
   // Export local public key (uncompressed)
   const localPublicKeyRaw = new Uint8Array(
-    await crypto.subtle.exportKey("raw", localKeyPair.publicKey),
-  );
+    await crypto.subtle.exportKey("raw", localKeyPair.publicKey)
+  )
 
   // Salt (16 random bytes)
-  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const salt = crypto.getRandomValues(new Uint8Array(16))
 
   // Auth secret
-  const authSecretBytes = base64urlDecode(authSecret);
+  const authSecretBytes = base64urlDecode(authSecret)
 
   // PRK_combine = HKDF-SHA256(auth_secret, ecdh_secret, "WebPush: info\0" || ua_public || as_public, 32)
-  const uaPublic = base64urlDecode(p256dhKey);
+  const uaPublic = base64urlDecode(p256dhKey)
   const infoInput = new Uint8Array([
     ...encoder.encode("WebPush: info\0"),
     ...uaPublic,
     ...localPublicKeyRaw,
-  ]);
+  ])
 
   const ikm = await crypto.subtle.importKey("raw", new Uint8Array(sharedSecret), "HKDF", false, [
     "deriveBits",
-  ]);
+  ])
 
   // IKM for the final HKDF: HKDF(auth_secret, shared_secret, info, 32)
   const prkCombine = new Uint8Array(
@@ -216,69 +216,69 @@ async function encryptPayload(
         info: infoInput.buffer as ArrayBuffer,
       },
       ikm,
-      256,
-    ),
-  );
+      256
+    )
+  )
 
   // PRK = HKDF-Extract(salt, prk_combine)
-  const prkKey = await crypto.subtle.importKey("raw", prkCombine, "HKDF", false, ["deriveBits"]);
+  const prkKey = await crypto.subtle.importKey("raw", prkCombine, "HKDF", false, ["deriveBits"])
 
   // CEK = HKDF-Expand(PRK, "Content-Encoding: aes128gcm\0", 16)
-  const cekInfo = encoder.encode("Content-Encoding: aes128gcm\0");
+  const cekInfo = encoder.encode("Content-Encoding: aes128gcm\0")
   const cekBits = await crypto.subtle.deriveBits(
     { name: "HKDF", hash: "SHA-256", salt, info: cekInfo },
     prkKey,
-    128,
-  );
+    128
+  )
 
   // Nonce = HKDF-Expand(PRK, "Content-Encoding: nonce\0", 12)
-  const nonceInfo = encoder.encode("Content-Encoding: nonce\0");
+  const nonceInfo = encoder.encode("Content-Encoding: nonce\0")
   const nonceBits = await crypto.subtle.deriveBits(
     { name: "HKDF", hash: "SHA-256", salt, info: nonceInfo },
     prkKey,
-    96,
-  );
+    96
+  )
 
   // Encrypt with AES-128-GCM
   const aesKey = await crypto.subtle.importKey("raw", new Uint8Array(cekBits), "AES-GCM", false, [
     "encrypt",
-  ]);
+  ])
 
   // Pad payload: content + 0x02 delimiter (last record)
-  const plaintext = new Uint8Array([...encoder.encode(payload), 2]);
+  const plaintext = new Uint8Array([...encoder.encode(payload), 2])
 
   const encrypted = new Uint8Array(
     await crypto.subtle.encrypt(
       { name: "AES-GCM", iv: new Uint8Array(nonceBits), tagLength: 128 },
       aesKey,
-      plaintext,
-    ),
-  );
+      plaintext
+    )
+  )
 
   // aes128gcm header: salt (16) || rs (4) || idlen (1) || keyid (65) || ciphertext
-  const rs = 4096;
-  const rsBytes = new Uint8Array(4);
-  new DataView(rsBytes.buffer).setUint32(0, rs);
+  const rs = 4096
+  const rsBytes = new Uint8Array(4)
+  new DataView(rsBytes.buffer).setUint32(0, rs)
 
   const header = new Uint8Array([
     ...salt,
     ...rsBytes,
     localPublicKeyRaw.length,
     ...localPublicKeyRaw,
-  ]);
+  ])
 
-  const body = new Uint8Array([...header, ...encrypted]);
+  const body = new Uint8Array([...header, ...encrypted])
 
-  return { body, salt, localPublicKey: localPublicKeyRaw };
+  return { body, salt, localPublicKey: localPublicKeyRaw }
 }
 
 // ─── Main handler ───────────────────────────────────────────────────────────
 
 interface SendPushPayload {
-  user_ids: string[];
-  title: string;
-  body: string;
-  url?: string;
+  user_ids: string[]
+  title: string
+  body: string
+  url?: string
 }
 
 /**
@@ -290,49 +290,49 @@ interface SendPushPayload {
  */
 function parsePayload(value: unknown): SendPushPayload {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("invalid payload");
+    throw new Error("invalid payload")
   }
-  const obj = value as Record<string, unknown>;
-  const title = obj.title;
-  const body = obj.body;
-  const url = obj.url;
+  const obj = value as Record<string, unknown>
+  const title = obj.title
+  const body = obj.body
+  const url = obj.url
 
-  if (typeof title !== "string" || !title) throw new Error("missing title");
-  if (typeof body !== "string" || !body) throw new Error("missing body");
-  if (url !== undefined && typeof url !== "string") throw new Error("invalid url");
+  if (typeof title !== "string" || !title) throw new Error("missing title")
+  if (typeof body !== "string" || !body) throw new Error("missing body")
+  if (url !== undefined && typeof url !== "string") throw new Error("invalid url")
 
   // Resolve user_ids from either shape
-  let user_ids: string[];
+  let user_ids: string[]
   if (Array.isArray(obj.user_ids)) {
-    user_ids = obj.user_ids as string[];
-    if (user_ids.length === 0) throw new Error("user_ids must not be empty");
+    user_ids = obj.user_ids as string[]
+    if (user_ids.length === 0) throw new Error("user_ids must not be empty")
     if (user_ids.some((id) => typeof id !== "string" || !id)) {
-      throw new Error("user_ids must be non-empty strings");
+      throw new Error("user_ids must be non-empty strings")
     }
   } else if (typeof obj.user_id === "string" && obj.user_id) {
-    user_ids = [obj.user_id];
+    user_ids = [obj.user_id]
   } else {
-    throw new Error("missing user_id or user_ids");
+    throw new Error("missing user_id or user_ids")
   }
 
-  return { user_ids, title, body, url: typeof url === "string" ? url : undefined };
+  return { user_ids, title, body, url: typeof url === "string" ? url : undefined }
 }
 
-const PUSH_TIMEOUT_MS = 10_000;
+const PUSH_TIMEOUT_MS = 10_000
 
 serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }) => {
-  const payload = parsePayload(await request.json());
+  const payload = parsePayload(await request.json())
 
   // Read provider credentials: vault-first, fallback to env.
-  let vapidPrivateKey = "";
-  let vapidPublicKey = "";
-  let vapidSubject = "";
-  let apnsTeamId = "";
-  let apnsKeyId = "";
-  let apnsPrivateKey = "";
-  let apnsBundleId = "";
-  let apnsEnvironment = "";
-  let fcmServiceAccountJson = "";
+  let vapidPrivateKey = ""
+  let vapidPublicKey = ""
+  let vapidSubject = ""
+  let apnsTeamId = ""
+  let apnsKeyId = ""
+  let apnsPrivateKey = ""
+  let apnsBundleId = ""
+  let apnsEnvironment = ""
+  let fcmServiceAccountJson = ""
 
   try {
     const { data: secrets } = await supabase
@@ -348,19 +348,19 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
         "apns_bundle_id",
         "apns_environment",
         "fcm_service_account_json",
-      ]);
+      ])
 
     if (secrets) {
       for (const s of secrets as Array<{ name: string; decrypted_secret: string }>) {
-        if (s.name === "vapid_private_key") vapidPrivateKey = s.decrypted_secret;
-        if (s.name === "vapid_public_key") vapidPublicKey = s.decrypted_secret;
-        if (s.name === "vapid_subject") vapidSubject = s.decrypted_secret;
-        if (s.name === "apns_team_id") apnsTeamId = s.decrypted_secret;
-        if (s.name === "apns_key_id") apnsKeyId = s.decrypted_secret;
-        if (s.name === "apns_private_key") apnsPrivateKey = s.decrypted_secret;
-        if (s.name === "apns_bundle_id") apnsBundleId = s.decrypted_secret;
-        if (s.name === "apns_environment") apnsEnvironment = s.decrypted_secret;
-        if (s.name === "fcm_service_account_json") fcmServiceAccountJson = s.decrypted_secret;
+        if (s.name === "vapid_private_key") vapidPrivateKey = s.decrypted_secret
+        if (s.name === "vapid_public_key") vapidPublicKey = s.decrypted_secret
+        if (s.name === "vapid_subject") vapidSubject = s.decrypted_secret
+        if (s.name === "apns_team_id") apnsTeamId = s.decrypted_secret
+        if (s.name === "apns_key_id") apnsKeyId = s.decrypted_secret
+        if (s.name === "apns_private_key") apnsPrivateKey = s.decrypted_secret
+        if (s.name === "apns_bundle_id") apnsBundleId = s.decrypted_secret
+        if (s.name === "apns_environment") apnsEnvironment = s.decrypted_secret
+        if (s.name === "fcm_service_account_json") fcmServiceAccountJson = s.decrypted_secret
       }
     }
   } catch {
@@ -368,26 +368,25 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
   }
 
   // Env fallback
-  if (!vapidPrivateKey) vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
-  if (!vapidPublicKey) vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
+  if (!vapidPrivateKey) vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") ?? ""
+  if (!vapidPublicKey) vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") ?? ""
   if (!vapidSubject)
-    vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:push@cypress-ink-labs.org";
-  if (!apnsTeamId) apnsTeamId = Deno.env.get("APNS_TEAM_ID") ?? "";
-  if (!apnsKeyId) apnsKeyId = Deno.env.get("APNS_KEY_ID") ?? "";
-  if (!apnsPrivateKey) apnsPrivateKey = Deno.env.get("APNS_PRIVATE_KEY") ?? "";
-  if (!apnsBundleId) apnsBundleId = Deno.env.get("APNS_BUNDLE_ID") ?? "com.familyevents.app";
-  if (!apnsEnvironment) apnsEnvironment = Deno.env.get("APNS_ENVIRONMENT") ?? "production";
-  if (!fcmServiceAccountJson)
-    fcmServiceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON") ?? "";
+    vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:push@cypress-ink-labs.org"
+  if (!apnsTeamId) apnsTeamId = Deno.env.get("APNS_TEAM_ID") ?? ""
+  if (!apnsKeyId) apnsKeyId = Deno.env.get("APNS_KEY_ID") ?? ""
+  if (!apnsPrivateKey) apnsPrivateKey = Deno.env.get("APNS_PRIVATE_KEY") ?? ""
+  if (!apnsBundleId) apnsBundleId = Deno.env.get("APNS_BUNDLE_ID") ?? "com.familyevents.app"
+  if (!apnsEnvironment) apnsEnvironment = Deno.env.get("APNS_ENVIRONMENT") ?? "production"
+  if (!fcmServiceAccountJson) fcmServiceAccountJson = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON") ?? ""
 
-  let fcmCredentials = undefined;
+  let fcmCredentials = undefined
   try {
-    fcmCredentials = parseFcmServiceAccount(fcmServiceAccountJson);
+    fcmCredentials = parseFcmServiceAccount(fcmServiceAccountJson)
   } catch (err) {
     logEdgeEvent("warn", "send-push: invalid FCM service account JSON", {
       function: "send-push",
       error: err instanceof Error ? err.message : String(err),
-    });
+    })
   }
 
   const apnsCredentials: ApnsCredentials | undefined =
@@ -399,57 +398,57 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
           bundleId: apnsBundleId,
           environment: apnsEnvironment === "sandbox" ? "sandbox" : "production",
         }
-      : undefined;
+      : undefined
   const mobileCredentials: MobilePushCredentials = {
     apns: apnsCredentials,
     fcm: fcmCredentials,
-  };
-  const credentialStatus = mobileCredentialStatus(mobileCredentials);
+  }
+  const credentialStatus = mobileCredentialStatus(mobileCredentials)
 
   // Fetch push subscriptions for all requested users in one query
   const { data: subscriptions, error: subError } = await supabase
     .from("push_subscriptions")
     .select("id, user_id, platform, endpoint, token, p256dh, auth_key")
-    .in("user_id", payload.user_ids);
+    .in("user_id", payload.user_ids)
 
-  if (subError) throw subError;
+  if (subError) throw subError
 
   if (!subscriptions || subscriptions.length === 0) {
     logEdgeEvent("log", "send-push: no push subscriptions for users", {
       function: "send-push",
       user_ids: payload.user_ids,
-    });
-    return { sent: 0, reason: "no_subscriptions" };
+    })
+    return { sent: 0, reason: "no_subscriptions" }
   }
 
-  const webSubscriptions = subscriptions.filter((sub) => sub.platform === "web");
+  const webSubscriptions = subscriptions.filter((sub) => sub.platform === "web")
   const mobileSubscriptions = partitionMobileSubscriptions(
-    subscriptions as unknown as PushSubscriptionRow[],
-  );
+    subscriptions as unknown as PushSubscriptionRow[]
+  )
 
   if (webSubscriptions.length > 0 && (!vapidPrivateKey || !vapidPublicKey)) {
     logEdgeEvent("warn", "send-push: VAPID keys not configured; skipping web push", {
       function: "send-push",
       user_ids: payload.user_ids,
       title: payload.title,
-    });
+    })
   }
 
   const pushPayload = JSON.stringify({
     title: payload.title,
     body: payload.body,
     ...(payload.url ? { url: payload.url } : {}),
-  });
+  })
 
-  let sent = 0;
-  let failed = 0;
-  const pruned: string[] = [];
+  let sent = 0
+  let failed = 0
+  const pruned: string[] = []
 
   for (const sub of webSubscriptions) {
-    if (!vapidPrivateKey || !vapidPublicKey) continue;
+    if (!vapidPrivateKey || !vapidPublicKey) continue
     if (!sub.endpoint || !sub.p256dh || !sub.auth_key) {
-      failed++;
-      continue;
+      failed++
+      continue
     }
 
     try {
@@ -457,10 +456,10 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
         sub.endpoint,
         vapidPrivateKey,
         vapidPublicKey,
-        vapidSubject,
-      );
+        vapidSubject
+      )
 
-      const encrypted = await encryptPayload(pushPayload, sub.p256dh, sub.auth_key);
+      const encrypted = await encryptPayload(pushPayload, sub.p256dh, sub.auth_key)
 
       const response = await fetch(sub.endpoint, {
         method: "POST",
@@ -473,36 +472,36 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
         },
         body: toArrayBuffer(encrypted.body),
         signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-      });
+      })
 
       if (response.ok || response.status === 201) {
-        sent++;
+        sent++
       } else if (response.status === 410 || response.status === 404) {
         // Subscription expired/invalid — prune it
-        pruned.push(sub.id);
-        await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+        pruned.push(sub.id)
+        await supabase.from("push_subscriptions").delete().eq("id", sub.id)
         logEdgeEvent("log", "send-push: pruned expired subscription", {
           function: "send-push",
           subscription_id: sub.id,
           status: response.status,
-        });
+        })
       } else {
-        const body = await response.text().catch(() => "");
+        const body = await response.text().catch(() => "")
         logEdgeEvent("warn", "send-push: push delivery failed", {
           function: "send-push",
           subscription_id: sub.id,
           status: response.status,
           body: body.slice(0, 300),
-        });
-        failed++;
+        })
+        failed++
       }
     } catch (err) {
       logEdgeEvent("warn", "send-push: push delivery error", {
         function: "send-push",
         subscription_id: sub.id,
         error: err instanceof Error ? err.message : String(err),
-      });
-      failed++;
+      })
+      failed++
     }
   }
 
@@ -511,16 +510,16 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
       function: "send-push",
       user_ids: payload.user_ids,
       count: mobileSubscriptions.apns.length,
-    });
+    })
   } else if (apnsCredentials) {
-    let apnsJwt = "";
+    let apnsJwt = ""
     try {
-      apnsJwt = await signApnsJwt(apnsCredentials);
+      apnsJwt = await signApnsJwt(apnsCredentials)
     } catch (err) {
       logEdgeEvent("warn", "send-push: APNs JWT signing failed", {
         function: "send-push",
         error: err instanceof Error ? err.message : String(err),
-      });
+      })
     }
 
     if (apnsJwt) {
@@ -532,36 +531,36 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
             bundleId: apnsCredentials.bundleId,
             environment: apnsCredentials.environment,
             payload,
-          });
+          })
           const response = await fetch(request.url, {
             method: "POST",
             headers: request.headers,
             body: request.body,
             signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-          });
+          })
 
           if (response.ok) {
-            sent++;
+            sent++
           } else if (response.status === 410 || response.status === 400) {
-            pruned.push(sub.id);
-            await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+            pruned.push(sub.id)
+            await supabase.from("push_subscriptions").delete().eq("id", sub.id)
           } else {
-            failed++;
-            const body = await response.text().catch(() => "");
+            failed++
+            const body = await response.text().catch(() => "")
             logEdgeEvent("warn", "send-push: APNs delivery failed", {
               function: "send-push",
               subscription_id: sub.id,
               status: response.status,
               body: body.slice(0, 300),
-            });
+            })
           }
         } catch (err) {
-          failed++;
+          failed++
           logEdgeEvent("warn", "send-push: APNs delivery error", {
             function: "send-push",
             subscription_id: sub.id,
             error: err instanceof Error ? err.message : String(err),
-          });
+          })
         }
       }
     }
@@ -572,16 +571,16 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
       function: "send-push",
       user_ids: payload.user_ids,
       count: mobileSubscriptions.fcm.length,
-    });
+    })
   } else if (fcmCredentials) {
-    let accessToken = "";
+    let accessToken = ""
     try {
-      accessToken = await getFcmAccessToken(fcmCredentials);
+      accessToken = await getFcmAccessToken(fcmCredentials)
     } catch (err) {
       logEdgeEvent("warn", "send-push: FCM access token failed", {
         function: "send-push",
         error: err instanceof Error ? err.message : String(err),
-      });
+      })
     }
 
     if (accessToken) {
@@ -601,34 +600,34 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
                   title: payload.title,
                   body: payload.body,
                   url: payload.url,
-                }),
+                })
               ),
               signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-            },
-          );
+            }
+          )
 
           if (response.ok) {
-            sent++;
+            sent++
           } else if (response.status === 404 || response.status === 400) {
-            pruned.push(sub.id);
-            await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+            pruned.push(sub.id)
+            await supabase.from("push_subscriptions").delete().eq("id", sub.id)
           } else {
-            failed++;
-            const body = await response.text().catch(() => "");
+            failed++
+            const body = await response.text().catch(() => "")
             logEdgeEvent("warn", "send-push: FCM delivery failed", {
               function: "send-push",
               subscription_id: sub.id,
               status: response.status,
               body: body.slice(0, 300),
-            });
+            })
           }
         } catch (err) {
-          failed++;
+          failed++
           logEdgeEvent("warn", "send-push: FCM delivery error", {
             function: "send-push",
             subscription_id: sub.id,
             error: err instanceof Error ? err.message : String(err),
-          });
+          })
         }
       }
     }
@@ -640,7 +639,7 @@ serveServiceRoleJson({ functionName: "send-push" }, async ({ request, supabase }
     sent,
     failed,
     pruned: pruned.length,
-  });
+  })
 
-  return { sent, failed, pruned: pruned.length };
-});
+  return { sent, failed, pruned: pruned.length }
+})

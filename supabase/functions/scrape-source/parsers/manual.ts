@@ -1,4 +1,4 @@
-import type { SourceParser } from "./_lib/types.ts";
+import type { SourceParser } from "./_lib/types.ts"
 
 export const manualParser: SourceParser<"manual"> = {
   type: "manual",
@@ -7,9 +7,9 @@ export const manualParser: SourceParser<"manual"> = {
       url: source.url,
       contentType: "text/plain",
       body: "",
-    });
+    })
   },
   extractEvents() {
-    return Promise.resolve([]);
+    return Promise.resolve([])
   },
-};
+}

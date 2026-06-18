@@ -31,77 +31,77 @@
 // events / 15 min = 2400/day) we stay comfortably under.
 
 interface UnsplashSearchHit {
-  id?: string;
+  id?: string
   urls?: {
-    regular?: string;
-  };
+    regular?: string
+  }
   links?: {
-    html?: string;
-    download_location?: string;
-  };
+    html?: string
+    download_location?: string
+  }
   user?: {
-    name?: string;
-    username?: string;
+    name?: string
+    username?: string
     links?: {
-      html?: string;
-    };
-  };
+      html?: string
+    }
+  }
 }
 
 interface UnsplashSearchResponse {
-  results?: UnsplashSearchHit[];
+  results?: UnsplashSearchHit[]
 }
 
 export interface UnsplashAttributionMetadata {
-  photoId: string;
-  photographerName: string;
-  photographerUsername: string;
-  photographerProfileUrl: string;
-  photoUrl: string;
-  downloadLocation: string;
+  photoId: string
+  photographerName: string
+  photographerUsername: string
+  photographerProfileUrl: string
+  photoUrl: string
+  downloadLocation: string
 }
 
 export interface UnsplashResult {
-  url: string;
+  url: string
   /** Search term we matched on (for logging). May be a title-derived term or a tag slug. */
-  matchedTag: string;
-  attribution: UnsplashAttributionMetadata;
+  matchedTag: string
+  attribution: UnsplashAttributionMetadata
 }
 
 export interface UnsplashTrackingResult {
-  ok: boolean;
-  error: string | null;
+  ok: boolean
+  error: string | null
 }
 
-const SEARCH_ENDPOINT = "https://api.unsplash.com/search/photos";
-const PHOTOS_ENDPOINT = "https://api.unsplash.com/photos";
+const SEARCH_ENDPOINT = "https://api.unsplash.com/search/photos"
+const PHOTOS_ENDPOINT = "https://api.unsplash.com/photos"
 
 function unsplashPhotoIdFromCdnUrl(imageUrl: string): string | null {
   try {
-    const { hostname, pathname } = new URL(imageUrl);
-    if (!hostname.includes("unsplash.com")) return null;
-    const match = pathname.match(/\/(photo-[\w-]+)/);
-    return match?.[1] ?? null;
+    const { hostname, pathname } = new URL(imageUrl)
+    if (!hostname.includes("unsplash.com")) return null
+    const match = pathname.match(/\/(photo-[\w-]+)/)
+    return match?.[1] ?? null
   } catch {
-    return null;
+    return null
   }
 }
 
 function firstString(...values: Array<string | undefined>): string | null {
   for (const value of values) {
-    const trimmed = value?.trim();
-    if (trimmed) return trimmed;
+    const trimmed = value?.trim()
+    if (trimmed) return trimmed
   }
-  return null;
+  return null
 }
 
 function attributionFromHit(hit: UnsplashSearchHit): UnsplashAttributionMetadata | null {
-  const photoId = firstString(hit.id);
-  const photographerUsername = firstString(hit.user?.username);
-  const photographerName = firstString(hit.user?.name, photographerUsername ?? undefined);
-  const photographerProfileUrl = firstString(hit.user?.links?.html);
-  const photoUrl = firstString(hit.links?.html);
-  const downloadLocation = firstString(hit.links?.download_location);
+  const photoId = firstString(hit.id)
+  const photographerUsername = firstString(hit.user?.username)
+  const photographerName = firstString(hit.user?.name, photographerUsername ?? undefined)
+  const photographerProfileUrl = firstString(hit.user?.links?.html)
+  const photoUrl = firstString(hit.links?.html)
+  const downloadLocation = firstString(hit.links?.download_location)
 
   if (
     !photoId ||
@@ -111,7 +111,7 @@ function attributionFromHit(hit: UnsplashSearchHit): UnsplashAttributionMetadata
     !photoUrl ||
     !downloadLocation
   ) {
-    return null;
+    return null
   }
 
   return {
@@ -121,7 +121,7 @@ function attributionFromHit(hit: UnsplashSearchHit): UnsplashAttributionMetadata
     photographerProfileUrl,
     photoUrl,
     downloadLocation,
-  };
+  }
 }
 
 /**
@@ -147,21 +147,21 @@ export function deriveTitleSearchTerm(title: string): string | null {
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 4)
-    .join(" ");
+    .join(" ")
 
   // Require at least 4 characters (filters out single-char noise after stripping)
-  return normalized.length >= 4 ? normalized : null;
+  return normalized.length >= 4 ? normalized : null
 }
 
 export async function trackUnsplashDownload(
   downloadLocation: string,
   accessKey: string,
-  options: { fetchImpl?: typeof fetch } = {},
+  options: { fetchImpl?: typeof fetch } = {}
 ): Promise<UnsplashTrackingResult> {
-  if (!accessKey) return { ok: false, error: "UNSPLASH_ACCESS_KEY is not configured" };
-  if (!downloadLocation.trim()) return { ok: false, error: "download location is empty" };
+  if (!accessKey) return { ok: false, error: "UNSPLASH_ACCESS_KEY is not configured" }
+  if (!downloadLocation.trim()) return { ok: false, error: "download location is empty" }
 
-  const fetcher = options.fetchImpl ?? fetch;
+  const fetcher = options.fetchImpl ?? fetch
 
   try {
     const res = await fetcher(downloadLocation, {
@@ -170,11 +170,11 @@ export async function trackUnsplashDownload(
         "Accept-Version": "v1",
       },
       signal: AbortSignal.timeout(3_000),
-    });
-    if (!res.ok) return { ok: false, error: `Unsplash tracking failed with HTTP ${res.status}` };
-    return { ok: true, error: null };
+    })
+    if (!res.ok) return { ok: false, error: `Unsplash tracking failed with HTTP ${res.status}` }
+    return { ok: true, error: null }
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
   }
 }
 
@@ -186,13 +186,13 @@ export async function trackUnsplashDownload(
 export async function lookupUnsplashPhotoFromUrl(
   imageUrl: string,
   accessKey: string,
-  options: { fetchImpl?: typeof fetch } = {},
+  options: { fetchImpl?: typeof fetch } = {}
 ): Promise<UnsplashAttributionMetadata | null> {
-  if (!accessKey) return null;
-  const photoId = unsplashPhotoIdFromCdnUrl(imageUrl);
-  if (!photoId) return null;
+  if (!accessKey) return null
+  const photoId = unsplashPhotoIdFromCdnUrl(imageUrl)
+  if (!photoId) return null
 
-  const fetcher = options.fetchImpl ?? fetch;
+  const fetcher = options.fetchImpl ?? fetch
   try {
     const res = await fetcher(`${PHOTOS_ENDPOINT}/${photoId}`, {
       headers: {
@@ -200,12 +200,12 @@ export async function lookupUnsplashPhotoFromUrl(
         "Accept-Version": "v1",
       },
       signal: AbortSignal.timeout(5_000),
-    });
-    if (!res.ok) return null;
-    const hit = (await res.json()) as UnsplashSearchHit;
-    return attributionFromHit(hit);
+    })
+    if (!res.ok) return null
+    const hit = (await res.json()) as UnsplashSearchHit
+    return attributionFromHit(hit)
   } catch {
-    return null;
+    return null
   }
 }
 
@@ -231,35 +231,35 @@ export async function lookupUnsplashPhotoFromUrl(
 export async function findFallbackImage(
   tags: string[],
   accessKey: string,
-  options: { fetchImpl?: typeof fetch; title?: string } = {},
+  options: { fetchImpl?: typeof fetch; title?: string } = {}
 ): Promise<UnsplashResult | null> {
-  if (!accessKey) return null;
+  if (!accessKey) return null
 
-  const fetcher = options.fetchImpl ?? fetch;
+  const fetcher = options.fetchImpl ?? fetch
 
   // Build the ordered search queue: title-derived term first, tag slugs after.
-  const queue: Array<{ searchTerm: string }> = [];
+  const queue: Array<{ searchTerm: string }> = []
 
   if (options.title) {
-    const term = deriveTitleSearchTerm(options.title);
-    if (term) queue.push({ searchTerm: term });
+    const term = deriveTitleSearchTerm(options.title)
+    if (term) queue.push({ searchTerm: term })
   }
 
   for (const rawTag of tags) {
-    const tag = rawTag.trim();
-    if (tag) queue.push({ searchTerm: tag });
+    const tag = rawTag.trim()
+    if (tag) queue.push({ searchTerm: tag })
   }
 
-  if (queue.length === 0) return null;
+  if (queue.length === 0) return null
 
   for (const { searchTerm } of queue) {
     // Two-pass strategy for each term:
     // 1. Try bare term first (more specific for activity searches)
     // 2. Fall back to "{term} family" only when bare returns empty
-    const attempts = [searchTerm, `${searchTerm} family`];
+    const attempts = [searchTerm, `${searchTerm} family`]
 
     for (const query of attempts) {
-      const url = `${SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=5&content_filter=high`;
+      const url = `${SEARCH_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=landscape&per_page=5&content_filter=high`
 
       try {
         const res = await fetcher(url, {
@@ -268,28 +268,28 @@ export async function findFallbackImage(
             "Accept-Version": "v1",
           },
           signal: AbortSignal.timeout(5_000),
-        });
-        if (!res.ok) continue;
+        })
+        if (!res.ok) continue
 
-        const body = (await res.json()) as UnsplashSearchResponse;
-        const results = body.results ?? [];
-        if (results.length === 0) continue;
+        const body = (await res.json()) as UnsplashSearchResponse
+        const results = body.results ?? []
+        if (results.length === 0) continue
 
         // Pick randomly among returned results so events sharing the same
         // primary term don't all get the same photo permanently.
-        const hit = results[Math.floor(Math.random() * results.length)];
-        const photoUrl = hit?.urls?.regular;
-        if (!hit || !photoUrl) continue;
+        const hit = results[Math.floor(Math.random() * results.length)]
+        const photoUrl = hit?.urls?.regular
+        if (!hit || !photoUrl) continue
 
-        const attribution = attributionFromHit(hit);
-        if (!attribution) continue;
+        const attribution = attributionFromHit(hit)
+        if (!attribution) continue
 
-        return { url: photoUrl, matchedTag: query, attribution };
+        return { url: photoUrl, matchedTag: query, attribution }
       } catch {
         // Network / timeout / parse failure: try the next pass, then next term.
-        continue;
+        continue
       }
     }
   }
-  return null;
+  return null
 }

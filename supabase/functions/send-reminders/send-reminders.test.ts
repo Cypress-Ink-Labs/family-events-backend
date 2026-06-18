@@ -1,56 +1,56 @@
-import { assertEquals } from "jsr:@std/assert";
-import { zonedDayStartUtc } from "../_shared/zoned-time.ts";
+import { assertEquals } from "jsr:@std/assert"
+import { zonedDayStartUtc } from "../_shared/zoned-time.ts"
 
 // ---------------------------------------------------------------------------
 // Extracted business logic for testing
 // ---------------------------------------------------------------------------
 
 interface ReminderTarget {
-  user_id: string;
-  email: string;
-  display_name: string | null;
-  event_id: string;
-  event_title: string;
-  start_datetime: string;
-  venue_name: string | null;
-  address: string | null;
-  reminder_email: boolean;
-  reminder_push: boolean;
-  reminder_type: "day_before" | "morning_of";
+  user_id: string
+  email: string
+  display_name: string | null
+  event_id: string
+  event_title: string
+  start_datetime: string
+  venue_name: string | null
+  address: string | null
+  reminder_email: boolean
+  reminder_push: boolean
+  reminder_type: "day_before" | "morning_of"
 }
 
 type JoinRow = {
-  user_id: string;
-  event_id: string;
+  user_id: string
+  event_id: string
   events: {
-    id: string;
-    title: string;
-    start_datetime: string;
-    venue_name: string | null;
-    address: string | null;
-    status: string;
-  } | null;
+    id: string
+    title: string
+    start_datetime: string
+    venue_name: string | null
+    address: string | null
+    status: string
+  } | null
   user_profiles: {
-    email: string | null;
-    display_name: string | null;
-  } | null;
-};
+    email: string | null
+    display_name: string | null
+  } | null
+}
 
-type PrefRow = { user_id: string; reminder_email: boolean; reminder_push: boolean };
+type PrefRow = { user_id: string; reminder_email: boolean; reminder_push: boolean }
 
 function flattenRows(
   rows: JoinRow[],
   reminderType: "day_before" | "morning_of",
-  prefs: Map<string, PrefRow>,
+  prefs: Map<string, PrefRow>
 ): ReminderTarget[] {
-  const targets: ReminderTarget[] = [];
+  const targets: ReminderTarget[] = []
   for (const row of rows) {
-    const event = row.events;
-    const profile = row.user_profiles;
+    const event = row.events
+    const profile = row.user_profiles
 
-    if (!event || !profile?.email) continue;
+    if (!event || !profile?.email) continue
 
-    const userPref = prefs.get(row.user_id);
+    const userPref = prefs.get(row.user_id)
 
     targets.push({
       user_id: row.user_id,
@@ -64,9 +64,9 @@ function flattenRows(
       reminder_email: userPref?.reminder_email ?? true,
       reminder_push: userPref?.reminder_push ?? true,
       reminder_type: reminderType,
-    });
+    })
   }
-  return targets;
+  return targets
 }
 
 function formatEventDate(isoDate: string): string {
@@ -77,20 +77,20 @@ function formatEventDate(isoDate: string): string {
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
-    });
+    })
   } catch {
-    return isoDate;
+    return isoDate
   }
 }
 
 function deduplicateTargets(targets: ReminderTarget[]): ReminderTarget[] {
-  const seen = new Set<string>();
+  const seen = new Set<string>()
   return targets.filter((t) => {
-    const key = `${t.user_id}:${t.event_id}:${t.reminder_type}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+    const key = `${t.user_id}:${t.event_id}:${t.reminder_type}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -115,19 +115,19 @@ Deno.test("flattenRows extracts valid reminder targets", () => {
         display_name: "Alice",
       },
     },
-  ];
+  ]
   const prefs = new Map<string, PrefRow>([
     ["u1", { user_id: "u1", reminder_email: true, reminder_push: true }],
-  ]);
+  ])
 
-  const targets = flattenRows(rows, "day_before", prefs);
-  assertEquals(targets.length, 1);
-  assertEquals(targets[0].email, "alice@test.com");
-  assertEquals(targets[0].event_title, "Park Day");
-  assertEquals(targets[0].reminder_type, "day_before");
-  assertEquals(targets[0].reminder_email, true);
-  assertEquals(targets[0].reminder_push, true);
-});
+  const targets = flattenRows(rows, "day_before", prefs)
+  assertEquals(targets.length, 1)
+  assertEquals(targets[0].email, "alice@test.com")
+  assertEquals(targets[0].event_title, "Park Day")
+  assertEquals(targets[0].reminder_type, "day_before")
+  assertEquals(targets[0].reminder_email, true)
+  assertEquals(targets[0].reminder_push, true)
+})
 
 Deno.test("flattenRows skips rows without event data", () => {
   const rows: JoinRow[] = [
@@ -137,11 +137,11 @@ Deno.test("flattenRows skips rows without event data", () => {
       events: null,
       user_profiles: { email: "alice@test.com", display_name: "Alice" },
     },
-  ];
+  ]
 
-  const targets = flattenRows(rows, "day_before", new Map());
-  assertEquals(targets.length, 0);
-});
+  const targets = flattenRows(rows, "day_before", new Map())
+  assertEquals(targets.length, 0)
+})
 
 Deno.test("flattenRows skips rows without user email", () => {
   const rows: JoinRow[] = [
@@ -158,11 +158,11 @@ Deno.test("flattenRows skips rows without user email", () => {
       },
       user_profiles: { email: null, display_name: "No Email" },
     },
-  ];
+  ]
 
-  const targets = flattenRows(rows, "morning_of", new Map());
-  assertEquals(targets.length, 0);
-});
+  const targets = flattenRows(rows, "morning_of", new Map())
+  assertEquals(targets.length, 0)
+})
 
 Deno.test("flattenRows defaults preferences to true when null", () => {
   const rows: JoinRow[] = [
@@ -179,13 +179,13 @@ Deno.test("flattenRows defaults preferences to true when null", () => {
       },
       user_profiles: { email: "bob@test.com", display_name: null },
     },
-  ];
+  ]
 
-  const targets = flattenRows(rows, "day_before", new Map());
-  assertEquals(targets.length, 1);
-  assertEquals(targets[0].reminder_email, true);
-  assertEquals(targets[0].reminder_push, true);
-});
+  const targets = flattenRows(rows, "day_before", new Map())
+  assertEquals(targets.length, 1)
+  assertEquals(targets[0].reminder_email, true)
+  assertEquals(targets[0].reminder_push, true)
+})
 
 // ---------------------------------------------------------------------------
 // Tests: preference filtering
@@ -206,22 +206,22 @@ Deno.test("users with reminder_email=false skip email dispatch", () => {
       },
       user_profiles: { email: "alice@test.com", display_name: "Alice" },
     },
-  ];
+  ]
   const prefs = new Map<string, PrefRow>([
     ["u1", { user_id: "u1", reminder_email: false, reminder_push: true }],
-  ]);
+  ])
 
-  const targets = flattenRows(rows, "day_before", prefs);
-  assertEquals(targets.length, 1);
-  assertEquals(targets[0].reminder_email, false);
-  assertEquals(targets[0].reminder_push, true);
+  const targets = flattenRows(rows, "day_before", prefs)
+  assertEquals(targets.length, 1)
+  assertEquals(targets[0].reminder_email, false)
+  assertEquals(targets[0].reminder_push, true)
 
   // Simulating the dispatch logic
-  const shouldSendEmail = targets[0].reminder_email;
-  const shouldSendPush = targets[0].reminder_push;
-  assertEquals(shouldSendEmail, false);
-  assertEquals(shouldSendPush, true);
-});
+  const shouldSendEmail = targets[0].reminder_email
+  const shouldSendPush = targets[0].reminder_push
+  assertEquals(shouldSendEmail, false)
+  assertEquals(shouldSendPush, true)
+})
 
 Deno.test("users with reminder_push=false skip push dispatch", () => {
   const rows: JoinRow[] = [
@@ -238,15 +238,15 @@ Deno.test("users with reminder_push=false skip push dispatch", () => {
       },
       user_profiles: { email: "bob@test.com", display_name: "Bob" },
     },
-  ];
+  ]
   const prefs = new Map<string, PrefRow>([
     ["u2", { user_id: "u2", reminder_email: true, reminder_push: false }],
-  ]);
+  ])
 
-  const targets = flattenRows(rows, "morning_of", prefs);
-  assertEquals(targets[0].reminder_push, false);
-  assertEquals(targets[0].reminder_email, true);
-});
+  const targets = flattenRows(rows, "morning_of", prefs)
+  assertEquals(targets[0].reminder_push, false)
+  assertEquals(targets[0].reminder_email, true)
+})
 
 // ---------------------------------------------------------------------------
 // Tests: deduplication
@@ -293,13 +293,13 @@ Deno.test("deduplicateTargets removes duplicate user+event+type combos", () => {
       reminder_push: true,
       reminder_type: "morning_of", // different type, should be kept
     },
-  ];
+  ]
 
-  const deduped = deduplicateTargets(targets);
-  assertEquals(deduped.length, 2);
-  assertEquals(deduped[0].reminder_type, "day_before");
-  assertEquals(deduped[1].reminder_type, "morning_of");
-});
+  const deduped = deduplicateTargets(targets)
+  assertEquals(deduped.length, 2)
+  assertEquals(deduped[0].reminder_type, "day_before")
+  assertEquals(deduped[1].reminder_type, "morning_of")
+})
 
 Deno.test("deduplicateTargets keeps different users for same event", () => {
   const targets: ReminderTarget[] = [
@@ -329,30 +329,30 @@ Deno.test("deduplicateTargets keeps different users for same event", () => {
       reminder_push: true,
       reminder_type: "day_before",
     },
-  ];
+  ]
 
-  const deduped = deduplicateTargets(targets);
-  assertEquals(deduped.length, 2);
-});
+  const deduped = deduplicateTargets(targets)
+  assertEquals(deduped.length, 2)
+})
 
 // ---------------------------------------------------------------------------
 // Tests: notification content formatting
 // ---------------------------------------------------------------------------
 
 Deno.test("formatEventDate produces human-readable date", () => {
-  const date = formatEventDate("2026-06-07T10:00:00Z");
-  assertEquals(typeof date, "string");
-  assertEquals(date.length > 0, true);
+  const date = formatEventDate("2026-06-07T10:00:00Z")
+  assertEquals(typeof date, "string")
+  assertEquals(date.length > 0, true)
   // Should contain "June" and "7"
-  assertEquals(date.includes("June"), true);
-  assertEquals(date.includes("7"), true);
-});
+  assertEquals(date.includes("June"), true)
+  assertEquals(date.includes("7"), true)
+})
 
 Deno.test("formatEventDate handles invalid date gracefully", () => {
-  const date = formatEventDate("not-a-date");
+  const date = formatEventDate("not-a-date")
   // new Date("not-a-date").toLocaleDateString() returns "Invalid Date"
-  assertEquals(date, "Invalid Date");
-});
+  assertEquals(date, "Invalid Date")
+})
 
 Deno.test("notification title includes event name and timing", () => {
   const target: ReminderTarget = {
@@ -367,18 +367,18 @@ Deno.test("notification title includes event name and timing", () => {
     reminder_email: true,
     reminder_push: true,
     reminder_type: "day_before",
-  };
+  }
 
-  const reminderLabel = target.reminder_type === "day_before" ? "tomorrow" : "today";
-  const notifTitle = `Reminder: ${target.event_title} is ${reminderLabel}`;
-  assertEquals(notifTitle, "Reminder: Park Day is tomorrow");
-});
+  const reminderLabel = target.reminder_type === "day_before" ? "tomorrow" : "today"
+  const notifTitle = `Reminder: ${target.event_title} is ${reminderLabel}`
+  assertEquals(notifTitle, "Reminder: Park Day is tomorrow")
+})
 
 Deno.test("notification body includes venue when available", () => {
   const withVenue = (t: ReminderTarget) => {
-    const date = formatEventDate(t.start_datetime);
-    return `${date}${t.venue_name ? ` at ${t.venue_name}` : ""}`;
-  };
+    const date = formatEventDate(t.start_datetime)
+    return `${date}${t.venue_name ? ` at ${t.venue_name}` : ""}`
+  }
 
   const targetWithVenue: ReminderTarget = {
     user_id: "u1",
@@ -392,15 +392,15 @@ Deno.test("notification body includes venue when available", () => {
     reminder_email: true,
     reminder_push: true,
     reminder_type: "morning_of",
-  };
+  }
 
-  const bodyWithVenue = withVenue(targetWithVenue);
-  assertEquals(bodyWithVenue.includes("at City Park"), true);
+  const bodyWithVenue = withVenue(targetWithVenue)
+  assertEquals(bodyWithVenue.includes("at City Park"), true)
 
-  const targetWithoutVenue = { ...targetWithVenue, venue_name: null };
-  const bodyWithoutVenue = withVenue(targetWithoutVenue);
-  assertEquals(bodyWithoutVenue.includes("at City Park"), false);
-});
+  const targetWithoutVenue = { ...targetWithVenue, venue_name: null }
+  const bodyWithoutVenue = withVenue(targetWithoutVenue)
+  assertEquals(bodyWithoutVenue.includes("at City Park"), false)
+})
 
 // ---------------------------------------------------------------------------
 // Tests: Resend template payload
@@ -419,10 +419,10 @@ Deno.test("Resend template payload has correct structure", () => {
     reminder_email: true,
     reminder_push: true,
     reminder_type: "day_before",
-  };
+  }
 
-  const appUrl = "https://family-events.up.railway.app";
-  const eventUrl = `${appUrl}/events/${target.event_id}`;
+  const appUrl = "https://family-events.up.railway.app"
+  const eventUrl = `${appUrl}/events/${target.event_id}`
 
   const payload = {
     from: "Family Events <onboarding@resend.dev>",
@@ -437,49 +437,49 @@ Deno.test("Resend template payload has correct structure", () => {
         EVENT_URL: eventUrl,
       },
     },
-  };
+  }
 
-  assertEquals(payload.to, ["alice@test.com"]);
-  assertEquals(payload.template.id, "family-events-event-reminder");
-  assertEquals(payload.template.variables.USERNAME, "Alice");
-  assertEquals(payload.template.variables.EVENT_TITLE, "Park Day");
-  assertEquals(payload.template.variables.EVENT_LOCATION, "City Park");
+  assertEquals(payload.to, ["alice@test.com"])
+  assertEquals(payload.template.id, "family-events-event-reminder")
+  assertEquals(payload.template.variables.USERNAME, "Alice")
+  assertEquals(payload.template.variables.EVENT_TITLE, "Park Day")
+  assertEquals(payload.template.variables.EVENT_LOCATION, "City Park")
   assertEquals(
     payload.template.variables.EVENT_URL,
-    "https://family-events.up.railway.app/events/e1",
-  );
-});
+    "https://family-events.up.railway.app/events/e1"
+  )
+})
 
 Deno.test("Resend template falls back to address when venue_name is null", () => {
-  const venueName: string | null = null;
-  const address: string | null = "456 Oak Ave";
-  const location = venueName ?? address ?? "TBD";
-  assertEquals(location, "456 Oak Ave");
-});
+  const venueName: string | null = null
+  const address: string | null = "456 Oak Ave"
+  const location = venueName ?? address ?? "TBD"
+  assertEquals(location, "456 Oak Ave")
+})
 
 Deno.test("Resend template falls back to TBD when both are null", () => {
-  const venueName: string | null = null;
-  const address: string | null = null;
-  const location = venueName ?? address ?? "TBD";
-  assertEquals(location, "TBD");
-});
+  const venueName: string | null = null
+  const address: string | null = null
+  const location = venueName ?? address ?? "TBD"
+  assertEquals(location, "TBD")
+})
 
 // ---------------------------------------------------------------------------
 // Tests: date boundary computation
 // ---------------------------------------------------------------------------
 
 Deno.test("date boundaries compute correctly", () => {
-  const now = new Date("2026-06-06T15:30:00Z");
-  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
-  const tomorrowStart = new Date(todayEnd);
-  const tomorrowEnd = new Date(tomorrowStart.getTime() + 24 * 60 * 60 * 1000);
+  const now = new Date("2026-06-06T15:30:00Z")
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+  const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
+  const tomorrowStart = new Date(todayEnd)
+  const tomorrowEnd = new Date(tomorrowStart.getTime() + 24 * 60 * 60 * 1000)
 
-  assertEquals(todayStart.toISOString(), "2026-06-06T00:00:00.000Z");
-  assertEquals(todayEnd.toISOString(), "2026-06-07T00:00:00.000Z");
-  assertEquals(tomorrowStart.toISOString(), "2026-06-07T00:00:00.000Z");
-  assertEquals(tomorrowEnd.toISOString(), "2026-06-08T00:00:00.000Z");
-});
+  assertEquals(todayStart.toISOString(), "2026-06-06T00:00:00.000Z")
+  assertEquals(todayEnd.toISOString(), "2026-06-07T00:00:00.000Z")
+  assertEquals(tomorrowStart.toISOString(), "2026-06-07T00:00:00.000Z")
+  assertEquals(tomorrowEnd.toISOString(), "2026-06-08T00:00:00.000Z")
+})
 
 // ---------------------------------------------------------------------------
 // Tests: zonedDayStartUtc — timezone-aware calendar-day boundary helper
@@ -487,47 +487,47 @@ Deno.test("date boundaries compute correctly", () => {
 
 Deno.test("zonedDayStartUtc: standard time CST (UTC-6) start of today", () => {
   // 2026-01-15T12:00:00Z = Jan 15 06:00 CST.  Chicago midnight Jan 15 = 06:00Z.
-  const now = new Date("2026-01-15T12:00:00Z");
-  const result = zonedDayStartUtc(now, "America/Chicago", 0);
-  assertEquals(result.toISOString(), "2026-01-15T06:00:00.000Z");
-});
+  const now = new Date("2026-01-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 0)
+  assertEquals(result.toISOString(), "2026-01-15T06:00:00.000Z")
+})
 
 Deno.test("zonedDayStartUtc: daylight time CDT (UTC-5) start of today", () => {
   // 2026-07-15T12:00:00Z = Jul 15 07:00 CDT.  Chicago midnight Jul 15 = 05:00Z.
-  const now = new Date("2026-07-15T12:00:00Z");
-  const result = zonedDayStartUtc(now, "America/Chicago", 0);
-  assertEquals(result.toISOString(), "2026-07-15T05:00:00.000Z");
-});
+  const now = new Date("2026-07-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 0)
+  assertEquals(result.toISOString(), "2026-07-15T05:00:00.000Z")
+})
 
 Deno.test("zonedDayStartUtc: cross-UTC-midnight — 03:00Z is still Jan 14 in Chicago", () => {
   // 2026-01-15T03:00:00Z = Jan 14 21:00 CST.  Start of that zone-local day =
   // Jan 14 00:00 CST = 2026-01-14T06:00:00Z (NOT Jan 15).
-  const now = new Date("2026-01-15T03:00:00Z");
-  const result = zonedDayStartUtc(now, "America/Chicago", 0);
-  assertEquals(result.toISOString(), "2026-01-14T06:00:00.000Z");
-});
+  const now = new Date("2026-01-15T03:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 0)
+  assertEquals(result.toISOString(), "2026-01-14T06:00:00.000Z")
+})
 
 Deno.test("zonedDayStartUtc: dayOffset 1 returns tomorrow midnight", () => {
-  const now = new Date("2026-01-15T12:00:00Z");
-  const result = zonedDayStartUtc(now, "America/Chicago", 1);
-  assertEquals(result.toISOString(), "2026-01-16T06:00:00.000Z");
-});
+  const now = new Date("2026-01-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 1)
+  assertEquals(result.toISOString(), "2026-01-16T06:00:00.000Z")
+})
 
 Deno.test("zonedDayStartUtc: dayOffset 2 returns day-after-tomorrow midnight", () => {
-  const now = new Date("2026-01-15T12:00:00Z");
-  const result = zonedDayStartUtc(now, "America/Chicago", 2);
-  assertEquals(result.toISOString(), "2026-01-17T06:00:00.000Z");
-});
+  const now = new Date("2026-01-15T12:00:00Z")
+  const result = zonedDayStartUtc(now, "America/Chicago", 2)
+  assertEquals(result.toISOString(), "2026-01-17T06:00:00.000Z")
+})
 
 Deno.test("zonedDayStartUtc: consecutive offsets are 24h apart in standard time", () => {
-  const now = new Date("2026-01-15T12:00:00Z");
-  const day0 = zonedDayStartUtc(now, "America/Chicago", 0);
-  const day1 = zonedDayStartUtc(now, "America/Chicago", 1);
-  const day2 = zonedDayStartUtc(now, "America/Chicago", 2);
-  const ms24h = 24 * 60 * 60 * 1000;
-  assertEquals(day1.getTime() - day0.getTime(), ms24h);
-  assertEquals(day2.getTime() - day1.getTime(), ms24h);
-});
+  const now = new Date("2026-01-15T12:00:00Z")
+  const day0 = zonedDayStartUtc(now, "America/Chicago", 0)
+  const day1 = zonedDayStartUtc(now, "America/Chicago", 1)
+  const day2 = zonedDayStartUtc(now, "America/Chicago", 2)
+  const ms24h = 24 * 60 * 60 * 1000
+  assertEquals(day1.getTime() - day0.getTime(), ms24h)
+  assertEquals(day2.getTime() - day1.getTime(), ms24h)
+})
 
 // ---------------------------------------------------------------------------
 // Tests: change notification processing (process-notification-queue logic)
@@ -536,88 +536,88 @@ Deno.test("zonedDayStartUtc: consecutive offsets are 24h apart in standard time"
 function changeSummary(changeType: string, detail: Record<string, unknown> | null): string {
   switch (changeType) {
     case "cancelled":
-      return "This event has been cancelled.";
+      return "This event has been cancelled."
     case "time_changed": {
-      const newStart = detail?.new_start;
+      const newStart = detail?.new_start
       if (typeof newStart === "string") {
-        return `Time changed to ${formatEventDate(newStart)}`;
+        return `Time changed to ${formatEventDate(newStart)}`
       }
-      return "The event time has changed.";
+      return "The event time has changed."
     }
     case "venue_changed": {
-      const newVenue = detail?.new_venue;
+      const newVenue = detail?.new_venue
       if (typeof newVenue === "string") {
-        return `Venue changed to ${newVenue}`;
+        return `Venue changed to ${newVenue}`
       }
-      return "The event venue has changed.";
+      return "The event venue has changed."
     }
     case "status_changed":
-      return "The event status has been updated.";
+      return "The event status has been updated."
     default:
-      return "This event has been updated.";
+      return "This event has been updated."
   }
 }
 
 Deno.test("changeSummary handles cancellation", () => {
-  const summary = changeSummary("cancelled", { old_status: "published", new_status: "archived" });
-  assertEquals(summary, "This event has been cancelled.");
-});
+  const summary = changeSummary("cancelled", { old_status: "published", new_status: "archived" })
+  assertEquals(summary, "This event has been cancelled.")
+})
 
 Deno.test("changeSummary handles time change with detail", () => {
   const summary = changeSummary("time_changed", {
     old_start: "2026-06-07T10:00:00Z",
     new_start: "2026-06-08T14:00:00Z",
-  });
-  assertEquals(summary.startsWith("Time changed to"), true);
-});
+  })
+  assertEquals(summary.startsWith("Time changed to"), true)
+})
 
 Deno.test("changeSummary handles time change without detail", () => {
-  const summary = changeSummary("time_changed", null);
-  assertEquals(summary, "The event time has changed.");
-});
+  const summary = changeSummary("time_changed", null)
+  assertEquals(summary, "The event time has changed.")
+})
 
 Deno.test("changeSummary handles venue change", () => {
-  const summary = changeSummary("venue_changed", { new_venue: "Community Center" });
-  assertEquals(summary, "Venue changed to Community Center");
-});
+  const summary = changeSummary("venue_changed", { new_venue: "Community Center" })
+  assertEquals(summary, "Venue changed to Community Center")
+})
 
 Deno.test("changeSummary handles unknown type", () => {
-  const summary = changeSummary("unknown", null);
-  assertEquals(summary, "This event has been updated.");
-});
+  const summary = changeSummary("unknown", null)
+  assertEquals(summary, "This event has been updated.")
+})
 
 // ---------------------------------------------------------------------------
 // Tests: debounce window calculation
 // ---------------------------------------------------------------------------
 
 Deno.test("debounce window cutoff is 1 hour before now", () => {
-  const DEBOUNCE_HOURS = 1;
-  const now = Date.now();
-  const cutoff = new Date(now - DEBOUNCE_HOURS * 60 * 60 * 1000);
+  const DEBOUNCE_HOURS = 1
+  const now = Date.now()
+  const cutoff = new Date(now - DEBOUNCE_HOURS * 60 * 60 * 1000)
 
   // An entry created 2 hours ago should be processed
-  const twoHoursAgo = new Date(now - 2 * 60 * 60 * 1000);
-  assertEquals(twoHoursAgo < cutoff, true);
+  const twoHoursAgo = new Date(now - 2 * 60 * 60 * 1000)
+  assertEquals(twoHoursAgo < cutoff, true)
 
   // An entry created 30 minutes ago should NOT be processed
-  const thirtyMinAgo = new Date(now - 30 * 60 * 1000);
-  assertEquals(thirtyMinAgo < cutoff, false);
-});
+  const thirtyMinAgo = new Date(now - 30 * 60 * 1000)
+  assertEquals(thirtyMinAgo < cutoff, false)
+})
 
 // ---------------------------------------------------------------------------
 // Tests: batch size and max per run limits
 // ---------------------------------------------------------------------------
 
 Deno.test("batch processing respects MAX_PER_RUN and BATCH_SIZE", () => {
-  const MAX_PER_RUN = 100;
-  const BATCH_SIZE = 10;
+  const MAX_PER_RUN = 100
+  const BATCH_SIZE = 10
 
   // Simulate 250 entries — only first 100 should be processed
-  const entries = Array.from({ length: 250 }, (_, i) => ({ id: `entry-${i}` }));
-  const limited = entries.slice(0, MAX_PER_RUN);
-  assertEquals(limited.length, 100);
+  const entries = Array.from({ length: 250 }, (_, i) => ({ id: `entry-${i}` }))
+  const limited = entries.slice(0, MAX_PER_RUN)
+  assertEquals(limited.length, 100)
 
   // Batches should be ceil(100/10) = 10
-  const batchCount = Math.ceil(limited.length / BATCH_SIZE);
-  assertEquals(batchCount, 10);
-});
+  const batchCount = Math.ceil(limited.length / BATCH_SIZE)
+  assertEquals(batchCount, 10)
+})

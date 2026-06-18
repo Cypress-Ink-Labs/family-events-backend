@@ -25,27 +25,27 @@ export function zonedDayStartUtc(now: Date, timeZone: string, dayOffset: number)
     minute: "numeric",
     second: "numeric",
     hour12: false,
-  });
+  })
 
-  const parts = fmt.formatToParts(now);
+  const parts = fmt.formatToParts(now)
   const get = (type: string) => {
-    const part = parts.find((p) => p.type === type);
-    if (!part) throw new Error(`Intl part "${type}" missing for timezone "${timeZone}"`);
-    return parseInt(part.value, 10);
-  };
+    const part = parts.find((p) => p.type === type)
+    if (!part) throw new Error(`Intl part "${type}" missing for timezone "${timeZone}"`)
+    return parseInt(part.value, 10)
+  }
 
-  const year = get("year");
-  const month = get("month") - 1; // Intl months are 1-based; Date.UTC months are 0-based
-  const day = get("day");
+  const year = get("year")
+  const month = get("month") - 1 // Intl months are 1-based; Date.UTC months are 0-based
+  const day = get("day")
 
   // Step 2 — derive the zone's UTC offset at this instant.
   // Treat the wall-clock parts as if they were a UTC time and subtract `now`.
   // The difference is (zone-local wall clock - UTC), i.e. the UTC offset in ms.
-  const wallAsUtcMs = Date.UTC(year, month, day, get("hour"), get("minute"), get("second"));
-  const offsetMs = wallAsUtcMs - now.getTime();
+  const wallAsUtcMs = Date.UTC(year, month, day, get("hour"), get("minute"), get("second"))
+  const offsetMs = wallAsUtcMs - now.getTime()
 
   // Step 3 — zone-local midnight of (today + dayOffset) as a UTC instant.
   // Date.UTC(year, month, day + dayOffset) gives midnight of that day *as if* in
   // UTC.  Subtracting the offset converts it to the real UTC instant.
-  return new Date(Date.UTC(year, month, day + dayOffset) - offsetMs);
+  return new Date(Date.UTC(year, month, day + dayOffset) - offsetMs)
 }

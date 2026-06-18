@@ -1,29 +1,29 @@
-import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
-import test from "node:test";
-import { readExpectedCronConfigs } from "../../scripts/railway-cron-drift.mjs";
+import assert from "node:assert/strict"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
+import path from "node:path"
+import test from "node:test"
+import { readExpectedCronConfigs } from "../../scripts/railway-cron-drift.mjs"
 
-const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
+const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..")
 
 test("root deploy scripts route through the TypeScript deploy CLI", () => {
-  const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"));
-  assert.equal(pkg.scripts.deploy, "pnpm --filter @cypress-ink-labs/deploy-cli cli");
+  const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"))
+  assert.equal(pkg.scripts.deploy, "pnpm --filter @cypress-ink-labs/deploy-cli cli")
   assert.equal(
     pkg.scripts["deploy:all"],
-    "pnpm --filter @cypress-ink-labs/deploy-cli cli deploy --all --yes",
-  );
+    "pnpm --filter @cypress-ink-labs/deploy-cli cli deploy --all --yes"
+  )
 
-  const wrapper = readFileSync(path.join(repoRoot, "scripts", "deploy.sh"), "utf8");
-  assert.match(wrapper, /@cypress-ink-labs\/deploy-cli/);
-  assert.match(wrapper, /pnpm --filter/);
-});
+  const wrapper = readFileSync(path.join(repoRoot, "scripts", "deploy.sh"), "utf8")
+  assert.match(wrapper, /@cypress-ink-labs\/deploy-cli/)
+  assert.match(wrapper, /pnpm --filter/)
+})
 
 test("deploy config includes every Supabase function directory", () => {
   const config = JSON.parse(
-    readFileSync(path.join(repoRoot, "config", "deploy.config.json"), "utf8"),
-  );
-  const configured = [...config.supabase.functions].sort();
+    readFileSync(path.join(repoRoot, "config", "deploy.config.json"), "utf8")
+  )
+  const configured = [...config.supabase.functions].sort()
   const discovered = readFileSync(path.join(repoRoot, "supabase", "functions", "deno.json"), "utf8")
     ? Array.from(
         new Set(
@@ -33,24 +33,24 @@ test("deploy config includes every Supabase function directory", () => {
             .filter(
               (name) =>
                 name !== "_shared" &&
-                existsSync(path.join(repoRoot, "supabase", "functions", name, "index.ts")),
-            ),
-        ),
+                existsSync(path.join(repoRoot, "supabase", "functions", name, "index.ts"))
+            )
+        )
       ).sort()
-    : [];
-  assert.deepEqual(configured, discovered);
-});
+    : []
+  assert.deepEqual(configured, discovered)
+})
 
 test("deploy config includes every Railway cron service from Railway IaC", () => {
   const config = JSON.parse(
-    readFileSync(path.join(repoRoot, "config", "deploy.config.json"), "utf8"),
-  );
-  const configured = new Set(config.railway.services.map((service) => service.name));
-  assert.equal(configured.has("web"), true);
+    readFileSync(path.join(repoRoot, "config", "deploy.config.json"), "utf8")
+  )
+  const configured = new Set(config.railway.services.map((service) => service.name))
+  assert.equal(configured.has("web"), true)
 
-  const cronServices = readExpectedCronConfigs(repoRoot);
+  const cronServices = readExpectedCronConfigs(repoRoot)
 
   for (const service of cronServices) {
-    assert.equal(configured.has(service.name), true, `${service.name} missing from deploy config`);
+    assert.equal(configured.has(service.name), true, `${service.name} missing from deploy config`)
   }
-});
+})

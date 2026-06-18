@@ -9,17 +9,17 @@
 // with redirect: "manual", and on a 3xx re-validates the Location target before
 // following it, up to a bounded depth.
 
-import { resolveAndCheckPublicIp } from "./url-resolve.ts";
+import { resolveAndCheckPublicIp } from "./url-resolve.ts"
 
 export interface GuardedFetchOptions {
   /** Max redirect hops to follow (each re-validated). Default 3. */
-  maxRedirects?: number;
+  maxRedirects?: number
 }
 
 export class SsrfRejectedError extends Error {
   constructor(reason: string) {
-    super(`URL rejected by SSRF guard: ${reason}`);
-    this.name = "SsrfRejectedError";
+    super(`URL rejected by SSRF guard: ${reason}`)
+    this.name = "SsrfRejectedError"
   }
 }
 
@@ -33,30 +33,30 @@ export class SsrfRejectedError extends Error {
 export async function guardedFetch(
   rawUrl: string,
   init: RequestInit = {},
-  opts: GuardedFetchOptions = {},
+  opts: GuardedFetchOptions = {}
 ): Promise<Response> {
-  const maxRedirects = opts.maxRedirects ?? 3;
-  let currentUrl = rawUrl;
+  const maxRedirects = opts.maxRedirects ?? 3
+  let currentUrl = rawUrl
 
   for (let hop = 0; hop <= maxRedirects; hop++) {
-    const check = await resolveAndCheckPublicIp(currentUrl);
+    const check = await resolveAndCheckPublicIp(currentUrl)
     if (!check.ok) {
-      throw new SsrfRejectedError(check.reason ?? "unknown reason");
+      throw new SsrfRejectedError(check.reason ?? "unknown reason")
     }
 
-    const response = await fetch(currentUrl, { ...init, redirect: "manual" });
+    const response = await fetch(currentUrl, { ...init, redirect: "manual" })
 
     if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get("location");
-      if (!location) return response;
+      const location = response.headers.get("location")
+      if (!location) return response
       // Release the redirect response body before following the next hop.
-      await response.body?.cancel().catch(() => {});
-      currentUrl = new URL(location, currentUrl).toString();
-      continue;
+      await response.body?.cancel().catch(() => {})
+      currentUrl = new URL(location, currentUrl).toString()
+      continue
     }
 
-    return response;
+    return response
   }
 
-  throw new SsrfRejectedError(`too many redirects (> ${maxRedirects})`);
+  throw new SsrfRejectedError(`too many redirects (> ${maxRedirects})`)
 }

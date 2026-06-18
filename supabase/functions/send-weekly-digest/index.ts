@@ -1,8 +1,8 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import { serveServiceRoleJson, serviceRoleJsonError } from "../_shared/service-role-handler.ts";
-import { escapeHtml } from "../_shared/html.ts";
-import { logEdgeEvent } from "../_shared/logger.ts";
-import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts";
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { serveServiceRoleJson, serviceRoleJsonError } from "../_shared/service-role-handler.ts"
+import { escapeHtml } from "../_shared/html.ts"
+import { logEdgeEvent } from "../_shared/logger.ts"
+import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
 
 // send-weekly-digest
 // ----------------------------------------------------------------
@@ -12,42 +12,42 @@ import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-
 // city has no events. Sends via Resend API following the notify-email
 // pattern. Rate-limits with small delays between batches.
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails";
-const RESEND_TIMEOUT_MS = 10_000;
-const BATCH_SIZE = 5;
-const BATCH_DELAY_MS = 500;
-const MAX_EVENTS_PER_DIGEST = 10;
+const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
+const RESEND_TIMEOUT_MS = 10_000
+const BATCH_SIZE = 5
+const BATCH_DELAY_MS = 500
+const MAX_EVENTS_PER_DIGEST = 10
 
 interface DigestUser {
-  user_id: string;
-  email: string;
-  display_name: string | null;
-  city_id: string;
-  city_name: string;
+  user_id: string
+  email: string
+  display_name: string | null
+  city_id: string
+  city_name: string
 }
 
 interface DigestPreference {
-  user_id: string;
+  user_id: string
 }
 
 interface DigestEvent {
-  id: string;
-  title: string;
-  start_datetime: string;
-  venue_name: string | null;
-  address: string | null;
-  is_free: boolean;
-  price: number | null;
+  id: string
+  title: string
+  start_datetime: string
+  venue_name: string | null
+  address: string | null
+  is_free: boolean
+  price: number | null
   // events.images is a jsonb array; elements are URL strings in practice, but
   // tolerate { url } objects too in case enrichment shape changes.
-  images: Array<string | { url?: string }> | null;
+  images: Array<string | { url?: string }> | null
 }
 
 function firstImageUrl(event: DigestEvent): string | undefined {
-  const first = event.images?.[0];
-  if (typeof first === "string") return first;
-  if (first && typeof first === "object") return first.url;
-  return undefined;
+  const first = event.images?.[0]
+  if (typeof first === "string") return first
+  if (first && typeof first === "object") return first.url
+  return undefined
 }
 
 // Some source events carry HTML markup in title/venue/address (e.g.
@@ -56,13 +56,13 @@ function stripTags(value: string): string {
   return value
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
-    .trim();
+    .trim()
 }
 
 function formatPrice(event: DigestEvent): string {
-  if (event.is_free) return "Free";
-  if (event.price != null) return `$${Number(event.price).toFixed(2)}`;
-  return "";
+  if (event.is_free) return "Free"
+  if (event.price != null) return `$${Number(event.price).toFixed(2)}`
+  return ""
 }
 
 // ── Dusk-Meadow theme tokens (mirrors packages/design-system) ─────────────────
@@ -83,62 +83,62 @@ const THEME = {
   gold: "#D4AA28", // kid affordances
   successText: "#2E7D5B", // free-price text
   successSoft: "#E6F2EC", // free-price pill fill
-} as const;
+} as const
 
-const FONT_SANS = `'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
-const FONT_DISPLAY = `'Fraunces', ui-serif, Georgia, 'Times New Roman', serif`;
-const FONT_EDITORIAL = `'Newsreader', ui-serif, Georgia, 'Times New Roman', serif`;
-const FONT_MONO = `'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace`;
+const FONT_SANS = `'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif`
+const FONT_DISPLAY = `'Fraunces', ui-serif, Georgia, 'Times New Roman', serif`
+const FONT_EDITORIAL = `'Newsreader', ui-serif, Georgia, 'Times New Roman', serif`
+const FONT_MONO = `'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace`
 
 const FONTS_HREF =
-  "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Geist+Mono:wght@400;500&display=swap";
+  "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Geist+Mono:wght@400;500&display=swap"
 
 function splitDateTime(isoDate: string): { date: string; time: string } {
   try {
-    const d = new Date(isoDate);
+    const d = new Date(isoDate)
     const date = d.toLocaleDateString("en-US", {
       weekday: "short",
       month: "short",
       day: "numeric",
-    });
+    })
     const time = d.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
-    });
-    return { date, time };
+    })
+    return { date, time }
   } catch {
-    return { date: isoDate, time: "" };
+    return { date: isoDate, time: "" }
   }
 }
 
 function renderPricePill(event: DigestEvent): string {
-  const price = formatPrice(event);
-  if (!price) return "";
-  const isFree = event.is_free;
-  const fill = isFree ? THEME.successSoft : THEME.peachSoft;
-  const color = isFree ? THEME.successText : THEME.peachDeep;
-  return `<span style="display:inline-block;background:${fill};color:${color};font-family:${FONT_MONO};font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;">${escapeHtml(price)}</span>`;
+  const price = formatPrice(event)
+  if (!price) return ""
+  const isFree = event.is_free
+  const fill = isFree ? THEME.successSoft : THEME.peachSoft
+  const color = isFree ? THEME.successText : THEME.peachDeep
+  return `<span style="display:inline-block;background:${fill};color:${color};font-family:${FONT_MONO};font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;">${escapeHtml(price)}</span>`
 }
 
 function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
-  const eventUrl = `${appUrl}/events/${event.id}`;
-  const thumbnail = firstImageUrl(event);
-  const title = stripTags(event.title);
-  const location = stripTags(event.venue_name || event.address || "");
-  const { date, time } = splitDateTime(event.start_datetime);
-  const initial = escapeHtml((title[0] || "•").toUpperCase());
+  const eventUrl = `${appUrl}/events/${event.id}`
+  const thumbnail = firstImageUrl(event)
+  const title = stripTags(event.title)
+  const location = stripTags(event.venue_name || event.address || "")
+  const { date, time } = splitDateTime(event.start_datetime)
+  const initial = escapeHtml((title[0] || "•").toUpperCase())
 
   const imageCell = thumbnail
     ? `<img src="${escapeHtml(thumbnail)}" width="92" height="92" alt=""
            style="width:92px;height:92px;border-radius:12px;object-fit:cover;display:block;border:1px solid ${THEME.border};" />`
-    : `<div style="width:92px;height:92px;border-radius:12px;background:${THEME.surfaceAlt};border:1px solid ${THEME.border};text-align:center;line-height:92px;font-family:${FONT_DISPLAY};font-size:34px;font-weight:600;color:${THEME.violet};">${initial}</div>`;
+    : `<div style="width:92px;height:92px;border-radius:12px;background:${THEME.surfaceAlt};border:1px solid ${THEME.border};text-align:center;line-height:92px;font-family:${FONT_DISPLAY};font-size:34px;font-weight:600;color:${THEME.violet};">${initial}</div>`
 
   const metaLine = [
     `<span style="font-family:${FONT_MONO};font-size:12px;color:${THEME.textMuted};">${escapeHtml(date)}${time ? ` · ${escapeHtml(time)}` : ""}</span>`,
     renderPricePill(event),
   ]
     .filter(Boolean)
-    .join(`<span style="color:${THEME.border};">&nbsp;&nbsp;</span>`);
+    .join(`<span style="color:${THEME.border};">&nbsp;&nbsp;</span>`)
 
   return `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;margin:0 0 14px;">
@@ -160,7 +160,7 @@ function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
           </table>
         </td>
       </tr>
-    </table>`;
+    </table>`
 }
 
 // Renders the full branded email as a single HTML string. We send raw `html`
@@ -168,13 +168,13 @@ function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
 // Resend's 2,000-char-per-template-variable limit. USERNAME/CITY_NAME are
 // escaped; event-card fields are escaped inside renderEventCardHtml.
 function renderDigestHtml(user: DigestUser, events: DigestEvent[], appUrl: string): string {
-  const username = escapeHtml(user.display_name || "there");
-  const cityName = escapeHtml(user.city_name);
-  const eventCount = String(events.length);
-  const eventLabel = events.length === 1 ? "event" : "events";
-  const eventsHtml = events.map((e) => renderEventCardHtml(e, appUrl)).join("\n");
-  const unsubscribeUrl = `${appUrl}/profile?tab=notifications`;
-  const logoUrl = `${appUrl}/brand/family-events-logo.png`;
+  const username = escapeHtml(user.display_name || "there")
+  const cityName = escapeHtml(user.city_name)
+  const eventCount = String(events.length)
+  const eventLabel = events.length === 1 ? "event" : "events"
+  const eventsHtml = events.map((e) => renderEventCardHtml(e, appUrl)).join("\n")
+  const unsubscribeUrl = `${appUrl}/profile?tab=notifications`
+  const logoUrl = `${appUrl}/brand/family-events-logo.png`
 
   return `
 <!DOCTYPE html>
@@ -263,26 +263,26 @@ function renderDigestHtml(user: DigestUser, events: DigestEvent[], appUrl: strin
     </tr>
   </table>
 </body>
-</html>`.trim();
+</html>`.trim()
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, supabase }) => {
-  const cronCtx = cronRunContextFromRequest(request);
+  const cronCtx = cronRunContextFromRequest(request)
 
   // Optional single-recipient override for manual/test runs:
   //   POST { "test_email": "you@example.com" }
   // When set, the run is scoped to that one recipient (must still be a digest
   // opt-in). Cron invocations send no body, so this is null in production.
-  let testEmail: string | null = null;
+  let testEmail: string | null = null
   try {
-    const body = (await request.json().catch(() => null)) as { test_email?: unknown } | null;
+    const body = (await request.json().catch(() => null)) as { test_email?: unknown } | null
     const raw =
-      body && typeof body.test_email === "string" ? body.test_email.trim().toLowerCase() : "";
-    testEmail = raw.length > 0 ? raw : null;
+      body && typeof body.test_email === "string" ? body.test_email.trim().toLowerCase() : ""
+    testEmail = raw.length > 0 ? raw : null
   } catch {
     // no/invalid body — treat as a normal full run
   }
@@ -292,74 +292,74 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
   const { data: preferences, error: preferencesError } = await supabase
     .from("user_notification_preferences")
     .select("user_id")
-    .eq("digest_email", true);
+    .eq("digest_email", true)
 
   if (preferencesError) {
     await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest users", {
       error: preferencesError.message,
-    });
-    throw preferencesError;
+    })
+    throw preferencesError
   }
 
-  const preferenceRows = (preferences ?? []) as DigestPreference[];
-  const userIds = [...new Set(preferenceRows.map((row) => row.user_id).filter(Boolean))];
+  const preferenceRows = (preferences ?? []) as DigestPreference[]
+  const userIds = [...new Set(preferenceRows.map((row) => row.user_id).filter(Boolean))]
 
   if (userIds.length === 0) {
-    await logCronRunEvent(supabase, cronCtx, "log", "No digest users found", {});
-    return { ok: true, sent: 0, skipped: 0, failed: 0 };
+    await logCronRunEvent(supabase, cronCtx, "log", "No digest users found", {})
+    return { ok: true, sent: 0, skipped: 0, failed: 0 }
   }
 
   type ProfileRow = {
-    id: string;
-    email: string | null;
-    display_name: string | null;
-    city_preference_id: string | null;
-    cities: { id: string; name: string } | null;
-  };
+    id: string
+    email: string | null
+    display_name: string | null
+    city_preference_id: string | null
+    cities: { id: string; name: string } | null
+  }
 
   const { data: profiles, error: profilesError } = await supabase
     .from("user_profiles")
     .select("id, email, display_name, city_preference_id, cities!inner(id, name)")
-    .in("id", userIds);
+    .in("id", userIds)
 
   if (profilesError) {
     await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest profiles", {
       error: profilesError.message,
-    });
-    throw profilesError;
+    })
+    throw profilesError
   }
 
-  const profilesById = new Map<string, ProfileRow>();
+  const profilesById = new Map<string, ProfileRow>()
   for (const profile of (profiles ?? []) as unknown as ProfileRow[]) {
-    profilesById.set(profile.id, profile);
+    profilesById.set(profile.id, profile)
   }
 
-  const digestUsers: DigestUser[] = [];
+  const digestUsers: DigestUser[] = []
   for (const row of preferenceRows) {
-    const profile = profilesById.get(row.user_id);
-    if (!profile?.email || !profile.cities) continue;
+    const profile = profilesById.get(row.user_id)
+    if (!profile?.email || !profile.cities) continue
     digestUsers.push({
       user_id: row.user_id,
       email: profile.email,
       display_name: profile.display_name,
       city_id: profile.cities.id,
       city_name: profile.cities.name,
-    });
+    })
   }
 
   if (digestUsers.length === 0) {
-    await logCronRunEvent(supabase, cronCtx, "log", "No digest users found", {});
-    return { ok: true, sent: 0, skipped: 0, failed: 0 };
+    await logCronRunEvent(supabase, cronCtx, "log", "No digest users found", {})
+    return { ok: true, sent: 0, skipped: 0, failed: 0 }
   }
 
   // 1b. If a test_email override is set, scope the run to that one recipient.
-  let targetedUsers = digestUsers;
+  let targetedUsers = digestUsers
   if (testEmail) {
-    targetedUsers = digestUsers.filter((u) => u.email.toLowerCase() === testEmail);
+    targetedUsers = digestUsers.filter((u) => u.email.toLowerCase() === testEmail)
     if (targetedUsers.length === 0) {
       await logCronRunEvent(supabase, cronCtx, "log", "Test email not among digest opt-ins", {
         test_email: testEmail,
-      });
+      })
       return {
         ok: true,
         sent: 0,
@@ -367,23 +367,23 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
         failed: 0,
         test_email: testEmail,
         note: "no matching digest user (must have digest_email=true)",
-      };
+      }
     }
   }
 
   // 2. Group users by city to avoid duplicate event queries
-  const usersByCity = new Map<string, DigestUser[]>();
+  const usersByCity = new Map<string, DigestUser[]>()
   for (const user of targetedUsers) {
-    const group = usersByCity.get(user.city_id) ?? [];
-    group.push(user);
-    usersByCity.set(user.city_id, group);
+    const group = usersByCity.get(user.city_id) ?? []
+    group.push(user)
+    usersByCity.set(user.city_id, group)
   }
 
   // 3. For each city, query upcoming published events for next 7 days
-  const now = new Date();
-  const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const now = new Date()
+  const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
 
-  const eventsByCity = new Map<string, DigestEvent[]>();
+  const eventsByCity = new Map<string, DigestEvent[]>()
   for (const cityId of usersByCity.keys()) {
     const { data: events, error: eventsError } = await supabase.rpc("search_events", {
       p_city_id: cityId,
@@ -391,33 +391,33 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       p_date_to: weekFromNow.toISOString(),
       p_status: "published",
       p_limit: MAX_EVENTS_PER_DIGEST,
-    });
+    })
 
     if (eventsError) {
       logEdgeEvent("warn", "Failed to query events for city", {
         function: "send-weekly-digest",
         city_id: cityId,
         error: eventsError.message,
-      });
-      continue;
+      })
+      continue
     }
 
     if (events && events.length > 0) {
-      eventsByCity.set(cityId, events as DigestEvent[]);
+      eventsByCity.set(cityId, events as DigestEvent[])
     }
   }
 
   // 4. Send emails via Resend
-  const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
-  const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>";
+  const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
+  const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
   const appUrl = (Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app").replace(
     /\/$/,
-    "",
-  );
+    ""
+  )
 
   if (!resendApiKey) {
-    const totalUsers = digestUsers.length;
-    const citiesWithEvents = eventsByCity.size;
+    const totalUsers = digestUsers.length
+    const citiesWithEvents = eventsByCity.size
     logEdgeEvent(
       "warn",
       "send-weekly-digest: RESEND_API_KEY not configured; would have sent digests",
@@ -425,33 +425,33 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
         function: "send-weekly-digest",
         total_users: totalUsers,
         cities_with_events: citiesWithEvents,
-      },
-    );
+      }
+    )
     await logCronRunEvent(supabase, cronCtx, "log", "Dry run (no RESEND_API_KEY)", {
       total_users: totalUsers,
       cities_with_events: citiesWithEvents,
-    });
-    return { ok: true, sent: 0, skipped: totalUsers, failed: 0, dev: true };
+    })
+    return { ok: true, sent: 0, skipped: totalUsers, failed: 0, dev: true }
   }
 
-  let sent = 0;
-  let skipped = 0;
-  let failed = 0;
+  let sent = 0
+  let skipped = 0
+  let failed = 0
 
   // Process in batches to rate-limit Resend API calls
-  const allUsers = [...targetedUsers];
+  const allUsers = [...targetedUsers]
   for (let i = 0; i < allUsers.length; i += BATCH_SIZE) {
-    const batch = allUsers.slice(i, i + BATCH_SIZE);
+    const batch = allUsers.slice(i, i + BATCH_SIZE)
 
     for (const user of batch) {
-      const events = eventsByCity.get(user.city_id);
+      const events = eventsByCity.get(user.city_id)
       if (!events || events.length === 0) {
-        skipped++;
-        continue;
+        skipped++
+        continue
       }
 
-      const html = renderDigestHtml(user, events, appUrl);
-      const subject = `${events.length} family events this week in ${user.city_name}`;
+      const html = renderDigestHtml(user, events, appUrl)
+      const subject = `${events.length} family events this week in ${user.city_name}`
 
       try {
         const response = await fetch(RESEND_API_ENDPOINT, {
@@ -467,42 +467,42 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
             html,
           }),
           signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-        });
+        })
 
         if (response.ok) {
-          sent++;
+          sent++
         } else {
-          const body = await response.text().catch(() => "");
+          const body = await response.text().catch(() => "")
           logEdgeEvent("warn", "send-weekly-digest: Resend rejected email", {
             function: "send-weekly-digest",
             to: user.email,
             status: response.status,
             body: body.slice(0, 300),
-          });
-          failed++;
+          })
+          failed++
         }
       } catch (err) {
         logEdgeEvent("warn", "send-weekly-digest: failed to send", {
           function: "send-weekly-digest",
           to: user.email,
           error: err instanceof Error ? err.message : String(err),
-        });
-        failed++;
+        })
+        failed++
       }
     }
 
     // Rate-limit: pause between batches (skip after last batch)
     if (i + BATCH_SIZE < allUsers.length) {
-      await sleep(BATCH_DELAY_MS);
+      await sleep(BATCH_DELAY_MS)
     }
   }
 
-  const summary = { ok: true, sent, skipped, failed, total: allUsers.length };
-  await logCronRunEvent(supabase, cronCtx, "log", "Weekly digest run complete", summary);
+  const summary = { ok: true, sent, skipped, failed, total: allUsers.length }
+  await logCronRunEvent(supabase, cronCtx, "log", "Weekly digest run complete", summary)
   logEdgeEvent("log", "send-weekly-digest: complete", {
     function: "send-weekly-digest",
     ...summary,
-  });
+  })
 
-  return summary;
-});
+  return summary
+})

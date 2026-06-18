@@ -1,108 +1,108 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { requireServiceRole } from "../_shared/auth.ts";
-import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts";
-import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage } from "../_shared/logger.ts";
-import { buildGeocodeQuery, geocodeViaNominatim, type GeocodeResult } from "../_shared/geocode.ts";
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import { requireServiceRole } from "../_shared/auth.ts"
+import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
+import { captureEdgeException } from "../_shared/sentry.ts"
+import { errorContext, errorMessage } from "../_shared/logger.ts"
+import { buildGeocodeQuery, geocodeViaNominatim, type GeocodeResult } from "../_shared/geocode.ts"
 import {
   findFallbackImage,
   trackUnsplashDownload,
   type StockImageProviderKeys,
   type StockProvider,
-} from "../_shared/stock-images.ts";
-import { lookupUnsplashPhotoFromUrl } from "../_shared/unsplash.ts";
-import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts";
-import type { ParsedEvent } from "../scrape-source/lib/types.ts";
-import { runParentTipsPass } from "./parent-tips-pass.ts";
+} from "../_shared/stock-images.ts"
+import { lookupUnsplashPhotoFromUrl } from "../_shared/unsplash.ts"
+import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts"
+import type { ParsedEvent } from "../scrape-source/lib/types.ts"
+import { runParentTipsPass } from "./parent-tips-pass.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+}
 
 // Cap batch so per-tick wall stays under 90s with headroom under the 150s
 // edge wall. Each event = 1 geocode HTTP + N image HEAD HTTPs (capped at 5)
 // + optionally 1 stock image search + 1 download-track ping. At ~1-3s/event
 // we fit ~25-30 events comfortably.
-const DEFAULT_BATCH = 25;
+const DEFAULT_BATCH = 25
 
 // Parent-tips pass is gated by ai_feature_config and runs after the
 // coords/images loop. Smaller batch because each event = one LLM call
 // (~1-3s) on top of the work already done above.
 interface EventNeedingEnrichment {
-  event_id: string;
-  title: string;
-  description: string | null;
-  venue_name: string | null;
-  address: string | null;
-  city_id: string | null;
-  source_id: string | null;
-  source_url: string | null;
-  needs_coords: boolean;
-  needs_images: boolean;
-  admin_locked_fields: string[];
+  event_id: string
+  title: string
+  description: string | null
+  venue_name: string | null
+  address: string | null
+  city_id: string | null
+  source_id: string | null
+  source_url: string | null
+  needs_coords: boolean
+  needs_images: boolean
+  admin_locked_fields: string[]
   /**
    * Tag slugs ordered by confidence DESC. Migration 20260601004000
    * extends list_events_needing_enrichment + adds
    * backfill_image_enrichment_in_scope so both return this column.
    * Empty array when the tag-queue hasn't processed the event yet.
    */
-  tags: string[];
+  tags: string[]
 }
 
 interface SourceCityContext {
-  name: string | null;
-  state: string | null;
-  latitude: number | null;
-  longitude: number | null;
+  name: string | null
+  state: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 interface PendingUnsplashTrackingRow {
-  attribution_id: string;
-  event_id: string;
-  image_url: string;
-  download_location: string;
-  attempts: number;
+  attribution_id: string
+  event_id: string
+  image_url: string
+  download_location: string
+  attempts: number
 }
 
 interface UnsplashTrackingSummary {
-  pending_claimed: number;
-  tracked: number;
-  failed: number;
+  pending_claimed: number
+  tracked: number
+  failed: number
 }
 
 async function fetchCityContext(
   supabase: SupabaseClient,
-  cityId: string | null,
+  cityId: string | null
 ): Promise<SourceCityContext | null> {
-  if (!cityId) return null;
+  if (!cityId) return null
   const { data } = await supabase
     .from("cities")
     .select("name, state, latitude, longitude")
     .eq("id", cityId)
-    .maybeSingle();
-  if (!data) return null;
+    .maybeSingle()
+  if (!data) return null
   return {
     name: data.name,
     state: data.state,
     latitude: data.latitude,
     longitude: data.longitude,
-  };
+  }
 }
 
 async function fetchSourceUrl(
   supabase: SupabaseClient,
-  sourceId: string | null,
+  sourceId: string | null
 ): Promise<string | null> {
-  if (!sourceId) return null;
+  if (!sourceId) return null
   const { data } = await supabase
     .from("event_sources")
     .select("url")
     .eq("id", sourceId)
-    .maybeSingle();
-  return (data as { url?: string } | null)?.url ?? null;
+    .maybeSingle()
+  return (data as { url?: string } | null)?.url ?? null
 }
 
 async function enrichOne(
@@ -112,26 +112,26 @@ async function enrichOne(
   sourceCache: Map<string, string | null>,
   providerKeys: StockImageProviderKeys,
   geocodeCache: Map<string, GeocodeResult | null>,
-  imageCache: Map<string, Awaited<ReturnType<typeof findFallbackImage>>>,
+  imageCache: Map<string, Awaited<ReturnType<typeof findFallbackImage>>>
 ): Promise<{
-  updated: boolean;
-  gotCoords: boolean;
-  gotImages: boolean;
-  imageSource: "scraper" | "pexels" | "pixabay" | "unsplash" | "none";
+  updated: boolean
+  gotCoords: boolean
+  gotImages: boolean
+  imageSource: "scraper" | "pexels" | "pixabay" | "unsplash" | "none"
 }> {
-  let latitude: number | null = null;
-  let longitude: number | null = null;
-  let images: string[] = [];
-  let imageSource: "scraper" | "pexels" | "pixabay" | "unsplash" | "none" = "none";
-  let stockResult: Awaited<ReturnType<typeof findFallbackImage>> = null;
+  let latitude: number | null = null
+  let longitude: number | null = null
+  let images: string[] = []
+  let imageSource: "scraper" | "pexels" | "pixabay" | "unsplash" | "none" = "none"
+  let stockResult: Awaited<ReturnType<typeof findFallbackImage>> = null
 
   if (row.needs_coords) {
-    let cityCtx: SourceCityContext | null = null;
+    let cityCtx: SourceCityContext | null = null
     if (row.city_id) {
       if (!cityCache.has(row.city_id)) {
-        cityCache.set(row.city_id, await fetchCityContext(supabase, row.city_id));
+        cityCache.set(row.city_id, await fetchCityContext(supabase, row.city_id))
       }
-      cityCtx = cityCache.get(row.city_id) ?? null;
+      cityCtx = cityCache.get(row.city_id) ?? null
     }
 
     const query = buildGeocodeQuery({
@@ -139,48 +139,48 @@ async function enrichOne(
       venueName: row.venue_name,
       cityName: cityCtx?.name ?? null,
       cityState: cityCtx?.state ?? null,
-    });
+    })
     if (query) {
       // Use geocodeCache to avoid re-fetching the same address within a batch.
       // Both hits and misses are cached — a venue that fails to geocode should
       // not be retried for every event in the same batch.
-      let geo: GeocodeResult | null;
+      let geo: GeocodeResult | null
       if (geocodeCache.has(query)) {
-        geo = geocodeCache.get(query)!;
+        geo = geocodeCache.get(query)!
       } else {
-        geo = await geocodeViaNominatim(query);
-        geocodeCache.set(query, geo);
+        geo = await geocodeViaNominatim(query)
+        geocodeCache.set(query, geo)
       }
       if (geo) {
-        latitude = geo.latitude;
-        longitude = geo.longitude;
+        latitude = geo.latitude
+        longitude = geo.longitude
       } else {
         // When venue_name follows "Room Name, Branch Name" pattern (e.g.
         // "WRL Storytime Room, West Regional Library"), Nominatim can't resolve
         // the room prefix. Strip it and retry with just the branch name.
-        const raw = row.venue_name ?? row.address;
+        const raw = row.venue_name ?? row.address
         if (raw) {
-          const lastComma = raw.lastIndexOf(",");
+          const lastComma = raw.lastIndexOf(",")
           if (lastComma !== -1) {
-            const branchName = raw.substring(lastComma + 1).trim();
+            const branchName = raw.substring(lastComma + 1).trim()
             if (branchName) {
               const fallbackQuery = buildGeocodeQuery({
                 address: null,
                 venueName: branchName,
                 cityName: cityCtx?.name ?? null,
                 cityState: cityCtx?.state ?? null,
-              });
+              })
               if (fallbackQuery) {
-                let fallbackGeo: GeocodeResult | null;
+                let fallbackGeo: GeocodeResult | null
                 if (geocodeCache.has(fallbackQuery)) {
-                  fallbackGeo = geocodeCache.get(fallbackQuery)!;
+                  fallbackGeo = geocodeCache.get(fallbackQuery)!
                 } else {
-                  fallbackGeo = await geocodeViaNominatim(fallbackQuery);
-                  geocodeCache.set(fallbackQuery, fallbackGeo);
+                  fallbackGeo = await geocodeViaNominatim(fallbackQuery)
+                  geocodeCache.set(fallbackQuery, fallbackGeo)
                 }
                 if (fallbackGeo) {
-                  latitude = fallbackGeo.latitude;
-                  longitude = fallbackGeo.longitude;
+                  latitude = fallbackGeo.latitude
+                  longitude = fallbackGeo.longitude
                 }
               }
             }
@@ -201,18 +201,18 @@ async function enrichOne(
         venueName: row.venue_name,
         cityName: null,
         cityState: null,
-      });
+      })
       if (venueOnlyQuery && venueOnlyQuery !== query) {
-        let venueGeo: GeocodeResult | null;
+        let venueGeo: GeocodeResult | null
         if (geocodeCache.has(venueOnlyQuery)) {
-          venueGeo = geocodeCache.get(venueOnlyQuery)!;
+          venueGeo = geocodeCache.get(venueOnlyQuery)!
         } else {
-          venueGeo = await geocodeViaNominatim(venueOnlyQuery);
-          geocodeCache.set(venueOnlyQuery, venueGeo);
+          venueGeo = await geocodeViaNominatim(venueOnlyQuery)
+          geocodeCache.set(venueOnlyQuery, venueGeo)
         }
         if (venueGeo) {
-          latitude = venueGeo.latitude;
-          longitude = venueGeo.longitude;
+          latitude = venueGeo.latitude
+          longitude = venueGeo.longitude
         }
       }
     }
@@ -228,9 +228,9 @@ async function enrichOne(
 
   if (row.needs_images && row.source_id) {
     if (!sourceCache.has(row.source_id)) {
-      sourceCache.set(row.source_id, await fetchSourceUrl(supabase, row.source_id));
+      sourceCache.set(row.source_id, await fetchSourceUrl(supabase, row.source_id))
     }
-    const sourceUrl = sourceCache.get(row.source_id) ?? null;
+    const sourceUrl = sourceCache.get(row.source_id) ?? null
     if (sourceUrl) {
       // sanitizeImagesForIngest expects a ParsedEvent shape; the scrape
       // RPC drops the parser's images on insert, so this currently returns
@@ -249,9 +249,9 @@ async function enrichOne(
         images: [],
         price: null,
         isFree: false,
-      };
-      images = await sanitizeImagesForIngest(parsedShim, sourceUrl);
-      if (images.length > 0) imageSource = "scraper";
+      }
+      images = await sanitizeImagesForIngest(parsedShim, sourceUrl)
+      if (images.length > 0) imageSource = "scraper"
     }
   }
 
@@ -267,21 +267,21 @@ async function enrichOne(
     // arg varies per event but tag-driven dedup is the dominant case and a
     // best-effort win within one batch. findFallbackImage has no side effects
     // (download tracking is a separate call), so caching is safe.
-    const imageKey = [...row.tags].sort().join(",");
+    const imageKey = [...row.tags].sort().join(",")
     if (imageCache.has(imageKey)) {
-      stockResult = imageCache.get(imageKey)!;
+      stockResult = imageCache.get(imageKey)!
     } else {
-      stockResult = await findFallbackImage(row.tags, providerKeys, { title: row.title });
-      imageCache.set(imageKey, stockResult);
+      stockResult = await findFallbackImage(row.tags, providerKeys, { title: row.title })
+      imageCache.set(imageKey, stockResult)
     }
     if (stockResult) {
-      images = [stockResult.url];
-      imageSource = stockResult.attribution.provider;
+      images = [stockResult.url]
+      imageSource = stockResult.attribution.provider
     }
   }
 
-  const gotCoords = latitude !== null && longitude !== null;
-  const gotImages = images.length > 0;
+  const gotCoords = latitude !== null && longitude !== null
+  const gotImages = images.length > 0
 
   // Nothing to write: bump the attempt timestamp so the row rotates to the
   // back of the claim queue. Without this the same unfillable rows would
@@ -290,14 +290,14 @@ async function enrichOne(
   if (!gotCoords && !gotImages) {
     const { error: markErr } = await supabase.rpc("mark_event_enrichment_attempt", {
       p_event_id: row.event_id,
-    });
-    if (markErr) throw markErr;
+    })
+    if (markErr) throw markErr
     return {
       updated: false,
       gotCoords: false,
       gotImages: false,
       imageSource: "none",
-    };
+    }
   }
 
   // update_event_enrichment also bumps last_enrichment_attempt_at server-side.
@@ -320,9 +320,9 @@ async function enrichOne(
         p_unsplash_photo_url: stockResult.attribution.photoUrl,
         p_unsplash_download_location: stockResult.attribution.downloadLocation ?? "",
         p_matched_tag: stockResult.matchedTag,
-      },
-    );
-    if (error) throw error;
+      }
+    )
+    if (error) throw error
 
     if (
       typeof attributionId === "string" &&
@@ -331,17 +331,17 @@ async function enrichOne(
     ) {
       const tracking = await trackUnsplashDownload(
         stockResult.attribution.downloadLocation,
-        providerKeys.unsplash ?? "",
-      );
+        providerKeys.unsplash ?? ""
+      )
       const { error: markTrackingError } = await supabase.rpc(
         "mark_unsplash_download_tracking_result",
         {
           p_attribution_id: attributionId,
           p_success: tracking.ok,
           p_error: tracking.error,
-        },
-      );
-      if (markTrackingError) throw markTrackingError;
+        }
+      )
+      if (markTrackingError) throw markTrackingError
     }
   } else if ((imageSource === "pexels" || imageSource === "pixabay") && stockResult) {
     // Update event coords/images first
@@ -350,8 +350,8 @@ async function enrichOne(
       p_latitude: latitude,
       p_longitude: longitude,
       p_images: images.length > 0 ? images : null,
-    });
-    if (updateErr) throw updateErr;
+    })
+    if (updateErr) throw updateErr
 
     // Then insert attribution (Pexels/Pixabay don't need download tracking)
     const { error: attrErr } = await supabase.from("event_image_attributions").upsert(
@@ -373,99 +373,99 @@ async function enrichOne(
           imageSource === "pixabay" ? stockResult.attribution.photographerUsername : null,
         pixabay_photo_url: imageSource === "pixabay" ? stockResult.attribution.photoUrl : null,
       },
-      { onConflict: "event_id,image_url" },
-    );
-    if (attrErr) throw attrErr;
+      { onConflict: "event_id,image_url" }
+    )
+    if (attrErr) throw attrErr
   } else {
     const { error } = await supabase.rpc("update_event_enrichment", {
       p_event_id: row.event_id,
       p_latitude: latitude,
       p_longitude: longitude,
       p_images: images.length > 0 ? images : null,
-    });
-    if (error) throw error;
+    })
+    if (error) throw error
   }
 
-  return { updated: true, gotCoords, gotImages, imageSource };
+  return { updated: true, gotCoords, gotImages, imageSource }
 }
 
 async function runPendingUnsplashTrackingPass(
   supabase: SupabaseClient,
-  unsplashAccessKey: string,
+  unsplashAccessKey: string
 ): Promise<UnsplashTrackingSummary> {
   const summary: UnsplashTrackingSummary = {
     pending_claimed: 0,
     tracked: 0,
     failed: 0,
-  };
+  }
 
-  if (!unsplashAccessKey) return summary;
+  if (!unsplashAccessKey) return summary
 
   const { data, error } = await supabase.rpc("list_pending_unsplash_download_tracking", {
     p_limit: 25,
-  });
-  if (error) throw error;
+  })
+  if (error) throw error
 
-  const rows = (data ?? []) as PendingUnsplashTrackingRow[];
-  summary.pending_claimed = rows.length;
+  const rows = (data ?? []) as PendingUnsplashTrackingRow[]
+  summary.pending_claimed = rows.length
 
   for (const row of rows) {
-    const result = await trackUnsplashDownload(row.download_location, unsplashAccessKey);
+    const result = await trackUnsplashDownload(row.download_location, unsplashAccessKey)
     const { error: markError } = await supabase.rpc("mark_unsplash_download_tracking_result", {
       p_attribution_id: row.attribution_id,
       p_success: result.ok,
       p_error: result.error,
-    });
-    if (markError) throw markError;
-    if (result.ok) summary.tracked += 1;
-    else summary.failed += 1;
+    })
+    if (markError) throw markError
+    if (result.ok) summary.tracked += 1
+    else summary.failed += 1
   }
 
-  return summary;
+  return summary
 }
 
 interface AttributionBackfillRow {
-  event_id: string;
-  image_url: string;
+  event_id: string
+  image_url: string
 }
 
 interface AttributionBackfillSummary {
-  claimed: number;
-  backfilled: number;
-  skipped: number;
-  errors: number;
+  claimed: number
+  backfilled: number
+  skipped: number
+  errors: number
 }
 
-const ATTRIBUTION_BACKFILL_BATCH = 10;
+const ATTRIBUTION_BACKFILL_BATCH = 10
 
 async function runUnsplashAttributionBackfillPass(
   supabase: SupabaseClient,
-  unsplashAccessKey: string,
+  unsplashAccessKey: string
 ): Promise<AttributionBackfillSummary> {
   const summary: AttributionBackfillSummary = {
     claimed: 0,
     backfilled: 0,
     skipped: 0,
     errors: 0,
-  };
+  }
 
-  if (!unsplashAccessKey) return summary;
+  if (!unsplashAccessKey) return summary
 
   const { data, error } = await supabase.rpc("list_events_needing_attribution_backfill", {
     p_limit: ATTRIBUTION_BACKFILL_BATCH,
-  });
-  if (error) throw error;
+  })
+  if (error) throw error
 
-  const rows = (data ?? []) as AttributionBackfillRow[];
-  summary.claimed = rows.length;
+  const rows = (data ?? []) as AttributionBackfillRow[]
+  summary.claimed = rows.length
 
   for (const row of rows) {
     try {
-      const attribution = await lookupUnsplashPhotoFromUrl(row.image_url, unsplashAccessKey);
+      const attribution = await lookupUnsplashPhotoFromUrl(row.image_url, unsplashAccessKey)
 
       if (!attribution) {
-        summary.skipped += 1;
-        continue;
+        summary.skipped += 1
+        continue
       }
 
       const { error: upsertErr } = await supabase.from("event_image_attributions").upsert(
@@ -483,85 +483,85 @@ async function runUnsplashAttributionBackfillPass(
           download_tracking_status: "pending",
           download_tracking_next_attempt_at: new Date().toISOString(),
         },
-        { onConflict: "event_id,image_url" },
-      );
+        { onConflict: "event_id,image_url" }
+      )
 
       if (upsertErr) {
-        summary.errors += 1;
-        continue;
+        summary.errors += 1
+        continue
       }
 
-      summary.backfilled += 1;
+      summary.backfilled += 1
     } catch (rowErr) {
-      summary.errors += 1;
+      summary.errors += 1
     }
   }
 
-  return summary;
+  return summary
 }
 
 Deno.serve(async (req: Request) => {
-  const cronContext = cronRunContextFromRequest(req);
+  const cronContext = cronRunContextFromRequest(req)
 
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, { status: 200, headers: corsHeaders })
   }
 
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
 
-  const auth = requireServiceRole(req, serviceRoleKey);
+  const auth = requireServiceRole(req, serviceRoleKey)
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.message }), {
       status: auth.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    })
   }
 
   if (!supabaseUrl) {
     return new Response(JSON.stringify({ error: "SUPABASE_URL not configured" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    })
   }
 
   try {
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     // Load all three provider keys
     const providerKeys: StockImageProviderKeys = {
       pexels: Deno.env.get("PEXELS_API_KEY"),
       pixabay: Deno.env.get("PIXABAY_API_KEY"),
       unsplash: Deno.env.get("UNSPLASH_ACCESS_KEY"),
-    };
-    const unsplashAccessKey = providerKeys.unsplash ?? "";
+    }
+    const unsplashAccessKey = providerKeys.unsplash ?? ""
 
     // Two-pass row claim. The legacy RPC orders by created_at DESC so old
     // rows that already have coords but no images can starve when many
     // recently-scraped rows still need coords. The scoped RPC narrows to
     // featured + next-30-day rows so the user-facing surface fills first.
-    const halfBatch = Math.max(1, Math.floor(DEFAULT_BATCH / 2));
+    const halfBatch = Math.max(1, Math.floor(DEFAULT_BATCH / 2))
     const [legacyResp, scopedResp] = await Promise.all([
       supabase.rpc("list_events_needing_enrichment", { p_limit: halfBatch }),
       supabase.rpc("backfill_image_enrichment_in_scope", {
         p_limit: halfBatch,
       }),
-    ]);
-    if (legacyResp.error) throw legacyResp.error;
-    if (scopedResp.error) throw scopedResp.error;
+    ])
+    if (legacyResp.error) throw legacyResp.error
+    if (scopedResp.error) throw scopedResp.error
 
-    const seen = new Set<string>();
-    const rows: EventNeedingEnrichment[] = [];
+    const seen = new Set<string>()
+    const rows: EventNeedingEnrichment[] = []
     for (const r of (legacyResp.data ?? []) as EventNeedingEnrichment[]) {
       if (!seen.has(r.event_id)) {
-        seen.add(r.event_id);
-        rows.push(r);
+        seen.add(r.event_id)
+        rows.push(r)
       }
     }
     for (const r of (scopedResp.data ?? []) as EventNeedingEnrichment[]) {
       if (!seen.has(r.event_id)) {
-        seen.add(r.event_id);
-        rows.push(r);
+        seen.add(r.event_id)
+        rows.push(r)
       }
     }
 
@@ -575,14 +575,14 @@ Deno.serve(async (req: Request) => {
       images_from_pixabay: 0,
       images_from_unsplash: 0,
       errors: 0,
-    };
-    const cityCache = new Map<string, SourceCityContext | null>();
-    const sourceCache = new Map<string, string | null>();
+    }
+    const cityCache = new Map<string, SourceCityContext | null>()
+    const sourceCache = new Map<string, string | null>()
     // Per-batch geocode + image caches: keyed on normalized query string and
     // sorted tag slugs respectively. Cuts redundant external calls when multiple
     // events share the same venue/address or tag set.
-    const geocodeCache = new Map<string, GeocodeResult | null>();
-    const imageCache = new Map<string, Awaited<ReturnType<typeof findFallbackImage>>>();
+    const geocodeCache = new Map<string, GeocodeResult | null>()
+    const imageCache = new Map<string, Awaited<ReturnType<typeof findFallbackImage>>>()
 
     for (const row of rows) {
       try {
@@ -593,43 +593,43 @@ Deno.serve(async (req: Request) => {
           sourceCache,
           providerKeys,
           geocodeCache,
-          imageCache,
-        );
-        if (result.updated) summary.updated += 1;
-        if (result.gotCoords) summary.coords += 1;
-        if (result.gotImages) summary.images += 1;
-        if (result.imageSource === "scraper") summary.images_from_scraper += 1;
-        if (result.imageSource === "pexels") summary.images_from_pexels += 1;
-        if (result.imageSource === "pixabay") summary.images_from_pixabay += 1;
+          imageCache
+        )
+        if (result.updated) summary.updated += 1
+        if (result.gotCoords) summary.coords += 1
+        if (result.gotImages) summary.images += 1
+        if (result.imageSource === "scraper") summary.images_from_scraper += 1
+        if (result.imageSource === "pexels") summary.images_from_pexels += 1
+        if (result.imageSource === "pixabay") summary.images_from_pixabay += 1
         if (result.imageSource === "unsplash") {
-          summary.images_from_unsplash += 1;
+          summary.images_from_unsplash += 1
         }
       } catch (rowErr) {
-        summary.errors += 1;
+        summary.errors += 1
         await logCronRunEvent(supabase, cronContext, "warn", "enrich row failed", {
           function: "backfill-event-enrichment",
           event_id: row.event_id,
           error: errorMessage(rowErr),
-        });
+        })
       }
     }
 
     const unsplashTrackingSummary = await runPendingUnsplashTrackingPass(
       supabase,
-      unsplashAccessKey,
-    );
+      unsplashAccessKey
+    )
 
     const attributionBackfillSummary = await runUnsplashAttributionBackfillPass(
       supabase,
-      unsplashAccessKey,
-    );
+      unsplashAccessKey
+    )
 
     const parentTipsSummary = await runParentTipsPass({
       supabase,
       supabaseUrl,
       serviceRoleKey,
       cronContext,
-    });
+    })
 
     await logCronRunEvent(supabase, cronContext, "log", "backfill-event-enrichment done", {
       function: "backfill-event-enrichment",
@@ -637,7 +637,7 @@ Deno.serve(async (req: Request) => {
       unsplash_tracking: unsplashTrackingSummary,
       attribution_backfill: attributionBackfillSummary,
       parent_tips: parentTipsSummary,
-    });
+    })
     return new Response(
       JSON.stringify({
         ok: true,
@@ -649,11 +649,11 @@ Deno.serve(async (req: Request) => {
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+      }
+    )
   } catch (err) {
     if (serviceRoleKey && supabaseUrl) {
-      const supabase = createClient(supabaseUrl, serviceRoleKey);
+      const supabase = createClient(supabaseUrl, serviceRoleKey)
       await logCronRunEvent(
         supabase,
         cronContext,
@@ -662,19 +662,19 @@ Deno.serve(async (req: Request) => {
         errorContext(err, {
           function: "backfill-event-enrichment",
           stage: "outer",
-        }),
-      );
+        })
+      )
     }
     await captureEdgeException(
       err,
       errorContext(err, {
         function: "backfill-event-enrichment",
         stage: "outer",
-      }),
-    );
+      })
+    )
     return new Response(JSON.stringify({ error: errorMessage(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    })
   }
-});
+})

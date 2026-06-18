@@ -12,20 +12,20 @@ export const DEFAULT_ALLOWED_ORIGINS = [
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
   "http://127.0.0.1:5175",
-];
+]
 
 /**
  * Returns the request origin when it is on the allowlist, otherwise null.
  * The allowlist is overridable via the ALLOWED_ORIGINS env var (comma-separated).
  */
 export function resolveAllowedOrigin(origin: string | null): string | null {
-  const configured = Deno.env.get("ALLOWED_ORIGINS");
+  const configured = Deno.env.get("ALLOWED_ORIGINS")
   const allowlist = (configured?.split(",") ?? DEFAULT_ALLOWED_ORIGINS)
     .map((value) => value.trim())
-    .filter((value) => value.length > 0);
+    .filter((value) => value.length > 0)
 
-  if (!origin) return null;
-  return allowlist.includes(origin) ? origin : null;
+  if (!origin) return null
+  return allowlist.includes(origin) ? origin : null
 }
 
 /**
@@ -36,15 +36,15 @@ export function resolveAllowedOrigin(origin: string | null): string | null {
  */
 export function buildCorsHeaders(
   allowedOrigin: string | null,
-  methods: string[] = ["POST", "OPTIONS"],
+  methods: string[] = ["POST", "OPTIONS"]
 ): Record<string, string> {
   const headers: Record<string, string> = {
     Vary: "Origin",
     "Access-Control-Allow-Methods": methods.join(", "),
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-  };
-  if (allowedOrigin) {
-    headers["Access-Control-Allow-Origin"] = allowedOrigin;
   }
-  return headers;
+  if (allowedOrigin) {
+    headers["Access-Control-Allow-Origin"] = allowedOrigin
+  }
+  return headers
 }

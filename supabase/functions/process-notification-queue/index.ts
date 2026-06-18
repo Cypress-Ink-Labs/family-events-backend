@@ -1,7 +1,7 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import { serveServiceRoleJson } from "../_shared/service-role-handler.ts";
-import { logEdgeEvent } from "../_shared/logger.ts";
-import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts";
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { serveServiceRoleJson } from "../_shared/service-role-handler.ts"
+import { logEdgeEvent } from "../_shared/logger.ts"
+import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
 
 // process-notification-queue
 // ----------------------------------------------------------------
@@ -12,40 +12,40 @@ import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-
 //
 // Caps processing at 100 entries per run to avoid timeout.
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails";
-const RESEND_TIMEOUT_MS = 10_000;
-const PUSH_TIMEOUT_MS = 10_000;
-const MAX_PER_RUN = 100;
-const DEBOUNCE_HOURS = 1;
-const BATCH_SIZE = 10;
-const BATCH_DELAY_MS = 300;
+const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
+const RESEND_TIMEOUT_MS = 10_000
+const PUSH_TIMEOUT_MS = 10_000
+const MAX_PER_RUN = 100
+const DEBOUNCE_HOURS = 1
+const BATCH_SIZE = 10
+const BATCH_DELAY_MS = 300
 
 interface QueueEntry {
-  id: string;
-  user_id: string;
-  event_id: string;
-  change_type: string;
-  change_detail: Record<string, unknown> | null;
-  created_at: string;
+  id: string
+  user_id: string
+  event_id: string
+  change_type: string
+  change_detail: Record<string, unknown> | null
+  created_at: string
 }
 
 interface EventInfo {
-  id: string;
-  title: string;
-  start_datetime: string;
-  venue_name: string | null;
-  address: string | null;
-  status: string;
+  id: string
+  title: string
+  start_datetime: string
+  venue_name: string | null
+  address: string | null
+  status: string
 }
 
 interface UserInfo {
-  email: string | null;
-  display_name: string | null;
+  email: string | null
+  display_name: string | null
 }
 
 interface UserPrefs {
-  change_email: boolean;
-  change_push: boolean;
+  change_email: boolean
+  change_push: boolean
 }
 
 function formatEventDate(isoDate: string): string {
@@ -56,48 +56,48 @@ function formatEventDate(isoDate: string): string {
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
-    });
+    })
   } catch {
-    return isoDate;
+    return isoDate
   }
 }
 
 function changeSummary(changeType: string, detail: Record<string, unknown> | null): string {
   switch (changeType) {
     case "cancelled":
-      return "This event has been cancelled.";
+      return "This event has been cancelled."
     case "time_changed": {
-      const newStart = detail?.new_start;
+      const newStart = detail?.new_start
       if (typeof newStart === "string") {
-        return `Time changed to ${formatEventDate(newStart)}`;
+        return `Time changed to ${formatEventDate(newStart)}`
       }
-      return "The event time has changed.";
+      return "The event time has changed."
     }
     case "venue_changed": {
-      const newVenue = detail?.new_venue;
+      const newVenue = detail?.new_venue
       if (typeof newVenue === "string") {
-        return `Venue changed to ${newVenue}`;
+        return `Venue changed to ${newVenue}`
       }
-      return "The event venue has changed.";
+      return "The event venue has changed."
     }
     case "status_changed":
-      return "The event status has been updated.";
+      return "The event status has been updated."
     default:
-      return "This event has been updated.";
+      return "This event has been updated."
   }
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 serveServiceRoleJson(
   { functionName: "process-notification-queue" },
   async ({ request, supabase, supabaseUrl, serviceRoleKey }) => {
-    const cronCtx = cronRunContextFromRequest(request);
+    const cronCtx = cronRunContextFromRequest(request)
 
     // 1. Read pending entries older than the debounce window
-    const cutoff = new Date(Date.now() - DEBOUNCE_HOURS * 60 * 60 * 1000).toISOString();
+    const cutoff = new Date(Date.now() - DEBOUNCE_HOURS * 60 * 60 * 1000).toISOString()
 
     const { data: entries, error: queryErr } = await supabase
       .from("notification_queue")
@@ -105,110 +105,110 @@ serveServiceRoleJson(
       .eq("processed", false)
       .lt("created_at", cutoff)
       .order("created_at", { ascending: true })
-      .limit(MAX_PER_RUN);
+      .limit(MAX_PER_RUN)
 
     if (queryErr) {
       await logCronRunEvent(supabase, cronCtx, "error", "Failed to query notification queue", {
         error: queryErr.message,
-      });
-      throw queryErr;
+      })
+      throw queryErr
     }
 
     if (!entries || entries.length === 0) {
-      await logCronRunEvent(supabase, cronCtx, "log", "No pending queue entries", {});
-      return { ok: true, processed: 0, sent_email: 0, sent_push: 0, in_app: 0 };
+      await logCronRunEvent(supabase, cronCtx, "log", "No pending queue entries", {})
+      return { ok: true, processed: 0, sent_email: 0, sent_push: 0, in_app: 0 }
     }
 
     // 2. Collect unique event IDs and user IDs
-    const eventIds = [...new Set(entries.map((e: QueueEntry) => e.event_id))];
-    const userIds = [...new Set(entries.map((e: QueueEntry) => e.user_id))];
+    const eventIds = [...new Set(entries.map((e: QueueEntry) => e.event_id))]
+    const userIds = [...new Set(entries.map((e: QueueEntry) => e.user_id))]
 
     // 3. Fetch event info
     const { data: events } = await supabase
       .from("events")
       .select("id, title, start_datetime, venue_name, address, status")
-      .in("id", eventIds);
+      .in("id", eventIds)
 
-    const eventMap = new Map<string, EventInfo>();
+    const eventMap = new Map<string, EventInfo>()
     for (const e of (events ?? []) as EventInfo[]) {
-      eventMap.set(e.id, e);
+      eventMap.set(e.id, e)
     }
 
     // 4. Fetch user info
     const { data: profiles } = await supabase
       .from("user_profiles")
       .select("id, email, display_name")
-      .in("id", userIds);
+      .in("id", userIds)
 
-    const profileMap = new Map<string, UserInfo>();
+    const profileMap = new Map<string, UserInfo>()
     for (const p of (profiles ?? []) as Array<{
-      id: string;
-      email: string | null;
-      display_name: string | null;
+      id: string
+      email: string | null
+      display_name: string | null
     }>) {
-      profileMap.set(p.id, { email: p.email, display_name: p.display_name });
+      profileMap.set(p.id, { email: p.email, display_name: p.display_name })
     }
 
     // 5. Fetch user preferences
     const { data: prefs } = await supabase
       .from("user_notification_preferences")
       .select("user_id, change_email, change_push")
-      .in("user_id", userIds);
+      .in("user_id", userIds)
 
-    const prefsMap = new Map<string, UserPrefs>();
+    const prefsMap = new Map<string, UserPrefs>()
     for (const p of (prefs ?? []) as Array<{
-      user_id: string;
-      change_email: boolean;
-      change_push: boolean;
+      user_id: string
+      change_email: boolean
+      change_push: boolean
     }>) {
-      prefsMap.set(p.user_id, { change_email: p.change_email, change_push: p.change_push });
+      prefsMap.set(p.user_id, { change_email: p.change_email, change_push: p.change_push })
     }
 
-    const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
-    const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>";
+    const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
+    const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
     const appUrl = (Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app").replace(
       /\/$/,
-      "",
-    );
+      ""
+    )
 
-    let sentEmail = 0;
-    let sentPush = 0;
-    let inApp = 0;
-    let failedEmail = 0;
-    let failedPush = 0;
-    const processedIds: string[] = [];
+    let sentEmail = 0
+    let sentPush = 0
+    let inApp = 0
+    let failedEmail = 0
+    let failedPush = 0
+    const processedIds: string[] = []
 
     // Push groups: keyed by "${event_id}:${change_type}" — all users sharing the same
     // push payload text are batched into a single send-push invocation.
     interface PushGroup {
-      title: string;
-      body: string;
-      url: string;
-      userIds: string[];
+      title: string
+      body: string
+      url: string
+      userIds: string[]
     }
-    const pushGroups = new Map<string, PushGroup>();
+    const pushGroups = new Map<string, PushGroup>()
 
     // 6. Process entries in batches
     for (let i = 0; i < entries.length; i += BATCH_SIZE) {
-      const batch = (entries as QueueEntry[]).slice(i, i + BATCH_SIZE);
+      const batch = (entries as QueueEntry[]).slice(i, i + BATCH_SIZE)
 
       for (const entry of batch) {
-        const event = eventMap.get(entry.event_id);
-        const user = profileMap.get(entry.user_id);
-        const userPrefs = prefsMap.get(entry.user_id) ?? { change_email: true, change_push: true };
+        const event = eventMap.get(entry.event_id)
+        const user = profileMap.get(entry.user_id)
+        const userPrefs = prefsMap.get(entry.user_id) ?? { change_email: true, change_push: true }
 
         if (!event || !user?.email) {
           // Event deleted or user profile missing — mark processed and skip
-          processedIds.push(entry.id);
-          continue;
+          processedIds.push(entry.id)
+          continue
         }
 
-        const summary = changeSummary(entry.change_type, entry.change_detail);
+        const summary = changeSummary(entry.change_type, entry.change_detail)
         const notifTitle =
           entry.change_type === "cancelled"
             ? `Cancelled: ${event.title}`
-            : `Updated: ${event.title}`;
-        const eventUrl = `${appUrl}/events/${entry.event_id}`;
+            : `Updated: ${event.title}`
+        const eventUrl = `${appUrl}/events/${entry.event_id}`
 
         // Create in-app notification (stays per-user)
         const { error: notifErr } = await supabase.from("user_notifications").insert({
@@ -217,7 +217,7 @@ serveServiceRoleJson(
           title: notifTitle,
           body: summary,
           event_id: entry.event_id,
-        });
+        })
 
         if (notifErr) {
           logEdgeEvent("warn", "process-notification-queue: failed to create in-app notification", {
@@ -225,9 +225,9 @@ serveServiceRoleJson(
             user_id: entry.user_id,
             event_id: entry.event_id,
             error: notifErr.message,
-          });
+          })
         } else {
-          inApp++;
+          inApp++
         }
 
         // Send email if user wants change emails (stays per-user: personalized template vars)
@@ -255,59 +255,59 @@ serveServiceRoleJson(
                 },
               }),
               signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-            });
+            })
 
             if (response.ok) {
-              sentEmail++;
+              sentEmail++
             } else {
-              const body = await response.text().catch(() => "");
+              const body = await response.text().catch(() => "")
               logEdgeEvent("warn", "process-notification-queue: Resend rejected email", {
                 function: "process-notification-queue",
                 to: user.email,
                 status: response.status,
                 body: body.slice(0, 300),
-              });
-              failedEmail++;
+              })
+              failedEmail++
             }
           } catch (err) {
             logEdgeEvent("warn", "process-notification-queue: email delivery error", {
               function: "process-notification-queue",
               to: user.email,
               error: err instanceof Error ? err.message : String(err),
-            });
-            failedEmail++;
+            })
+            failedEmail++
           }
         } else if (userPrefs.change_email && !resendApiKey) {
           logEdgeEvent("warn", "process-notification-queue: RESEND_API_KEY not configured", {
             function: "process-notification-queue",
             to: user.email,
-          });
+          })
         }
 
         // Collect push-eligible users into groups keyed by (event_id, change_type).
         // The push payload is identical for all users in the same group, so one
         // send-push invocation per group replaces one per entry.
         if (userPrefs.change_push) {
-          const groupKey = `${entry.event_id}:${entry.change_type}`;
-          const existing = pushGroups.get(groupKey);
+          const groupKey = `${entry.event_id}:${entry.change_type}`
+          const existing = pushGroups.get(groupKey)
           if (existing) {
-            existing.userIds.push(entry.user_id);
+            existing.userIds.push(entry.user_id)
           } else {
             pushGroups.set(groupKey, {
               title: notifTitle,
               body: summary,
               url: eventUrl,
               userIds: [entry.user_id],
-            });
+            })
           }
         }
 
-        processedIds.push(entry.id);
+        processedIds.push(entry.id)
       }
 
       // Rate-limit between batches
       if (i + BATCH_SIZE < entries.length) {
-        await sleep(BATCH_DELAY_MS);
+        await sleep(BATCH_DELAY_MS)
       }
     }
 
@@ -327,22 +327,22 @@ serveServiceRoleJson(
             url: group.url,
           }),
           signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
-        });
+        })
 
         if (pushResponse.ok) {
-          const result = (await pushResponse.json().catch(() => ({}))) as { sent?: number };
-          sentPush += result.sent ?? 0;
+          const result = (await pushResponse.json().catch(() => ({}))) as { sent?: number }
+          sentPush += result.sent ?? 0
         } else {
           // Count all users in this group as failed push
-          failedPush += group.userIds.length;
+          failedPush += group.userIds.length
         }
       } catch (err) {
         logEdgeEvent("warn", "process-notification-queue: push delivery error", {
           function: "process-notification-queue",
           user_ids: group.userIds,
           error: err instanceof Error ? err.message : String(err),
-        });
-        failedPush += group.userIds.length;
+        })
+        failedPush += group.userIds.length
       }
     }
 
@@ -351,14 +351,14 @@ serveServiceRoleJson(
       const { error: updateErr } = await supabase
         .from("notification_queue")
         .update({ processed: true, processed_at: new Date().toISOString() })
-        .in("id", processedIds);
+        .in("id", processedIds)
 
       if (updateErr) {
         logEdgeEvent("error", "process-notification-queue: failed to mark entries processed", {
           function: "process-notification-queue",
           count: processedIds.length,
           error: updateErr.message,
-        });
+        })
       }
     }
 
@@ -370,14 +370,14 @@ serveServiceRoleJson(
       sent_push: sentPush,
       failed_email: failedEmail,
       failed_push: failedPush,
-    };
+    }
 
-    await logCronRunEvent(supabase, cronCtx, "log", "process-notification-queue complete", result);
+    await logCronRunEvent(supabase, cronCtx, "log", "process-notification-queue complete", result)
     logEdgeEvent("log", "process-notification-queue: complete", {
       function: "process-notification-queue",
       ...result,
-    });
+    })
 
-    return result;
-  },
-);
+    return result
+  }
+)

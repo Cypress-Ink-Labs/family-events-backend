@@ -1,4 +1,4 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import { handleGenerateParentTips } from "./handler.ts";
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { handleGenerateParentTips } from "./handler.ts"
 
-Deno.serve(handleGenerateParentTips);
+Deno.serve(handleGenerateParentTips)

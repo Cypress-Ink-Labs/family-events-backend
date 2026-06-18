@@ -1,16 +1,16 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "jsr:@std/assert"
 import {
   formatTagMemoryPrompt,
   formatReviewMemoryPrompt,
   type SimilarEventTagContext,
   type SimilarEventReviewContext,
-} from "./memory-context.ts";
+} from "./memory-context.ts"
 
 // ── formatTagMemoryPrompt tests ──────────────────────────────────────────────
 
 Deno.test("formatTagMemoryPrompt - returns empty string for no contexts", () => {
-  assertEquals(formatTagMemoryPrompt([]), "");
-});
+  assertEquals(formatTagMemoryPrompt([]), "")
+})
 
 Deno.test("formatTagMemoryPrompt - formats single event with AI tags", () => {
   const contexts: SimilarEventTagContext[] = [
@@ -25,15 +25,15 @@ Deno.test("formatTagMemoryPrompt - formats single event with AI tags", () => {
       adminCorrected: false,
       adminReason: null,
     },
-  ];
+  ]
 
-  const result = formatTagMemoryPrompt(contexts);
-  assertEquals(result.includes("MEMORY CONTEXT"), true);
-  assertEquals(result.includes("Kids Music Class"), true);
-  assertEquals(result.includes("music"), true);
-  assertEquals(result.includes("indoor"), true);
-  assertEquals(result.includes("admin-corrected"), false);
-});
+  const result = formatTagMemoryPrompt(contexts)
+  assertEquals(result.includes("MEMORY CONTEXT"), true)
+  assertEquals(result.includes("Kids Music Class"), true)
+  assertEquals(result.includes("music"), true)
+  assertEquals(result.includes("indoor"), true)
+  assertEquals(result.includes("admin-corrected"), false)
+})
 
 Deno.test("formatTagMemoryPrompt - highlights admin corrections", () => {
   const contexts: SimilarEventTagContext[] = [
@@ -48,14 +48,14 @@ Deno.test("formatTagMemoryPrompt - highlights admin corrections", () => {
       adminCorrected: true,
       adminReason: "Added art tag, this is primarily an art event",
     },
-  ];
+  ]
 
-  const result = formatTagMemoryPrompt(contexts);
-  assertEquals(result.includes("admin-corrected"), true);
-  assertEquals(result.includes("[ADMIN CORRECTED]"), true);
-  assertEquals(result.includes("Admin reason:"), true);
-  assertEquals(result.includes("primarily an art event"), true);
-});
+  const result = formatTagMemoryPrompt(contexts)
+  assertEquals(result.includes("admin-corrected"), true)
+  assertEquals(result.includes("[ADMIN CORRECTED]"), true)
+  assertEquals(result.includes("Admin reason:"), true)
+  assertEquals(result.includes("primarily an art event"), true)
+})
 
 Deno.test("formatTagMemoryPrompt - includes reference instruction", () => {
   const contexts: SimilarEventTagContext[] = [
@@ -67,17 +67,17 @@ Deno.test("formatTagMemoryPrompt - includes reference instruction", () => {
       adminCorrected: false,
       adminReason: null,
     },
-  ];
+  ]
 
-  const result = formatTagMemoryPrompt(contexts);
-  assertEquals(result.includes("Admin-corrected tags are higher-quality signals"), true);
-});
+  const result = formatTagMemoryPrompt(contexts)
+  assertEquals(result.includes("Admin-corrected tags are higher-quality signals"), true)
+})
 
 // ── formatReviewMemoryPrompt tests ───────────────────────────────────────────
 
 Deno.test("formatReviewMemoryPrompt - returns empty string for no contexts", () => {
-  assertEquals(formatReviewMemoryPrompt([]), "");
-});
+  assertEquals(formatReviewMemoryPrompt([]), "")
+})
 
 Deno.test("formatReviewMemoryPrompt - formats approved and rejected events", () => {
   const contexts: SimilarEventReviewContext[] = [
@@ -101,15 +101,15 @@ Deno.test("formatReviewMemoryPrompt - formats approved and rejected events", () 
       adminDecision: null,
       adminReason: null,
     },
-  ];
+  ]
 
-  const result = formatReviewMemoryPrompt(contexts);
-  assertEquals(result.includes("MEMORY CONTEXT"), true);
-  assertEquals(result.includes("Kids Yoga"), true);
-  assertEquals(result.includes("published"), true);
-  assertEquals(result.includes("Adult Only Event"), true);
-  assertEquals(result.includes("rejected"), true);
-});
+  const result = formatReviewMemoryPrompt(contexts)
+  assertEquals(result.includes("MEMORY CONTEXT"), true)
+  assertEquals(result.includes("Kids Yoga"), true)
+  assertEquals(result.includes("published"), true)
+  assertEquals(result.includes("Adult Only Event"), true)
+  assertEquals(result.includes("rejected"), true)
+})
 
 Deno.test("formatReviewMemoryPrompt - highlights admin overrides", () => {
   const contexts: SimilarEventReviewContext[] = [
@@ -123,11 +123,11 @@ Deno.test("formatReviewMemoryPrompt - highlights admin overrides", () => {
       adminDecision: "published",
       adminReason: "This is a family-friendly community event",
     },
-  ];
+  ]
 
-  const result = formatReviewMemoryPrompt(contexts);
-  assertEquals(result.includes("admin-overridden"), true);
-  assertEquals(result.includes("Admin reason:"), true);
-  assertEquals(result.includes("family-friendly community event"), true);
-  assertEquals(result.includes("Admin-overridden decisions are stronger signals"), true);
-});
+  const result = formatReviewMemoryPrompt(contexts)
+  assertEquals(result.includes("admin-overridden"), true)
+  assertEquals(result.includes("Admin reason:"), true)
+  assertEquals(result.includes("family-friendly community event"), true)
+  assertEquals(result.includes("Admin-overridden decisions are stronger signals"), true)
+})

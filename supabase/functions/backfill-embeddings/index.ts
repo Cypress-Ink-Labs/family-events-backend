@@ -1,65 +1,65 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { serveServiceRoleJson } from "../_shared/service-role-handler.ts";
-import { embedEvent, type EmbedEventDeps } from "../embed-event/handler.ts";
-import { logEdgeEvent } from "../_shared/logger.ts";
+import "@supabase/functions-js/edge-runtime.d.ts"
+import type { SupabaseClient } from "@supabase/supabase-js"
+import { serveServiceRoleJson } from "../_shared/service-role-handler.ts"
+import { embedEvent, type EmbedEventDeps } from "../embed-event/handler.ts"
+import { logEdgeEvent } from "../_shared/logger.ts"
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const BATCH_SIZE = 50;
-const DELAY_BETWEEN_ITEMS_MS = 50; // ~1200/min, well under OpenAI 3000 RPM
-const BUDGET_MS = 110_000; // Stop before edge function 150s wall limit
+const BATCH_SIZE = 50
+const DELAY_BETWEEN_ITEMS_MS = 50 // ~1200/min, well under OpenAI 3000 RPM
+const BUDGET_MS = 110_000 // Stop before edge function 150s wall limit
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface BackfillSummary {
-  total_found: number;
-  processed: number;
-  failed: number;
-  skipped: number;
-  duration_ms: number;
+  total_found: number
+  processed: number
+  failed: number
+  skipped: number
+  duration_ms: number
 }
 
 interface EventRow {
-  id: string;
-  title: string;
-  description: string | null;
+  id: string
+  title: string
+  description: string | null
 }
 
 // ── Core logic ───────────────────────────────────────────────────────────────
 
 async function findEventsWithoutEmbeddings(
   supabase: SupabaseClient,
-  limit: number,
+  limit: number
 ): Promise<EventRow[]> {
   // Delegate to an indexed LEFT JOIN RPC so the server does O(events) work
   // rather than serializing all embedded IDs into a NOT-IN filter.
   const { data, error } = await supabase.rpc("list_events_needing_embeddings", {
     p_limit: limit,
-  });
-  if (error) throw error;
-  return (data ?? []) as EventRow[];
+  })
+  if (error) throw error
+  return (data ?? []) as EventRow[]
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export async function backfillEmbeddings(
   supabase: SupabaseClient,
   openAiApiKey: string,
   options?: {
-    batchSize?: number;
-    delayMs?: number;
-    budgetMs?: number;
-    fetchImpl?: typeof fetch;
-    now?: () => number;
-  },
+    batchSize?: number
+    delayMs?: number
+    budgetMs?: number
+    fetchImpl?: typeof fetch
+    now?: () => number
+  }
 ): Promise<BackfillSummary> {
-  const batchSize = options?.batchSize ?? BATCH_SIZE;
-  const delayMs = options?.delayMs ?? DELAY_BETWEEN_ITEMS_MS;
-  const budgetMs = options?.budgetMs ?? BUDGET_MS;
-  const startedAt = options?.now?.() ?? Date.now();
+  const batchSize = options?.batchSize ?? BATCH_SIZE
+  const delayMs = options?.delayMs ?? DELAY_BETWEEN_ITEMS_MS
+  const budgetMs = options?.budgetMs ?? BUDGET_MS
+  const startedAt = options?.now?.() ?? Date.now()
 
   const summary: BackfillSummary = {
     total_found: 0,
@@ -67,41 +67,41 @@ export async function backfillEmbeddings(
     failed: 0,
     skipped: 0,
     duration_ms: 0,
-  };
+  }
 
-  const events = await findEventsWithoutEmbeddings(supabase, batchSize);
-  summary.total_found = events.length;
+  const events = await findEventsWithoutEmbeddings(supabase, batchSize)
+  summary.total_found = events.length
 
   if (events.length === 0) {
-    summary.duration_ms = (options?.now?.() ?? Date.now()) - startedAt;
+    summary.duration_ms = (options?.now?.() ?? Date.now()) - startedAt
     logEdgeEvent("log", "backfill-embeddings: nothing to do", {
       function: "backfill-embeddings",
       ...summary,
-    });
-    return summary;
+    })
+    return summary
   }
 
   const deps: EmbedEventDeps = {
     supabase,
     openAiApiKey,
     fetchImpl: options?.fetchImpl,
-  };
+  }
 
   for (const event of events) {
-    const elapsed = (options?.now?.() ?? Date.now()) - startedAt;
+    const elapsed = (options?.now?.() ?? Date.now()) - startedAt
     if (elapsed >= budgetMs) {
       logEdgeEvent("warn", "backfill-embeddings: budget exhausted", {
         function: "backfill-embeddings",
         elapsed_ms: elapsed,
         processed: summary.processed,
         remaining: summary.total_found - summary.processed - summary.failed - summary.skipped,
-      });
-      break;
+      })
+      break
     }
 
     if (!event.title?.trim()) {
-      summary.skipped += 1;
-      continue;
+      summary.skipped += 1
+      continue
     }
 
     try {
@@ -111,32 +111,32 @@ export async function backfillEmbeddings(
           title: event.title,
           description: event.description,
         },
-        deps,
-      );
-      summary.processed += 1;
+        deps
+      )
+      summary.processed += 1
     } catch (err) {
-      summary.failed += 1;
+      summary.failed += 1
       logEdgeEvent("warn", "backfill-embeddings: item failed", {
         function: "backfill-embeddings",
         event_id: event.id,
         error: err instanceof Error ? err.message : String(err),
-      });
+      })
     }
 
     // Rate limit delay between items
     if (delayMs > 0) {
-      await sleep(delayMs);
+      await sleep(delayMs)
     }
   }
 
-  summary.duration_ms = (options?.now?.() ?? Date.now()) - startedAt;
+  summary.duration_ms = (options?.now?.() ?? Date.now()) - startedAt
 
   logEdgeEvent("log", "backfill-embeddings: batch complete", {
     function: "backfill-embeddings",
     ...summary,
-  });
+  })
 
-  return summary;
+  return summary
 }
 
 // ── Edge function entry point ────────────────────────────────────────────────
@@ -145,11 +145,11 @@ if (import.meta.main) {
   serveServiceRoleJson(
     { functionName: "backfill-embeddings", errorStage: "outer" },
     async ({ supabase }) => {
-      const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? "";
+      const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? ""
       if (!openAiApiKey) {
-        return { error: "OPENAI_API_KEY not configured", processed: 0 };
+        return { error: "OPENAI_API_KEY not configured", processed: 0 }
       }
-      return backfillEmbeddings(supabase, openAiApiKey);
-    },
-  );
+      return backfillEmbeddings(supabase, openAiApiKey)
+    }
+  )
 }

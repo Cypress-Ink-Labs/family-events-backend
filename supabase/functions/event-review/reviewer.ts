@@ -1,22 +1,22 @@
-import { resolveLlmReviewConfig } from "./config.ts";
-import { normalizeReviewEventInput } from "./normalizer.ts";
-import { buildReviewPrompt } from "./prompt.ts";
-import { applyConfidenceThreshold, parseLlmDecisionJson } from "./schema.ts";
-import { buildLlmReviewProvider } from "./provider.ts";
+import { resolveLlmReviewConfig } from "./config.ts"
+import { normalizeReviewEventInput } from "./normalizer.ts"
+import { buildReviewPrompt } from "./prompt.ts"
+import { applyConfidenceThreshold, parseLlmDecisionJson } from "./schema.ts"
+import { buildLlmReviewProvider } from "./provider.ts"
 import type {
   AppliedLlmEventReviewDecision,
   LlmReviewConfig,
   ReviewEventDeps,
   ReviewEventInput,
-} from "./types.ts";
-import { LLM_EVENT_REVIEW_DECISION, LLM_EVENT_REVIEW_STATUS } from "./types.ts";
+} from "./types.ts"
+import { LLM_EVENT_REVIEW_DECISION, LLM_EVENT_REVIEW_STATUS } from "./types.ts"
 
 function failedDecision(
   config: LlmReviewConfig,
   reason: string,
   errorCode: string,
   processingMs: number,
-  errorMessage: string | null = null,
+  errorMessage: string | null = null
 ): AppliedLlmEventReviewDecision {
   return {
     status: LLM_EVENT_REVIEW_STATUS.FAILED,
@@ -34,26 +34,26 @@ function failedDecision(
     errorCode,
     errorMessage,
     processingMs,
-  };
+  }
 }
 
 export interface ReviewMemoryContext {
-  memoryPrompt: string;
-  similarEventIds: string[];
-  confidenceDelta: number;
-  confidenceReason: string;
+  memoryPrompt: string
+  similarEventIds: string[]
+  confidenceDelta: number
+  confidenceReason: string
 }
 
 export async function reviewEventWithLlm(
   input: ReviewEventInput,
   deps?: Partial<ReviewEventDeps>,
-  memoryContext?: ReviewMemoryContext | null,
+  memoryContext?: ReviewMemoryContext | null
 ): Promise<AppliedLlmEventReviewDecision> {
-  const startedAt = deps?.now?.() ?? Date.now();
-  const config = deps?.config ?? resolveLlmReviewConfig();
+  const startedAt = deps?.now?.() ?? Date.now()
+  const config = deps?.config ?? resolveLlmReviewConfig()
 
   if (!config.enabled) {
-    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
+    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt
     return {
       status: LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED,
       modelDecision: null,
@@ -70,34 +70,34 @@ export async function reviewEventWithLlm(
       errorCode: "disabled",
       errorMessage: null,
       processingMs: elapsed,
-    } satisfies AppliedLlmEventReviewDecision;
+    } satisfies AppliedLlmEventReviewDecision
   }
 
   if (!config.valid) {
-    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
+    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt
     return failedDecision(
       config,
       "LLM review configuration is invalid; routing to admin review.",
       config.invalidReason ?? "invalid_config",
       elapsed,
-      config.invalidReason,
-    );
+      config.invalidReason
+    )
   }
 
-  const normalized = normalizeReviewEventInput(input);
+  const normalized = normalizeReviewEventInput(input)
   if (!normalized.normalized || normalized.fallback) {
-    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
+    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt
     return failedDecision(
       config,
       normalized.fallback?.reason ??
         "Input is incomplete for automated review; routing to admin review.",
       normalized.fallback?.code ?? "invalid_input",
-      elapsed,
-    );
+      elapsed
+    )
   }
 
-  const prompt = buildReviewPrompt(normalized.normalized, memoryContext?.memoryPrompt);
-  const provider = deps?.provider ?? buildLlmReviewProvider(config);
+  const prompt = buildReviewPrompt(normalized.normalized, memoryContext?.memoryPrompt)
+  const provider = deps?.provider ?? buildLlmReviewProvider(config)
 
   try {
     const providerOutput = await provider.review(
@@ -106,26 +106,26 @@ export async function reviewEventWithLlm(
         userPrompt: prompt.userPrompt,
         model: config.model,
       },
-      AbortSignal.timeout(config.timeoutMs),
-    );
+      AbortSignal.timeout(config.timeoutMs)
+    )
 
-    const parsed = parseLlmDecisionJson(providerOutput.rawText);
-    const applied = applyConfidenceThreshold(parsed, config.confidenceThreshold);
-    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
+    const parsed = parseLlmDecisionJson(providerOutput.rawText)
+    const applied = applyConfidenceThreshold(parsed, config.confidenceThreshold)
+    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt
 
     // Apply memory-based confidence adjustment
-    let adjustedConfidence = applied.confidence;
-    const memoryFlags: string[] = [];
+    let adjustedConfidence = applied.confidence
+    const memoryFlags: string[] = []
     if (memoryContext && memoryContext.confidenceDelta !== 0 && adjustedConfidence !== null) {
       adjustedConfidence = Math.max(
         0,
-        Math.min(1, adjustedConfidence + memoryContext.confidenceDelta),
-      );
-      memoryFlags.push("memory_context_used");
-      if (memoryContext.confidenceDelta > 0) memoryFlags.push("memory_confidence_boosted");
-      if (memoryContext.confidenceDelta < 0) memoryFlags.push("memory_confidence_penalized");
+        Math.min(1, adjustedConfidence + memoryContext.confidenceDelta)
+      )
+      memoryFlags.push("memory_context_used")
+      if (memoryContext.confidenceDelta > 0) memoryFlags.push("memory_confidence_boosted")
+      if (memoryContext.confidenceDelta < 0) memoryFlags.push("memory_confidence_penalized")
     } else if (memoryContext) {
-      memoryFlags.push("memory_context_used");
+      memoryFlags.push("memory_context_used")
     }
 
     return {
@@ -152,10 +152,10 @@ export async function reviewEventWithLlm(
       errorCode: null,
       errorMessage: null,
       processingMs: elapsed,
-    };
+    }
   } catch (error) {
-    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt;
-    const message = error instanceof Error ? error.message : String(error);
+    const elapsed = (deps?.now?.() ?? Date.now()) - startedAt
+    const message = error instanceof Error ? error.message : String(error)
     const errorCode = message.includes("timeout")
       ? "provider_timeout"
       : message.startsWith("provider_http_")
@@ -164,14 +164,14 @@ export async function reviewEventWithLlm(
           ? "malformed_json"
           : message.startsWith("invalid_") || message.startsWith("unexpected_key")
             ? "schema_validation_error"
-            : "provider_error";
+            : "provider_error"
 
     return failedDecision(
       config,
       "Automated review failed; routing to admin review.",
       errorCode,
       elapsed,
-      message,
-    );
+      message
+    )
   }
 }

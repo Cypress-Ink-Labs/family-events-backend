@@ -3,51 +3,51 @@
 
 export function parseIsoDate(value: string | null | undefined): string | null {
   if (!value) {
-    return null;
+    return null
   }
 
-  const parsed = new Date(value);
+  const parsed = new Date(value)
   if (Number.isNaN(parsed.getTime())) {
-    return null;
+    return null
   }
-  return parsed.toISOString();
+  return parsed.toISOString()
 }
 
 export function parseIcalDate(value: string | null): string | null {
   if (!value) {
-    return null;
+    return null
   }
 
-  const compact = value.trim();
+  const compact = value.trim()
   if (/^\d{8}$/.test(compact)) {
-    const year = compact.slice(0, 4);
-    const month = compact.slice(4, 6);
-    const day = compact.slice(6, 8);
-    return new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString();
+    const year = compact.slice(0, 4)
+    const month = compact.slice(4, 6)
+    const day = compact.slice(6, 8)
+    return new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString()
   }
 
   if (/^\d{8}T\d{6}Z$/.test(compact)) {
-    const year = compact.slice(0, 4);
-    const month = compact.slice(4, 6);
-    const day = compact.slice(6, 8);
-    const hour = compact.slice(9, 11);
-    const minute = compact.slice(11, 13);
-    const second = compact.slice(13, 15);
-    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString();
+    const year = compact.slice(0, 4)
+    const month = compact.slice(4, 6)
+    const day = compact.slice(6, 8)
+    const hour = compact.slice(9, 11)
+    const minute = compact.slice(11, 13)
+    const second = compact.slice(13, 15)
+    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString()
   }
 
   if (/^\d{8}T\d{6}$/.test(compact)) {
-    const year = compact.slice(0, 4);
-    const month = compact.slice(4, 6);
-    const day = compact.slice(6, 8);
-    const hour = compact.slice(9, 11);
-    const minute = compact.slice(11, 13);
-    const second = compact.slice(13, 15);
+    const year = compact.slice(0, 4)
+    const month = compact.slice(4, 6)
+    const day = compact.slice(6, 8)
+    const hour = compact.slice(9, 11)
+    const minute = compact.slice(11, 13)
+    const second = compact.slice(13, 15)
     // Treat timezone-less iCal as UTC for consistent behaviour across server environments
-    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString();
+    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString()
   }
 
-  return parseIsoDate(compact);
+  return parseIsoDate(compact)
 }
 
 export function decodeHtml(value: string): string {
@@ -69,7 +69,7 @@ export function decodeHtml(value: string): string {
     shy: "",
     times: "x",
     lt: "<",
-  };
+  }
 
   return value
     .replaceAll("&amp;", "&")
@@ -79,20 +79,20 @@ export function decodeHtml(value: string): string {
     .replaceAll("&#39;", "'")
     .replaceAll("&apos;", "'")
     .replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => {
-      const codePoint = parseInt(hex, 16);
+      const codePoint = parseInt(hex, 16)
       return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
         ? String.fromCodePoint(codePoint)
-        : match;
+        : match
     })
     .replace(/&#(\d+);/g, (match, dec) => {
-      const codePoint = parseInt(dec, 10);
+      const codePoint = parseInt(dec, 10)
       return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
         ? String.fromCodePoint(codePoint)
-        : match;
+        : match
     })
     .replace(/&([a-zA-Z][a-zA-Z0-9]+);/g, (match, entityName) => {
-      return namedEntities[entityName.toLowerCase()] ?? match;
-    });
+      return namedEntities[entityName.toLowerCase()] ?? match
+    })
 }
 
 export function normalizeExtractedText(value: string): string {
@@ -102,13 +102,13 @@ export function normalizeExtractedText(value: string): string {
     .replaceAll(/\s+/g, " ")
     .replace(
       /([a-z0-9).!?])\s*(Spring Dates|Dates|Date|Time|Location|Meeting Point|Where|When|Cost|About|Themes|What to Bring):/gi,
-      "$1 $2:",
+      "$1 $2:"
     )
     .replace(
       /\b([AP])\.?M\.?\s*(Spring Dates|Dates|Date|Time|Location|Meeting Point|Where|When|Cost|About|Themes|What to Bring):/gi,
-      "$1M $2:",
+      "$1M $2:"
     )
-    .trim();
+    .trim()
 }
 
 /**
@@ -120,11 +120,11 @@ export function unescapeIcalText(value: string): string {
     .replace(/\\n/gi, " ")
     .replace(/\\,/g, ",")
     .replace(/\\;/g, ";")
-    .replace(/\\\\/g, "\\");
+    .replace(/\\\\/g, "\\")
 }
 
 export function stripHtml(value: string): string {
-  return normalizeExtractedText(value.replaceAll(/<[^>]*>/g, " "));
+  return normalizeExtractedText(value.replaceAll(/<[^>]*>/g, " "))
 }
 
 /**
@@ -147,7 +147,7 @@ export function stripShortcodes(value: string): string {
       // Trailing unclosed generic shortcode (requires whitespace after the
       // name so we don't eat user prose like `[See details` at end-of-string).
       .replace(/\[\/?[a-z][a-z0-9_]*\s[^\]]*$/s, "")
-  );
+  )
 }
 
 /**
@@ -157,13 +157,13 @@ export function stripShortcodes(value: string): string {
  */
 export function cleanDescription(value: string | null | undefined): string {
   if (!value) {
-    return "";
+    return ""
   }
-  return stripHtml(stripShortcodes(value));
+  return stripHtml(stripShortcodes(value))
 }
 
 export function extractPrice(text: string): { price: number | null; isFree: boolean } {
-  const lower = text.toLowerCase();
+  const lower = text.toLowerCase()
 
   const freePatterns = [
     /\bfree\b/,
@@ -172,19 +172,19 @@ export function extractPrice(text: string): { price: number | null; isFree: bool
     /\bcomplimentary\b/,
     /\bfree admission\b/,
     /\bfree event\b/,
-  ];
+  ]
   for (const pattern of freePatterns) {
     if (pattern.test(lower)) {
-      return { price: null, isFree: true };
+      return { price: null, isFree: true }
     }
   }
 
-  const priceMatch = text.match(/\$\s*(\d+(?:\.\d{1,2})?)/);
+  const priceMatch = text.match(/\$\s*(\d+(?:\.\d{1,2})?)/)
   if (priceMatch) {
-    return { price: Number(priceMatch[1]), isFree: false };
+    return { price: Number(priceMatch[1]), isFree: false }
   }
 
-  return { price: null, isFree: false };
+  return { price: null, isFree: false }
 }
 
 /**
@@ -192,8 +192,8 @@ export function extractPrice(text: string): { price: number | null; isFree: bool
  * Same title + same start minute + same city = same event regardless of source.
  */
 export function dedupKey(title: string, startDatetime: string, cityId: string | null): string {
-  const normalizedTitle = title.trim().toLowerCase();
+  const normalizedTitle = title.trim().toLowerCase()
   // Truncate to minute precision to handle minor ISO format variations
-  const minute = startDatetime.slice(0, 16);
-  return `${cityId ?? "null"}::${minute}::${normalizedTitle}`;
+  const minute = startDatetime.slice(0, 16)
+  return `${cityId ?? "null"}::${minute}::${normalizedTitle}`
 }

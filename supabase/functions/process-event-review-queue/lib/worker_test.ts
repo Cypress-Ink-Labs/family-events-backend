@@ -1,82 +1,82 @@
-import { assert, assertEquals } from "jsr:@std/assert";
+import { assert, assertEquals } from "jsr:@std/assert"
 import {
   type EventLlmReviewQueueRow,
   processReviewQueueRow,
   type ReviewQueueDeps,
-} from "./worker.ts";
+} from "./worker.ts"
 import {
   type AppliedLlmEventReviewDecision,
   LLM_EVENT_REVIEW_DECISION,
   LLM_EVENT_REVIEW_STATUS,
   type LlmEventReviewDecision,
-} from "../../event-review/types.ts";
+} from "../../event-review/types.ts"
 
-const REVIEWABLE_LLM_REVIEW_STATUS_PENDING = "pending";
+const REVIEWABLE_LLM_REVIEW_STATUS_PENDING = "pending"
 
 interface FakeEvent {
-  id: string;
-  status: "draft" | "published" | "rejected" | "archived";
-  title: string;
-  description: string | null;
-  start_datetime: string;
-  end_datetime: string | null;
-  timezone: string;
-  venue_name: string | null;
-  address: string | null;
-  source_name: string | null;
-  source_url: string | null;
-  llm_review_status: string;
-  llm_review_decision: string | null;
-  llm_review_confidence: number | null;
-  llm_review_reason: string | null;
-  llm_review_flags: string[];
-  llm_review_provider: string | null;
-  llm_review_model: string | null;
-  llm_review_prompt_version: string | null;
-  llm_reviewed_at: string | null;
-  llm_review_error: string | null;
-  updated_at: string;
+  id: string
+  status: "draft" | "published" | "rejected" | "archived"
+  title: string
+  description: string | null
+  start_datetime: string
+  end_datetime: string | null
+  timezone: string
+  venue_name: string | null
+  address: string | null
+  source_name: string | null
+  source_url: string | null
+  llm_review_status: string
+  llm_review_decision: string | null
+  llm_review_confidence: number | null
+  llm_review_reason: string | null
+  llm_review_flags: string[]
+  llm_review_provider: string | null
+  llm_review_model: string | null
+  llm_review_prompt_version: string | null
+  llm_reviewed_at: string | null
+  llm_review_error: string | null
+  updated_at: string
 }
 
 type QueueRow = EventLlmReviewQueueRow & {
-  finished_at?: string | null;
-  started_at?: string | null;
-  last_error?: string | null;
-  updated_at?: string;
-};
+  finished_at?: string | null
+  started_at?: string | null
+  last_error?: string | null
+  updated_at?: string
+}
 
 class FakeSupabase {
-  events = new Map<string, FakeEvent>();
-  queue = new Map<number, QueueRow>();
-  traces: Record<string, unknown>[] = [];
-  tagQueue: Record<string, unknown>[] = [];
+  events = new Map<string, FakeEvent>()
+  queue = new Map<number, QueueRow>()
+  traces: Record<string, unknown>[] = []
+  tagQueue: Record<string, unknown>[] = []
 
   rpc(name: string, args: Record<string, unknown>) {
     if (name === "mark_event_llm_review_queue_row_started") {
-      const queueId = Number(args.p_queue_id);
-      const row = this.queue.get(queueId);
+      const queueId = Number(args.p_queue_id)
+      const row = this.queue.get(queueId)
       if (!row || row.status !== "processing") {
         return Promise.resolve({
           data: null,
           error: new Error("queue row missing"),
-        });
+        })
       }
-      row.attempt_count += 1;
-      row.started_at = new Date().toISOString();
-      this.queue.set(queueId, row);
-      return Promise.resolve({ data: { ...row }, error: null });
+      row.attempt_count += 1
+      row.started_at = new Date().toISOString()
+      this.queue.set(queueId, row)
+      return Promise.resolve({ data: { ...row }, error: null })
     }
 
     if (name === "apply_event_llm_review_decision") {
-      const queueId = Number(args.p_queue_id);
-      const eventId = String(args.p_event_id);
-      const event = this.events.get(eventId);
-      const row = this.queue.get(queueId);
+      const queueId = Number(args.p_queue_id)
+      const eventId = String(args.p_event_id)
+      const event = this.events.get(eventId)
+      const row = this.queue.get(queueId)
       if (!event || event.status !== "draft" || !row) {
-        return Promise.resolve({ data: false, error: null });
+        return Promise.resolve({ data: false, error: null })
       }
 
-      const appliedDecision = args.p_applied_decision as LlmEventReviewDecision;
+      const appliedDecision = args.p_applied_decision as LlmEventReviewDecision
       Object.assign(event, {
         status:
           appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE
@@ -95,8 +95,8 @@ class FakeSupabase {
         llm_reviewed_at: new Date().toISOString(),
         llm_review_error: args.p_error_message,
         updated_at: new Date().toISOString(),
-      });
-      this.events.set(eventId, event);
+      })
+      this.events.set(eventId, event)
       this.traces.push({
         event_id: eventId,
         queue_id: queueId,
@@ -118,18 +118,18 @@ class FakeSupabase {
         error_message: args.p_error_message,
         input_snapshot: args.p_input_snapshot,
         processing_ms: args.p_processing_ms,
-      });
+      })
 
       if (appliedDecision !== LLM_EVENT_REVIEW_DECISION.REJECT) {
         const duplicate = this.tagQueue.some(
-          (existing) => String((existing as { event_id?: string }).event_id ?? "") === eventId,
-        );
+          (existing) => String((existing as { event_id?: string }).event_id ?? "") === eventId
+        )
         if (!duplicate) {
           this.tagQueue.push({
             event_id: eventId,
             source_run_id: args.p_source_run_id,
             trigger_type: "import",
-          });
+          })
         }
       }
 
@@ -138,126 +138,126 @@ class FakeSupabase {
         finished_at: new Date().toISOString(),
         last_error: null,
         updated_at: new Date().toISOString(),
-      });
-      this.queue.set(queueId, row);
-      return Promise.resolve({ data: true, error: null });
+      })
+      this.queue.set(queueId, row)
+      return Promise.resolve({ data: true, error: null })
     }
 
-    throw new Error(`Unhandled rpc in fake client: ${name}`);
+    throw new Error(`Unhandled rpc in fake client: ${name}`)
   }
 
   from(table: string) {
-    return new FakeQuery(this, table);
+    return new FakeQuery(this, table)
   }
 }
 
 class FakeQuery {
-  private operation: "select" | "update" | "insert" = "select";
-  private payload: Record<string, unknown> | Record<string, unknown>[] | null = null;
-  private filters = new Map<string, unknown>();
-  private wantsSingle = false;
+  private operation: "select" | "update" | "insert" = "select"
+  private payload: Record<string, unknown> | Record<string, unknown>[] | null = null
+  private filters = new Map<string, unknown>()
+  private wantsSingle = false
 
   constructor(
     private readonly db: FakeSupabase,
-    private readonly table: string,
+    private readonly table: string
   ) {}
 
   select(_columns?: string) {
     if (this.operation !== "update") {
-      this.operation = "select";
+      this.operation = "select"
     }
-    this.wantsSingle = true;
-    return this;
+    this.wantsSingle = true
+    return this
   }
 
   update(payload: Record<string, unknown>) {
-    this.operation = "update";
-    this.payload = payload;
-    return this;
+    this.operation = "update"
+    this.payload = payload
+    return this
   }
 
   insert(payload: Record<string, unknown> | Record<string, unknown>[]) {
-    this.operation = "insert";
-    this.payload = payload;
-    return this;
+    this.operation = "insert"
+    this.payload = payload
+    return this
   }
 
   eq(column: string, value: unknown) {
-    this.filters.set(column, value);
-    return this;
+    this.filters.set(column, value)
+    return this
   }
 
   maybeSingle() {
-    return this.execute(true);
+    return this.execute(true)
   }
 
   then<TResult1 = unknown, TResult2 = never>(
     onfulfilled?: ((value: unknown) => TResult1 | PromiseLike<TResult1>) | null,
-    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
   ): Promise<TResult1 | TResult2> {
-    return this.execute(false).then(onfulfilled, onrejected);
+    return this.execute(false).then(onfulfilled, onrejected)
   }
 
   private execute(expectSingle: boolean) {
     if (this.operation === "select" && this.table === "events") {
-      const id = this.filters.get("id");
-      const event = id ? this.db.events.get(String(id)) : undefined;
-      return Promise.resolve({ data: event ?? null, error: null });
+      const id = this.filters.get("id")
+      const event = id ? this.db.events.get(String(id)) : undefined
+      return Promise.resolve({ data: event ?? null, error: null })
     }
 
     if (this.operation === "update" && this.table === "events") {
-      const id = String(this.filters.get("id"));
-      const statusFilter = this.filters.get("status");
-      const event = this.db.events.get(id) ?? null;
+      const id = String(this.filters.get("id"))
+      const statusFilter = this.filters.get("status")
+      const event = this.db.events.get(id) ?? null
       if (!event) {
-        return Promise.resolve({ data: null, error: null });
+        return Promise.resolve({ data: null, error: null })
       }
       if (statusFilter && event.status !== statusFilter) {
-        return Promise.resolve({ data: null, error: null });
+        return Promise.resolve({ data: null, error: null })
       }
-      Object.assign(event, this.payload ?? {});
-      this.db.events.set(id, event);
+      Object.assign(event, this.payload ?? {})
+      this.db.events.set(id, event)
       if (expectSingle || this.wantsSingle) {
-        return Promise.resolve({ data: { id }, error: null });
+        return Promise.resolve({ data: { id }, error: null })
       }
-      return Promise.resolve({ data: null, error: null });
+      return Promise.resolve({ data: null, error: null })
     }
 
     if (this.operation === "update" && this.table === "event_llm_review_queue") {
-      const id = Number(this.filters.get("id"));
-      const row = this.db.queue.get(id);
-      if (!row) return Promise.resolve({ data: null, error: null });
-      Object.assign(row, this.payload ?? {});
-      this.db.queue.set(id, row);
-      return Promise.resolve({ data: null, error: null });
+      const id = Number(this.filters.get("id"))
+      const row = this.db.queue.get(id)
+      if (!row) return Promise.resolve({ data: null, error: null })
+      Object.assign(row, this.payload ?? {})
+      this.db.queue.set(id, row)
+      return Promise.resolve({ data: null, error: null })
     }
 
     if (this.operation === "insert" && this.table === "event_llm_review_traces") {
       if (Array.isArray(this.payload)) {
-        this.db.traces.push(...this.payload);
+        this.db.traces.push(...this.payload)
       } else if (this.payload) {
-        this.db.traces.push(this.payload);
+        this.db.traces.push(this.payload)
       }
-      return Promise.resolve({ data: null, error: null });
+      return Promise.resolve({ data: null, error: null })
     }
 
     if (this.operation === "insert" && this.table === "event_tag_queue") {
-      const rows = Array.isArray(this.payload) ? this.payload : [this.payload];
+      const rows = Array.isArray(this.payload) ? this.payload : [this.payload]
       for (const row of rows) {
-        if (!row) continue;
-        const eventId = String((row as { event_id?: string }).event_id ?? "");
+        if (!row) continue
+        const eventId = String((row as { event_id?: string }).event_id ?? "")
         const duplicate = this.db.tagQueue.some(
-          (existing) => String((existing as { event_id?: string }).event_id ?? "") === eventId,
-        );
+          (existing) => String((existing as { event_id?: string }).event_id ?? "") === eventId
+        )
         if (duplicate) {
-          return Promise.resolve({ data: null, error: { code: "23505" } });
+          return Promise.resolve({ data: null, error: { code: "23505" } })
         }
-        this.db.tagQueue.push(row);
+        this.db.tagQueue.push(row)
       }
-      return Promise.resolve({ data: null, error: null });
+      return Promise.resolve({ data: null, error: null })
     }
 
-    return Promise.resolve({ data: null, error: null });
+    return Promise.resolve({ data: null, error: null })
   }
 }
 
@@ -286,7 +286,7 @@ function buildEvent(overrides: Partial<FakeEvent> = {}): FakeEvent {
     llm_review_error: null,
     updated_at: new Date().toISOString(),
     ...overrides,
-  };
+  }
 }
 
 function buildQueueRow(overrides: Partial<QueueRow> = {}): QueueRow {
@@ -301,7 +301,7 @@ function buildQueueRow(overrides: Partial<QueueRow> = {}): QueueRow {
     max_attempts: 3,
     next_attempt_at: new Date().toISOString(),
     ...overrides,
-  };
+  }
 }
 
 function baseConfig() {
@@ -319,11 +319,11 @@ function baseConfig() {
     persistRawResponse: false,
     valid: true,
     invalidReason: null,
-  };
+  }
 }
 
 function decision(
-  overrides: Partial<AppliedLlmEventReviewDecision> = {},
+  overrides: Partial<AppliedLlmEventReviewDecision> = {}
 ): AppliedLlmEventReviewDecision {
   return {
     status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
@@ -342,28 +342,28 @@ function decision(
     errorMessage: null,
     processingMs: 30,
     ...overrides,
-  };
+  }
 }
 
 async function runRowTest(options: {
-  event?: Partial<FakeEvent>;
-  row?: Partial<QueueRow>;
-  reviewEvent?: ReviewQueueDeps["reviewEvent"];
+  event?: Partial<FakeEvent>
+  row?: Partial<QueueRow>
+  reviewEvent?: ReviewQueueDeps["reviewEvent"]
 }) {
-  const supabase = new FakeSupabase();
-  const event = buildEvent(options.event);
-  const row = buildQueueRow(options.row);
-  supabase.events.set(event.id, event);
-  supabase.queue.set(row.id, row);
+  const supabase = new FakeSupabase()
+  const event = buildEvent(options.event)
+  const row = buildQueueRow(options.row)
+  supabase.events.set(event.id, event)
+  supabase.queue.set(row.id, row)
 
   const deps: ReviewQueueDeps = {
     supabase: supabase as unknown as ReviewQueueDeps["supabase"],
     config: baseConfig(),
     reviewEvent: options.reviewEvent,
-  };
+  }
 
-  const result = await processReviewQueueRow(deps, row);
-  return { supabase, eventId: event.id, queueId: row.id, result };
+  const result = await processReviewQueueRow(deps, row)
+  return { supabase, eventId: event.id, queueId: row.id, result }
 }
 
 Deno.test("approve publishes event and enqueues tag queue", async () => {
@@ -373,13 +373,13 @@ Deno.test("approve publishes event and enqueues tag queue", async () => {
         appliedDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
         modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
       }),
-  });
+  })
 
-  assertEquals(result.outcome, "succeeded");
-  assertEquals(supabase.events.get(eventId)?.status, "published");
-  assertEquals(supabase.tagQueue.length, 1);
-  assertEquals(supabase.queue.get(1)?.status, "succeeded");
-});
+  assertEquals(result.outcome, "succeeded")
+  assertEquals(supabase.events.get(eventId)?.status, "published")
+  assertEquals(supabase.tagQueue.length, 1)
+  assertEquals(supabase.queue.get(1)?.status, "succeeded")
+})
 
 Deno.test("reject rejects event and does not enqueue tag queue", async () => {
   const { supabase, eventId } = await runRowTest({
@@ -388,11 +388,11 @@ Deno.test("reject rejects event and does not enqueue tag queue", async () => {
         appliedDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
         modelDecision: LLM_EVENT_REVIEW_DECISION.REJECT,
       }),
-  });
+  })
 
-  assertEquals(supabase.events.get(eventId)?.status, "rejected");
-  assertEquals(supabase.tagQueue.length, 0);
-});
+  assertEquals(supabase.events.get(eventId)?.status, "rejected")
+  assertEquals(supabase.tagQueue.length, 0)
+})
 
 Deno.test("needs_admin_review keeps draft and enqueues tag queue", async () => {
   const { supabase, eventId } = await runRowTest({
@@ -402,11 +402,11 @@ Deno.test("needs_admin_review keeps draft and enqueues tag queue", async () => {
         modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
         confidence: 0.62,
       }),
-  });
+  })
 
-  assertEquals(supabase.events.get(eventId)?.status, "draft");
-  assertEquals(supabase.tagQueue.length, 1);
-});
+  assertEquals(supabase.events.get(eventId)?.status, "draft")
+  assertEquals(supabase.tagQueue.length, 1)
+})
 
 Deno.test("provider timeout routes to admin review", async () => {
   const { supabase, eventId, result } = await runRowTest({
@@ -418,13 +418,13 @@ Deno.test("provider timeout routes to admin review", async () => {
         errorCode: "provider_timeout",
         errorMessage: "timed out",
       }),
-  });
+  })
 
-  assertEquals(result.outcome, "succeeded");
-  assertEquals(result.failed, true);
-  assertEquals(supabase.events.get(eventId)?.status, "draft");
-  assertEquals(supabase.events.get(eventId)?.llm_review_status, LLM_EVENT_REVIEW_STATUS.FAILED);
-});
+  assertEquals(result.outcome, "succeeded")
+  assertEquals(result.failed, true)
+  assertEquals(supabase.events.get(eventId)?.status, "draft")
+  assertEquals(supabase.events.get(eventId)?.llm_review_status, LLM_EVENT_REVIEW_STATUS.FAILED)
+})
 
 Deno.test("malformed provider output routes to admin review", async () => {
   const { supabase, eventId } = await runRowTest({
@@ -435,21 +435,21 @@ Deno.test("malformed provider output routes to admin review", async () => {
         modelDecision: null,
         errorCode: "malformed_json",
       }),
-  });
+  })
 
-  assertEquals(supabase.events.get(eventId)?.status, "draft");
+  assertEquals(supabase.events.get(eventId)?.status, "draft")
   assertEquals(
     supabase.events.get(eventId)?.llm_review_decision,
-    LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
-  );
-});
+    LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW
+  )
+})
 
 Deno.test("disabled feature flag routes to admin review", async () => {
-  const supabase = new FakeSupabase();
-  const event = buildEvent();
-  const row = buildQueueRow();
-  supabase.events.set(event.id, event);
-  supabase.queue.set(row.id, row);
+  const supabase = new FakeSupabase()
+  const event = buildEvent()
+  const row = buildQueueRow()
+  supabase.events.set(event.id, event)
+  supabase.queue.set(row.id, row)
 
   const result = await processReviewQueueRow(
     {
@@ -459,16 +459,16 @@ Deno.test("disabled feature flag routes to admin review", async () => {
         enabled: false,
       },
     },
-    row,
-  );
+    row
+  )
 
-  assertEquals(result.outcome, "succeeded");
-  assertEquals(supabase.events.get(event.id)?.status, "draft");
+  assertEquals(result.outcome, "succeeded")
+  assertEquals(supabase.events.get(event.id)?.status, "draft")
   assertEquals(
     supabase.events.get(event.id)?.llm_review_status,
-    LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED,
-  );
-});
+    LLM_EVENT_REVIEW_STATUS.NOT_REQUIRED
+  )
+})
 
 Deno.test("low confidence routes to admin review", async () => {
   const { supabase, eventId } = await runRowTest({
@@ -479,29 +479,29 @@ Deno.test("low confidence routes to admin review", async () => {
         modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
         confidence: 0.5,
       }),
-  });
+  })
 
-  assertEquals(supabase.events.get(eventId)?.status, "draft");
-  assertEquals(supabase.events.get(eventId)?.llm_review_status, LLM_EVENT_REVIEW_STATUS.SUCCEEDED);
+  assertEquals(supabase.events.get(eventId)?.status, "draft")
+  assertEquals(supabase.events.get(eventId)?.llm_review_status, LLM_EVENT_REVIEW_STATUS.SUCCEEDED)
   assertEquals(
     supabase.events.get(eventId)?.llm_review_decision,
-    LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW,
-  );
-});
+    LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW
+  )
+})
 
 Deno.test("retryable failures increment attempts and schedule retry", async () => {
   const { supabase, result } = await runRowTest({
     reviewEvent: async () => {
-      throw new Error("network error");
+      throw new Error("network error")
     },
-  });
+  })
 
-  assertEquals(result.outcome, "retrying");
-  const row = supabase.queue.get(1);
-  assertEquals(row?.status, "retrying");
-  assert(row?.attempt_count === 1);
-  assert(row?.next_attempt_at !== undefined);
-});
+  assertEquals(result.outcome, "retrying")
+  const row = supabase.queue.get(1)
+  assertEquals(row?.status, "retrying")
+  assert(row?.attempt_count === 1)
+  assert(row?.next_attempt_at !== undefined)
+})
 
 Deno.test("exhausted attempts mark queue row dead", async () => {
   const { supabase, result } = await runRowTest({
@@ -510,13 +510,13 @@ Deno.test("exhausted attempts mark queue row dead", async () => {
       max_attempts: 3,
     },
     reviewEvent: async () => {
-      throw new Error("still failing");
+      throw new Error("still failing")
     },
-  });
+  })
 
-  assertEquals(result.outcome, "dead");
-  assertEquals(supabase.queue.get(1)?.status, "dead");
-});
+  assertEquals(result.outcome, "dead")
+  assertEquals(supabase.queue.get(1)?.status, "dead")
+})
 
 Deno.test("already processed event is skipped", async () => {
   const { supabase, result } = await runRowTest({
@@ -525,22 +525,22 @@ Deno.test("already processed event is skipped", async () => {
       llm_review_status: LLM_EVENT_REVIEW_STATUS.SUCCEEDED,
     },
     reviewEvent: async () => decision(),
-  });
+  })
 
-  assertEquals(result.outcome, "skipped");
-  assertEquals(supabase.tagQueue.length, 0);
-  assertEquals(supabase.queue.get(1)?.status, "succeeded");
-});
+  assertEquals(result.outcome, "skipped")
+  assertEquals(supabase.tagQueue.length, 0)
+  assertEquals(supabase.queue.get(1)?.status, "succeeded")
+})
 
 Deno.test("duplicate queue rows do not cause duplicate state transitions", async () => {
-  const supabase = new FakeSupabase();
-  const event = buildEvent();
-  const row1 = buildQueueRow({ id: 1, event_id: event.id });
-  const row2 = buildQueueRow({ id: 2, event_id: event.id });
+  const supabase = new FakeSupabase()
+  const event = buildEvent()
+  const row1 = buildQueueRow({ id: 1, event_id: event.id })
+  const row2 = buildQueueRow({ id: 2, event_id: event.id })
 
-  supabase.events.set(event.id, event);
-  supabase.queue.set(row1.id, row1);
-  supabase.queue.set(row2.id, row2);
+  supabase.events.set(event.id, event)
+  supabase.queue.set(row1.id, row1)
+  supabase.queue.set(row2.id, row2)
 
   const deps: ReviewQueueDeps = {
     supabase: supabase as unknown as ReviewQueueDeps["supabase"],
@@ -550,13 +550,13 @@ Deno.test("duplicate queue rows do not cause duplicate state transitions", async
         appliedDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
         modelDecision: LLM_EVENT_REVIEW_DECISION.APPROVE,
       }),
-  };
+  }
 
-  const first = await processReviewQueueRow(deps, row1);
-  const second = await processReviewQueueRow(deps, row2);
+  const first = await processReviewQueueRow(deps, row1)
+  const second = await processReviewQueueRow(deps, row2)
 
-  assertEquals(first.outcome, "succeeded");
-  assertEquals(second.outcome, "skipped");
-  assertEquals(supabase.events.get(event.id)?.status, "published");
-  assertEquals(supabase.tagQueue.length, 1);
-});
+  assertEquals(first.outcome, "succeeded")
+  assertEquals(second.outcome, "skipped")
+  assertEquals(supabase.events.get(event.id)?.status, "published")
+  assertEquals(supabase.tagQueue.length, 1)
+})

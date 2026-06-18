@@ -2,7 +2,7 @@ import type {
   ReviewEventInput,
   ReviewNormalizerOutput,
   NormalizedReviewEventInput,
-} from "./types.ts";
+} from "./types.ts"
 
 const FIELD_LIMITS = {
   title: 300,
@@ -13,29 +13,29 @@ const FIELD_LIMITS = {
   sourceUrl: 1_000,
   category: 120,
   tag: 64,
-} as const;
+} as const
 
 function trimToMax(value: string | null | undefined, max: number): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (trimmed.length <= max) return trimmed;
-  return trimmed.slice(0, max);
+  if (typeof value !== "string") return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  if (trimmed.length <= max) return trimmed
+  return trimmed.slice(0, max)
 }
 
 function normalizeTags(values: string[]): string[] {
-  const deduped = new Set<string>();
+  const deduped = new Set<string>()
   for (const value of values) {
-    const normalized = trimToMax(value, FIELD_LIMITS.tag);
-    if (!normalized) continue;
-    deduped.add(normalized);
-    if (deduped.size >= 20) break;
+    const normalized = trimToMax(value, FIELD_LIMITS.tag)
+    if (!normalized) continue
+    deduped.add(normalized)
+    if (deduped.size >= 20) break
   }
-  return [...deduped];
+  return [...deduped]
 }
 
 export function normalizeReviewEventInput(input: ReviewEventInput): ReviewNormalizerOutput {
-  const title = trimToMax(input.title, FIELD_LIMITS.title);
+  const title = trimToMax(input.title, FIELD_LIMITS.title)
   if (!title) {
     return {
       normalized: null,
@@ -43,10 +43,10 @@ export function normalizeReviewEventInput(input: ReviewEventInput): ReviewNormal
         code: "missing_title",
         reason: "Event title is required for LLM review.",
       },
-    };
+    }
   }
 
-  const startDatetime = trimToMax(input.startDatetime, 64);
+  const startDatetime = trimToMax(input.startDatetime, 64)
   if (!startDatetime) {
     return {
       normalized: null,
@@ -54,11 +54,11 @@ export function normalizeReviewEventInput(input: ReviewEventInput): ReviewNormal
         code: "missing_start_datetime",
         reason: "Event start date/time is required for LLM review.",
       },
-    };
+    }
   }
 
-  const sourceUrl = trimToMax(input.sourceUrl, FIELD_LIMITS.sourceUrl);
-  const sourceName = trimToMax(input.sourceName, FIELD_LIMITS.sourceName);
+  const sourceUrl = trimToMax(input.sourceUrl, FIELD_LIMITS.sourceUrl)
+  const sourceName = trimToMax(input.sourceName, FIELD_LIMITS.sourceName)
   if (!sourceUrl && !sourceName) {
     return {
       normalized: null,
@@ -66,7 +66,7 @@ export function normalizeReviewEventInput(input: ReviewEventInput): ReviewNormal
         code: "missing_source_reference",
         reason: "Event is missing both source URL and source name; routing to admin review.",
       },
-    };
+    }
   }
 
   const normalized: NormalizedReviewEventInput = {
@@ -82,7 +82,7 @@ export function normalizeReviewEventInput(input: ReviewEventInput): ReviewNormal
     sourceUrl,
     category: trimToMax(input.category, FIELD_LIMITS.category),
     tags: normalizeTags(input.tags),
-  };
+  }
 
-  return { normalized, fallback: null };
+  return { normalized, fallback: null }
 }

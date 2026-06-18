@@ -1,21 +1,17 @@
-import { resolveSharedLlmConfig } from "../../_shared/llm-config.ts";
-import { postOpenAiChatCompletion } from "../../_shared/llm-openai.ts";
+import { resolveSharedLlmConfig } from "../../_shared/llm-config.ts"
+import { postOpenAiChatCompletion } from "../../_shared/llm-openai.ts"
 import {
   normalizeArtifactForLlm,
   parseLlmParsedEvents,
-} from "../../scrape-source/lib/extraction-pipeline.ts";
-import type {
-  EventSourceRow,
-  FetchedArtifact,
-  ParsedEvent,
-} from "../../scrape-source/lib/types.ts";
+} from "../../scrape-source/lib/extraction-pipeline.ts"
+import type { EventSourceRow, FetchedArtifact, ParsedEvent } from "../../scrape-source/lib/types.ts"
 
 export interface LlmConfig {
-  apiKey: string;
-  baseUrl: string;
-  configured: boolean;
-  model: string;
-  provider: string;
+  apiKey: string
+  baseUrl: string
+  configured: boolean
+  model: string
+  provider: string
 }
 
 export function resolveLlmConfig(): LlmConfig {
@@ -31,16 +27,16 @@ export function resolveLlmConfig(): LlmConfig {
       "gpt-5",
     ]),
     defaultOpenAiModel: "gpt-4o-mini",
-  });
+  })
 }
 
 export async function extractWithLlm(
   source: EventSourceRow,
-  artifact: FetchedArtifact,
+  artifact: FetchedArtifact
 ): Promise<{ config: LlmConfig; events: ParsedEvent[]; latencyMs: number }> {
-  const config = resolveLlmConfig();
+  const config = resolveLlmConfig()
   if (!config.configured) {
-    throw new Error("LLM extraction provider is not configured");
+    throw new Error("LLM extraction provider is not configured")
   }
 
   const completion = await postOpenAiChatCompletion({
@@ -70,11 +66,11 @@ export async function extractWithLlm(
     failureMessagePrefix: "LLM extraction failed",
     providerName: "LLM extraction",
     timeoutMs: 45_000,
-  });
+  })
 
   return {
     config,
     events: parseLlmParsedEvents(completion.content),
     latencyMs: completion.latencyMs,
-  };
+  }
 }

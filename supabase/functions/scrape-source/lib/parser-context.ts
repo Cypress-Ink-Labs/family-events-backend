@@ -1,9 +1,9 @@
 export interface ParserFetchOptions {
-  accept?: string;
+  accept?: string
 }
 
 export interface ParserContext {
-  timezone: string;
-  fetchText: (url: string, opts?: ParserFetchOptions) => Promise<string>;
-  fetchJson: <T = unknown>(url: string, opts?: ParserFetchOptions) => Promise<T>;
+  timezone: string
+  fetchText: (url: string, opts?: ParserFetchOptions) => Promise<string>
+  fetchJson: <T = unknown>(url: string, opts?: ParserFetchOptions) => Promise<T>
 }

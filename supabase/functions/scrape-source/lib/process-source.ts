@@ -1,103 +1,103 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { captureEdgeException } from "../../_shared/sentry.ts";
-import { errorContext, errorMessage as formatError, logEdgeEvent } from "../../_shared/logger.ts";
-import { guardedFetch } from "../../_shared/guarded-fetch.ts";
-import type { ParserContext } from "./parser-context.ts";
-import { resolveCityTimezone } from "./schedule.ts";
+import type { SupabaseClient } from "@supabase/supabase-js"
+import { captureEdgeException } from "../../_shared/sentry.ts"
+import { errorContext, errorMessage as formatError, logEdgeEvent } from "../../_shared/logger.ts"
+import { guardedFetch } from "../../_shared/guarded-fetch.ts"
+import type { ParserContext } from "./parser-context.ts"
+import { resolveCityTimezone } from "./schedule.ts"
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
 // scrape-source now just enqueues, returning immediately.
-import type { EventSourceRow, ParsedEvent, RunStatus, SourceResult } from "./types.ts";
-export { sanitizeImagesForIngest } from "./enrichment.ts";
+import type { EventSourceRow, ParsedEvent, RunStatus, SourceResult } from "./types.ts"
+export { sanitizeImagesForIngest } from "./enrichment.ts"
 
-const SOURCE_FETCH_TIMEOUT_MS = 10_000;
-const SOURCE_MAX_BYTES = 5 * 1024 * 1024; // 5 MB cap on feed body to prevent OOM
+const SOURCE_FETCH_TIMEOUT_MS = 10_000
+const SOURCE_MAX_BYTES = 5 * 1024 * 1024 // 5 MB cap on feed body to prevent OOM
 
-const OUTDOOR_TAG_HINTS = ["park", "outdoor", "hike", "nature", "trail", "playground"];
-const INDOOR_TAG_HINTS = ["museum", "indoor", "library", "theater", "theatre"];
-const MAX_RAW_IMAGE_CANDIDATES = 20;
+const OUTDOOR_TAG_HINTS = ["park", "outdoor", "hike", "nature", "trail", "playground"]
+const INDOOR_TAG_HINTS = ["museum", "indoor", "library", "theater", "theatre"]
+const MAX_RAW_IMAGE_CANDIDATES = 20
 
 export function deriveIsOutdoorFromParsedEvent(parsed: ParsedEvent): boolean | null {
   const text = [parsed.title, parsed.description, parsed.venueName, parsed.address]
     .filter((value): value is string => Boolean(value))
     .join(" ")
-    .toLowerCase();
+    .toLowerCase()
 
-  const hasOutdoorSignal = OUTDOOR_TAG_HINTS.some((keyword) => text.includes(keyword));
-  const hasIndoorSignal = INDOOR_TAG_HINTS.some((keyword) => text.includes(keyword));
+  const hasOutdoorSignal = OUTDOOR_TAG_HINTS.some((keyword) => text.includes(keyword))
+  const hasIndoorSignal = INDOOR_TAG_HINTS.some((keyword) => text.includes(keyword))
 
   if (hasOutdoorSignal && !hasIndoorSignal) {
-    return true;
+    return true
   }
   if (hasIndoorSignal && !hasOutdoorSignal) {
-    return false;
+    return false
   }
-  return null;
+  return null
 }
 
 export function deriveRawImageCandidates(parsed: ParsedEvent): string[] {
-  const seen = new Set<string>();
-  const candidates = [...parsed.images, ...(parsed.imageUrl ? [parsed.imageUrl] : [])];
+  const seen = new Set<string>()
+  const candidates = [...parsed.images, ...(parsed.imageUrl ? [parsed.imageUrl] : [])]
 
   for (const candidate of candidates) {
-    const url = candidate.trim();
-    if (!url.startsWith("http://") && !url.startsWith("https://")) continue;
-    if (seen.has(url)) continue;
-    seen.add(url);
-    if (seen.size >= MAX_RAW_IMAGE_CANDIDATES) break;
+    const url = candidate.trim()
+    if (!url.startsWith("http://") && !url.startsWith("https://")) continue
+    if (seen.has(url)) continue
+    seen.add(url)
+    if (seen.size >= MAX_RAW_IMAGE_CANDIDATES) break
   }
 
-  return [...seen];
+  return [...seen]
 }
 
 async function fetchCityCentroid(
   supabase: SupabaseClient,
-  cityId: string | null,
+  cityId: string | null
 ): Promise<{ latitude: number | null; longitude: number | null } | null> {
-  if (!cityId) return null;
+  if (!cityId) return null
   const { data } = await supabase
     .from("cities")
     .select("latitude, longitude")
     .eq("id", cityId)
-    .maybeSingle();
-  return data ?? null;
+    .maybeSingle()
+  return data ?? null
 }
 
 async function readResponseBodyCapped(response: Response, maxBytes: number): Promise<string> {
-  if (!response.body) return "";
-  const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
+  if (!response.body) return ""
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
 
   const readNextChunk = async (): Promise<void> => {
-    const { done, value } = await reader.read();
-    if (done) return;
+    const { done, value } = await reader.read()
+    if (done) return
 
-    total += value.byteLength;
+    total += value.byteLength
     if (total > maxBytes) {
-      await reader.cancel();
-      throw new Error(`Response body exceeded cap of ${maxBytes} bytes`);
+      await reader.cancel()
+      throw new Error(`Response body exceeded cap of ${maxBytes} bytes`)
     }
 
-    chunks.push(value);
-    await readNextChunk();
-  };
+    chunks.push(value)
+    await readNextChunk()
+  }
 
   try {
-    await readNextChunk();
+    await readNextChunk()
   } finally {
-    reader.releaseLock();
+    reader.releaseLock()
   }
 
-  const buf = new Uint8Array(total);
-  let offset = 0;
+  const buf = new Uint8Array(total)
+  let offset = 0
   for (const c of chunks) {
-    buf.set(c, offset);
-    offset += c.byteLength;
+    buf.set(c, offset)
+    offset += c.byteLength
   }
-  return new TextDecoder("utf-8").decode(buf);
+  return new TextDecoder("utf-8").decode(buf)
 }
 
-const DEFAULT_FETCH_ACCEPT = "text/html,application/xml,text/xml,*/*";
+const DEFAULT_FETCH_ACCEPT = "text/html,application/xml,text/xml,*/*"
 
 async function guardedFetchText(url: string, accept: string): Promise<string> {
   // SSRF-safe fetch. guardedFetch resolves + range-checks the URL AND every
@@ -109,15 +109,15 @@ async function guardedFetchText(url: string, accept: string): Promise<string> {
       Accept: accept,
     },
     signal: AbortSignal.timeout(SOURCE_FETCH_TIMEOUT_MS),
-  });
+  })
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch source (${response.status})`);
+    throw new Error(`Failed to fetch source (${response.status})`)
   }
 
   // Streamed read with 5 MB cap. response.text() is unbounded; a malicious or
   // accidentally-huge feed could OOM the edge function.
-  return await readResponseBodyCapped(response, SOURCE_MAX_BYTES);
+  return await readResponseBodyCapped(response, SOURCE_MAX_BYTES)
 }
 
 export function buildParserContext(timezone: string): ParserContext {
@@ -125,32 +125,32 @@ export function buildParserContext(timezone: string): ParserContext {
     timezone,
     fetchText: (url, opts) => guardedFetchText(url, opts?.accept ?? DEFAULT_FETCH_ACCEPT),
     fetchJson: async <T = unknown>(url: string, opts?: { accept?: string }): Promise<T> => {
-      const body = await guardedFetchText(url, opts?.accept ?? "application/json,*/*");
-      return JSON.parse(body) as T;
+      const body = await guardedFetchText(url, opts?.accept ?? "application/json,*/*")
+      return JSON.parse(body) as T
     },
-  };
+  }
 }
 
 export async function importParsedSourceEvents(
   supabase: SupabaseClient,
   source: EventSourceRow,
   runId: string,
-  parsedEvents: ParsedEvent[],
+  parsedEvents: ParsedEvent[]
 ): Promise<SourceResult> {
-  let status: RunStatus = "success";
-  let eventsFound = 0;
-  let eventsImported = 0;
-  let eventsSkipped = 0;
-  let addressNullCount = 0;
-  let errorMessage: string | null = null;
+  let status: RunStatus = "success"
+  let eventsFound = 0
+  let eventsImported = 0
+  let eventsSkipped = 0
+  let addressNullCount = 0
+  let errorMessage: string | null = null
   // Fatal pipeline-deploy errors (bulk RPC missing) short-circuit the run
   // because no further work can succeed. Non-fatal enqueue failures are
   // logged but don't propagate — the SQL bulk RPC handles them via
   // ON CONFLICT DO NOTHING and returns a count we cross-check below.
-  let pipelineSetupError: string | null = null;
+  let pipelineSetupError: string | null = null
 
   // Flush live progress to source_runs so the UI can show incremental counts.
-  const PROGRESS_BATCH = 5;
+  const PROGRESS_BATCH = 5
   async function flushProgress() {
     await supabase
       .from("source_runs")
@@ -159,21 +159,19 @@ export async function importParsedSourceEvents(
         events_imported: eventsImported,
         events_skipped: eventsSkipped,
       })
-      .eq("id", runId);
+      .eq("id", runId)
   }
 
   try {
     const [timezone, cityCentroid] = await Promise.all([
       resolveCityTimezone(supabase, source.city_id),
       fetchCityCentroid(supabase, source.city_id),
-    ]);
-    eventsFound = parsedEvents.length;
+    ])
+    eventsFound = parsedEvents.length
 
     // Observability: count events missing geocodable location data
-    addressNullCount = parsedEvents.filter(
-      (e) => e.address === null && e.venueName === null,
-    ).length;
-    const addressNullRate = eventsFound > 0 ? addressNullCount / eventsFound : 0;
+    addressNullCount = parsedEvents.filter((e) => e.address === null && e.venueName === null).length
+    const addressNullRate = eventsFound > 0 ? addressNullCount / eventsFound : 0
     // Warn when >50% of a batch has no address data — possible parser regression
     if (eventsFound > 0 && addressNullRate > 0.5) {
       logEdgeEvent("warn", "high address null rate — possible parser regression", {
@@ -184,26 +182,26 @@ export async function importParsedSourceEvents(
         events_found: eventsFound,
         address_null: addressNullCount,
         address_null_pct: Math.round(addressNullRate * 100),
-      });
+      })
     }
 
     // Write total found immediately so the UI shows "X found" while import runs.
-    await flushProgress();
+    await flushProgress()
 
     const validEvents = parsedEvents.filter((p) => {
       if (!p.title || !p.startDatetime) {
-        eventsSkipped += 1;
-        return false;
+        eventsSkipped += 1
+        return false
       }
-      return true;
-    });
+      return true
+    })
 
     if (validEvents.length === 0) {
-      await flushProgress();
+      await flushProgress()
     } else {
       function prepEventPayload(parsed: ParsedEvent): Record<string, unknown> {
-        const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed);
-        const imageCandidates = deriveRawImageCandidates(parsed);
+        const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed)
+        const imageCandidates = deriveRawImageCandidates(parsed)
 
         return {
           title: parsed.title,
@@ -222,10 +220,10 @@ export async function importParsedSourceEvents(
           is_outdoor: isOutdoor,
           latitude: cityCentroid?.latitude ?? null,
           longitude: cityCentroid?.longitude ?? null,
-        };
+        }
       }
 
-      const payloads = validEvents.map(prepEventPayload);
+      const payloads = validEvents.map(prepEventPayload)
 
       // Single bulk RPC: classify + INSERT + UPDATE + event_tag_queue enqueue
       // all in one SQL transaction. Replaces the prior per-event loop (which
@@ -236,29 +234,29 @@ export async function importParsedSourceEvents(
           p_run_id: runId,
           p_source_id: source.id,
           p_events: payloads,
-        },
-      );
+        }
+      )
       if (bulkError) {
         if (bulkError.code === "42883" || bulkError.code === "42P01") {
           // RPC missing -> grouped event ingestion migration not applied yet.
           pipelineSetupError =
-            "bulk_import_scrape_events RPC missing. Run `supabase db push --linked` to apply migration 20260601002000.";
+            "bulk_import_scrape_events RPC missing. Run `supabase db push --linked` to apply migration 20260601002000."
         } else {
-          throw bulkError;
+          throw bulkError
         }
       } else {
         const result = bulkResult as {
-          imported?: number;
-          updated?: number;
-          skipped?: number;
-          enqueued?: number;
-        } | null;
-        const imported = result?.imported ?? 0;
-        const updated = result?.updated ?? 0;
-        const skipped = result?.skipped ?? 0;
-        const enqueued = result?.enqueued ?? 0;
-        eventsImported = imported + updated;
-        eventsSkipped += skipped;
+          imported?: number
+          updated?: number
+          skipped?: number
+          enqueued?: number
+        } | null
+        const imported = result?.imported ?? 0
+        const updated = result?.updated ?? 0
+        const skipped = result?.skipped ?? 0
+        const enqueued = result?.enqueued ?? 0
+        eventsImported = imported + updated
+        eventsSkipped += skipped
         // The RPC enqueues into event_tag_queue under ON CONFLICT DO NOTHING.
         // If imported+updated > enqueued, some rows were already pending in
         // the queue from a prior run — benign, not an error.
@@ -269,11 +267,11 @@ export async function importParsedSourceEvents(
             imported,
             updated,
             enqueued,
-          });
+          })
         }
       }
 
-      await flushProgress();
+      await flushProgress()
     }
 
     // Observability: log final run summary on success path
@@ -287,24 +285,24 @@ export async function importParsedSourceEvents(
       events_imported: eventsImported,
       events_skipped: eventsSkipped,
       address_null: addressNullCount,
-    });
+    })
 
     // Status derivation precedence:
     //   1. pipelineSetupError (bulk RPC missing) → 'error' + actionable hint
     //   2. found events but imported none → 'partial'
     //   3. otherwise 'success' (default initial value)
     if (pipelineSetupError) {
-      status = "error";
-      errorMessage = pipelineSetupError;
+      status = "error"
+      errorMessage = pipelineSetupError
     } else if (eventsImported === 0 && eventsFound > 0) {
-      status = "partial";
+      status = "partial"
     }
   } catch (error) {
-    status = "error";
+    status = "error"
     // formatError surfaces PostgrestError code + details (plain-object
     // errors don't pass `instanceof Error`, so the original code silently
     // collapsed them to "Unknown scrape failure").
-    errorMessage = formatError(error) || "Unknown scrape failure.";
+    errorMessage = formatError(error) || "Unknown scrape failure."
     await captureEdgeException(
       error,
       errorContext(error, {
@@ -313,8 +311,8 @@ export async function importParsedSourceEvents(
         source_name: source.name,
         source_type: source.source_type,
         run_id: runId,
-      }),
-    );
+      })
+    )
     logEdgeEvent(
       "error",
       "scrape-source fetch failed",
@@ -324,8 +322,8 @@ export async function importParsedSourceEvents(
         source_name: source.name,
         source_type: source.source_type,
         run_id: runId,
-      }),
-    );
+      })
+    )
   } finally {
     // Finalization MUST run even when the catch handler itself throws (e.g.
     // a logging call fails) or when an unexpected error escapes after the
@@ -341,7 +339,7 @@ export async function importParsedSourceEvents(
           events_skipped: eventsSkipped,
           error_log: errorMessage,
         })
-        .eq("id", runId);
+        .eq("id", runId)
 
       await supabase
         .from("event_sources")
@@ -353,7 +351,7 @@ export async function importParsedSourceEvents(
           // failures; keep accumulating until a clean success.
           error_count: status === "success" ? 0 : source.error_count + (status === "error" ? 1 : 0),
         })
-        .eq("id", source.id);
+        .eq("id", source.id)
       // Kick the tag-queue worker if we imported anything. Each RPC call
       // fires net.http_post (async) and returns immediately, so this is a
       // fan-out, not a blocking loop. process-tag-queue claims BATCH_SIZE=20
@@ -364,16 +362,16 @@ export async function importParsedSourceEvents(
       // the OpenAI rate limit (the LLM is the actual bottleneck). The cron
       // */1 keeps backfilling whatever a burst leaves behind.
       if (eventsImported > 0) {
-        const TAG_QUEUE_BATCH_SIZE = 20;
-        const MAX_KICKS = 8;
+        const TAG_QUEUE_BATCH_SIZE = 20
+        const MAX_KICKS = 8
         const kicks = Math.min(
           Math.max(1, Math.ceil(eventsImported / TAG_QUEUE_BATCH_SIZE)),
-          MAX_KICKS,
-        );
+          MAX_KICKS
+        )
         const results = await Promise.allSettled(
-          Array.from({ length: kicks }, () => supabase.rpc("invoke_process_tag_queue")),
-        );
-        const failed = results.filter((r) => r.status === "rejected").length;
+          Array.from({ length: kicks }, () => supabase.rpc("invoke_process_tag_queue"))
+        )
+        const failed = results.filter((r) => r.status === "rejected").length
         if (failed > 0) {
           logEdgeEvent("warn", "tag-queue kick(s) failed after source processing", {
             function: "process-source",
@@ -382,7 +380,7 @@ export async function importParsedSourceEvents(
             events_imported: eventsImported,
             kicks_attempted: kicks,
             kicks_failed: failed,
-          });
+          })
         }
       }
     } catch (finalizeError) {
@@ -394,8 +392,8 @@ export async function importParsedSourceEvents(
           source_name: source.name,
           run_id: runId,
           stage: "finalize",
-        }),
-      );
+        })
+      )
     }
   }
 
@@ -406,5 +404,5 @@ export async function importParsedSourceEvents(
     eventsImported,
     eventsSkipped,
     error: errorMessage,
-  };
+  }
 }

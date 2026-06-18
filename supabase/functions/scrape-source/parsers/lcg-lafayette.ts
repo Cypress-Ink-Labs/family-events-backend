@@ -23,11 +23,11 @@
 //     ...
 //   </ul>
 
-import { DOMParser } from "@b-fuze/deno-dom";
-import { cleanDescription, extractPrice } from "../../_shared/parsing.ts";
-import { wallClockToIso } from "../lib/date.ts";
-import type { ParsedEvent } from "../lib/types.ts";
-import type { SourceParser } from "./_lib/types.ts";
+import { DOMParser } from "@b-fuze/deno-dom"
+import { cleanDescription, extractPrice } from "../../_shared/parsing.ts"
+import { wallClockToIso } from "../lib/date.ts"
+import type { ParsedEvent } from "../lib/types.ts"
+import type { SourceParser } from "./_lib/types.ts"
 
 const MONTHS: Record<string, number> = {
   jan: 0,
@@ -42,7 +42,7 @@ const MONTHS: Record<string, number> = {
   oct: 9,
   nov: 10,
   dec: 11,
-};
+}
 
 /**
  * Extract datetime from an LCG event URL slug.
@@ -50,21 +50,21 @@ const MONTHS: Record<string, number> = {
  * Returns ISO string or null on parse failure.
  */
 export function parseLcgEventUrl(url: string): {
-  startDatetime: string | null;
-  year: number | null;
-  month: number | null;
-  day: number | null;
+  startDatetime: string | null
+  year: number | null
+  month: number | null
+  day: number | null
 } {
   // Match: .../YYYY-MM-DD-HHMM-...
-  const match = url.match(/\/(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})-/);
-  if (!match) return { startDatetime: null, year: null, month: null, day: null };
+  const match = url.match(/\/(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})-/)
+  if (!match) return { startDatetime: null, year: null, month: null, day: null }
 
-  const [, yearStr, monthStr, dayStr, hourStr, minStr] = match;
-  const year = Number(yearStr);
-  const month = Number(monthStr);
-  const day = Number(dayStr);
-  const hour = Number(hourStr);
-  const minute = Number(minStr);
+  const [, yearStr, monthStr, dayStr, hourStr, minStr] = match
+  const year = Number(yearStr)
+  const month = Number(monthStr)
+  const day = Number(dayStr)
+  const hour = Number(hourStr)
+  const minute = Number(minStr)
 
   if (
     !Number.isFinite(year) ||
@@ -73,41 +73,41 @@ export function parseLcgEventUrl(url: string): {
     !Number.isFinite(hour) ||
     !Number.isFinite(minute)
   ) {
-    return { startDatetime: null, year: null, month: null, day: null };
+    return { startDatetime: null, year: null, month: null, day: null }
   }
 
   const startDatetime =
     wallClockToIso({ year, month, day, hour, minute, second: 0 }, "America/Chicago", {
       fallback: "null",
-    }) ?? null;
+    }) ?? null
 
-  return { startDatetime, year, month, day };
+  return { startDatetime, year, month, day }
 }
 
 export function parseLcgEvents(html: string): ParsedEvent[] {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  if (!doc) return [];
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, "text/html")
+  if (!doc) return []
 
-  const events: ParsedEvent[] = [];
-  const seenKeys = new Set<string>();
+  const events: ParsedEvent[] = []
+  const seenKeys = new Set<string>()
 
   for (const item of doc.querySelectorAll("li.gs-feed-list-item")) {
     // Title + source URL from the anchor
-    const anchor = item.querySelector("a.gs-feed-list-title");
-    const title = anchor?.textContent?.trim();
-    const href = anchor?.getAttribute("href")?.trim() ?? null;
-    if (!title || !href) continue;
+    const anchor = item.querySelector("a.gs-feed-list-title")
+    const title = anchor?.textContent?.trim()
+    const href = anchor?.getAttribute("href")?.trim() ?? null
+    if (!title || !href) continue
 
-    const { startDatetime } = parseLcgEventUrl(href);
-    if (!startDatetime) continue;
+    const { startDatetime } = parseLcgEventUrl(href)
+    if (!startDatetime) continue
 
-    const description = title;
-    const priceInfo = extractPrice(description);
+    const description = title
+    const priceInfo = extractPrice(description)
 
-    const key = `${title.toLowerCase()}::${startDatetime}`;
-    if (seenKeys.has(key)) continue;
-    seenKeys.add(key);
+    const key = `${title.toLowerCase()}::${startDatetime}`
+    if (seenKeys.has(key)) continue
+    seenKeys.add(key)
 
     events.push({
       title,
@@ -121,10 +121,10 @@ export function parseLcgEvents(html: string): ParsedEvent[] {
       images: [],
       price: priceInfo.price,
       isFree: priceInfo.isFree,
-    });
+    })
   }
 
-  return events;
+  return events
 }
 
 export const lcgLafayetteParser: SourceParser<"lcglafayette"> = {
@@ -132,10 +132,10 @@ export const lcgLafayetteParser: SourceParser<"lcglafayette"> = {
   async fetchArtifact(source, ctx) {
     const html = await ctx.fetchText(source.url, {
       accept: "text/html,*/*",
-    });
-    return { url: source.url, contentType: "text/html", body: html };
+    })
+    return { url: source.url, contentType: "text/html", body: html }
   },
   extractEvents(_source, artifact) {
-    return Promise.resolve(parseLcgEvents(artifact.body));
+    return Promise.resolve(parseLcgEvents(artifact.body))
   },
-};
+}

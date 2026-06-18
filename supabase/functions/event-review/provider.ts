@@ -3,19 +3,19 @@ import type {
   LlmReviewProvider,
   LlmReviewProviderInput,
   LlmReviewProviderOutput,
-} from "./types.ts";
+} from "./types.ts"
 
-type FetchLike = typeof fetch;
+type FetchLike = typeof fetch
 
 export class OpenAiCompatibleReviewProvider implements LlmReviewProvider {
   constructor(
     private readonly config: LlmReviewConfig,
-    private readonly fetchImpl: FetchLike = fetch,
+    private readonly fetchImpl: FetchLike = fetch
   ) {}
 
   async review(
     input: LlmReviewProviderInput,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<LlmReviewProviderOutput> {
     const response = await this.fetchImpl(`${this.config.baseUrl}/chat/completions`, {
       method: "POST",
@@ -33,17 +33,17 @@ export class OpenAiCompatibleReviewProvider implements LlmReviewProvider {
         ],
       }),
       signal,
-    });
+    })
 
     if (!response.ok) {
-      const body = await response.text().catch(() => "");
-      throw new Error(`provider_http_${response.status}:${body.slice(0, 400)}`);
+      const body = await response.text().catch(() => "")
+      throw new Error(`provider_http_${response.status}:${body.slice(0, 400)}`)
     }
 
-    const payload = await response.json();
-    const content = payload?.choices?.[0]?.message?.content;
+    const payload = await response.json()
+    const content = payload?.choices?.[0]?.message?.content
     if (typeof content !== "string" || content.trim() === "") {
-      throw new Error("provider_empty_content");
+      throw new Error("provider_empty_content")
     }
 
     return {
@@ -51,13 +51,13 @@ export class OpenAiCompatibleReviewProvider implements LlmReviewProvider {
       rawResponse: payload,
       provider: this.config.provider,
       model: this.config.model,
-    };
+    }
   }
 }
 
 export function buildLlmReviewProvider(
   config: LlmReviewConfig,
-  fetchImpl: FetchLike = fetch,
+  fetchImpl: FetchLike = fetch
 ): LlmReviewProvider {
-  return new OpenAiCompatibleReviewProvider(config, fetchImpl);
+  return new OpenAiCompatibleReviewProvider(config, fetchImpl)
 }

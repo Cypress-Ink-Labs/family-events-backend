@@ -1,9 +1,9 @@
-import "@supabase/functions-js/edge-runtime.d.ts";
-import { requireServiceRole } from "../_shared/auth.ts";
-import { escapeHtml } from "../_shared/html.ts";
-import { captureEdgeException } from "../_shared/sentry.ts";
-import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts";
-import { isRecord, readString } from "../_shared/validation.ts";
+import "@supabase/functions-js/edge-runtime.d.ts"
+import { requireServiceRole } from "../_shared/auth.ts"
+import { escapeHtml } from "../_shared/html.ts"
+import { captureEdgeException } from "../_shared/sentry.ts"
+import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
+import { isRecord, readString } from "../_shared/validation.ts"
 
 // notify-email
 // ----------------------------------------------------------------
@@ -18,87 +18,87 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+}
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails";
-const RESEND_TIMEOUT_MS = 10_000;
+const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
+const RESEND_TIMEOUT_MS = 10_000
 
 type Payload =
   | {
-      kind: "admin_request";
-      request_id: string;
-      email: string;
-      message: string | null;
+      kind: "admin_request"
+      request_id: string
+      email: string
+      message: string | null
     }
   | {
-      kind: "request_approved";
-      email: string;
-      code: string;
-      app_url?: string;
+      kind: "request_approved"
+      email: string
+      code: string
+      app_url?: string
     }
   | {
-      kind: "request_rejected";
-      email: string;
+      kind: "request_rejected"
+      email: string
     }
   | {
-      kind: "welcome";
-      email: string;
-      username: string;
+      kind: "welcome"
+      email: string
+      username: string
     }
   | {
-      kind: "community_event_approved";
-      email: string;
-      username: string;
-      event_title: string;
-      event_id: string;
-      app_url?: string;
+      kind: "community_event_approved"
+      email: string
+      username: string
+      event_title: string
+      event_id: string
+      app_url?: string
     }
   | {
-      kind: "community_event_rejected";
-      email: string;
-      username: string;
-      event_title: string;
-      app_url?: string;
-    };
+      kind: "community_event_rejected"
+      email: string
+      username: string
+      event_title: string
+      app_url?: string
+    }
 
 function readOptionalString(
   value: Record<string, unknown>,
   key: string,
-  maxLength: number,
+  maxLength: number
 ): string | undefined {
-  const raw = value[key];
-  if (raw == null) return undefined;
-  if (typeof raw !== "string") throw new Error(`invalid ${key}`);
-  const trimmed = raw.trim();
-  if (!trimmed) return undefined;
-  if (trimmed.length > maxLength) throw new Error(`invalid ${key}`);
-  return trimmed;
+  const raw = value[key]
+  if (raw == null) return undefined
+  if (typeof raw !== "string") throw new Error(`invalid ${key}`)
+  const trimmed = raw.trim()
+  if (!trimmed) return undefined
+  if (trimmed.length > maxLength) throw new Error(`invalid ${key}`)
+  return trimmed
 }
 
 function readNullableString(
   value: Record<string, unknown>,
   key: string,
-  maxLength: number,
+  maxLength: number
 ): string | null {
-  const raw = value[key];
-  if (raw == null) return null;
-  if (typeof raw !== "string") throw new Error(`invalid ${key}`);
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  if (trimmed.length > maxLength) throw new Error(`invalid ${key}`);
-  return trimmed;
+  const raw = value[key]
+  if (raw == null) return null
+  if (typeof raw !== "string") throw new Error(`invalid ${key}`)
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  if (trimmed.length > maxLength) throw new Error(`invalid ${key}`)
+  return trimmed
 }
 
 function assertEmail(value: string): string {
   if (value.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-    throw new Error("invalid email");
+    throw new Error("invalid email")
   }
-  return value.toLowerCase();
+  return value.toLowerCase()
 }
 
 function parsePayload(value: unknown): Payload {
-  if (!isRecord(value)) throw new Error("invalid payload");
-  const kind = readString(value, "kind", { required: true, maxLength: 64 });
+  if (!isRecord(value)) throw new Error("invalid payload")
+  const kind = readString(value, "kind", { required: true, maxLength: 64 })
 
   if (kind === "admin_request") {
     return {
@@ -106,7 +106,7 @@ function parsePayload(value: unknown): Payload {
       request_id: readString(value, "request_id", { required: true, maxLength: 128 }),
       email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
       message: readNullableString(value, "message", 2000),
-    };
+    }
   }
 
   if (kind === "request_approved") {
@@ -115,14 +115,14 @@ function parsePayload(value: unknown): Payload {
       email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
       code: readString(value, "code", { required: true, maxLength: 64 }),
       app_url: readOptionalString(value, "app_url", 2048),
-    };
+    }
   }
 
   if (kind === "request_rejected") {
     return {
       kind,
       email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
-    };
+    }
   }
 
   if (kind === "welcome") {
@@ -130,7 +130,7 @@ function parsePayload(value: unknown): Payload {
       kind,
       email: assertEmail(readString(value, "email", { required: true, maxLength: 320 })),
       username: readString(value, "username", { required: true, maxLength: 120 }),
-    };
+    }
   }
 
   if (kind === "community_event_approved") {
@@ -141,7 +141,7 @@ function parsePayload(value: unknown): Payload {
       event_title: readString(value, "event_title", { required: true, maxLength: 300 }),
       event_id: readString(value, "event_id", { required: true, maxLength: 64 }),
       app_url: readOptionalString(value, "app_url", 256),
-    };
+    }
   }
 
   if (kind === "community_event_rejected") {
@@ -151,10 +151,10 @@ function parsePayload(value: unknown): Payload {
       username: readString(value, "username", { required: true, maxLength: 120 }),
       event_title: readString(value, "event_title", { required: true, maxLength: 300 }),
       app_url: readOptionalString(value, "app_url", 256),
-    };
+    }
   }
 
-  throw new Error("unknown kind");
+  throw new Error("unknown kind")
 }
 
 // ── Dusk-Meadow theme tokens (mirrors packages/design-system) ─────────────────
@@ -167,12 +167,12 @@ const THEME = {
   violet: "#7B5CC8",
   violetDeep: "#5E42A6",
   peach: "#E89060",
-} as const;
+} as const
 
-const FONT_SANS = `'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif`;
-const FONT_DISPLAY = `'Fraunces', ui-serif, Georgia, serif`;
-const FONT_EDITORIAL = `'Newsreader', ui-serif, Georgia, serif`;
-const FONT_MONO = `'Geist Mono', ui-monospace, 'SF Mono', monospace`;
+const FONT_SANS = `'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif`
+const FONT_DISPLAY = `'Fraunces', ui-serif, Georgia, serif`
+const FONT_EDITORIAL = `'Newsreader', ui-serif, Georgia, serif`
+const FONT_MONO = `'Geist Mono', ui-monospace, 'SF Mono', monospace`
 
 function wrapEmailShell({
   heading,
@@ -181,13 +181,13 @@ function wrapEmailShell({
   footerHtml,
   appUrl,
 }: {
-  heading: string;
-  tagline: string;
-  bodyHtml: string;
-  footerHtml: string;
-  appUrl: string;
+  heading: string
+  tagline: string
+  bodyHtml: string
+  footerHtml: string
+  appUrl: string
 }): string {
-  const logoUrl = `${appUrl.replace(/\/$/, "")}/brand/family-events-logo.png`;
+  const logoUrl = `${appUrl.replace(/\/$/, "")}/brand/family-events-logo.png`
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -231,22 +231,22 @@ function wrapEmailShell({
     </tr>
   </table>
 </body>
-</html>`.trim();
+</html>`.trim()
 }
 
 interface RenderedEmail {
-  to: string;
-  subject: string;
-  html: string;
+  to: string
+  subject: string
+  html: string
 }
 
 function renderAdminRequest(
   payload: Extract<Payload, { kind: "admin_request" }>,
   adminEmail: string,
-  appUrl: string,
+  appUrl: string
 ): RenderedEmail {
-  const message = payload.message?.trim();
-  const linkUrl = `${appUrl.replace(/\/$/, "")}/admin/invites`;
+  const message = payload.message?.trim()
+  const linkUrl = `${appUrl.replace(/\/$/, "")}/admin/invites`
 
   const bodyHtml = `
     <tr>
@@ -281,7 +281,7 @@ function renderAdminRequest(
           </tr>
         </table>
       </td>
-    </tr>`;
+    </tr>`
 
   return {
     to: adminEmail,
@@ -293,15 +293,15 @@ function renderAdminRequest(
       footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">One-click approve there to generate + reveal the code.</div>`,
       appUrl,
     }),
-  };
+  }
 }
 
 function renderRequestApproved(
   payload: Extract<Payload, { kind: "request_approved" }>,
-  appUrl: string,
+  appUrl: string
 ): RenderedEmail {
-  const url = (payload.app_url ?? appUrl).replace(/\/$/, "");
-  const signupUrl = `${url}/sign-up`;
+  const url = (payload.app_url ?? appUrl).replace(/\/$/, "")
+  const signupUrl = `${url}/sign-up`
 
   const bodyHtml = `
     <tr>
@@ -327,7 +327,7 @@ function renderRequestApproved(
           </tr>
         </table>
       </td>
-    </tr>`;
+    </tr>`
 
   return {
     to: payload.email,
@@ -339,12 +339,12 @@ function renderRequestApproved(
       footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">Didn't request this? You can safely ignore this email.</div>`,
       appUrl: url,
     }),
-  };
+  }
 }
 
 function renderRequestRejected(
   payload: Extract<Payload, { kind: "request_rejected" }>,
-  appUrl: string,
+  appUrl: string
 ): RenderedEmail {
   const bodyHtml = `
     <tr>
@@ -357,7 +357,7 @@ function renderRequestRejected(
           <a href="mailto:support@cypress-ink-labs.org" style="color:${THEME.violetDeep};font-weight:500;text-decoration:underline;">support@cypress-ink-labs.org</a>.
         </div>
       </td>
-    </tr>`;
+    </tr>`
 
   return {
     to: payload.email,
@@ -369,7 +369,7 @@ function renderRequestRejected(
       footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">Didn't request this? You can safely ignore this email.</div>`,
       appUrl,
     }),
-  };
+  }
 }
 
 function renderCommunityEventStatus(
@@ -377,22 +377,22 @@ function renderCommunityEventStatus(
     | Extract<Payload, { kind: "community_event_approved" }>
     | Extract<Payload, { kind: "community_event_rejected" }>,
   appUrl: string,
-  status: "approved" | "rejected",
+  status: "approved" | "rejected"
 ): RenderedEmail {
-  const isApproved = status === "approved";
-  const eventTitle = escapeHtml(payload.event_title);
-  const username = escapeHtml(payload.username);
+  const isApproved = status === "approved"
+  const eventTitle = escapeHtml(payload.event_title)
+  const username = escapeHtml(payload.username)
 
   const statusMessage = isApproved
     ? `Great news! Your event "${eventTitle}" has been approved and is now live on Family Events. Local families can discover it and add it to their calendars.`
-    : `Thanks for submitting "${eventTitle}". After review, we weren't able to publish it at this time. You're welcome to submit other events anytime.`;
+    : `Thanks for submitting "${eventTitle}". After review, we weren't able to publish it at this time. You're welcome to submit other events anytime.`
 
   const ctaUrl =
     isApproved && "event_id" in payload
       ? `${appUrl}/events/${payload.event_id}`
-      : `${appUrl}/submit-event`;
+      : `${appUrl}/submit-event`
 
-  const ctaLabel = isApproved ? "View Your Event" : "Submit Another Event";
+  const ctaLabel = isApproved ? "View Your Event" : "Submit Another Event"
 
   const bodyHtml = `
     <tr>
@@ -414,7 +414,7 @@ function renderCommunityEventStatus(
           </a>
         </div>
       </td>
-    </tr>`;
+    </tr>`
 
   return {
     to: payload.email,
@@ -428,14 +428,14 @@ function renderCommunityEventStatus(
       footerHtml: `<div style="font-family:${FONT_SANS};font-size:12px;line-height:1.6;color:${THEME.textMuted};text-align:center;margin:0;">You received this because you submitted an event on <a href="${appUrl}" style="color:${THEME.violetDeep};text-decoration:underline;">Family Events</a>.</div>`,
       appUrl,
     }),
-  };
+  }
 }
 
 async function sendViaResend(args: {
-  apiKey: string;
-  from: string;
-  replyTo?: string;
-  email: RenderedEmail;
+  apiKey: string
+  from: string
+  replyTo?: string
+  email: RenderedEmail
 }): Promise<{ ok: true; id: string } | { ok: false; status: number; body: string }> {
   const response = await fetch(RESEND_API_ENDPOINT, {
     method: "POST",
@@ -451,23 +451,23 @@ async function sendViaResend(args: {
       ...(args.replyTo ? { reply_to: args.replyTo } : {}),
     }),
     signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-  });
+  })
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    return { ok: false, status: response.status, body: body.slice(0, 500) };
+    const body = await response.text().catch(() => "")
+    return { ok: false, status: response.status, body: body.slice(0, 500) }
   }
 
-  const data = (await response.json().catch(() => ({}))) as { id?: string };
-  return { ok: true, id: data.id ?? "" };
+  const data = (await response.json().catch(() => ({}))) as { id?: string }
+  return { ok: true, id: data.id ?? "" }
 }
 
 async function sendViaResendTemplate(args: {
-  apiKey: string;
-  from: string;
-  to: string;
-  templateAlias: string;
-  variables: Record<string, string>;
+  apiKey: string
+  from: string
+  to: string
+  templateAlias: string
+  variables: Record<string, string>
 }): Promise<{ ok: true; id: string } | { ok: false; status: number; body: string }> {
   const response = await fetch(RESEND_API_ENDPOINT, {
     method: "POST",
@@ -484,49 +484,49 @@ async function sendViaResendTemplate(args: {
       },
     }),
     signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-  });
+  })
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    return { ok: false, status: response.status, body: body.slice(0, 500) };
+    const body = await response.text().catch(() => "")
+    return { ok: false, status: response.status, body: body.slice(0, 500) }
   }
 
-  const data = (await response.json().catch(() => ({}))) as { id?: string };
-  return { ok: true, id: data.id ?? "" };
+  const data = (await response.json().catch(() => ({}))) as { id?: string }
+  return { ok: true, id: data.id ?? "" }
 }
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, { status: 200, headers: corsHeaders })
   }
 
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const auth = requireServiceRole(req, serviceRoleKey);
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  const auth = requireServiceRole(req, serviceRoleKey)
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.message }), {
       status: auth.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    })
   }
 
-  let payload: Payload;
+  let payload: Payload
   try {
-    payload = parsePayload(await req.json());
+    payload = parsePayload(await req.json())
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "invalid JSON body" }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+      }
+    )
   }
 
-  const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
-  const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>";
-  const resendReplyTo = Deno.env.get("RESEND_REPLY_TO") ?? "";
-  const adminEmail = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? "";
-  const appUrl = Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app";
+  const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
+  const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
+  const resendReplyTo = Deno.env.get("RESEND_REPLY_TO") ?? ""
+  const adminEmail = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? ""
+  const appUrl = Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app"
 
   try {
     // welcome: send via deployed Resend template
@@ -539,12 +539,12 @@ Deno.serve(async (req: Request) => {
             function: "notify-email",
             kind: payload.kind,
             to: payload.email,
-          },
-        );
+          }
+        )
         return new Response(JSON.stringify({ sent: false, dev: true }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        })
       }
 
       const result = await sendViaResendTemplate({
@@ -556,7 +556,7 @@ Deno.serve(async (req: Request) => {
           USERNAME: payload.username,
           APP_URL: appUrl,
         },
-      });
+      })
 
       if (!result.ok) {
         logEdgeEvent("error", "notify-email: Resend rejected welcome email", {
@@ -564,55 +564,55 @@ Deno.serve(async (req: Request) => {
           kind: payload.kind,
           status: result.status,
           body: result.body,
-        });
+        })
         await captureEdgeException(
           new Error(`Resend ${result.status}: ${result.body.slice(0, 200)}`),
-          { function: "notify-email", kind: payload.kind },
-        );
+          { function: "notify-email", kind: payload.kind }
+        )
         return new Response(JSON.stringify({ sent: false, error: `resend_${result.status}` }), {
           status: 502,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        })
       }
 
       logEdgeEvent("log", "notify-email: sent", {
         function: "notify-email",
         kind: payload.kind,
         resend_id: result.id,
-      });
+      })
       return new Response(JSON.stringify({ sent: true, id: result.id }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      })
     }
 
     // Inline-rendered email kinds
-    let rendered: RenderedEmail;
+    let rendered: RenderedEmail
     if (payload.kind === "admin_request") {
       if (!adminEmail) {
         logEdgeEvent("warn", "notify-email: ADMIN_NOTIFY_EMAIL not configured; skipping", {
           function: "notify-email",
           kind: payload.kind,
-        });
+        })
         return new Response(JSON.stringify({ sent: false, reason: "no_admin_email" }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        })
       }
-      rendered = renderAdminRequest(payload, adminEmail, appUrl);
+      rendered = renderAdminRequest(payload, adminEmail, appUrl)
     } else if (payload.kind === "request_approved") {
-      rendered = renderRequestApproved(payload, appUrl);
+      rendered = renderRequestApproved(payload, appUrl)
     } else if (payload.kind === "request_rejected") {
-      rendered = renderRequestRejected(payload, appUrl);
+      rendered = renderRequestRejected(payload, appUrl)
     } else if (payload.kind === "community_event_approved") {
-      rendered = renderCommunityEventStatus(payload, appUrl, "approved");
+      rendered = renderCommunityEventStatus(payload, appUrl, "approved")
     } else if (payload.kind === "community_event_rejected") {
-      rendered = renderCommunityEventStatus(payload, appUrl, "rejected");
+      rendered = renderCommunityEventStatus(payload, appUrl, "rejected")
     } else {
       return new Response(JSON.stringify({ error: "unknown kind" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      })
     }
 
     // Soft-failure mode: no RESEND_API_KEY → log + 200. Keeps local/dev and
@@ -623,11 +623,11 @@ Deno.serve(async (req: Request) => {
         kind: payload.kind,
         to: rendered.to,
         subject: rendered.subject,
-      });
+      })
       return new Response(JSON.stringify({ sent: false, dev: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      })
     }
 
     const result = await sendViaResend({
@@ -635,7 +635,7 @@ Deno.serve(async (req: Request) => {
       from: resendFrom,
       replyTo: resendReplyTo || undefined,
       email: rendered,
-    });
+    })
 
     if (!result.ok) {
       logEdgeEvent("error", "notify-email: Resend rejected request", {
@@ -643,36 +643,36 @@ Deno.serve(async (req: Request) => {
         kind: payload.kind,
         status: result.status,
         body: result.body,
-      });
+      })
       await captureEdgeException(
         new Error(`Resend ${result.status}: ${result.body.slice(0, 200)}`),
-        { function: "notify-email", kind: payload.kind },
-      );
+        { function: "notify-email", kind: payload.kind }
+      )
       return new Response(JSON.stringify({ sent: false, error: `resend_${result.status}` }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      })
     }
 
     logEdgeEvent("log", "notify-email: sent", {
       function: "notify-email",
       kind: payload.kind,
       resend_id: result.id,
-    });
+    })
     return new Response(JSON.stringify({ sent: true, id: result.id }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    })
   } catch (err) {
-    await captureEdgeException(err, errorContext(err, { function: "notify-email" }));
+    await captureEdgeException(err, errorContext(err, { function: "notify-email" }))
     logEdgeEvent(
       "error",
       "notify-email outer failure",
-      errorContext(err, { function: "notify-email" }),
-    );
+      errorContext(err, { function: "notify-email" })
+    )
     return new Response(JSON.stringify({ error: errorMessage(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    })
   }
-});
+})

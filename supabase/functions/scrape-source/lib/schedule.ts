@@ -1,14 +1,14 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { EventSourceRow } from "./types.ts";
+import type { SupabaseClient } from "@supabase/supabase-js"
+import type { EventSourceRow } from "./types.ts"
 
 export function isSourceDue(source: EventSourceRow): boolean {
   if (!source.last_scraped_at) {
-    return true;
+    return true
   }
 
-  const lastScraped = new Date(source.last_scraped_at).getTime();
-  const elapsed = Date.now() - lastScraped;
-  return elapsed >= source.scrape_interval_hours * 60 * 60 * 1000;
+  const lastScraped = new Date(source.last_scraped_at).getTime()
+  const elapsed = Date.now() - lastScraped
+  return elapsed >= source.scrape_interval_hours * 60 * 60 * 1000
 }
 
 /**
@@ -17,9 +17,9 @@ export function isSourceDue(source: EventSourceRow): boolean {
  */
 export async function resolveCityTimezone(
   supabase: SupabaseClient,
-  cityId: string | null,
+  cityId: string | null
 ): Promise<string> {
-  if (!cityId) return "UTC";
-  const { data } = await supabase.from("cities").select("timezone").eq("id", cityId).maybeSingle();
-  return (data?.timezone as string | undefined) ?? "UTC";
+  if (!cityId) return "UTC"
+  const { data } = await supabase.from("cities").select("timezone").eq("id", cityId).maybeSingle()
+  return (data?.timezone as string | undefined) ?? "UTC"
 }

@@ -1,92 +1,92 @@
-export type SharedLlmProvider = "openai" | "ollama" | "localai";
+export type SharedLlmProvider = "openai" | "ollama" | "localai"
 
 export interface SharedLlmDbOverride {
-  enabled?: boolean;
-  model?: string | null;
-  modelId?: string | null;
-  provider?: string | null;
+  enabled?: boolean
+  model?: string | null
+  modelId?: string | null
+  provider?: string | null
 }
 
 export interface SharedLlmConfigDescriptor {
-  allowedOpenAiModels: Set<string>;
-  apiKeyEnvNames?: string[];
-  baseUrlEnvNames?: string[];
-  dbOverride?: SharedLlmDbOverride | null;
-  defaultOpenAiBaseUrl?: string;
-  defaultOpenAiModel: string;
-  defaultProvider?: SharedLlmProvider;
-  enabledDefault?: boolean;
-  modelEnvNames?: string[];
-  providerEnvNames?: string[];
-  selfHostedDefaultModel?: string;
+  allowedOpenAiModels: Set<string>
+  apiKeyEnvNames?: string[]
+  baseUrlEnvNames?: string[]
+  dbOverride?: SharedLlmDbOverride | null
+  defaultOpenAiBaseUrl?: string
+  defaultOpenAiModel: string
+  defaultProvider?: SharedLlmProvider
+  enabledDefault?: boolean
+  modelEnvNames?: string[]
+  providerEnvNames?: string[]
+  selfHostedDefaultModel?: string
 }
 
 export interface SharedLlmConfig {
-  apiKey: string;
-  baseUrl: string;
-  configured: boolean;
-  enabled: boolean;
-  model: string;
-  provider: SharedLlmProvider;
+  apiKey: string
+  baseUrl: string
+  configured: boolean
+  enabled: boolean
+  model: string
+  provider: SharedLlmProvider
 }
 
-const SUPPORTED_PROVIDERS = new Set(["openai", "ollama", "localai"]);
+const SUPPORTED_PROVIDERS = new Set(["openai", "ollama", "localai"])
 
 function envFirst(names: string[], env: Pick<typeof Deno.env, "get">): string | undefined {
   for (const name of names) {
-    const value = env.get(name);
-    if (value != null && value.trim() !== "") return value.trim();
+    const value = env.get(name)
+    if (value != null && value.trim() !== "") return value.trim()
   }
-  return undefined;
+  return undefined
 }
 
 export function normalizeLlmBaseUrl(value: string): string {
-  return value.trim().replace(/\/+$/, "");
+  return value.trim().replace(/\/+$/, "")
 }
 
 export function resolveLlmProvider(
   value: string | undefined | null,
-  fallback: SharedLlmProvider = "openai",
+  fallback: SharedLlmProvider = "openai"
 ): SharedLlmProvider {
-  return value && SUPPORTED_PROVIDERS.has(value) ? (value as SharedLlmProvider) : fallback;
+  return value && SUPPORTED_PROVIDERS.has(value) ? (value as SharedLlmProvider) : fallback
 }
 
 export function resolveSharedLlmConfig(
   descriptor: SharedLlmConfigDescriptor,
-  env: Pick<typeof Deno.env, "get"> = Deno.env,
+  env: Pick<typeof Deno.env, "get"> = Deno.env
 ): SharedLlmConfig {
-  const db = descriptor.dbOverride;
-  const enabled = db?.enabled ?? descriptor.enabledDefault ?? true;
+  const db = descriptor.dbOverride
+  const enabled = db?.enabled ?? descriptor.enabledDefault ?? true
   const provider = resolveLlmProvider(
     db?.provider ?? envFirst(descriptor.providerEnvNames ?? ["AI_PROVIDER"], env),
-    descriptor.defaultProvider ?? "openai",
-  );
+    descriptor.defaultProvider ?? "openai"
+  )
 
   const baseUrl = normalizeLlmBaseUrl(
     envFirst(descriptor.baseUrlEnvNames ?? ["AI_BASE_URL"], env) ??
       (provider === "openai"
         ? (descriptor.defaultOpenAiBaseUrl ?? "https://api.openai.com/v1")
-        : ""),
-  );
+        : "")
+  )
 
   const rawModel =
     db?.modelId ??
     db?.model ??
-    envFirst(descriptor.modelEnvNames ?? ["AI_MODEL", "OPENAI_MODEL"], env);
+    envFirst(descriptor.modelEnvNames ?? ["AI_MODEL", "OPENAI_MODEL"], env)
   const model =
     provider === "openai"
       ? descriptor.allowedOpenAiModels.has(rawModel ?? "")
         ? (rawModel ?? descriptor.defaultOpenAiModel)
         : descriptor.defaultOpenAiModel
-      : (rawModel ?? descriptor.selfHostedDefaultModel ?? "qwen3:1.7b");
+      : (rawModel ?? descriptor.selfHostedDefaultModel ?? "qwen3:1.7b")
 
-  const openAiApiKey = envFirst(descriptor.apiKeyEnvNames ?? ["AI_API_KEY", "OPENAI_API_KEY"], env);
+  const openAiApiKey = envFirst(descriptor.apiKeyEnvNames ?? ["AI_API_KEY", "OPENAI_API_KEY"], env)
   const apiKey =
     provider === "openai"
       ? (openAiApiKey ?? "")
       : provider === "localai"
         ? (env.get("LOCALAI_API_KEY")?.trim() ?? "")
-        : "ollama";
+        : "ollama"
 
   return {
     apiKey,
@@ -95,5 +95,5 @@ export function resolveSharedLlmConfig(
     enabled,
     model,
     provider,
-  };
+  }
 }
