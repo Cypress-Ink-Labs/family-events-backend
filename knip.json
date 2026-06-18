@@ -1,7 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "include": ["files", "dependencies", "unlisted", "binaries"],
-  "ignoreBinaries": ["terraform", "supabase", "deno", "psql"],
   "ignoreWorkspaces": ["packages/config-quality", "packages/config-typescript"],
   "ignoreIssues": {
     "supabase/functions/**/*.ts": ["unlisted"]
@@ -9,11 +8,10 @@
   "tags": ["-lintignore"],
   "workspaces": {
     ".": {
-      "entry": ["scripts/**/*.mjs", "scripts/**/*.ts", "tests/**/*.mjs", "tests/**/*.ts"],
-      "project": ["scripts/**/*.mjs", "scripts/**/*.ts", "tests/**/*.mjs", "tests/**/*.ts"]
+      "entry": ["scripts/**/*.mjs", "tests/**/*.mjs"],
+      "project": ["scripts/**/*.mjs", "tests/**/*.mjs"]
     },
     "packages/contracts": {
-      "entry": ["src/index.ts!", "src/database.types.ts!"],
       "project": ["src/**/*.ts!"],
       "ignoreDependencies": [
         "@cypress-ink-labs/config-quality",
@@ -21,15 +19,10 @@
       ]
     },
     "packages/deploy-cli": {
-      "entry": ["src/cli.ts!"],
-      "project": ["src/**/*.ts!", "tests/**/*.ts"],
-      "ignoreDependencies": [
-        "@cypress-ink-labs/config-quality",
-        "@cypress-ink-labs/config-typescript"
-      ]
+      "project": ["src/**/*.ts!", "tests/**/*.ts"]
     },
     "packages/email": {
-      "entry": ["src/index.ts!", "emails/**/*.tsx!", "scripts/**/*.tsx!"],
+      "entry": ["emails/**/*.tsx!", "scripts/**/*.tsx!"],
       "project": ["src/**/*.ts!", "emails/**/*.tsx!", "scripts/**/*.tsx!"],
       "react-email": false,
       "ignoreDependencies": ["@cypress-ink-labs/config-typescript"]
