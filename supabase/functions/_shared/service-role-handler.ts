@@ -1,16 +1,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireServiceRole } from "./auth.ts";
+import { buildCorsHeaders, resolveAllowedOrigin } from "./cors.ts";
 import { errorContext } from "./logger.ts";
 import { captureEdgeException } from "./sentry.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Client-Info, Apikey",
-};
-
-const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
 
 interface ServiceRoleJsonContext {
   request: Request;
@@ -42,10 +34,14 @@ export function serviceRoleJsonError(status: number, message: string) {
   return new ServiceRoleJsonError(status, message);
 }
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(
+  body: unknown,
+  status = 200,
+  corsHeaders: Record<string, string>,
+) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: jsonHeaders,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
 
@@ -54,6 +50,9 @@ export function serveServiceRoleJson(
   handler: ServiceRoleJsonHandler,
 ) {
   Deno.serve(async (req: Request) => {
+    const allowedOrigin = resolveAllowedOrigin(req.headers.get("Origin"));
+    const corsHeaders = buildCorsHeaders(allowedOrigin, ["POST", "OPTIONS"]);
+
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 200, headers: corsHeaders });
     }
@@ -65,26 +64,33 @@ export function serveServiceRoleJson(
       return jsonResponse(
         { error: "SUPABASE_SERVICE_ROLE_KEY not configured" },
         500,
+        corsHeaders,
       );
     }
 
     const auth = requireServiceRole(req, serviceRoleKey);
     if (!auth.ok) {
-      return jsonResponse({ error: auth.message }, auth.status);
+      return jsonResponse({ error: auth.message }, auth.status, corsHeaders);
     }
 
     if (!supabaseUrl) {
-      return jsonResponse({ error: "SUPABASE_URL not configured" }, 500);
+      return jsonResponse(
+        { error: "SUPABASE_URL not configured" },
+        500,
+        corsHeaders,
+      );
     }
 
     try {
       const supabase = createClient(supabaseUrl, serviceRoleKey);
       return jsonResponse(
         await handler({ request: req, serviceRoleKey, supabase, supabaseUrl }),
+        200,
+        corsHeaders,
       );
     } catch (err) {
       if (err instanceof ServiceRoleJsonError) {
-        return jsonResponse({ error: err.message }, err.status);
+        return jsonResponse({ error: err.message }, err.status, corsHeaders);
       }
       await captureEdgeException(
         err,
@@ -95,6 +101,7 @@ export function serveServiceRoleJson(
       return jsonResponse(
         { error: "Internal error", executionId: Deno.env.get("SB_EXECUTION_ID") ?? null },
         500,
+        corsHeaders,
       );
     }
   });

@@ -3,6 +3,9 @@ import type { AuthResult } from "./auth.ts";
 import { requireAdminOrService } from "./auth.ts";
 import {
   buildCorsHeaders,
+  resolveAllowedOrigin,
+} from "./cors.ts";
+import {
   type CorsOptions,
   errorJson,
   jsonResponse,
@@ -63,16 +66,16 @@ export function createAdminJsonHandler(
   handler: AdminJsonHandler,
   deps: AdminJsonDependencies = {},
 ): (req: Request) => Promise<Response> {
-  const corsHeaders = buildCorsHeaders({
-    ...cors,
-    methods: cors?.methods ?? [...methods, "OPTIONS"],
-  });
+  const corsMethodList = cors?.methods ?? [...methods, "OPTIONS"];
   const env = deps.env ?? Deno.env;
   const serviceClientFactory = deps.createServiceClient ?? createServiceClient;
   const requireAuth = deps.requireAdminOrService ?? requireAdminOrService;
   const captureException = deps.captureException ?? captureEdgeException;
 
   return async (req: Request) => {
+    const allowedOrigin = resolveAllowedOrigin(req.headers.get("Origin"));
+    const corsHeaders = buildCorsHeaders(allowedOrigin, corsMethodList);
+
     if (req.method === "OPTIONS") return optionsResponse(corsHeaders);
     if (!methods.includes(req.method)) {
       return errorJson("method not allowed", 405, corsHeaders);

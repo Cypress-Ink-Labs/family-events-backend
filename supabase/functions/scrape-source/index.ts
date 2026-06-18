@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { requireAdminOrService } from "../_shared/auth.ts";
+import { buildCorsHeaders, resolveAllowedOrigin } from "../_shared/cors.ts";
 import { captureEdgeException } from "../_shared/sentry.ts";
 import { errorContext, logEdgeEvent } from "../_shared/logger.ts";
 import {
@@ -10,43 +11,9 @@ import {
 } from "./lib/source-queue.ts";
 import type { EventSourceRow } from "./lib/types.ts";
 
-const DEFAULT_ALLOWED_ORIGINS = [
-  "https://family-events.org",
-  "https://www.family-events.org",
-  "https://family-events.up.railway.app",
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174",
-  "http://127.0.0.1:5175",
-];
-
-function resolveAllowedOrigin(origin: string | null): string | null {
-  const configured = Deno.env.get("ALLOWED_ORIGINS");
-  const allowlist = (configured?.split(",") ?? DEFAULT_ALLOWED_ORIGINS)
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
-
-  if (!origin) return null;
-  return allowlist.includes(origin) ? origin : null;
-}
-
 declare const EdgeRuntime:
   | { waitUntil<T>(promise: Promise<T>): Promise<T> }
   | undefined;
-
-function buildCorsHeaders(allowedOrigin: string | null): HeadersInit {
-  if (!allowedOrigin) return { Vary: "Origin" };
-
-  return {
-    "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers":
-      "Content-Type, Authorization, X-Client-Info, Apikey",
-    Vary: "Origin",
-  };
-}
 
 function dueSourceLimit(): number {
   const parsed = Number(Deno.env.get("DUE_SOURCE_LIMIT") ?? "200");
@@ -153,6 +120,8 @@ Deno.serve(async (req: Request) => {
       );
       if (typeof EdgeRuntime !== "undefined") {
         EdgeRuntime.waitUntil(kick);
+      } else {
+        await kick; // non-edge runtime (local/tests): await so the kick actually runs and errors surface
       }
     }
 
