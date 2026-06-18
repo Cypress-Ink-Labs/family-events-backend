@@ -31,7 +31,8 @@ suites + lint into CI. Several later plans assume those gates exist so their new
 | 016  | (spike) iCal + RSS export edge function                   | P3       | M      | LOW  | —          | DONE                                  |
 | 017  | (spike) Verify + document public semantic-search RPC      | P3       | S      | LOW  | —          | DONE                                  |
 | 018  | (spike) Design public read REST API                       | P3       | L      | —    | —          | DONE                                  |
-| 019  | Adopt Railway project into IaC management                 | P3       | L      | HIGH | —          | TODO                                  |
+| 019  | Adopt Railway project into IaC management (Model A)       | P3       | L      | HIGH | —          | TODO                                  |
+| 020  | Split crons into own IaC-managed Railway project (Model B)| P3       | L      | HIGH | —          | TODO                                  |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale)
 
