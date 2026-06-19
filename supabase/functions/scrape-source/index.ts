@@ -76,19 +76,49 @@ Deno.serve(async (req: Request) => {
 
     const dueSources = (sourcesRaw ?? []) as EventSourceRow[]
     const results: SourceScrapeEnqueueResponseRow[] = []
+    const enqueuedSourceIds: string[] = []
 
-    for (const source of dueSources) {
-      const enqueue = await enqueueSourceScrape(
-        supabase,
-        source.id,
-        requestedSourceId ? "manual" : "scheduled"
-      )
-      await supabase.from("event_sources").update({ last_status: "pending" }).eq("id", source.id)
-      results.push({
-        source_id: source.id,
-        queue_id: enqueue.queue_id,
-        deduped: enqueue.deduped,
-      })
+    try {
+      for (const source of dueSources) {
+        const enqueue = await enqueueSourceScrape(
+          supabase,
+          source.id,
+          requestedSourceId ? "manual" : "scheduled"
+        )
+        enqueuedSourceIds.push(source.id)
+        results.push({
+          source_id: source.id,
+          queue_id: enqueue.queue_id,
+          deduped: enqueue.deduped,
+        })
+      }
+    } finally {
+      // Flush in a single round-trip, in `finally` so a mid-loop enqueue failure
+      // still marks the already-enqueued sources pending — matching the original
+      // per-source update-after-enqueue (which marked each before any later throw).
+      if (enqueuedSourceIds.length > 0) {
+        // try/catch so a rejection here can't throw out of `finally` and mask an
+        // in-flight enqueue exception from the try block.
+        try {
+          const { error: updErr } = await supabase
+            .from("event_sources")
+            .update({ last_status: "pending" })
+            .in("id", enqueuedSourceIds)
+          if (updErr) {
+            logEdgeEvent("warn", "scrape-source: failed to mark sources pending", {
+              function: "scrape-source",
+              count: enqueuedSourceIds.length,
+              error: updErr.message,
+            })
+          }
+        } catch (err) {
+          logEdgeEvent("warn", "scrape-source: failed to mark sources pending", {
+            function: "scrape-source",
+            count: enqueuedSourceIds.length,
+            error: err instanceof Error ? err.message : String(err),
+          })
+        }
+      }
     }
 
     if (results.length > 0 && supabaseUrl && serviceRoleKey) {

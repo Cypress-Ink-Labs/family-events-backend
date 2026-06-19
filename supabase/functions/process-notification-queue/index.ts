@@ -191,6 +191,15 @@ serveServiceRoleJson(
     for (let i = 0; i < entries.length; i += BATCH_SIZE) {
       const batch = (entries as QueueEntry[]).slice(i, i + BATCH_SIZE)
 
+      // Accumulate in-app notification rows for this batch into a single insert.
+      const notifRows: Array<{
+        user_id: string
+        type: "change"
+        title: string
+        body: string
+        event_id: string
+      }> = []
+
       for (const entry of batch) {
         const event = eventMap.get(entry.event_id)
         const user = profileMap.get(entry.user_id)
@@ -209,25 +218,14 @@ serveServiceRoleJson(
             : `Updated: ${event.title}`
         const eventUrl = `${appUrl}/events/${entry.event_id}`
 
-        // Create in-app notification (stays per-user)
-        const { error: notifErr } = await supabase.from("user_notifications").insert({
+        // Queue in-app notification row (flushed in one insert after the batch loop)
+        notifRows.push({
           user_id: entry.user_id,
           type: "change" as const,
           title: notifTitle,
           body: summary,
           event_id: entry.event_id,
         })
-
-        if (notifErr) {
-          logEdgeEvent("warn", "process-notification-queue: failed to create in-app notification", {
-            function: "process-notification-queue",
-            user_id: entry.user_id,
-            event_id: entry.event_id,
-            error: notifErr.message,
-          })
-        } else {
-          inApp++
-        }
 
         // Send email if user wants change emails (stays per-user: personalized template vars)
         if (userPrefs.change_email && resendApiKey) {
@@ -302,6 +300,46 @@ serveServiceRoleJson(
         }
 
         processedIds.push(entry.id)
+      }
+
+      // Flush this batch's in-app notifications in a single insert. Per the
+      // at-most-once tradeoff, processedIds already includes every entry above
+      // regardless of this insert's result — the batch insert only changes HOW
+      // the rows are written, not whether the queue entry is marked processed.
+      // One batch error stands in for the whole array: on success every queued
+      // row counts toward inApp, on failure none do.
+      if (notifRows.length > 0) {
+        const { error: notifErr } = await supabase.from("user_notifications").insert(notifRows)
+
+        if (notifErr) {
+          logEdgeEvent(
+            "warn",
+            "process-notification-queue: failed to create in-app notifications",
+            {
+              function: "process-notification-queue",
+              count: notifRows.length,
+              error: notifErr.message,
+            }
+          )
+          // A single bad row fails the whole batch insert; fall back to per-row
+          // inserts so one violation can't drop every other valid notification
+          // (queue entries are already marked processed — at-most-once).
+          for (const row of notifRows) {
+            const { error: rowErr } = await supabase.from("user_notifications").insert(row)
+            if (rowErr) {
+              logEdgeEvent("warn", "process-notification-queue: row insert failed", {
+                function: "process-notification-queue",
+                user_id: row.user_id,
+                event_id: row.event_id,
+                error: rowErr.message,
+              })
+            } else {
+              inApp += 1
+            }
+          }
+        } else {
+          inApp += notifRows.length
+        }
       }
 
       // Rate-limit between batches
