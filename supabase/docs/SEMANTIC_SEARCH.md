@@ -5,9 +5,9 @@
 ## Overview
 
 Vector-based "related events" search is backend-complete. The public
-`find_similar_events_by_id` RPC is callable by authenticated users via the
-Supabase JavaScript client's `.rpc()` method. See the **known issue** below
-before shipping an anon (unauthenticated) path.
+`find_similar_events_by_id` RPC is callable by `anon`, `authenticated`, and
+`service_role` via the Supabase JavaScript client's `.rpc()` method (the anon
+path was unblocked by plan 024 — see the security model below).
 
 ---
 
@@ -45,10 +45,15 @@ No PII, internal flags, or user data appear in the return set.
 ## Security model
 
 ```
-public.find_similar_events_by_id   (SECURITY INVOKER, owner=postgres)
+public.find_similar_events_by_id   (SECURITY DEFINER, owner=postgres)
   └── private.find_similar_events_by_id  (SECURITY DEFINER, owner=postgres)
         └── private.find_similar_events  (SECURITY DEFINER, owner=postgres)
 ```
+
+All three functions run as their owner (`postgres`). The public wrapper is a
+pure pass-through (`SET search_path TO ''`, no dynamic SQL), so SECURITY DEFINER
+only widens reachability of the private body — it does not bypass the
+published-only filter enforced below.
 
 Grants on `public.find_similar_events_by_id`:
 
@@ -68,49 +73,37 @@ with `cosine_distance >= 0.3`. Only semantically close events are returned.
 
 ---
 
-## Known issue: anon callers blocked (SECURITY INVOKER mismatch)
+## Resolved: anon callers (SECURITY INVOKER mismatch)
 
-**Status: gap documented; fix is a follow-up migration (not part of plan 017).**
+**Status: RESOLVED in migration
+`20260618000000_find_similar_events_by_id_security_definer.sql` (plan 024).**
 
-`public.find_similar_events_by_id` is `SECURITY INVOKER`. When the `anon` role
-calls it, the wrapper executes as `anon` and then tries to invoke
-`private.find_similar_events_by_id` — but `anon` has no `EXECUTE` on that
-private function. The call fails:
+Previously, `public.find_similar_events_by_id` was `SECURITY INVOKER`. When the
+`anon` role called it, the wrapper executed as `anon` and then tried to invoke
+`private.find_similar_events_by_id` — but `anon` has no `EXECUTE` on that private
+function, so the call failed with
+`{"code":"42501","message":"permission denied for function find_similar_events_by_id"}`
+(verified via PostgREST HTTP with the publishable/anon key; `authenticated`
+callers failed identically).
 
-```
-{"code":"42501","message":"permission denied for function find_similar_events_by_id"}
-```
+The wrapper is now `SECURITY DEFINER` + `SET search_path TO ''`, matching the
+`private.invites_required` pattern: the wrapper runs as its owner (`postgres`),
+which has `EXECUTE` on the private body, so `anon`/`authenticated` calls succeed.
+The body remains a pure schema-qualified pass-through (no dynamic SQL, no
+user-supplied identifiers), and the published-only filter still lives in the
+private body — DEFINER widens reachability without weakening the guarantees.
 
-This was verified via PostgREST HTTP with the publishable (anon) key.
-`authenticated` callers fail for the same reason.
-
-**Fix pattern**: make the public wrapper `SECURITY DEFINER` (matching the
-pattern used by `private.invites_required`, where the private fn is accessible
-because the public INVOKER wrapper's owner has access). One-migration fix:
-
-```sql
-CREATE OR REPLACE FUNCTION public.find_similar_events_by_id(...)
-RETURNS TABLE (...)
-LANGUAGE sql
-SECURITY DEFINER        -- change from INVOKER
-SET search_path TO ''
-AS $$
-  SELECT * FROM private.find_similar_events_by_id(p_event_id, p_limit, p_city_id);
-$$;
--- Re-apply grants after replacing the function
-REVOKE EXECUTE ON FUNCTION public.find_similar_events_by_id(uuid, int, uuid) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.find_similar_events_by_id(uuid, int, uuid)
-  TO authenticated, anon, service_role;
-```
-
-Until this fix lands, use `service_role` on the server side or an authenticated
-session from the client.
+Rollback (reintroduces the anon-block) lives at
+`supabase/rollbacks/20260618000000_find_similar_events_by_id_security_definer_down.sql`.
 
 ---
 
 ## Known issue: `p_limit` unbounded
 
-**Status: noted; fix is a follow-up migration.**
+**Status: still open after plan 024.** The plan's optional `p_limit` clamp
+(Step 4) was skipped because it requires a local Supabase to DB-verify a body
+change, which was unavailable; shipping an unverified body change was out of
+scope.
 
 `p_limit` is passed raw to `LIMIT p_limit` with no server-side clamp. An anon
 or authenticated caller can request arbitrarily many results. Recommended fix:
@@ -148,8 +141,8 @@ Note: HNSW approximate-NN does not guarantee exact threshold enforcement. The
 **No edge-function wrapper needed.** The frontend consumes this via
 `.rpc("find_similar_events_by_id", …)` directly through PostgREST. There is no
 server-side caching requirement or special HTTP shape that would justify a
-wrapper. This decision holds as long as the SECURITY INVOKER issue (above) is
-fixed in a migration.
+wrapper. This decision holds now that the SECURITY INVOKER issue (above) is
+fixed in migration `20260618000000_*` (plan 024).
 
 ---
 
