@@ -1,19 +1,3 @@
-export interface CorsOptions {
-  allowHeaders?: string[]
-  methods?: string[]
-  origin?: string
-}
-
-const DEFAULT_ALLOW_HEADERS = ["Content-Type", "Authorization", "X-Client-Info", "Apikey"]
-
-export function buildCorsHeaders(options: CorsOptions = {}): Record<string, string> {
-  return {
-    "Access-Control-Allow-Origin": options.origin ?? "*",
-    "Access-Control-Allow-Methods": (options.methods ?? ["POST", "OPTIONS"]).join(", "),
-    "Access-Control-Allow-Headers": (options.allowHeaders ?? DEFAULT_ALLOW_HEADERS).join(", "),
-  }
-}
-
 function mergeHeaders(base: HeadersInit, override?: HeadersInit): Headers {
   const headers = new Headers(base)
   if (override) {

@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import type { AuthResult } from "./auth.ts"
 import { requireAdminOrService } from "./auth.ts"
 import { buildCorsHeaders, resolveAllowedOrigin } from "./cors.ts"
-import { type CorsOptions, errorJson, jsonResponse, optionsResponse } from "./http.ts"
+import { errorJson, jsonResponse, optionsResponse } from "./http.ts"
 import { errorContext } from "./logger.ts"
 import { captureEdgeException } from "./sentry.ts"
 import { createServiceClient } from "./supabase-client.ts"
@@ -17,7 +17,7 @@ export interface AdminJsonContext {
 }
 
 export interface AdminJsonOptions {
-  cors?: CorsOptions
+  cors?: { methods?: string[] }
   errorStage?: string
   functionName: string
   methods?: string[]

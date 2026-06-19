@@ -48,3 +48,23 @@ export function buildCorsHeaders(
   }
   return headers
 }
+
+/**
+ * Builds open `Access-Control-Allow-Origin: *` CORS headers.
+ *
+ * Use ONLY for intentionally-public, unauthenticated read endpoints (e.g. the
+ * public events API, OG image/share, sitemap) or service-role-only functions
+ * never invoked from a browser. Unlike {@link buildCorsHeaders} this serves
+ * every origin and omits `Vary: Origin`. For browser/auth-facing functions use
+ * {@link buildCorsHeaders} with {@link resolveAllowedOrigin} instead.
+ */
+export function buildPublicCorsHeaders(
+  methods: string[] = ["GET", "OPTIONS"],
+  allowHeaders: string[] = ["Content-Type", "Authorization", "X-Client-Info", "Apikey"]
+): Record<string, string> {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": methods.join(", "),
+    "Access-Control-Allow-Headers": allowHeaders.join(", "),
+  }
+}

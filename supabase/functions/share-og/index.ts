@@ -1,10 +1,10 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
+import { buildPublicCorsHeaders } from "../_shared/cors.ts"
 import { escapeHtml } from "../_shared/html.ts"
-import { buildCorsHeaders } from "../_shared/http.ts"
 import { validateExternalUrl } from "../_shared/url-validation.ts"
 
-const corsHeaders = buildCorsHeaders({ methods: ["GET", "OPTIONS"] })
+const corsHeaders = buildPublicCorsHeaders(["GET", "OPTIONS"])
 
 // CDN cache TTL is short on purpose: event data mutates (status flips,
 // description edits, cancellation), and a long s-maxage keeps the stale

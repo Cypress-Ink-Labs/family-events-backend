@@ -12,15 +12,13 @@ import {
   type StockProvider,
 } from "../_shared/stock-images.ts"
 import { lookupUnsplashPhotoFromUrl } from "../_shared/unsplash.ts"
+import { buildPublicCorsHeaders } from "../_shared/cors.ts"
 import { sanitizeImagesForIngest } from "../scrape-source/lib/enrichment.ts"
 import type { ParsedEvent } from "../scrape-source/lib/types.ts"
 import { runParentTipsPass } from "./parent-tips-pass.ts"
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-}
+// Service-role-only cron function (never browser-invoked); open CORS is safe.
+const corsHeaders = buildPublicCorsHeaders(["POST", "OPTIONS"])
 
 // Cap batch so per-tick wall stays under 90s with headroom under the 150s
 // edge wall. Each event = 1 geocode HTTP + N image HEAD HTTPs (capped at 5)
