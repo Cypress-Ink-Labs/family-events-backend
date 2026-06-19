@@ -162,10 +162,16 @@ Supabase Edge Functions do not expose a built-in rate-limit primitive. Options:
 2. **Postgres token bucket** (sketched in plan 011) — uses the DB connection pool; adds latency.
 3. **Cloudflare Workers / WAF rule** — infrastructure layer; not in this repo.
 
-**For now**: do not announce the API publicly until at least option 1 or 3 is in place. Add a
-`TODO: no rate limit` comment in the function.
+**Decision (plan 029):** the chosen approach is **option 2 — a Postgres token-bucket RPC** (no new
+infra or secrets, fail-open, reusing the advisory-lock pattern from plan 011). The full option
+comparison, client-IP source, and a build-ready design (data model, `429` + `Retry-After` /
+`X-RateLimit-*` headers, fail-open policy, test plan) live in
+[`RATE_LIMITING.md`](./RATE_LIMITING.md). Implementation is a follow-up build plan.
 
-Suggested v1 limits once implemented: 100 req / min per IP, burst 200, for GET /events.
+**For now**: do not announce the API publicly until the limiter is implemented. The
+`TODO: no rate limit` comment stays in the function until then.
+
+v1 limits once implemented: 100 req / min per IP, burst 200, for GET /events.
 
 ---
 
