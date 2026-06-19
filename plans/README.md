@@ -100,12 +100,12 @@ shipped. Execute in the order below; honor each plan's STOP conditions and updat
 |------|-------|----------|--------|------|------------|--------|
 | 022  | Test the notify-path functions (send-push/notify-email/send-reminders) | P2 | M   | LOW | — | TODO — CIL-105 |
 | 023  | Characterization tests for the queue orchestration loops               | P2 | M   | LOW | — | TODO — CIL-106 |
-| 024  | Make `find_similar_events_by_id` wrapper SECURITY DEFINER (unblock anon)| P2 | S   | LOW | — | TODO — CIL-107 |
-| 025  | Consolidate CORS onto one module (public-vs-allowlist explicit)         | P2 | S–M | LOW | — | TODO — CIL-108 |
+| 024  | Make `find_similar_events_by_id` wrapper SECURITY DEFINER (unblock anon)| P2 | S   | LOW | — | DONE — merged `cfc1def` (PR #1, CIL-107); +source-published gate per CodeRabbit |
+| 025  | Consolidate CORS onto one module (public-vs-allowlist explicit)         | P2 | S–M | LOW | — | DONE — merged `643797f` (PR #3, CIL-108) |
 | 026  | Batch the per-row DB writes/fetches in the cron pipeline                | P3 | S–M | LOW | — | TODO — CIL-109 |
 | 027  | Extract a shared Resend config module                                   | P3 | S   | LOW | — | TODO — CIL-110 |
 | 028  | (SPIKE) Specify the 3 unbuilt public REST API endpoints                 | P3 | M   | LOW | 024 | TODO — CIL-111 |
-| 029  | (SPIKE) Choose + design per-IP rate limiting for events-api             | P3 | M   | LOW | — | TODO — CIL-112 |
+| 029  | (SPIKE) Choose + design per-IP rate limiting for events-api             | P3 | M   | LOW | — | DONE — merged `b065320` (PR #2, CIL-112); recommends Postgres token-bucket |
 
 ### Round 2 dependency notes
 
