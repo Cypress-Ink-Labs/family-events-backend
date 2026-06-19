@@ -2,8 +2,9 @@ import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
 
 // TODO: no rate limiting — do not announce this endpoint publicly until
-// per-IP rate limiting is implemented (Upstash Redis or Cloudflare WAF rule).
-// See supabase/docs/PUBLIC_API.md § Rate limiting.
+// per-IP rate limiting is implemented. Approach chosen: Postgres token-bucket
+// RPC (no new infra/secrets, fail-open). Build-ready design in
+// supabase/docs/RATE_LIMITING.md; gap also noted in PUBLIC_API.md § Rate limiting.
 
 // Public API v1 — GET /events
 // Thin façade over public.search_events() with param validation + JSON envelope.
