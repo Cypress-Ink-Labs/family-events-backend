@@ -2,7 +2,7 @@
 // Run: cd supabase/functions && deno test --allow-env events-api/events-api_test.ts
 
 import { assertEquals } from "jsr:@std/assert"
-import { decodeCursor, parseParams } from "./index.ts"
+import { decodeCursor, handleEventsApi, parseParams, parseRoute } from "./index.ts"
 
 // ── decodeCursor ─────────────────────────────────────────────────────────────
 
@@ -182,4 +182,93 @@ Deno.test("parseParams: invalid cursor rejected", () => {
   assertEquals(result.ok, false)
   if (result.ok) return
   assertEquals(result.error.field, "cursor")
+})
+
+// ── parseRoute (GET /events vs GET /events/{id}) ───────────────────────────────
+
+const VALID_ID = "12345678-1234-1234-a234-123456789012"
+
+Deno.test("parseRoute: function root is the list collection", () => {
+  assertEquals(parseRoute("/functions/v1/events-api"), { kind: "list" })
+  assertEquals(parseRoute("/functions/v1/events-api/"), { kind: "list" })
+})
+
+Deno.test("parseRoute: trailing UUID segment is a single-event lookup", () => {
+  assertEquals(parseRoute(`/functions/v1/events-api/${VALID_ID}`), {
+    kind: "event",
+    id: VALID_ID,
+  })
+})
+
+Deno.test("parseRoute: URL-encoded UUID is decoded", () => {
+  assertEquals(parseRoute(`/functions/v1/events-api/${encodeURIComponent(VALID_ID)}`), {
+    kind: "event",
+    id: VALID_ID,
+  })
+})
+
+Deno.test("parseRoute: non-UUID single segment is unknown (reserved for future routes)", () => {
+  assertEquals(parseRoute("/functions/v1/events-api/cities"), { kind: "unknown" })
+  assertEquals(parseRoute("/functions/v1/events-api/not-a-uuid"), { kind: "unknown" })
+})
+
+Deno.test("parseRoute: multi-segment tail (e.g. {id}/similar) is unknown — not built", () => {
+  assertEquals(parseRoute(`/functions/v1/events-api/${VALID_ID}/similar`), { kind: "unknown" })
+})
+
+Deno.test("parseRoute: malformed percent-encoding is unknown (must not throw → no 500)", () => {
+  // decodeURIComponent("%E0%A4%A") throws URIError; parseRoute must catch it.
+  assertEquals(parseRoute("/functions/v1/events-api/%E0%A4%A"), { kind: "unknown" })
+})
+
+// ── handleEventsApi routing guards (resolved before any DB call) ───────────────
+
+Deno.test("handleEventsApi: OPTIONS preflight returns 200", async () => {
+  const res = await handleEventsApi(
+    new Request("https://x/functions/v1/events-api", { method: "OPTIONS" })
+  )
+  assertEquals(res.status, 200)
+  assertEquals(res.headers.get("Access-Control-Allow-Origin"), "*")
+})
+
+Deno.test("handleEventsApi: non-GET method → 405", async () => {
+  const res = await handleEventsApi(
+    new Request("https://x/functions/v1/events-api", { method: "POST" })
+  )
+  assertEquals(res.status, 405)
+  assertEquals((await res.json()).error, "method not allowed")
+})
+
+Deno.test("handleEventsApi: unknown route → 404", async () => {
+  const res = await handleEventsApi(
+    new Request("https://x/functions/v1/events-api/cities", { method: "GET" })
+  )
+  assertEquals(res.status, 404)
+  assertEquals((await res.json()).error, "not found")
+})
+
+Deno.test("handleEventsApi: {id}/similar is not built → 404", async () => {
+  const res = await handleEventsApi(
+    new Request(`https://x/functions/v1/events-api/${VALID_ID}/similar`, { method: "GET" })
+  )
+  assertEquals(res.status, 404)
+})
+
+Deno.test("handleEventsApi: missing env → 503 before any DB call", async () => {
+  // Ensure the env is unset so getAnonClient() returns null and we never touch
+  // the network. The single-event route reaches this guard with a valid id.
+  const prevUrl = Deno.env.get("SUPABASE_URL")
+  const prevKey = Deno.env.get("SUPABASE_ANON_KEY")
+  Deno.env.delete("SUPABASE_URL")
+  Deno.env.delete("SUPABASE_ANON_KEY")
+  try {
+    const res = await handleEventsApi(
+      new Request(`https://x/functions/v1/events-api/${VALID_ID}`, { method: "GET" })
+    )
+    assertEquals(res.status, 503)
+    assertEquals((await res.json()).error, "service unavailable")
+  } finally {
+    if (prevUrl !== undefined) Deno.env.set("SUPABASE_URL", prevUrl)
+    if (prevKey !== undefined) Deno.env.set("SUPABASE_ANON_KEY", prevKey)
+  }
 })
