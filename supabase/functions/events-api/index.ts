@@ -210,7 +210,15 @@ export function parseRoute(pathname: string): Route {
     return { kind: "list" }
   }
   if (tail.length === 1) {
-    const seg = decodeURIComponent(tail[0])
+    let seg: string
+    try {
+      seg = decodeURIComponent(tail[0])
+    } catch {
+      // decodeURIComponent throws URIError on malformed percent-encoding
+      // (e.g. "%E0%A4%A"). A malformed segment is never a valid route — treat
+      // it as unknown (→ 404) rather than letting the handler 500.
+      return { kind: "unknown" }
+    }
     // A bare single segment is a single-event lookup ONLY when it is a UUID.
     // Non-UUID single segments (e.g. "cities") are reserved for future routes
     // and must not be treated as an event id.

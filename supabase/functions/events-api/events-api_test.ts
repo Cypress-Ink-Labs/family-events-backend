@@ -216,6 +216,11 @@ Deno.test("parseRoute: multi-segment tail (e.g. {id}/similar) is unknown — not
   assertEquals(parseRoute(`/functions/v1/events-api/${VALID_ID}/similar`), { kind: "unknown" })
 })
 
+Deno.test("parseRoute: malformed percent-encoding is unknown (must not throw → no 500)", () => {
+  // decodeURIComponent("%E0%A4%A") throws URIError; parseRoute must catch it.
+  assertEquals(parseRoute("/functions/v1/events-api/%E0%A4%A"), { kind: "unknown" })
+})
+
 // ── handleEventsApi routing guards (resolved before any DB call) ───────────────
 
 Deno.test("handleEventsApi: OPTIONS preflight returns 200", async () => {
