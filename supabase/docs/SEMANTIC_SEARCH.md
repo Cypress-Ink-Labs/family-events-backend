@@ -21,9 +21,9 @@ const { data, error } = await supabase.rpc("find_similar_events_by_id", {
 });
 ```
 
-All three parameters are optional (the function has defaults), but always pass
-`p_event_id`. The function returns an empty array — not an error — when the
-source event has no embedding.
+`p_limit` and `p_city_id` are optional (they have defaults); `p_event_id` is
+required. The function returns an empty array — not an error — when the source
+event has no embedding or is not published.
 
 ---
 
