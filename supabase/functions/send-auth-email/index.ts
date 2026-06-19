@@ -3,6 +3,7 @@ import { Webhook } from "npm:standardwebhooks@1.0.0"
 import { escapeHtml } from "../_shared/html.ts"
 import { captureEdgeException } from "../_shared/sentry.ts"
 import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
+import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
 
 // send-auth-email
 // ----------------------------------------------------------------
@@ -23,8 +24,6 @@ import { errorContext, logEdgeEvent } from "../_shared/logger.ts"
 // dashboard with this function's URL and an HMAC secret for signature
 // verification.
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
-const RESEND_TIMEOUT_MS = 10_000
 const JSON_HEADERS = { "Content-Type": "application/json" }
 
 interface AuthEmailHookPayload {

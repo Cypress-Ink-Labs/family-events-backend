@@ -5,6 +5,7 @@ import { escapeHtml } from "../_shared/html.ts"
 import { captureEdgeException } from "../_shared/sentry.ts"
 import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
 import { isRecord, readString } from "../_shared/validation.ts"
+import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
 
 // notify-email
 // ----------------------------------------------------------------
@@ -17,9 +18,6 @@ import { isRecord, readString } from "../_shared/validation.ts"
 
 // Service-role-only (never browser-invoked); open CORS is safe here.
 const corsHeaders = buildPublicCorsHeaders(["POST", "OPTIONS"])
-
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
-const RESEND_TIMEOUT_MS = 10_000
 
 type Payload =
   | {
