@@ -11,3 +11,4 @@ dist-ssr
 !.env.example
 supabase/.temp/
 supabase/functions/.cache/
+.deploy/runs/

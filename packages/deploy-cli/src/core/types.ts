@@ -77,6 +77,11 @@ export interface DeployOptions {
   pollTimeoutSeconds?: number;
   smoke: boolean;
   allowProdSmoke: boolean;
+  // Whole-project `railway config apply` (IaC sync). OFF by default: it is destructive
+  // (deletes any service not declared in .railway/railway.ts) and this project is shared
+  // across repos. Opt in with --apply-railway-config; the apply is still guarded by a
+  // plan preview that refuses any deletion. See CIL-104.
+  applyRailwayConfig: boolean;
 }
 
 export interface CommandRecord {

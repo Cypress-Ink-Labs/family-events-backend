@@ -31,6 +31,36 @@ export class RailwayProvider {
   }
 
   async applyConfig(): Promise<void> {
+    // SAFETY RAIL: a whole-project `railway config apply` deletes any service absent from the
+    // desired graph. This Railway project is shared across repos (web is owned by the web
+    // repo), and a version-skewed / unparseable IaC runner can yield an EMPTY desired graph
+    // that diffs to "delete every service". Preview first; refuse anything destructive or
+    // anything we cannot confirm is non-destructive. See CIL-104.
+    const plan = await this.runner.run("railway", ["config", "plan", "--json"], {
+      cwd: this.rootDir,
+      allowFailure: true,
+    });
+    if (plan.exitCode !== 0 || !plan.stdout.trim()) {
+      throw new ValidationError(
+        "Refusing to apply Railway config: `railway config plan` failed or produced no output " +
+          "(commonly a railway CLI vs `railway` npm package version mismatch). " +
+          `exit=${plan.exitCode}. See CIL-104.`,
+      );
+    }
+    const deletions = countPlannedDeletions(plan.stdout);
+    if (deletions === null) {
+      throw new ValidationError(
+        "Refusing to apply Railway config: could not parse `railway config plan` output to " +
+          "confirm it is non-destructive. See CIL-104.",
+      );
+    }
+    if (deletions > 0) {
+      throw new ValidationError(
+        `Refusing to apply Railway config: plan would DELETE ${deletions} resource(s). ` +
+          ".railway/railway.ts declares only the cron services, but `railway config apply` " +
+          "syncs the whole (shared) project — it would delete services it does not own. See CIL-104.",
+      );
+    }
     await this.runner.run("railway", ["config", "apply", "--yes"], { cwd: this.rootDir });
   }
 
@@ -58,6 +88,14 @@ export class RailwayProvider {
     options: { poll: boolean; pollTimeoutSeconds?: number; noPollSuccess?: boolean },
   ): Promise<void> {
     const service = this.serviceConfig(name);
+    if (service.rootDirectory === null) {
+      // Declared in deploy config for IaC/ordering awareness, but owned by another repo
+      // (e.g. `web`). `railway up` from here would upload THIS repo's code to that service.
+      throw new ValidationError(
+        `Railway service '${name}' has no rootDirectory — it is owned by another repo and is ` +
+          "not deployable from here. Deploy it from its own repository.",
+      );
+    }
     this.validateServiceDirectory(service);
 
     if (!(await this.serviceExists(name))) {
@@ -205,4 +243,41 @@ function extractServiceNames(value: unknown): string[] {
   return value
     .map((item) => (typeof item === "object" && item && "name" in item ? String(item.name) : ""))
     .filter(Boolean);
+}
+
+/**
+ * Count planned resource deletions in `railway config plan --json` output.
+ * Returns `null` when the output cannot be parsed into a changeset — callers must treat
+ * `null` as "cannot confirm non-destructive" and refuse to apply.
+ */
+export function countPlannedDeletions(raw: string): number | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  const changes = findChangeList(parsed);
+  if (!changes) return null;
+  return changes.filter((change) => {
+    if (!change || typeof change !== "object" || !("kind" in change)) return false;
+    const kind = (change as { kind: unknown }).kind;
+    return typeof kind === "string" && kind.toLowerCase().includes("delete");
+  }).length;
+}
+
+function findChangeList(value: unknown): unknown[] | null {
+  if (!value || typeof value !== "object") return null;
+  const obj = value as Record<string, unknown>;
+  const changeSet = obj.changeSet;
+  if (changeSet && typeof changeSet === "object") {
+    const changes = (changeSet as Record<string, unknown>).changes;
+    if (Array.isArray(changes)) return changes;
+  }
+  if (obj.preview) {
+    const nested = findChangeList(obj.preview);
+    if (nested) return nested;
+  }
+  if (Array.isArray(obj.effects)) return obj.effects;
+  return null;
 }

@@ -23,6 +23,7 @@ describe("deploy runner", () => {
       poll: true,
       smoke: false,
       allowProdSmoke: false,
+      applyRailwayConfig: false,
     });
     expect(result.targets.length).toBeGreaterThan(3);
     expect(result.targets.filter(Boolean)).toHaveLength(result.targets.length);

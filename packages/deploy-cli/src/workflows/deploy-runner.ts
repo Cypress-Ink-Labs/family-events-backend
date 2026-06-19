@@ -78,7 +78,12 @@ export async function runDeploy(
     }
   }
 
-  if (expanded.some((target) => target.kind.startsWith("railway"))) {
+  // Whole-project `railway config apply` is OFF unless explicitly opted in. It deletes any
+  // service not declared in .railway/railway.ts, and this Railway project is shared across
+  // repos (web is owned by the web repo's IaC), so a routine deploy must never run it.
+  // Shipping code to services happens below via `railway up` (deployService), which is
+  // non-destructive. See CIL-104.
+  if (options.applyRailwayConfig && expanded.some((target) => target.kind.startsWith("railway"))) {
     const spinner = createSpinner("Applying Railway config", useSpinner(options));
     try {
       await railway.applyConfig();

@@ -25,6 +25,7 @@ interface CommanderDeployOptions {
   pollTimeout?: string;
   smoke?: boolean;
   allowProdSmoke?: boolean;
+  applyRailwayConfig?: boolean;
 }
 
 export function registerDeployCommand(program: Command): void {
@@ -49,6 +50,10 @@ export function registerDeployCommand(program: Command): void {
     .option("--poll-timeout <seconds>", "override Railway poll timeout")
     .option("--smoke", "run post-deploy smoke checks")
     .option("--allow-prod-smoke", "allow production smoke probes that require service keys")
+    .option(
+      "--apply-railway-config",
+      "sync .railway/railway.ts via `railway config apply` before deploying (OFF by default; guarded — refuses any plan that deletes a service)",
+    )
     .action(async (targets: string[], raw: CommanderDeployOptions) => {
       try {
         const rootDir = repoRootFrom();
@@ -84,6 +89,7 @@ export function registerDeployCommand(program: Command): void {
           pollTimeoutSeconds: raw.pollTimeout ? Number.parseInt(raw.pollTimeout, 10) : undefined,
           smoke: raw.smoke ?? false,
           allowProdSmoke: raw.allowProdSmoke ?? false,
+          applyRailwayConfig: raw.applyRailwayConfig ?? false,
         };
 
         const result = await runDeploy(rootDir, config, options);

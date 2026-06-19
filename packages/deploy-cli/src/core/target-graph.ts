@@ -36,8 +36,15 @@ export function resolveTargets(
   all: boolean,
 ): DeployTarget[] {
   const byId = new Map(allTargets(config).map((target) => [target.id, target]));
+  // `--all` deploys migrations + every function + the cron services. It uses railway:crons
+  // (NOT railway:all) so it never touches `web`, which is owned by the web repo's own pipeline
+  // (rootDirectory: null here). See CIL-104.
   const selected = all
-    ? [byId.get("supabase:migrations"), byId.get("supabase:functions:all"), byId.get("railway:all")]
+    ? [
+        byId.get("supabase:migrations"),
+        byId.get("supabase:functions:all"),
+        byId.get("railway:crons"),
+      ]
     : requested.map((id) => byId.get(normalizeTargetId(id)));
 
   const missing = requested.map(normalizeTargetId).filter((id) => !byId.has(id));

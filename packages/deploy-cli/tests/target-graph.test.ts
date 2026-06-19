@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { DeployConfig } from "../src/core/types";
-import { resolveTargets } from "../src/core/target-graph";
+import { expandTarget, resolveTargets } from "../src/core/target-graph";
 
 const config: DeployConfig = {
   environments: {
@@ -30,11 +30,21 @@ describe("target graph", () => {
     expect(resolveTargets(config, ["web"], false)[0]?.id).toBe("railway:web");
   });
 
-  it("resolves all to top-level grouped targets", () => {
+  it("resolves all to top-level grouped targets (crons, never web)", () => {
     expect(resolveTargets(config, [], true).map((target) => target.id)).toEqual([
       "supabase:migrations",
       "supabase:functions:all",
-      "railway:all",
+      "railway:crons",
     ]);
+  });
+
+  it("expands --all railway targets to crons only, excluding web", () => {
+    const selected = resolveTargets(config, [], true);
+    const railwayServices = selected
+      .flatMap((target) => expandTarget(config, target))
+      .filter((target) => target.kind === "railway:service")
+      .map((target) => target.name);
+    expect(railwayServices).toEqual(["cron"]);
+    expect(railwayServices).not.toContain("web");
   });
 });

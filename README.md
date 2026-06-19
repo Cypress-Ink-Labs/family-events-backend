@@ -64,7 +64,9 @@ Deno function tests and vitest are not yet wired into CI — see `plans/001`.
 ## Deploy
 
 ```bash
-# Deploy everything (edge functions + Railway services)
+# Deploy what this repo owns: DB migrations + all edge functions + the cron services.
+# Does NOT touch the `web` service (owned by the web repo) and does NOT run
+# `railway config apply` (whole-project IaC sync is opt-in; see below).
 pnpm run deploy:all
 
 # Interactive deploy CLI (select targets)
@@ -74,6 +76,21 @@ pnpm run deploy
 pnpm run railway:plan          # preview infrastructure changes
 pnpm run railway:drift:validate  # validate cron config drift
 ```
+
+### Railway config sync (opt-in, guarded)
+
+`railway config apply` syncs the **whole** Railway project from `.railway/railway.ts`.
+Because this project is shared across repos (the `web` service is owned by the web repo)
+and this repo's IaC declares only the cron services, a whole-project apply would try to
+**delete services it does not own**. So it is **off by default** and gated:
+
+```bash
+pnpm run deploy -- --all --apply-railway-config   # opt in explicitly
+```
+
+The deploy CLI previews with `railway config plan` first and **refuses to apply any plan
+that would delete a resource** (or that it cannot parse). The IaC config-sync path is
+currently blocked on a railway CLI ↔ `railway` npm package version mismatch — see CIL-104.
 
 ## Environment variables
 
