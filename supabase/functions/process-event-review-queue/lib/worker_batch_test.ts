@@ -116,6 +116,20 @@ class FakeSupabase {
     }
 
     if (name === "release_unstarted_event_llm_review_rows") {
+      // Mirror the real RPC (migration 20260601004000): claimed rows still
+      // 'processing' with no started_at go back to 'pending', started_at NULL.
+      const claimedIds = Array.isArray(args?.p_claimed_ids)
+        ? (args.p_claimed_ids as Array<number | string>)
+        : []
+      for (const rawId of claimedIds) {
+        const id = Number(rawId)
+        const row = this.queue.get(id)
+        if (!row) continue
+        if (row.status === "processing" && (row.started_at === null || row.started_at === undefined)) {
+          Object.assign(row, { status: "pending", started_at: null, updated_at: new Date().toISOString() })
+          this.queue.set(id, row)
+        }
+      }
       return Promise.resolve({ data: null, error: null })
     }
 
@@ -517,9 +531,11 @@ Deno.test("processReviewQueueBatch releases unstarted rows once the wall budget 
   )
   assert(release !== undefined, "expected unstarted rows to be released")
   assertEquals(release?.args?.p_claimed_ids, [2, 3])
-  // The released rows were never marked started.
-  assertEquals(db.queue.get(2)?.status, "processing")
-  assertEquals(db.queue.get(3)?.status, "processing")
+  // Released rows are returned to 'pending' with started_at cleared (real RPC contract).
+  assertEquals(db.queue.get(2)?.status, "pending")
+  assertEquals(db.queue.get(3)?.status, "pending")
+  assertEquals(db.queue.get(2)?.started_at, null)
+  assertEquals(db.queue.get(3)?.started_at, null)
 })
 
 Deno.test("processReviewQueueBatch releases the whole batch when the budget is spent before row one", async () => {
