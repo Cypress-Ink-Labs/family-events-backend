@@ -53,10 +53,19 @@ interface ProcessSummary {
   duration_ms: number
 }
 
+type EventInputs = { title: string; description: string }
+
+function normalizeEventInputs(data: { title?: unknown; description?: unknown }): EventInputs {
+  return {
+    title: String(data.title ?? ""),
+    description: String(data.description ?? ""),
+  }
+}
+
 async function fetchEventInputs(
   supabase: SupabaseClient,
   eventId: string
-): Promise<{ title: string; description: string } | null> {
+): Promise<EventInputs | null> {
   const { data, error } = await supabase
     .from("events")
     .select("title, description")
@@ -64,10 +73,38 @@ async function fetchEventInputs(
     .maybeSingle()
   if (error) throw error
   if (!data) return null
-  return {
-    title: String((data as { title?: unknown }).title ?? ""),
-    description: String((data as { description?: unknown }).description ?? ""),
+  return normalizeEventInputs(data as { title?: unknown; description?: unknown })
+}
+
+// Prefetch title/description for every claimed event in one round-trip instead
+// of one .maybeSingle() per row inside the parallel chunk loop. Rows missing
+// from the result (e.g. event deleted between enqueue and claim) are simply
+// absent from the Map; processOneRow falls back to a single fetch for those to
+// preserve the original per-row resilience. A bulk-query error is swallowed and
+// surfaced as an empty Map so every row falls back to its own per-row fetch —
+// keeping the original per-row retry/dead routing on a transient read failure.
+async function prefetchEventInputs(
+  supabase: SupabaseClient,
+  eventIds: string[]
+): Promise<Map<string, EventInputs>> {
+  const map = new Map<string, EventInputs>()
+  if (eventIds.length === 0) return map
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, title, description")
+    .in("id", eventIds)
+  if (error) return map
+  for (const row of (data ?? []) as Array<{
+    id?: unknown
+    title?: unknown
+    description?: unknown
+  }>) {
+    const id = row.id
+    if (typeof id === "string") {
+      map.set(id, normalizeEventInputs(row))
+    }
   }
+  return map
 }
 
 async function callTagEvent(
@@ -185,6 +222,12 @@ export async function processTagQueueBatch(
     return summary
   }
 
+  // Prefetch all claimed events' inputs in one query before the chunk loop, so
+  // each row reads from this Map instead of issuing its own .maybeSingle().
+  const eventInputsById = await prefetchEventInputs(supabase, [
+    ...new Set(rows.map((r) => r.event_id)),
+  ])
+
   // Process each row in an isolated try/catch so a single failure doesn't
   // poison its chunk. Returned to the caller as an awaitable for Promise.all.
   async function processOneRow(row: QueueRow): Promise<void> {
@@ -203,7 +246,11 @@ export async function processTagQueueBatch(
         ),
       }
 
-      const inputs = await fetchEventInputs(supabase, activeRow.event_id)
+      // Read from the prefetched Map; fall back to a single fetch only when the
+      // event was absent from the prefetch (preserves the original resilience).
+      const inputs = eventInputsById.has(activeRow.event_id)
+        ? (eventInputsById.get(activeRow.event_id) ?? null)
+        : await fetchEventInputs(supabase, activeRow.event_id)
       if (!inputs || !inputs.title) {
         // Event was deleted between enqueue and claim, or has no title.
         // Don't retry — mark as a soft completion.

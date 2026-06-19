@@ -76,6 +76,7 @@ Deno.serve(async (req: Request) => {
 
     const dueSources = (sourcesRaw ?? []) as EventSourceRow[]
     const results: SourceScrapeEnqueueResponseRow[] = []
+    const enqueuedSourceIds: string[] = []
 
     for (const source of dueSources) {
       const enqueue = await enqueueSourceScrape(
@@ -83,12 +84,21 @@ Deno.serve(async (req: Request) => {
         source.id,
         requestedSourceId ? "manual" : "scheduled"
       )
-      await supabase.from("event_sources").update({ last_status: "pending" }).eq("id", source.id)
+      enqueuedSourceIds.push(source.id)
       results.push({
         source_id: source.id,
         queue_id: enqueue.queue_id,
         deduped: enqueue.deduped,
       })
+    }
+
+    // Mark all enqueued sources pending in a single round-trip (after every
+    // enqueue, preserving the original per-source ordering of update-after-enqueue).
+    if (enqueuedSourceIds.length > 0) {
+      await supabase
+        .from("event_sources")
+        .update({ last_status: "pending" })
+        .in("id", enqueuedSourceIds)
     }
 
     if (results.length > 0 && supabaseUrl && serviceRoleKey) {

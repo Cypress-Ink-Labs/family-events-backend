@@ -237,31 +237,29 @@ serveServiceRoleJson(
     for (let i = 0; i < dedupedTargets.length; i += BATCH_SIZE) {
       const batch = dedupedTargets.slice(i, i + BATCH_SIZE)
 
+      // Accumulate in-app notification rows for this batch into a single insert.
+      const notifRows: Array<{
+        user_id: string
+        type: "reminder"
+        title: string
+        body: string
+        event_id: string
+      }> = []
+
       for (const target of batch) {
         const reminderLabel = target.reminder_type === "day_before" ? "tomorrow" : "today"
         const notifTitle = `Reminder: ${target.event_title} is ${reminderLabel}`
         const notifBody = `${formatEventDate(target.start_datetime)}${target.venue_name ? ` at ${target.venue_name}` : ""}`
         const eventUrl = `${appUrl}/events/${target.event_id}`
 
-        // 1. Create in-app notification
-        const { error: notifErr } = await supabase.from("user_notifications").insert({
+        // 1. Queue in-app notification row (flushed in one insert after the batch loop)
+        notifRows.push({
           user_id: target.user_id,
           type: "reminder" as const,
           title: notifTitle,
           body: notifBody,
           event_id: target.event_id,
         })
-
-        if (notifErr) {
-          logEdgeEvent("warn", "send-reminders: failed to create in-app notification", {
-            function: "send-reminders",
-            user_id: target.user_id,
-            event_id: target.event_id,
-            error: notifErr.message,
-          })
-        } else {
-          inApp++
-        }
 
         // 2. Send email if user wants reminder emails
         if (target.reminder_email && resendApiKey) {
@@ -357,6 +355,24 @@ serveServiceRoleJson(
             })
             failedPush++
           }
+        }
+      }
+
+      // Flush this batch's in-app notifications in a single insert. One batch
+      // error stands in for the whole array: on success every queued row counts
+      // toward inApp, on failure none do — same observable contract as the old
+      // per-row insert when all rows in the batch share the same outcome.
+      if (notifRows.length > 0) {
+        const { error: notifErr } = await supabase.from("user_notifications").insert(notifRows)
+
+        if (notifErr) {
+          logEdgeEvent("warn", "send-reminders: failed to create in-app notifications", {
+            function: "send-reminders",
+            count: notifRows.length,
+            error: notifErr.message,
+          })
+        } else {
+          inApp += notifRows.length
         }
       }
 

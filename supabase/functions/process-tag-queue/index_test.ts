@@ -19,6 +19,9 @@ class FakeSupabase {
   pendingCount = 0
   rpcCalls: Array<{ name: string; args?: Record<string, unknown> }> = []
   updates = new Map<number, Record<string, unknown>>()
+  // Tracks events selects: bulk prefetch (.in) vs per-row fallback (.eq + maybeSingle).
+  eventBulkSelects: Array<unknown[]> = []
+  eventSingleSelects: string[] = []
 
   rpc(name: string, args?: Record<string, unknown>) {
     this.rpcCalls.push({ name, args })
@@ -62,6 +65,7 @@ class FakeSupabase {
 class FakeQuery {
   private operation: "select" | "update" = "select"
   private filters = new Map<string, unknown>()
+  private inFilters = new Map<string, unknown[]>()
   private payload: Record<string, unknown> | null = null
 
   constructor(
@@ -85,6 +89,11 @@ class FakeQuery {
     return this
   }
 
+  in(column: string, values: unknown[]) {
+    this.inFilters.set(column, values)
+    return this
+  }
+
   maybeSingle() {
     return this.execute(true)
   }
@@ -98,7 +107,21 @@ class FakeQuery {
 
   private execute(_expectSingle: boolean) {
     if (this.operation === "select" && this.table === "events") {
-      const event = this.db.events.get(String(this.filters.get("id"))) ?? null
+      const inIds = this.inFilters.get("id")
+      if (inIds) {
+        // Prefetch path: return one row per known event id (including its id).
+        this.db.eventBulkSelects.push(inIds)
+        const data = inIds
+          .map((id) => {
+            const event = this.db.events.get(String(id))
+            return event ? { id: String(id), ...event } : null
+          })
+          .filter((row): row is { id: string } & EventRow => row !== null)
+        return Promise.resolve({ data, error: null })
+      }
+      const id = String(this.filters.get("id"))
+      this.db.eventSingleSelects.push(id)
+      const event = this.db.events.get(id) ?? null
       return Promise.resolve({ data: event, error: null })
     }
 
@@ -323,4 +346,50 @@ Deno.test("processTagQueueBatch aggregates a mixed batch (success + retry + dead
   assert(typeof db.updates.get(2)?.next_attempt_at === "string")
   assertEquals(db.updates.get(3)?.status, "dead")
   assert(String(db.updates.get(3)?.last_error).includes("hard timeout"))
+})
+
+Deno.test("processTagQueueBatch prefetches all event inputs in a single .in() query", async () => {
+  const db = new FakeSupabase()
+  db.claimedRows = [row(1), row(2), row(3)]
+  for (const item of db.claimedRows) {
+    db.events.set(item.event_id, { title: "Storytime", description: "Books" })
+  }
+  db.pendingCount = 0
+
+  await withFetch(
+    () => Promise.resolve(new Response("ok")),
+    async () => {
+      const summary = await processTagQueueBatch(db as never, "http://local", "key")
+      assertEquals(summary.succeeded, 3)
+    }
+  )
+
+  // Exactly one bulk prefetch covering all three event ids, and no per-row fallback.
+  assertEquals(db.eventBulkSelects.length, 1)
+  assertEquals(db.eventBulkSelects[0], ["evt-1", "evt-2", "evt-3"])
+  assertEquals(db.eventSingleSelects.length, 0)
+})
+
+Deno.test("processTagQueueBatch falls back to a single fetch for an event missing from the prefetch", async () => {
+  const db = new FakeSupabase()
+  db.claimedRows = [row(1), row(2)]
+  // Only evt-1 exists; evt-2 is absent from the prefetch result.
+  db.events.set("evt-1", { title: "Storytime", description: "Books" })
+  db.pendingCount = 0
+
+  await withFetch(
+    () => Promise.resolve(new Response("ok")),
+    async () => {
+      const summary = await processTagQueueBatch(db as never, "http://local", "key")
+      // evt-1 tags successfully; evt-2 has no event row → soft success.
+      assertEquals(summary.succeeded, 2)
+      assertEquals(summary.failed, 0)
+    }
+  )
+
+  // One bulk prefetch, plus a single fallback fetch for the missing evt-2 only.
+  assertEquals(db.eventBulkSelects.length, 1)
+  assertEquals(db.eventSingleSelects, ["evt-2"])
+  // evt-2 resolved as a soft success (event missing).
+  assertEquals(db.updates.get(2)?.status, "succeeded")
 })
