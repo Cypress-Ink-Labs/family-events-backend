@@ -13,6 +13,7 @@ import { escapeHtml } from "../_shared/html.ts"
 // ---------------------------------------------------------------------------
 
 const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
+const RESEND_TIMEOUT_MS = 10_000
 const APP_URL = "https://family-events.up.railway.app"
 
 // ── Templated kind: welcome → sendViaResendTemplate ──────────────────────────
@@ -208,6 +209,7 @@ async function sendViaResend(args: {
       html: args.email.html,
       ...(args.replyTo ? { reply_to: args.replyTo } : {}),
     }),
+    signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
   })
   if (!response.ok) {
     const body = await response.text().catch(() => "")
@@ -236,6 +238,7 @@ async function sendViaResendTemplate(args: {
       to: [args.to],
       template: { id: args.templateAlias, variables: args.variables },
     }),
+    signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
   })
   if (!response.ok) {
     const body = await response.text().catch(() => "")
