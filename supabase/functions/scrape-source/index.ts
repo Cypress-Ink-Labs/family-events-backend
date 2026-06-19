@@ -97,15 +97,25 @@ Deno.serve(async (req: Request) => {
       // still marks the already-enqueued sources pending — matching the original
       // per-source update-after-enqueue (which marked each before any later throw).
       if (enqueuedSourceIds.length > 0) {
-        const { error: updErr } = await supabase
-          .from("event_sources")
-          .update({ last_status: "pending" })
-          .in("id", enqueuedSourceIds)
-        if (updErr) {
+        // try/catch so a rejection here can't throw out of `finally` and mask an
+        // in-flight enqueue exception from the try block.
+        try {
+          const { error: updErr } = await supabase
+            .from("event_sources")
+            .update({ last_status: "pending" })
+            .in("id", enqueuedSourceIds)
+          if (updErr) {
+            logEdgeEvent("warn", "scrape-source: failed to mark sources pending", {
+              function: "scrape-source",
+              count: enqueuedSourceIds.length,
+              error: updErr.message,
+            })
+          }
+        } catch (err) {
           logEdgeEvent("warn", "scrape-source: failed to mark sources pending", {
             function: "scrape-source",
             count: enqueuedSourceIds.length,
-            error: updErr.message,
+            error: err instanceof Error ? err.message : String(err),
           })
         }
       }
