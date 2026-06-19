@@ -14,8 +14,9 @@ Deno.test("errorJson writes standard error body", async () => {
   assertEquals(await response.json(), { error: "bad" })
 })
 
-Deno.test("optionsResponse returns empty 200", async () => {
+Deno.test("optionsResponse returns empty 200 and passes through headers", async () => {
   const response = optionsResponse({ "Access-Control-Allow-Methods": "POST, OPTIONS" })
   assertEquals(response.status, 200)
+  assertEquals(response.headers.get("Access-Control-Allow-Methods"), "POST, OPTIONS")
   assertEquals(await response.text(), "")
 })
