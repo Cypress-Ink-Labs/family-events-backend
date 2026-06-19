@@ -1,5 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { requireServiceRole } from "../_shared/auth.ts"
+import { buildPublicCorsHeaders } from "../_shared/cors.ts"
 import { escapeHtml } from "../_shared/html.ts"
 import { captureEdgeException } from "../_shared/sentry.ts"
 import { errorContext, errorMessage, logEdgeEvent } from "../_shared/logger.ts"
@@ -14,11 +15,8 @@ import { isRecord, readString } from "../_shared/validation.ts"
 // { sent: false, dev: true } so the upstream RPC's fire-and-forget
 // call still succeeds and never blocks the user-facing flow.
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-}
+// Service-role-only (never browser-invoked); open CORS is safe here.
+const corsHeaders = buildPublicCorsHeaders(["POST", "OPTIONS"])
 
 const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
 const RESEND_TIMEOUT_MS = 10_000

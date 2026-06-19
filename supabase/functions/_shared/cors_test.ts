@@ -1,5 +1,10 @@
 import { assertEquals } from "jsr:@std/assert"
-import { buildCorsHeaders, DEFAULT_ALLOWED_ORIGINS, resolveAllowedOrigin } from "./cors.ts"
+import {
+  buildCorsHeaders,
+  buildPublicCorsHeaders,
+  DEFAULT_ALLOWED_ORIGINS,
+  resolveAllowedOrigin,
+} from "./cors.ts"
 
 // ---------------------------------------------------------------------------
 // resolveAllowedOrigin
@@ -57,4 +62,29 @@ Deno.test("buildCorsHeaders sets default methods when none provided", () => {
 Deno.test("buildCorsHeaders respects custom methods", () => {
   const headers = buildCorsHeaders("https://family-events.org", ["GET", "OPTIONS"])
   assertEquals(headers["Access-Control-Allow-Methods"], "GET, OPTIONS")
+})
+
+// ---------------------------------------------------------------------------
+// buildPublicCorsHeaders
+// ---------------------------------------------------------------------------
+
+Deno.test("buildPublicCorsHeaders serves every origin with * and omits Vary", () => {
+  const headers = buildPublicCorsHeaders()
+  assertEquals(headers["Access-Control-Allow-Origin"], "*")
+  assertEquals(headers["Vary"], undefined)
+})
+
+Deno.test("buildPublicCorsHeaders defaults to GET, OPTIONS and the full allow-headers", () => {
+  const headers = buildPublicCorsHeaders()
+  assertEquals(headers["Access-Control-Allow-Methods"], "GET, OPTIONS")
+  assertEquals(
+    headers["Access-Control-Allow-Headers"],
+    "Content-Type, Authorization, X-Client-Info, Apikey"
+  )
+})
+
+Deno.test("buildPublicCorsHeaders respects custom methods and allow-headers", () => {
+  const headers = buildPublicCorsHeaders(["POST", "OPTIONS"], ["Content-Type", "Apikey"])
+  assertEquals(headers["Access-Control-Allow-Methods"], "POST, OPTIONS")
+  assertEquals(headers["Access-Control-Allow-Headers"], "Content-Type, Apikey")
 })

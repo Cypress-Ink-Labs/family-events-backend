@@ -1,5 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "@supabase/supabase-js"
+import { buildPublicCorsHeaders } from "../_shared/cors.ts"
 
 // TODO: no rate limiting — do not announce this endpoint publicly until
 // per-IP rate limiting is implemented. Approach chosen: Postgres token-bucket
@@ -27,12 +28,10 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
 // ── CORS ─────────────────────────────────────────────────────────────────────
 // Open GET for all origins — this is a public read API for partner integrations.
 // Differs from _shared/cors.ts allowlist (app-facing functions only).
+// Allow-Headers is intentionally tighter than the shared default (no
+// Authorization/X-Client-Info) — this surface only needs Content-Type + Apikey.
 // See PUBLIC_API.md § CORS.
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Apikey",
-}
+const CORS_HEADERS = buildPublicCorsHeaders(["GET", "OPTIONS"], ["Content-Type", "Apikey"])
 
 // ── Cursor encoding ───────────────────────────────────────────────────────────
 

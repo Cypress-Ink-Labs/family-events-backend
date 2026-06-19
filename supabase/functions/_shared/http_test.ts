@@ -1,20 +1,5 @@
 import { assertEquals } from "jsr:@std/assert"
-import { buildCorsHeaders, errorJson, jsonResponse, optionsResponse } from "./http.ts"
-
-Deno.test("buildCorsHeaders returns service-role defaults", () => {
-  assertEquals(buildCorsHeaders(), {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-  })
-})
-
-Deno.test("buildCorsHeaders supports method overrides", () => {
-  assertEquals(
-    buildCorsHeaders({ methods: ["GET", "OPTIONS"] })["Access-Control-Allow-Methods"],
-    "GET, OPTIONS"
-  )
-})
+import { errorJson, jsonResponse, optionsResponse } from "./http.ts"
 
 Deno.test("jsonResponse writes json content type and body", async () => {
   const response = jsonResponse({ ok: true })
@@ -29,8 +14,9 @@ Deno.test("errorJson writes standard error body", async () => {
   assertEquals(await response.json(), { error: "bad" })
 })
 
-Deno.test("optionsResponse returns empty 200", async () => {
-  const response = optionsResponse(buildCorsHeaders())
+Deno.test("optionsResponse returns empty 200 and passes through headers", async () => {
+  const response = optionsResponse({ "Access-Control-Allow-Methods": "POST, OPTIONS" })
   assertEquals(response.status, 200)
+  assertEquals(response.headers.get("Access-Control-Allow-Methods"), "POST, OPTIONS")
   assertEquals(await response.text(), "")
 })
