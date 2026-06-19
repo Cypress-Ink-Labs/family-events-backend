@@ -3,6 +3,7 @@ import { serveServiceRoleJson } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
 import { zonedDayStartUtc } from "../_shared/zoned-time.ts"
+import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
 
 // NOTE: This app is single-region (Lafayette / Baton Rouge, LA).  If multi-region
 // support is ever added, REMINDER_TZ must become per-event (events.timezone column)
@@ -21,8 +22,6 @@ const REMINDER_TZ = "America/Chicago"
 //   - Dispatches push via send-push edge function
 // Respects user_notification_preferences (reminder_email/reminder_push).
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
-const RESEND_TIMEOUT_MS = 10_000
 const PUSH_TIMEOUT_MS = 10_000
 const BATCH_SIZE = 10
 const BATCH_DELAY_MS = 300

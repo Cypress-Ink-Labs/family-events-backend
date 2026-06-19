@@ -2,6 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts"
 import { serveServiceRoleJson } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
+import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
 
 // process-notification-queue
 // ----------------------------------------------------------------
@@ -12,8 +13,6 @@ import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-
 //
 // Caps processing at 100 entries per run to avoid timeout.
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
-const RESEND_TIMEOUT_MS = 10_000
 const PUSH_TIMEOUT_MS = 10_000
 const MAX_PER_RUN = 100
 const DEBOUNCE_HOURS = 1

@@ -3,6 +3,7 @@ import { serveServiceRoleJson, serviceRoleJsonError } from "../_shared/service-r
 import { escapeHtml } from "../_shared/html.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
+import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
 
 // send-weekly-digest
 // ----------------------------------------------------------------
@@ -12,8 +13,6 @@ import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-
 // city has no events. Sends via Resend API following the notify-email
 // pattern. Rate-limits with small delays between batches.
 
-const RESEND_API_ENDPOINT = "https://api.resend.com/emails"
-const RESEND_TIMEOUT_MS = 10_000
 const BATCH_SIZE = 5
 const BATCH_DELAY_MS = 500
 const MAX_EVENTS_PER_DIGEST = 10
