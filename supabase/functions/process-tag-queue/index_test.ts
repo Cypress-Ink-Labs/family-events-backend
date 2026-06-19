@@ -282,3 +282,45 @@ Deno.test("processTagQueueBatch releases unstarted rows when the wall budget is 
   const release = db.rpcCalls.find((call) => call.name === "release_unstarted_tag_queue_rows")
   assertEquals(release?.args?.p_claimed_ids, [5])
 })
+
+Deno.test("processTagQueueBatch aggregates a mixed batch (success + retry + dead)", async () => {
+  // evt-1 succeeds, evt-2 fails transiently (attempt 2 → retry), evt-3 fails at
+  // max attempts (attempt 5 → dead). All three run in a single chunk
+  // (CONCURRENCY=4); the per-row try/catch must keep them isolated so one
+  // failure doesn't poison the others.
+  const db = new FakeSupabase()
+  db.claimedRows = [row(1), row(2), row(3)]
+  for (const item of db.claimedRows) {
+    db.events.set(item.event_id, { title: "Storytime", description: "Books" })
+  }
+  db.startedAttempts.set(2, 2) // under MAX_ATTEMPTS → retry
+  db.startedAttempts.set(3, 5) // at MAX_ATTEMPTS → dead
+  db.pendingCount = 0
+
+  await withFetch(
+    (_input, init) => {
+      const body = JSON.parse(String(init?.body ?? "{}")) as { event_id?: string }
+      if (body.event_id === "evt-2") {
+        return Promise.resolve(new Response("upstream", { status: 503 }))
+      }
+      if (body.event_id === "evt-3") {
+        return Promise.reject(new Error("hard timeout"))
+      }
+      return Promise.resolve(new Response("ok"))
+    },
+    async () => {
+      const summary = await processTagQueueBatch(db as never, "http://local", "key")
+
+      assertEquals(summary.claimed, 3)
+      assertEquals(summary.succeeded, 1)
+      assertEquals(summary.failed, 1)
+      assertEquals(summary.dead, 1)
+    }
+  )
+
+  assertEquals(db.updates.get(1)?.status, "succeeded")
+  assertEquals(db.updates.get(2)?.status, "pending")
+  assert(typeof db.updates.get(2)?.next_attempt_at === "string")
+  assertEquals(db.updates.get(3)?.status, "dead")
+  assert(String(db.updates.get(3)?.last_error).includes("hard timeout"))
+})
