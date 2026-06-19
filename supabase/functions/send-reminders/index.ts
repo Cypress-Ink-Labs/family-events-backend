@@ -371,6 +371,21 @@ serveServiceRoleJson(
             count: notifRows.length,
             error: notifErr.message,
           })
+          // One bad row fails the whole batch insert; fall back to per-row inserts
+          // so a single violation can't drop every other valid reminder.
+          for (const row of notifRows) {
+            const { error: rowErr } = await supabase.from("user_notifications").insert(row)
+            if (rowErr) {
+              logEdgeEvent("warn", "send-reminders: row insert failed", {
+                function: "send-reminders",
+                user_id: row.user_id,
+                event_id: row.event_id,
+                error: rowErr.message,
+              })
+            } else {
+              inApp += 1
+            }
+          }
         } else {
           inApp += notifRows.length
         }

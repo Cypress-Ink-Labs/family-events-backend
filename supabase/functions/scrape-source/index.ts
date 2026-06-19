@@ -78,27 +78,37 @@ Deno.serve(async (req: Request) => {
     const results: SourceScrapeEnqueueResponseRow[] = []
     const enqueuedSourceIds: string[] = []
 
-    for (const source of dueSources) {
-      const enqueue = await enqueueSourceScrape(
-        supabase,
-        source.id,
-        requestedSourceId ? "manual" : "scheduled"
-      )
-      enqueuedSourceIds.push(source.id)
-      results.push({
-        source_id: source.id,
-        queue_id: enqueue.queue_id,
-        deduped: enqueue.deduped,
-      })
-    }
-
-    // Mark all enqueued sources pending in a single round-trip (after every
-    // enqueue, preserving the original per-source ordering of update-after-enqueue).
-    if (enqueuedSourceIds.length > 0) {
-      await supabase
-        .from("event_sources")
-        .update({ last_status: "pending" })
-        .in("id", enqueuedSourceIds)
+    try {
+      for (const source of dueSources) {
+        const enqueue = await enqueueSourceScrape(
+          supabase,
+          source.id,
+          requestedSourceId ? "manual" : "scheduled"
+        )
+        enqueuedSourceIds.push(source.id)
+        results.push({
+          source_id: source.id,
+          queue_id: enqueue.queue_id,
+          deduped: enqueue.deduped,
+        })
+      }
+    } finally {
+      // Flush in a single round-trip, in `finally` so a mid-loop enqueue failure
+      // still marks the already-enqueued sources pending — matching the original
+      // per-source update-after-enqueue (which marked each before any later throw).
+      if (enqueuedSourceIds.length > 0) {
+        const { error: updErr } = await supabase
+          .from("event_sources")
+          .update({ last_status: "pending" })
+          .in("id", enqueuedSourceIds)
+        if (updErr) {
+          logEdgeEvent("warn", "scrape-source: failed to mark sources pending", {
+            function: "scrape-source",
+            count: enqueuedSourceIds.length,
+            error: updErr.message,
+          })
+        }
+      }
     }
 
     if (results.length > 0 && supabaseUrl && serviceRoleKey) {

@@ -321,6 +321,22 @@ serveServiceRoleJson(
               error: notifErr.message,
             }
           )
+          // A single bad row fails the whole batch insert; fall back to per-row
+          // inserts so one violation can't drop every other valid notification
+          // (queue entries are already marked processed — at-most-once).
+          for (const row of notifRows) {
+            const { error: rowErr } = await supabase.from("user_notifications").insert(row)
+            if (rowErr) {
+              logEdgeEvent("warn", "process-notification-queue: row insert failed", {
+                function: "process-notification-queue",
+                user_id: row.user_id,
+                event_id: row.event_id,
+                error: rowErr.message,
+              })
+            } else {
+              inApp += 1
+            }
+          }
         } else {
           inApp += notifRows.length
         }
