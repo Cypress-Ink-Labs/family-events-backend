@@ -1,5 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import { buildPublicCorsHeaders } from "../_shared/cors.ts"
 
 // TODO: no rate limiting — do not announce this endpoint publicly until
@@ -192,6 +192,37 @@ export function parseParams(
   }
 }
 
+// ── Routing ─────────────────────────────────────────────────────────────────
+// Supabase serves this function at /functions/v1/events-api. Sub-paths arrive as
+// /functions/v1/events-api/<segment>. We route off the segment that follows the
+// function name (mirrors share-og's pathname parsing). Only the collection root
+// and a single-event id are implemented here; /<id>/similar and /cities are
+// specified (PUBLIC_API.md) but not yet built — they fall through to 404.
+
+export type Route = { kind: "list" } | { kind: "event"; id: string } | { kind: "unknown" }
+
+export function parseRoute(pathname: string): Route {
+  const parts = pathname.split("/").filter((p) => p.length > 0)
+  const idx = parts.findIndex((p) => p === "events-api")
+  // Tail = path segments after the function name. Empty tail → list collection.
+  const tail = idx >= 0 ? parts.slice(idx + 1) : parts
+  if (tail.length === 0) {
+    return { kind: "list" }
+  }
+  if (tail.length === 1) {
+    const seg = decodeURIComponent(tail[0])
+    // A bare single segment is a single-event lookup ONLY when it is a UUID.
+    // Non-UUID single segments (e.g. "cities") are reserved for future routes
+    // and must not be treated as an event id.
+    if (UUID_PATTERN.test(seg)) {
+      return { kind: "event", id: seg }
+    }
+    return { kind: "unknown" }
+  }
+  // Multi-segment tails (e.g. <id>/similar) are not built yet.
+  return { kind: "unknown" }
+}
+
 // ── Public projection ─────────────────────────────────────────────────────────
 // search_events returns SETOF events (full row). We project only the public
 // columns listed in PUBLIC_API.md to avoid leaking internal/LLM fields.
@@ -245,45 +276,39 @@ function projectEvent(row: RawEventRow): PublicEvent {
   }
 }
 
-// ── Handler ───────────────────────────────────────────────────────────────────
+// ── Response helpers ──────────────────────────────────────────────────────────
 
-export async function handleEventsApi(req: Request): Promise<Response> {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: CORS_HEADERS })
-  }
-  if (req.method !== "GET") {
-    return new Response(JSON.stringify({ error: "method not allowed" }), {
-      status: 405,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    })
-  }
+function jsonError(status: number, message: string): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+  })
+}
 
+function getAnonClient(): SupabaseClient | null {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  if (!supabaseUrl || !anonKey) {
+    return null
+  }
+  // Anon key on purpose: RLS ("Anon can read published events") is the published-only
+  // boundary for both endpoints. Never swap in the service-role key here — it would
+  // bypass RLS and could leak draft/unpublished rows. See PUBLIC_API.md § Surface safety.
+  return createClient(supabaseUrl, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+
+// ── List handler (GET /events) ──────────────────────────────────────────────────
+
+async function handleList(req: Request, supabase: SupabaseClient): Promise<Response> {
   const url = new URL(req.url)
   const parsed = parseParams(url.searchParams)
   if (!parsed.ok) {
-    return new Response(
-      JSON.stringify({
-        error: `invalid parameter: ${parsed.error.field} — ${parsed.error.message}`,
-      }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
-    )
+    return jsonError(400, `invalid parameter: ${parsed.error.field} — ${parsed.error.message}`)
   }
 
   const { cityId, dateFrom, dateTo, isFree, tags, keyword, limit, cursor } = parsed.params
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-
-  if (!supabaseUrl || !anonKey) {
-    return new Response(JSON.stringify({ error: "service unavailable" }), {
-      status: 503,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    })
-  }
-
-  const supabase = createClient(supabaseUrl, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
 
   const { data, error } = await supabase.rpc("search_events", {
     p_city_id: cityId ?? undefined,
@@ -299,10 +324,7 @@ export async function handleEventsApi(req: Request): Promise<Response> {
   })
 
   if (error) {
-    return new Response(JSON.stringify({ error: "query failed" }), {
-      status: 500,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    })
+    return jsonError(500, "query failed")
   }
 
   const rows = (data ?? []) as RawEventRow[]
@@ -329,6 +351,64 @@ export async function handleEventsApi(req: Request): Promise<Response> {
       "Cache-Control": CACHE_CONTROL,
     },
   })
+}
+
+// ── Single-event handler (GET /events/{id}) ───────────────────────────────────
+// Reads events_enriched_v2 filtered by p_event_ids = ARRAY[id]. The RPC is
+// SECURITY INVOKER, so the anon RLS policy (published-only) does the gating: an
+// unpublished or missing id resolves to zero rows → 404. See PUBLIC_API.md.
+
+async function handleGetEvent(id: string, supabase: SupabaseClient): Promise<Response> {
+  const { data, error } = await supabase.rpc("events_enriched_v2", {
+    p_event_ids: [id],
+  })
+
+  if (error) {
+    return jsonError(500, "query failed")
+  }
+
+  const rows = (data ?? []) as RawEventRow[]
+  if (rows.length === 0) {
+    // Not found OR not published (RLS-filtered). No cache header so a freshly
+    // published event is not pinned as "missing" at the edge.
+    return jsonError(404, "event not found")
+  }
+
+  return new Response(JSON.stringify({ data: projectEvent(rows[0]) }), {
+    status: 200,
+    headers: {
+      ...CORS_HEADERS,
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": CACHE_CONTROL,
+    },
+  })
+}
+
+// ── Handler ───────────────────────────────────────────────────────────────────
+
+export async function handleEventsApi(req: Request): Promise<Response> {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 200, headers: CORS_HEADERS })
+  }
+  if (req.method !== "GET") {
+    return jsonError(405, "method not allowed")
+  }
+
+  const url = new URL(req.url)
+  const route = parseRoute(url.pathname)
+  if (route.kind === "unknown") {
+    return jsonError(404, "not found")
+  }
+
+  const supabase = getAnonClient()
+  if (supabase === null) {
+    return jsonError(503, "service unavailable")
+  }
+
+  if (route.kind === "event") {
+    return await handleGetEvent(route.id, supabase)
+  }
+  return await handleList(req, supabase)
 }
 
 if (import.meta.main) {

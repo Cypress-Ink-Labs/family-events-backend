@@ -1,7 +1,9 @@
 # Public Read API — Design Document (v1 spike)
 
-> Status: **Design spike** (plan 018). One PoC endpoint built; remaining endpoints are specified
-> but not yet implemented. Open questions are recorded at the bottom.
+> Status: **Design spike** (plan 018; build specs verified in plan 028). `GET /events` (list, PoC)
+> and `GET /events/{id}` (single event) are **built**. `GET /events/{id}/similar` and `GET /cities`
+> are specified with verified backing reads and **ready to build** (`/{id}/similar` was unblocked by
+> plan 024). Open questions are recorded at the bottom.
 
 ## Overview
 
@@ -98,26 +100,119 @@ Maps to `public.search_events(...)`.
 
 ---
 
-### `GET /functions/v1/events-api/{id}` — Single event (NOT YET BUILT)
+### `GET /functions/v1/events-api/{id}` — Single event (BUILT — plan 028 proof)
 
-Maps to `events_enriched_v2` filtered by `p_event_ids = ARRAY[id]`.
+> **Status: BUILT.** Implemented in `events-api/index.ts` as `handleGetEvent`; routed off the
+> trailing path segment. Verified by `events-api/events-api_test.ts`.
 
-Same public projection as the list endpoint plus `image_attributions`.
-Returns 404 JSON when event is not found or not published.
+**Backing read (verified):** `public.events_enriched_v2(p_event_ids => ARRAY[id]::uuid[])`
+— defined in migration `20260601006000_enrichment_images_and_rpc_cleanup.sql:435`,
+`GRANT EXECUTE ... TO anon, authenticated, service_role` (same migration, line 542). The function
+is `LANGUAGE sql STABLE` with **no `SECURITY` clause → SECURITY INVOKER**, so it runs with the
+caller's privileges and the anon RLS policy on `public.events` applies.
+
+**Why this is safe for anon despite the function's WHERE clause:** the `events_enriched_v2` body
+gates `status = p_status` only on the `p_event_ids IS NULL` branch
+(`20260601006000_...:525-530`). Operator precedence means the `p_event_ids` branch matches by id
+alone and does **not** re-filter on status. The published-only guarantee therefore comes from RLS,
+not the function: policy `"Anon can read published events" ON public.events FOR SELECT TO anon
+USING (status = 'published')` (`20260601017000_...:131`). Called via the **anon key** (as this
+function does), a draft/unpublished id returns zero rows → the handler emits **404**. Do NOT call
+this RPC with the service-role key for this endpoint — that would bypass RLS and could leak drafts.
+
+**Request:** path `…/events-api/{id}`. No query params. The single-event route only matches when the
+trailing segment is a UUID (`events-api`'s `UUID_PATTERN`). A non-UUID single segment is treated as
+an **unknown route → 404** (it is reserved for future named routes such as `cities`), not as a
+malformed id — so the published-only behaviour never depends on a UUID round trip to Postgres.
+
+**Response (200):** `{ "data": <PublicEvent> }` using the **same `projectEvent` projection** as the
+list endpoint (published/public columns only; internal/LLM/admin/user-specific columns excluded —
+see the exclusion table above).
+
+**Errors:** `404 {"error":"event not found"}` (UUID with no visible row / not published /
+RLS-filtered); `404 {"error":"not found"}` (non-UUID / unknown route); `405` for non-GET;
+`503` if env is missing; `500 {"error":"query failed"}` on RPC error.
+
+**Cache:** reuse `CACHE_CONTROL` (`public, max-age=60, s-maxage=60, stale-while-revalidate=30`) on
+200; no cache header on 404 (so a just-published event is not pinned as missing at the edge).
+
+**Test checklist (implemented in `events-api_test.ts`):**
+
+- `parseRoute`: `…/events-api/<uuid>` → `{kind:"event"}`; bare collection path → `{kind:"list"}`;
+  `cities`, a non-UUID segment, and `<id>/similar` → `{kind:"unknown"}` (so the single-event route
+  does not shadow future routes).
+- non-GET method → 405; unknown route → 404; missing env → 503 (all resolved before any DB call).
 
 ---
 
-### `GET /functions/v1/events-api/{id}/similar` — Similar events (NOT YET BUILT)
+### `GET /functions/v1/events-api/{id}/similar` — Similar events (READY — unblocked by plan 024)
 
-Maps to `find_similar_events_by_id`. Requires plan 017 to be fully landed.
-Same public projection as list endpoint.
+> **Status: READY to build** (was blocked; plan 024 has landed). Not built in plan 028 (out of scope).
+
+**Backing read (verified):** `public.find_similar_events_by_id(p_event_id uuid, p_limit int,
+p_city_id uuid)` — made `SECURITY DEFINER` and `GRANT EXECUTE ... TO authenticated, anon,
+service_role` in migration `20260618000000_find_similar_events_by_id_security_definer.sql`
+(plan 024). Before plan 024 the public wrapper was `SECURITY INVOKER` and anon hit
+`42501 permission denied` reaching the `private` body — that was the blocker. **Now anon-callable.**
+
+**Published-only guarantees (verified, defense in depth):** the private body
+(`20260618000000_...:74-93`) looks up the source event's embedding **only when the source event is
+`status = 'published'`** (an unpublished source id → no embedding → empty result), and filters the
+returned neighbours to `status = 'published'` as well. So neither the source nor the neighbours leak
+drafts even though embeddings exist for drafts.
+
+**Shape note — a second hydration query is required.** `find_similar_events_by_id` returns only
+`(event_id, title, status, cosine_distance, source_id, city_id)` — NOT the full public event
+object. To return the list/`{id}` projection, the handler must:
+
+1. Validate `{id}` (UUID regex → 400 on bad input) and optional `limit` (1–`MAX_LIMIT`, default a
+   small value e.g. 5) / `city_id` (UUID).
+2. Call `find_similar_events_by_id(p_event_id => id, p_limit => limit, p_city_id => city_id)` →
+   ordered list of similar `event_id`s.
+3. Hydrate full rows via `events_enriched_v2(p_event_ids => ARRAY[those ids])` **with the anon key**
+   (RLS keeps it published-only), then re-order to match the cosine-distance order from step 2
+   (`events_enriched_v2` orders by `start_datetime`, not similarity).
+4. Project each row with `projectEvent`. Optionally surface `cosine_distance` as a `similarity`
+   field (decide at build time; not part of the committed list projection).
+
+**Response (200):** `{ "data": [ <PublicEvent>, … ] }`. An unknown / unpublished `{id}` yields
+`{ "data": [] }` (empty, not 404 — the source is simply not visible / has no neighbours).
+
+**Cache:** reuse `CACHE_CONTROL`.
+
+**Test checklist (for the build plan):** valid id → ordered similar list; unpublished/unknown id →
+empty `data`; bad UUID → 400; `limit` clamp; neighbour ordering preserved after hydration.
 
 ---
 
-### `GET /functions/v1/events-api/cities` — City list (NOT YET BUILT)
+### `GET /functions/v1/events-api/cities` — City list (READY)
 
-Simple `SELECT id, name, state, country FROM public.cities WHERE is_active = true`.
-Response: `{ "data": [ { "id": "uuid", "name": "string", "state": "string", "country": "string" } ] }`.
+> **Status: READY to build.** Not built in plan 028 (out of scope).
+
+**Backing read (verified):** direct table select on `public.cities`. No RPC needed.
+`GRANT ALL ON TABLE public.cities TO anon` (`20260601000000_schema_baseline.sql:6645`) and RLS
+policy `"Anon can read active cities" ON public.cities FOR SELECT TO anon USING (is_active = true)`
+(`20260601000000_...:5507`). Anon, via the anon key, sees only active cities.
+
+**Columns (verified against `cities` definition, `20260601000000_...:4321`):**
+`id uuid`, `name text NOT NULL`, `state text` (**nullable**), `country text NOT NULL` (default
+`'US'`), plus `slug`, `is_active`, `latitude`, `longitude`, `timezone`, `created_at`. Project the
+public subset only.
+
+**Request:** path `…/events-api/cities`. No query params (a `state` filter is a possible follow-up).
+
+**Query:** `supabase.from("cities").select("id, name, state, country").eq("is_active", true)`
+with the anon key. The `is_active` predicate is redundant with RLS but keeps intent explicit.
+Order by `name` for a stable response.
+
+**Response (200):** `{ "data": [ { "id": "uuid", "name": "string", "state": "string | null",
+"country": "string" }, … ] }`. Note `state` is **nullable** — type it `string | null`, not `string`.
+
+**Cache:** cities change rarely; a longer TTL is appropriate
+(`public, max-age=3600, s-maxage=3600, stale-while-revalidate=300`) rather than the 60 s event TTL.
+
+**Test checklist (for the build plan):** projection excludes non-public columns; `state` nullable
+handled; only active cities returned (RLS); response sorted by `name`.
 
 ---
 
@@ -210,7 +305,7 @@ endpoints in v1, so CSRF via CORS is not a concern.
 | ---------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------- |
 | `public.search_events`             | `SETOF events` filtered to `status = 'published'` | anon, authenticated, service_role (see migration 20260601028000) |
 | `public.events_enriched_v2`        | RETURNS TABLE (explicit columns)                  | anon, authenticated, service_role (see migration 20260601006000) |
-| `public.find_similar_events_by_id` | Similar published events                          | anon, authenticated (see migration 20260601029000)               |
+| `public.find_similar_events_by_id` | Similar published events (SECURITY DEFINER)        | anon, authenticated, service_role (see migration 20260618000000) |
 
 **Input validation per parameter (GET /events):**
 
@@ -249,6 +344,8 @@ endpoints in v1, so CSRF via CORS is not a concern.
    events if the underlying data changes. Document the trade-off; add an `expires_at` field to the
    cursor payload if partners report stale-cursor issues.
 
-6. **`GET /events/:id` fallback to `public_events` view?** `events_enriched_v2` is richer but
-   heavier. For a single-event lookup, the `public_events` view (used by `share-og`) is faster.
-   Decide at implementation time.
+6. **`GET /events/:id` fallback to `public_events` view? (RESOLVED)** Plan 028 built the single-event
+   endpoint on `events_enriched_v2(p_event_ids => ARRAY[id])` so it returns the identical projection
+   (incl. `tags`, `avg_rating`) as the list endpoint with no separate code path. The `public_events`
+   view (used by `share-og`) is lighter but lacks the enriched columns; revisit only if single-event
+   latency becomes a measured problem.
