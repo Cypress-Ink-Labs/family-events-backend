@@ -52,7 +52,7 @@ jobs:
           if [[ "${{ contains(github.event.pull_request.labels.*.name, 'railway-sandbox') }}" == "true" ]]; then
             should_run=true
           else
-            changed_files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")
+            changed_files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
 
             if echo "$changed_files" | grep -Eq '^(\\.railway/|scripts/railway-sandbox\\.mjs$|package\\.json$|pnpm-lock\\.yaml$|apps/cron-|apps/web/)'; then
               should_run=true
