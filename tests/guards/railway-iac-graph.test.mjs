@@ -59,7 +59,8 @@ test("desired graph resources are non-empty and include every declared cron serv
   assert.equal(result.status, 0, `evaluator exited ${result.status}; stderr:\n${result.stderr}`)
 
   const parsed = JSON.parse(result.stdout)
-  const resources = parsed.graph?.resources
+  assert.ok(parsed.graph, "evaluator output is missing the desired graph")
+  const resources = parsed.graph.resources
 
   assert.ok(Array.isArray(resources), "graph.resources is not an array")
   assert.ok(
