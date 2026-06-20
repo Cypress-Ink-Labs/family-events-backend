@@ -13,11 +13,11 @@
     "format:check": "oxfmt --config ../config-quality/oxfmt.base.json --check src emails scripts"
   },
   "dependencies": {
-    "@react-email/render": "^2.0.8",
+    "@react-email/render": "^2.0.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-email": "^6.6.0",
-    "resend": "^6.12.4"
+    "react-email": "^6.6.3",
+    "resend": "^6.14.0"
   },
   "devDependencies": {
     "@cypress-ink-labs/config-typescript": "workspace:*",
