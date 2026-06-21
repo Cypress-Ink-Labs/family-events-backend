@@ -411,6 +411,207 @@ if (typeof Deno !== "undefined") {
     }
   )
 
+  // ── importParsedSourceEvents: cross-source dedup pre-pass ─────────────────
+
+  /**
+   * Minimal fake SupabaseClient that handles all DB calls made by
+   * importParsedSourceEvents:
+   *   - .from("cities").select().eq().maybeSingle()  → centroid
+   *   - .from("source_runs").update().eq()           → progress flushes
+   *   - .from("event_sources").update().eq()         → finalize
+   *   - .rpc("find_cross_source_event_candidates")   → controlled by caller
+   *   - .rpc("bulk_import_scrape_events")            → returns fixed counts
+   *   - .rpc("invoke_process_tag_queue")             → no-op
+   */
+  class FakeSupabase {
+    // Caller sets these to control which RPC responses are returned.
+    crossSourceCandidates: Array<{
+      id: string
+      title: string
+      source_id: string
+      start_datetime: string
+    }> = []
+    crossSourceCandidateError: { code?: string; message?: string } | null = null
+
+    // Track what was passed to the bulk RPC.
+    bulkRpcCalls: Array<Record<string, unknown>[]> = []
+
+    rpc(name: string, args?: Record<string, unknown>) {
+      if (name === "find_cross_source_event_candidates") {
+        if (this.crossSourceCandidateError) {
+          return Promise.resolve({ data: null, error: this.crossSourceCandidateError })
+        }
+        return Promise.resolve({ data: this.crossSourceCandidates, error: null })
+      }
+
+      if (name === "bulk_import_scrape_events") {
+        const events = (args?.p_events ?? []) as Record<string, unknown>[]
+        this.bulkRpcCalls.push(events)
+        return Promise.resolve({
+          data: { imported: events.length, updated: 0, skipped: 0, enqueued: events.length },
+          error: null,
+        })
+      }
+
+      if (name === "invoke_process_tag_queue") {
+        return Promise.resolve({ data: null, error: null })
+      }
+
+      throw new Error(`Unhandled rpc: ${name}`)
+    }
+
+    from(table: string) {
+      return new FakeQuery(table)
+    }
+  }
+
+  class FakeQuery {
+    constructor(private readonly table: string) {}
+
+    select(_cols?: string) {
+      return this
+    }
+    update(_payload?: Record<string, unknown>) {
+      return this
+    }
+    eq(_col?: string, _val?: unknown) {
+      return this
+    }
+    maybeSingle() {
+      if (this.table === "cities") {
+        return Promise.resolve({ data: { latitude: 30.45, longitude: -91.19 }, error: null })
+      }
+      return Promise.resolve({ data: null, error: null })
+    }
+    // Allow `.update().eq()` to resolve via then-able (no-op)
+    then<T>(
+      onfulfilled?: ((value: { data: null; error: null }) => T | PromiseLike<T>) | null
+    ): Promise<T> {
+      return Promise.resolve({ data: null, error: null }).then(onfulfilled)
+    }
+  }
+
+  function buildDedupSource(overrides: Partial<EventSourceRow> = {}): EventSourceRow {
+    return {
+      id: "source-a",
+      name: "Test Source A",
+      url: "https://example.com/feed",
+      source_type: "rss",
+      extraction_mode: "deterministic",
+      city_id: "city-1",
+      is_active: true,
+      auto_approve: false,
+      scrape_interval_hours: 24,
+      last_scraped_at: null,
+      last_status: null,
+      error_count: 0,
+      date_window_days: null,
+      consecutive_zero_result_scrapes: 0,
+      stale_escalated_at: null,
+      ...overrides,
+    }
+  }
+
+  function buildParsedEventForDedup(overrides: Partial<ParsedEvent> = {}): ParsedEvent {
+    return {
+      title: "Family Story Time",
+      description: "A fun event for kids",
+      startDatetime: "2026-06-20T14:00:00.000Z",
+      endDatetime: null,
+      venueName: "City Library",
+      address: "100 Main St",
+      sourceUrl: "https://example.com/event/1",
+      imageUrl: null,
+      images: [],
+      price: null,
+      isFree: true,
+      ...overrides,
+    }
+  }
+
+  Deno.test("importParsedSourceEvents: cross-source duplicate is skipped (not sent to bulk_import)", async () => {
+    const db = new FakeSupabase()
+    // Existing event from a DIFFERENT source with same title + time
+    db.crossSourceCandidates = [
+      {
+        id: "event-existing-1",
+        title: "Family Story Time",
+        source_id: "source-b", // different source
+        start_datetime: "2026-06-20T14:00:00.000Z",
+      },
+    ]
+
+    const source = buildDedupSource({ id: "source-a", city_id: "city-1" })
+    const parsedEvents = [buildParsedEventForDedup()]
+
+    const result = await importParsedSourceEvents(db as never, source, "run-1", parsedEvents)
+
+    // The event must have been skipped — bulk_import called with empty array
+    assertEquals(db.bulkRpcCalls.length, 1)
+    assertEquals(db.bulkRpcCalls[0].length, 0)
+    // eventsSkipped should reflect the cross-source skip
+    assertEquals(result.eventsSkipped, 1)
+  })
+
+  Deno.test("importParsedSourceEvents: same-source candidate is NOT skipped", async () => {
+    const db = new FakeSupabase()
+    // Candidate from the SAME source — should not be filtered by dedup
+    db.crossSourceCandidates = [
+      {
+        id: "event-existing-2",
+        title: "Family Story Time",
+        source_id: "source-a", // same source
+        start_datetime: "2026-06-20T14:00:00.000Z",
+      },
+    ]
+
+    const source = buildDedupSource({ id: "source-a", city_id: "city-1" })
+    const parsedEvents = [buildParsedEventForDedup()]
+
+    await importParsedSourceEvents(db as never, source, "run-2", parsedEvents)
+
+    // Not filtered by dedup — must be passed to bulk_import
+    assertEquals(db.bulkRpcCalls.length, 1)
+    assertEquals(db.bulkRpcCalls[0].length, 1)
+  })
+
+  Deno.test("importParsedSourceEvents: city_id null bypasses dedup entirely", async () => {
+    const db = new FakeSupabase()
+    // Even with cross-source candidates configured, dedup should not run
+    db.crossSourceCandidates = [
+      {
+        id: "event-existing-3",
+        title: "Family Story Time",
+        source_id: "source-b",
+        start_datetime: "2026-06-20T14:00:00.000Z",
+      },
+    ]
+
+    const source = buildDedupSource({ id: "source-a", city_id: null })
+    const parsedEvents = [buildParsedEventForDedup()]
+
+    await importParsedSourceEvents(db as never, source, "run-3", parsedEvents)
+
+    // All events passed through — dedup skipped when city_id is null
+    assertEquals(db.bulkRpcCalls.length, 1)
+    assertEquals(db.bulkRpcCalls[0].length, 1)
+  })
+
+  Deno.test("importParsedSourceEvents: dedup RPC missing (42883) does not break ingestion", async () => {
+    const db = new FakeSupabase()
+    db.crossSourceCandidateError = { code: "42883", message: "function not found" }
+
+    const source = buildDedupSource({ id: "source-a", city_id: "city-1" })
+    const parsedEvents = [buildParsedEventForDedup()]
+
+    const result = await importParsedSourceEvents(db as never, source, "run-4", parsedEvents)
+
+    // Ingestion must still succeed (status = success, event imported)
+    assertEquals(result.status, "success")
+    assertEquals(db.bulkRpcCalls.length, 1)
+    assertEquals(db.bulkRpcCalls[0].length, 1)
+  })
+
   Deno.test("sanitizeImagesForIngest validates image candidates with bounded concurrency", async () => {
     const originalFetch = globalThis.fetch
     let active = 0
