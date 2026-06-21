@@ -216,6 +216,9 @@ if (typeof Deno !== "undefined") {
    */
   function buildSupabaseMock(opts: {
     bulkResult?: { imported: number; updated: number; skipped: number; enqueued: number }
+    // When set, admin_audit_log.insert() resolves with this error (the supabase
+    // client surfaces DB errors in the response object, not via throw).
+    auditInsertError?: { message: string }
   } = {}) {
     const captured: {
       eventSourceUpdate: Record<string, unknown> | null
@@ -253,6 +256,9 @@ if (typeof Deno !== "undefined") {
       builder.insert = (payload: unknown) => {
         if (table === "admin_audit_log") {
           captured.auditLogInserts.push(payload)
+          if (opts.auditInsertError) {
+            return Promise.resolve({ data: null, error: opts.auditInsertError })
+          }
         }
         return Promise.resolve({ data: null, error: null })
       }
@@ -375,6 +381,33 @@ if (typeof Deno !== "undefined") {
       )
       // No second audit log entry.
       assertEquals(captured.auditLogInserts.length, 0)
+    }
+  )
+
+  Deno.test(
+    "stale escalation: audit-log insert error stays non-fatal and still escalates",
+    async () => {
+      const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
+      const { client, captured } = buildSupabaseMock({
+        bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
+        // admin_audit_log.insert resolves with an error (RLS/constraint) — not a throw.
+        auditInsertError: { message: "permission denied for table admin_audit_log" },
+      })
+
+      // Must not throw even though the audit write fails.
+      await importParsedSourceEvents(
+        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+        source,
+        "run-4",
+        []
+      )
+
+      // Escalation still happened on event_sources despite the audit failure.
+      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+      assertEquals(captured.eventSourceUpdate!.last_status, "stale")
+      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 3)
+      // Insert was attempted exactly once.
+      assertEquals(captured.auditLogInserts.length, 1)
     }
   )
 

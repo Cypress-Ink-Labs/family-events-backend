@@ -682,6 +682,7 @@ export type Database = {
         Row: {
           auto_approve: boolean
           city_id: string | null
+          consecutive_zero_result_scrapes: number
           created_at: string
           date_window_days: number | null
           error_count: number
@@ -695,12 +696,14 @@ export type Database = {
           processing_mode: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours: number
           source_type: string
+          stale_escalated_at: string | null
           updated_at: string
           url: string
         }
         Insert: {
           auto_approve?: boolean
           city_id?: string | null
+          consecutive_zero_result_scrapes?: number
           created_at?: string
           date_window_days?: number | null
           error_count?: number
@@ -714,12 +717,14 @@ export type Database = {
           processing_mode?: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours?: number
           source_type?: string
+          stale_escalated_at?: string | null
           updated_at?: string
           url: string
         }
         Update: {
           auto_approve?: boolean
           city_id?: string | null
+          consecutive_zero_result_scrapes?: number
           created_at?: string
           date_window_days?: number | null
           error_count?: number
@@ -733,6 +738,7 @@ export type Database = {
           processing_mode?: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours?: number
           source_type?: string
+          stale_escalated_at?: string | null
           updated_at?: string
           url?: string
         }
@@ -2126,6 +2132,7 @@ export type Database = {
         Returns: {
           auto_approve: boolean
           city_id: string | null
+          consecutive_zero_result_scrapes: number
           created_at: string
           date_window_days: number | null
           error_count: number
@@ -2139,6 +2146,7 @@ export type Database = {
           processing_mode: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours: number
           source_type: string
+          stale_escalated_at: string | null
           updated_at: string
           url: string
         }
@@ -2326,6 +2334,7 @@ export type Database = {
         Returns: {
           auto_approve: boolean
           city_id: string | null
+          consecutive_zero_result_scrapes: number
           created_at: string
           date_window_days: number | null
           error_count: number
@@ -2339,6 +2348,7 @@ export type Database = {
           processing_mode: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours: number
           source_type: string
+          stale_escalated_at: string | null
           updated_at: string
           url: string
         }
@@ -2583,6 +2593,7 @@ export type Database = {
         Returns: {
           auto_approve: boolean
           city_id: string | null
+          consecutive_zero_result_scrapes: number
           created_at: string
           date_window_days: number | null
           error_count: number
@@ -2596,6 +2607,7 @@ export type Database = {
           processing_mode: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours: number
           source_type: string
+          stale_escalated_at: string | null
           updated_at: string
           url: string
         }
@@ -2730,6 +2742,7 @@ export type Database = {
         Returns: {
           auto_approve: boolean
           city_id: string | null
+          consecutive_zero_result_scrapes: number
           created_at: string
           date_window_days: number | null
           error_count: number
@@ -2743,6 +2756,7 @@ export type Database = {
           processing_mode: Database["public"]["Enums"]["event_processing_mode"]
           scrape_interval_hours: number
           source_type: string
+          stale_escalated_at: string | null
           updated_at: string
           url: string
         }[]

@@ -376,7 +376,11 @@ export async function importParsedSourceEvents(
           last_scraped_at: source.last_scraped_at,
         })
         try {
-          await supabase.from("admin_audit_log").insert({
+          // The supabase client returns DB errors in the response object (RLS,
+          // constraints, etc.) rather than throwing, so check `error` too — not
+          // just the catch. Either path stays non-fatal: a failed audit write
+          // must never break scrape finalization.
+          const { error: auditError } = await supabase.from("admin_audit_log").insert({
             action: "source.stale_escalated",
             target_type: "event_source",
             target_id: source.id,
@@ -386,6 +390,13 @@ export async function importParsedSourceEvents(
               last_scraped_at: source.last_scraped_at,
             },
           })
+          if (auditError) {
+            logEdgeEvent("warn", "failed to write stale-escalation audit log", {
+              function: "process-source",
+              source_id: source.id,
+              error: auditError.message,
+            })
+          }
         } catch (auditError) {
           logEdgeEvent("warn", "failed to write stale-escalation audit log", {
             function: "process-source",
