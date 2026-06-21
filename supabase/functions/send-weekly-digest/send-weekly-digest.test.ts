@@ -62,7 +62,8 @@ function createMockSupabase(opts: {
       eq(col: string, val: unknown) {
         eqCalls.push({ col, val })
         queryCalls.push({ from: tableName, selectStr, eqCalls: [...eqCalls], inCalls: [] })
-        return Promise.resolve({ data: rows, error: null })
+        const filtered = rows.filter((r) => r[col] === val)
+        return Promise.resolve({ data: filtered, error: null })
       },
       in(col: string, val: unknown[]) {
         queryCalls.push({
@@ -71,7 +72,9 @@ function createMockSupabase(opts: {
           eqCalls: [...eqCalls],
           inCalls: [{ col, val }],
         })
-        return Promise.resolve({ data: rows, error: null })
+        const set = new Set(val)
+        const filtered = rows.filter((r) => set.has(r[col]))
+        return Promise.resolve({ data: filtered, error: null })
       },
     }
     return chain

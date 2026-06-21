@@ -17,6 +17,9 @@ import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config
 const BATCH_SIZE = 5
 const BATCH_DELAY_MS = 500
 const MAX_EVENTS_PER_DIGEST = 5
+// Max per-user ranking lookups (RPC + event fetch) in flight at once, so a large
+// recipient list doesn't monopolize the cron in a serial pre-send phase.
+const LOOKUP_CONCURRENCY = 5
 
 interface DigestUser {
   user_id: string
@@ -468,10 +471,10 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
   const windowFrom = new Date(Math.max(now.getTime(), friday.getTime())).toISOString()
   const windowTo = sunday.toISOString()
 
-  // 3. Per-user: call plan_events_for_user_range, fetch event details, build DigestEvent[]
+  // 3. Per-user (bounded concurrency): rank → fetch event details → build DigestEvent[].
   const eventsByUser = new Map<string, DigestEvent[]>()
 
-  for (const user of targetedUsers) {
+  async function buildUserDigestEvents(user: DigestUser): Promise<void> {
     const cityIds = prefCityMap.get(user.user_id) ?? [user.city_id]
 
     const { data: rankedRows, error: rpcError } = await supabase.rpc(
@@ -494,11 +497,11 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
         user_id: user.user_id,
         error: rpcError.message,
       })
-      continue
+      return
     }
 
     const ranked = (rankedRows ?? []) as RankedEventRow[]
-    if (ranked.length === 0) continue
+    if (ranked.length === 0) return
 
     const eventIds = ranked.map((r) => r.event_id)
 
@@ -513,7 +516,7 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
         user_id: user.user_id,
         error: eventsError.message,
       })
-      continue
+      return
     }
 
     // Build a lookup map by event_id, then reassemble in ranked order
@@ -533,6 +536,13 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     if (digestEvents.length > 0) {
       eventsByUser.set(user.user_id, digestEvents)
     }
+  }
+
+  // Process users in bounded-concurrency chunks so the lookup phase doesn't run
+  // fully serial across a large recipient list (Map writes are safe — single-threaded).
+  for (let i = 0; i < targetedUsers.length; i += LOOKUP_CONCURRENCY) {
+    const chunk = targetedUsers.slice(i, i + LOOKUP_CONCURRENCY)
+    await Promise.all(chunk.map((u) => buildUserDigestEvents(u)))
   }
 
   // 4. Send emails via Resend
