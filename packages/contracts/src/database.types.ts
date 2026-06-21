@@ -2812,6 +2812,20 @@ export type Database = {
           view_count: number
         }[]
       }
+      find_cross_source_event_candidates: {
+        Args: {
+          p_city_id: string
+          p_limit?: number
+          p_start_from: string
+          p_start_to: string
+        }
+        Returns: {
+          id: string
+          source_id: string
+          start_datetime: string
+          title: string
+        }[]
+      }
       find_similar_events: {
         Args: {
           p_city_id?: string
