@@ -8,14 +8,15 @@ import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config
 // send-weekly-digest
 // ----------------------------------------------------------------
 // Cron-triggered edge function that sends branded weekly digest emails
-// to users who have digest_email=true. For each user, queries upcoming
-// published events in their city for the next 7 days. Skips users whose
-// city has no events. Sends via Resend API following the notify-email
-// pattern. Rate-limits with small delays between batches.
+// to users who have digest_email=true. For each user, calls the
+// plan_events_for_user_range RPC (Phase 2) to get personalized ranked
+// events for the upcoming weekend across the user's preferred cities.
+// Skips users whose RPC returns no events. Sends via Resend API.
+// Rate-limits with small delays between batches.
 
 const BATCH_SIZE = 5
 const BATCH_DELAY_MS = 500
-const MAX_EVENTS_PER_DIGEST = 10
+const MAX_EVENTS_PER_DIGEST = 5
 
 interface DigestUser {
   user_id: string
@@ -23,6 +24,7 @@ interface DigestUser {
   display_name: string | null
   city_id: string
   city_name: string
+  child_age: number | null
 }
 
 interface DigestPreference {
@@ -40,6 +42,24 @@ interface DigestEvent {
   // events.images is a jsonb array; elements are URL strings in practice, but
   // tolerate { url } objects too in case enrichment shape changes.
   images: Array<string | { url?: string }> | null
+  explanation?: string
+}
+
+// Rows returned by plan_events_for_user_range RPC
+interface RankedEventRow {
+  event_id: string
+  score: number
+  distance_score: number | null
+  weather_score: number | null
+  age_score: number | null
+  history_affinity: number | null
+  family_fit_score: number | null
+  timing_score: number | null
+  novelty_score: number | null
+  budget_score: number | null
+  distance_km: number | null
+  start_datetime: string
+  city_id: string
 }
 
 function firstImageUrl(event: DigestEvent): string | undefined {
@@ -119,6 +139,39 @@ function renderPricePill(event: DigestEvent): string {
   return `<span style="display:inline-block;background:${fill};color:${color};font-family:${FONT_MONO};font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;">${escapeHtml(price)}</span>`
 }
 
+// Factor name → friendly label mapping (in weight/priority order for tie-breaking)
+const FACTOR_LABELS: Array<[keyof RankedEventRow, string]> = [
+  ["distance_score", "nearby"],
+  ["weather_score", "weather fit"],
+  ["age_score", "great age match"],
+  ["history_affinity", "matches your interests"],
+  ["family_fit_score", "family-friendly"],
+  ["timing_score", "perfect weekend timing"],
+  ["novelty_score", "newly added"],
+  ["budget_score", "budget-friendly"],
+]
+
+// Neutral default threshold — factors at or below this add no meaningful signal
+const NEUTRAL_THRESHOLD = 0.5
+
+// Build a human-readable explanation string from RPC score factors.
+// Returns the top 2 factors (by value, ignoring neutral-or-below) joined with " · ".
+function buildExplanation(row: RankedEventRow): string | undefined {
+  const candidates: Array<{ label: string; value: number; order: number }> = []
+  for (let i = 0; i < FACTOR_LABELS.length; i++) {
+    const [key, label] = FACTOR_LABELS[i]
+    const val = row[key] as number | null
+    if (val != null && val > NEUTRAL_THRESHOLD) {
+      candidates.push({ label, value: val, order: i })
+    }
+  }
+  if (candidates.length === 0) return undefined
+  // Sort descending by value; ties broken by original weight order (lower index = higher priority)
+  candidates.sort((a, b) => b.value - a.value || a.order - b.order)
+  const top2 = candidates.slice(0, 2).map((c) => c.label)
+  return top2.join(" · ")
+}
+
 function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
   const eventUrl = `${appUrl}/events/${event.id}`
   const thumbnail = firstImageUrl(event)
@@ -139,6 +192,10 @@ function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
     .filter(Boolean)
     .join(`<span style="color:${THEME.border};">&nbsp;&nbsp;</span>`)
 
+  const explanationHtml = event.explanation
+    ? `<div style="font-family:${FONT_SANS};font-size:12px;color:${THEME.textMuted};margin-top:5px;font-style:italic;">${escapeHtml(event.explanation)}</div>`
+    : ""
+
   return `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;margin:0 0 14px;">
       <tr>
@@ -154,6 +211,7 @@ function renderEventCardHtml(event: DigestEvent, appUrl: string): string {
                     ? `<div style="font-family:${FONT_SANS};font-size:13px;color:${THEME.blue};margin-top:6px;">&#9679;&nbsp;${escapeHtml(location)}</div>`
                     : ""
                 }
+                ${explanationHtml}
               </td>
             </tr>
           </table>
@@ -313,12 +371,13 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     email: string | null
     display_name: string | null
     city_preference_id: string | null
+    child_age: number | null
     cities: { id: string; name: string } | null
   }
 
   const { data: profiles, error: profilesError } = await supabase
     .from("user_profiles")
-    .select("id, email, display_name, city_preference_id, cities!inner(id, name)")
+    .select("id, email, display_name, city_preference_id, child_age, cities!inner(id, name)")
     .in("id", userIds)
 
   if (profilesError) {
@@ -343,6 +402,7 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       display_name: profile.display_name,
       city_id: profile.cities.id,
       city_name: profile.cities.name,
+      child_age: profile.child_age ?? null,
     })
   }
 
@@ -370,39 +430,108 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     }
   }
 
-  // 2. Group users by city to avoid duplicate event queries
-  const usersByCity = new Map<string, DigestUser[]>()
-  for (const user of targetedUsers) {
-    const group = usersByCity.get(user.city_id) ?? []
-    group.push(user)
-    usersByCity.set(user.city_id, group)
+  // 1c. Batch-load preferred cities for all targeted users.
+  // Fallback for users with no rows: their primary city_id.
+  const targetedUserIds = targetedUsers.map((u) => u.user_id)
+  const { data: prefCityRows, error: prefCityError } = await supabase
+    .from("user_preferred_cities")
+    .select("user_id, city_id")
+    .in("user_id", targetedUserIds)
+
+  if (prefCityError) {
+    logEdgeEvent("warn", "send-weekly-digest: failed to load preferred cities; using primary", {
+      function: "send-weekly-digest",
+      error: prefCityError.message,
+    })
   }
 
-  // 3. For each city, query upcoming published events for next 7 days
-  const now = new Date()
-  const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+  // Build map: user_id → city_id[]
+  const prefCityMap = new Map<string, string[]>()
+  for (const row of (prefCityRows ?? []) as Array<{ user_id: string; city_id: string }>) {
+    const list = prefCityMap.get(row.user_id) ?? []
+    list.push(row.city_id)
+    prefCityMap.set(row.user_id, list)
+  }
 
-  const eventsByCity = new Map<string, DigestEvent[]>()
-  for (const cityId of usersByCity.keys()) {
-    const { data: events, error: eventsError } = await supabase.rpc("search_events", {
-      p_city_id: cityId,
-      p_date_from: now.toISOString(),
-      p_date_to: weekFromNow.toISOString(),
-      p_status: "published",
-      p_limit: MAX_EVENTS_PER_DIGEST,
-    })
+  // 2. Compute the upcoming weekend window (UTC).
+  // UTC approximation — the RPC's timing_score refines local-time fit.
+  const now = new Date()
+  const day = now.getUTCDay() // 0=Sun..6=Sat
+  const fridayOffset = day === 0 ? -2 : day === 6 ? -1 : 5 - day
+  const friday = new Date(now)
+  friday.setUTCDate(now.getUTCDate() + fridayOffset)
+  friday.setUTCHours(0, 0, 0, 0)
+  const sunday = new Date(friday)
+  sunday.setUTCDate(friday.getUTCDate() + 2)
+  sunday.setUTCHours(23, 59, 59, 999)
+  // Don't recommend events already in the past
+  const windowFrom = new Date(Math.max(now.getTime(), friday.getTime())).toISOString()
+  const windowTo = sunday.toISOString()
+
+  // 3. Per-user: call plan_events_for_user_range, fetch event details, build DigestEvent[]
+  const eventsByUser = new Map<string, DigestEvent[]>()
+
+  for (const user of targetedUsers) {
+    const cityIds = prefCityMap.get(user.user_id) ?? [user.city_id]
+
+    const { data: rankedRows, error: rpcError } = await supabase.rpc(
+      "plan_events_for_user_range",
+      {
+        p_user_id: user.user_id,
+        p_date_from: windowFrom,
+        p_date_to: windowTo,
+        p_city_ids: cityIds,
+        p_kid_age: user.child_age,
+        p_weather_fit: "neutral",
+        p_limit: MAX_EVENTS_PER_DIGEST,
+        // p_lat / p_lng intentionally omitted → NULL; geo personalization is a follow-up
+      }
+    )
+
+    if (rpcError) {
+      logEdgeEvent("warn", "send-weekly-digest: plan_events_for_user_range failed", {
+        function: "send-weekly-digest",
+        user_id: user.user_id,
+        error: rpcError.message,
+      })
+      continue
+    }
+
+    const ranked = (rankedRows ?? []) as RankedEventRow[]
+    if (ranked.length === 0) continue
+
+    const eventIds = ranked.map((r) => r.event_id)
+
+    const { data: eventRows, error: eventsError } = await supabase
+      .from("events")
+      .select("id, title, start_datetime, venue_name, address, is_free, price, images")
+      .in("id", eventIds)
 
     if (eventsError) {
-      logEdgeEvent("warn", "Failed to query events for city", {
+      logEdgeEvent("warn", "send-weekly-digest: failed to fetch event details", {
         function: "send-weekly-digest",
-        city_id: cityId,
+        user_id: user.user_id,
         error: eventsError.message,
       })
       continue
     }
 
-    if (events && events.length > 0) {
-      eventsByCity.set(cityId, events as DigestEvent[])
+    // Build a lookup map by event_id, then reassemble in ranked order
+    const eventMap = new Map<string, DigestEvent>()
+    for (const row of (eventRows ?? []) as DigestEvent[]) {
+      eventMap.set(row.id, row)
+    }
+
+    const digestEvents: DigestEvent[] = []
+    for (const rankedRow of ranked) {
+      const ev = eventMap.get(rankedRow.event_id)
+      if (!ev) continue
+      const explanation = buildExplanation(rankedRow)
+      digestEvents.push({ ...ev, explanation })
+    }
+
+    if (digestEvents.length > 0) {
+      eventsByUser.set(user.user_id, digestEvents)
     }
   }
 
@@ -416,19 +545,19 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
 
   if (!resendApiKey) {
     const totalUsers = digestUsers.length
-    const citiesWithEvents = eventsByCity.size
+    const usersWithEvents = eventsByUser.size
     logEdgeEvent(
       "warn",
       "send-weekly-digest: RESEND_API_KEY not configured; would have sent digests",
       {
         function: "send-weekly-digest",
         total_users: totalUsers,
-        cities_with_events: citiesWithEvents,
+        users_with_events: usersWithEvents,
       }
     )
     await logCronRunEvent(supabase, cronCtx, "log", "Dry run (no RESEND_API_KEY)", {
       total_users: totalUsers,
-      cities_with_events: citiesWithEvents,
+      users_with_events: usersWithEvents,
     })
     return { ok: true, sent: 0, skipped: totalUsers, failed: 0, dev: true }
   }
@@ -443,14 +572,14 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     const batch = allUsers.slice(i, i + BATCH_SIZE)
 
     for (const user of batch) {
-      const events = eventsByCity.get(user.city_id)
+      const events = eventsByUser.get(user.user_id)
       if (!events || events.length === 0) {
         skipped++
         continue
       }
 
       const html = renderDigestHtml(user, events, appUrl)
-      const subject = `${events.length} family events this week in ${user.city_name}`
+      const subject = `${events.length} family picks for your weekend`
 
       try {
         const response = await fetch(RESEND_API_ENDPOINT, {

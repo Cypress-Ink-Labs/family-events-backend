@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert"
+import { assertEquals, assertStringIncludes } from "jsr:@std/assert"
 
 // ---------------------------------------------------------------------------
 // Helpers to build mock Supabase client + Resend server
@@ -16,17 +16,41 @@ interface MockQueryChain {
   inCalls: Array<{ col: string; val: unknown[] }>
 }
 
+// Ranked row returned by plan_events_for_user_range
+interface RankedEventRow {
+  event_id: string
+  score: number
+  distance_score: number | null
+  weather_score: number | null
+  age_score: number | null
+  history_affinity: number | null
+  family_fit_score: number | null
+  timing_score: number | null
+  novelty_score: number | null
+  budget_score: number | null
+  distance_km: number | null
+  start_datetime: string
+  city_id: string
+}
+
 function createMockSupabase(opts: {
   prefsRows?: Array<Record<string, unknown>>
   profileRows?: Array<Record<string, unknown>>
-  searchEventsResult?: Record<string, unknown[]>
+  preferredCityRows?: Array<{ user_id: string; city_id: string }>
+  planEventsResult?: Record<string, RankedEventRow[]>
+  eventDetailRows?: Array<Record<string, unknown>>
   rpcCalls?: MockRpcCall[]
   queryCalls?: MockQueryChain[]
 }) {
   const rpcCalls: MockRpcCall[] = opts.rpcCalls ?? []
   const queryCalls: MockQueryChain[] = opts.queryCalls ?? []
 
-  function buildSelectChain(tableName: string, rows: Array<Record<string, unknown>>) {
+  function buildSelectChain(
+    tableName: string,
+    rows: Array<Record<string, unknown>>,
+    // allow overriding rows after select for tables that need it
+    _extra?: unknown
+  ) {
     let selectStr = ""
     const eqCalls: Array<{ col: string; val: unknown }> = []
 
@@ -61,15 +85,24 @@ function createMockSupabase(opts: {
       if (table === "user_profiles") {
         return buildSelectChain(table, opts.profileRows ?? [])
       }
+      if (table === "user_preferred_cities") {
+        return buildSelectChain(
+          table,
+          (opts.preferredCityRows ?? []) as Array<Record<string, unknown>>
+        )
+      }
+      if (table === "events") {
+        return buildSelectChain(table, opts.eventDetailRows ?? [])
+      }
       return buildSelectChain(table, [])
     },
     rpc(name: string, params: Record<string, unknown> = {}) {
       rpcCalls.push({ name, params })
 
-      if (name === "search_events") {
-        const cityId = params.p_city_id as string
-        const events = opts.searchEventsResult?.[cityId] ?? []
-        return Promise.resolve({ data: events, error: null })
+      if (name === "plan_events_for_user_range") {
+        const userId = params.p_user_id as string
+        const rows = opts.planEventsResult?.[userId] ?? []
+        return Promise.resolve({ data: rows, error: null })
       }
 
       if (name === "log_cron_run_event") {
@@ -82,12 +115,8 @@ function createMockSupabase(opts: {
 }
 
 // ---------------------------------------------------------------------------
-// Import the module's inner logic by extracting core logic into testable shape
-// We test the core flow by simulating what the handler does
+// Inline helpers extracted from index.ts for unit-level testing
 // ---------------------------------------------------------------------------
-
-// Since the edge function uses Deno.serve via serveServiceRoleJson, we test
-// the business logic by replicating the key steps in isolation.
 
 function buildDigestUsers(
   prefsRows: Array<Record<string, unknown>>,
@@ -98,6 +127,7 @@ function buildDigestUsers(
     email: string | null
     display_name: string | null
     city_preference_id: string | null
+    child_age: number | null
     cities: { id: string; name: string } | null
   }
 
@@ -107,6 +137,7 @@ function buildDigestUsers(
     display_name: string | null
     city_id: string
     city_name: string
+    child_age: number | null
   }
 
   const profilesById = new Map<string, ProfileRow>()
@@ -124,9 +155,39 @@ function buildDigestUsers(
       display_name: profile.display_name,
       city_id: profile.cities.id,
       city_name: profile.cities.name,
+      child_age: profile.child_age ?? null,
     })
   }
   return digestUsers
+}
+
+// Factor labels in priority order (mirrors index.ts)
+const FACTOR_LABELS: Array<[keyof RankedEventRow, string]> = [
+  ["distance_score", "nearby"],
+  ["weather_score", "weather fit"],
+  ["age_score", "great age match"],
+  ["history_affinity", "matches your interests"],
+  ["family_fit_score", "family-friendly"],
+  ["timing_score", "perfect weekend timing"],
+  ["novelty_score", "newly added"],
+  ["budget_score", "budget-friendly"],
+]
+
+const NEUTRAL_THRESHOLD = 0.5
+
+function buildExplanation(row: RankedEventRow): string | undefined {
+  const candidates: Array<{ label: string; value: number; order: number }> = []
+  for (let i = 0; i < FACTOR_LABELS.length; i++) {
+    const [key, label] = FACTOR_LABELS[i]
+    const val = row[key] as number | null
+    if (val != null && val > NEUTRAL_THRESHOLD) {
+      candidates.push({ label, value: val, order: i })
+    }
+  }
+  if (candidates.length === 0) return undefined
+  candidates.sort((a, b) => b.value - a.value || a.order - b.order)
+  const top2 = candidates.slice(0, 2).map((c) => c.label)
+  return top2.join(" · ")
 }
 
 // ---------------------------------------------------------------------------
@@ -141,6 +202,7 @@ Deno.test("buildDigestUsers flattens join rows correctly", () => {
       email: "alice@test.com",
       display_name: "Alice",
       city_preference_id: "c1",
+      child_age: 5,
       cities: { id: "c1", name: "Lafayette" },
     },
     {
@@ -148,6 +210,7 @@ Deno.test("buildDigestUsers flattens join rows correctly", () => {
       email: "bob@test.com",
       display_name: null,
       city_preference_id: "c2",
+      child_age: null,
       cities: { id: "c2", name: "Houston" },
     },
   ]
@@ -156,8 +219,10 @@ Deno.test("buildDigestUsers flattens join rows correctly", () => {
   assertEquals(users.length, 2)
   assertEquals(users[0].email, "alice@test.com")
   assertEquals(users[0].city_name, "Lafayette")
+  assertEquals(users[0].child_age, 5)
   assertEquals(users[1].display_name, null)
   assertEquals(users[1].city_id, "c2")
+  assertEquals(users[1].child_age, null)
 })
 
 Deno.test("buildDigestUsers skips users without email", () => {
@@ -168,6 +233,7 @@ Deno.test("buildDigestUsers skips users without email", () => {
       email: null,
       display_name: "No Email",
       city_preference_id: "c1",
+      child_age: null,
       cities: { id: "c1", name: "Lafayette" },
     },
   ]
@@ -184,6 +250,7 @@ Deno.test("buildDigestUsers skips users without city", () => {
       email: "alice@test.com",
       display_name: "Alice",
       city_preference_id: null,
+      child_age: null,
       cities: null,
     },
   ]
@@ -202,6 +269,7 @@ Deno.test("digest user reads avoid nonexistent preferences to profiles embed", a
         email: "alice@test.com",
         display_name: "Alice",
         city_preference_id: "c1",
+        child_age: null,
         cities: { id: "c1", name: "Lafayette" },
       },
     ],
@@ -211,7 +279,7 @@ Deno.test("digest user reads avoid nonexistent preferences to profiles embed", a
   await supabase.from("user_notification_preferences").select("user_id").eq("digest_email", true)
   await supabase
     .from("user_profiles")
-    .select("id, email, display_name, city_preference_id, cities!inner(id, name)")
+    .select("id, email, display_name, city_preference_id, child_age, cities!inner(id, name)")
     .in("id", ["u1", "u2"])
 
   assertEquals(queryCalls.length, 2)
@@ -222,118 +290,317 @@ Deno.test("digest user reads avoid nonexistent preferences to profiles embed", a
   assertEquals(queryCalls[1].inCalls, [{ col: "id", val: ["u1", "u2"] }])
 })
 
-Deno.test("mock Supabase queries events by city via search_events RPC", async () => {
-  const rpcCalls: MockRpcCall[] = []
-  const mockEvents = {
-    c1: [
-      {
-        id: "e1",
-        title: "Park Day",
-        start_datetime: "2026-06-02T10:00:00Z",
-        venue_name: "City Park",
-        is_free: true,
-      },
-      {
-        id: "e2",
-        title: "Story Time",
-        start_datetime: "2026-06-03T14:00:00Z",
-        venue_name: "Library",
-        is_free: true,
-      },
+Deno.test("preferred cities fallback: user with no rows uses primary city_id", async () => {
+  const queryCalls: MockQueryChain[] = []
+  const supabase = createMockSupabase({
+    preferredCityRows: [
+      // only u2 has preferred cities; u1 will fall back
+      { user_id: "u2", city_id: "c3" },
     ],
-    c2: [],
+    queryCalls,
+  })
+
+  const result = await supabase
+    .from("user_preferred_cities")
+    .select("user_id, city_id")
+    .in("user_id", ["u1", "u2"])
+
+  const rows = result.data as Array<{ user_id: string; city_id: string }>
+  assertEquals(rows.length, 1)
+  assertEquals(rows[0].user_id, "u2")
+
+  // Simulate the fallback logic
+  const prefCityMap = new Map<string, string[]>()
+  for (const row of rows) {
+    const list = prefCityMap.get(row.user_id) ?? []
+    list.push(row.city_id)
+    prefCityMap.set(row.user_id, list)
   }
 
-  const supabase = createMockSupabase({
-    prefsRows: [],
-    searchEventsResult: mockEvents,
-    rpcCalls,
-  })
+  const cityIdsU1 = prefCityMap.get("u1") ?? ["c1_primary"]
+  const cityIdsU2 = prefCityMap.get("u2") ?? ["c2_primary"]
 
-  // Query city with events
-  const result1 = await supabase.rpc("search_events", {
-    p_city_id: "c1",
-    p_date_from: new Date().toISOString(),
-    p_date_to: new Date(Date.now() + 7 * 86400000).toISOString(),
-    p_status: "published",
-    p_limit: 10,
-  })
-  const events1 = result1.data as Array<Record<string, unknown>>
-
-  assertEquals(events1.length, 2)
-  assertEquals(events1[0].title, "Park Day")
-
-  // Query city without events
-  const result2 = await supabase.rpc("search_events", {
-    p_city_id: "c2",
-    p_date_from: new Date().toISOString(),
-    p_date_to: new Date(Date.now() + 7 * 86400000).toISOString(),
-    p_status: "published",
-    p_limit: 10,
-  })
-  const events2 = result2.data as Array<Record<string, unknown>>
-
-  assertEquals(events2.length, 0)
-
-  // Verify both RPCs were called
-  assertEquals(rpcCalls.length, 2)
-  assertEquals(rpcCalls[0].name, "search_events")
-  assertEquals(rpcCalls[0].params.p_city_id, "c1")
-  assertEquals(rpcCalls[1].params.p_city_id, "c2")
+  assertEquals(cityIdsU1, ["c1_primary"]) // fallback to primary
+  assertEquals(cityIdsU2, ["c3"]) // from preferred cities table
 })
 
-Deno.test("empty city produces no events and user should be skipped", async () => {
+Deno.test("plan_events_for_user_range RPC is called with correct parameters", async () => {
   const rpcCalls: MockRpcCall[] = []
-  const supabase = createMockSupabase({
-    searchEventsResult: { c_empty: [] },
-    rpcCalls,
-  })
-
-  const result = await supabase.rpc("search_events", {
-    p_city_id: "c_empty",
-    p_status: "published",
-    p_limit: 10,
-  })
-  const data = result.data as Array<Record<string, unknown>>
-
-  assertEquals(data.length, 0)
-  // With no events, the digest function skips this user
-})
-
-Deno.test("grouping users by city deduplicates event queries", () => {
-  const users = [
-    { user_id: "u1", email: "a@t.com", display_name: "A", city_id: "c1", city_name: "Lafayette" },
-    { user_id: "u2", email: "b@t.com", display_name: "B", city_id: "c1", city_name: "Lafayette" },
-    { user_id: "u3", email: "c@t.com", display_name: "C", city_id: "c2", city_name: "Houston" },
+  const rankedRows: RankedEventRow[] = [
+    {
+      event_id: "e1",
+      score: 0.9,
+      distance_score: 0.85,
+      weather_score: 0.7,
+      age_score: 0.6,
+      history_affinity: 0.5,
+      family_fit_score: 0.8,
+      timing_score: 0.55,
+      novelty_score: 0.4,
+      budget_score: 0.9,
+      distance_km: 2.5,
+      start_datetime: "2026-06-20T14:00:00Z",
+      city_id: "c1",
+    },
   ]
 
-  const usersByCity = new Map<string, typeof users>()
-  for (const user of users) {
-    const group = usersByCity.get(user.city_id) ?? []
-    group.push(user)
-    usersByCity.set(user.city_id, group)
-  }
+  const supabase = createMockSupabase({
+    planEventsResult: { u1: rankedRows },
+    rpcCalls,
+  })
 
-  // Only 2 unique cities, so only 2 event queries needed
-  assertEquals(usersByCity.size, 2)
-  assertEquals(usersByCity.get("c1")!.length, 2)
-  assertEquals(usersByCity.get("c2")!.length, 1)
+  const windowFrom = "2026-06-19T00:00:00.000Z"
+  const windowTo = "2026-06-21T23:59:59.999Z"
+
+  const result = await supabase.rpc("plan_events_for_user_range", {
+    p_user_id: "u1",
+    p_date_from: windowFrom,
+    p_date_to: windowTo,
+    p_city_ids: ["c1", "c2"],
+    p_kid_age: 5,
+    p_weather_fit: "neutral",
+    p_limit: 5,
+  })
+
+  assertEquals(rpcCalls.length, 1)
+  assertEquals(rpcCalls[0].name, "plan_events_for_user_range")
+  assertEquals(rpcCalls[0].params.p_user_id, "u1")
+  assertEquals(rpcCalls[0].params.p_city_ids, ["c1", "c2"])
+  assertEquals(rpcCalls[0].params.p_kid_age, 5)
+  assertEquals(rpcCalls[0].params.p_weather_fit, "neutral")
+  assertEquals(rpcCalls[0].params.p_limit, 5)
+
+  const rows = result.data as RankedEventRow[]
+  assertEquals(rows.length, 1)
+  assertEquals(rows[0].event_id, "e1")
+  assertEquals(rows[0].score, 0.9)
 })
 
-Deno.test("Resend API call shape is correct", () => {
-  // Verify the shape of what would be sent to Resend
-  const resendPayload = {
-    from: "Family Events <onboarding@resend.dev>",
-    to: ["alice@test.com"],
-    subject: "3 family events this week in Lafayette",
-    html: "<html>...</html>",
+Deno.test("empty plan_events_for_user_range result means user is skipped", async () => {
+  const rpcCalls: MockRpcCall[] = []
+  const supabase = createMockSupabase({
+    planEventsResult: { u1: [] },
+    rpcCalls,
+  })
+
+  const result = await supabase.rpc("plan_events_for_user_range", {
+    p_user_id: "u1",
+    p_date_from: "2026-06-19T00:00:00Z",
+    p_date_to: "2026-06-21T23:59:59Z",
+    p_city_ids: ["c1"],
+    p_kid_age: null,
+    p_weather_fit: "neutral",
+    p_limit: 5,
+  })
+
+  const rows = result.data as RankedEventRow[]
+  assertEquals(rows.length, 0)
+  // Digest handler would skip this user (no events)
+})
+
+Deno.test("buildExplanation picks top 2 factors above neutral threshold", () => {
+  const row: RankedEventRow = {
+    event_id: "e1",
+    score: 0.85,
+    distance_score: 0.95, // highest — "nearby"
+    weather_score: 0.3, // below threshold — ignored
+    age_score: 0.88, // second highest — "great age match"
+    history_affinity: 0.5, // at threshold — ignored
+    family_fit_score: 0.7, // third — cut off at 2
+    timing_score: 0.55,
+    novelty_score: null,
+    budget_score: 0.6,
+    distance_km: 1.2,
+    start_datetime: "2026-06-21T10:00:00Z",
+    city_id: "c1",
   }
 
-  assertEquals(resendPayload.from, "Family Events <onboarding@resend.dev>")
-  assertEquals(resendPayload.to, ["alice@test.com"])
-  assertEquals(typeof resendPayload.subject, "string")
-  assertEquals(resendPayload.subject.includes("Lafayette"), true)
-  assertEquals(typeof resendPayload.html, "string")
+  const explanation = buildExplanation(row)
+  assertEquals(explanation, "nearby · great age match")
+})
+
+Deno.test("buildExplanation returns undefined when all factors at or below neutral", () => {
+  const row: RankedEventRow = {
+    event_id: "e2",
+    score: 0.5,
+    distance_score: 0.5,
+    weather_score: 0.3,
+    age_score: null,
+    history_affinity: 0.5,
+    family_fit_score: 0.4,
+    timing_score: 0.5,
+    novelty_score: 0.2,
+    budget_score: null,
+    distance_km: null,
+    start_datetime: "2026-06-21T12:00:00Z",
+    city_id: "c1",
+  }
+
+  const explanation = buildExplanation(row)
+  assertEquals(explanation, undefined)
+})
+
+Deno.test("buildExplanation respects weight-order tie-breaking", () => {
+  // distance_score and age_score both at 0.8; distance comes first in weight order
+  const row: RankedEventRow = {
+    event_id: "e3",
+    score: 0.8,
+    distance_score: 0.8,
+    weather_score: null,
+    age_score: 0.8,
+    history_affinity: null,
+    family_fit_score: null,
+    timing_score: null,
+    novelty_score: null,
+    budget_score: null,
+    distance_km: 3.0,
+    start_datetime: "2026-06-21T15:00:00Z",
+    city_id: "c1",
+  }
+
+  const explanation = buildExplanation(row)
+  assertEquals(explanation, "nearby · great age match")
+})
+
+Deno.test("buildExplanation returns single label when only one factor above threshold", () => {
+  const row: RankedEventRow = {
+    event_id: "e4",
+    score: 0.65,
+    distance_score: null,
+    weather_score: null,
+    age_score: null,
+    history_affinity: null,
+    family_fit_score: null,
+    timing_score: null,
+    novelty_score: null,
+    budget_score: 0.9,
+    distance_km: null,
+    start_datetime: "2026-06-21T16:00:00Z",
+    city_id: "c1",
+  }
+
+  const explanation = buildExplanation(row)
+  assertEquals(explanation, "budget-friendly")
+})
+
+Deno.test("event detail fetch assembles DigestEvents in ranked order", async () => {
+  const queryCalls: MockQueryChain[] = []
+
+  // RPC returns e2 ranked higher than e1
+  const rankedRows: RankedEventRow[] = [
+    {
+      event_id: "e2",
+      score: 0.9,
+      distance_score: 0.95,
+      weather_score: null,
+      age_score: null,
+      history_affinity: null,
+      family_fit_score: null,
+      timing_score: null,
+      novelty_score: null,
+      budget_score: null,
+      distance_km: 1.0,
+      start_datetime: "2026-06-21T11:00:00Z",
+      city_id: "c1",
+    },
+    {
+      event_id: "e1",
+      score: 0.7,
+      distance_score: 0.6,
+      weather_score: null,
+      age_score: null,
+      history_affinity: null,
+      family_fit_score: null,
+      timing_score: null,
+      novelty_score: null,
+      budget_score: null,
+      distance_km: 5.0,
+      start_datetime: "2026-06-21T14:00:00Z",
+      city_id: "c1",
+    },
+  ]
+
+  // DB returns rows in reverse order (ID order, not rank order)
+  const eventDetailRows = [
+    {
+      id: "e1",
+      title: "Park Day",
+      start_datetime: "2026-06-21T14:00:00Z",
+      venue_name: "City Park",
+      address: null,
+      is_free: true,
+      price: null,
+      images: null,
+    },
+    {
+      id: "e2",
+      title: "Story Time",
+      start_datetime: "2026-06-21T11:00:00Z",
+      venue_name: "Library",
+      address: null,
+      is_free: true,
+      price: null,
+      images: null,
+    },
+  ]
+
+  const supabase = createMockSupabase({
+    planEventsResult: { u1: rankedRows },
+    eventDetailRows,
+    queryCalls,
+  })
+
+  // Simulate the handler's reassembly logic
+  const eventIds = rankedRows.map((r) => r.event_id)
+  const { data: rows } = await supabase.from("events").select("id, title, start_datetime, venue_name, address, is_free, price, images").in("id", eventIds)
+
+  const eventMap = new Map<string, Record<string, unknown>>()
+  for (const row of (rows ?? []) as Array<Record<string, unknown>>) {
+    eventMap.set(row.id as string, row)
+  }
+
+  const digestEvents = rankedRows
+    .map((r) => eventMap.get(r.event_id))
+    .filter(Boolean) as Array<Record<string, unknown>>
+
+  // Ranked order is preserved: e2 first, then e1
+  assertEquals(digestEvents[0].id, "e2")
+  assertEquals(digestEvents[0].title, "Story Time")
+  assertEquals(digestEvents[1].id, "e1")
+  assertEquals(digestEvents[1].title, "Park Day")
+})
+
+Deno.test("preferred cities query shape is correct", async () => {
+  const queryCalls: MockQueryChain[] = []
+  const supabase = createMockSupabase({
+    preferredCityRows: [
+      { user_id: "u1", city_id: "c1" },
+      { user_id: "u1", city_id: "c2" },
+    ],
+    queryCalls,
+  })
+
+  await supabase
+    .from("user_preferred_cities")
+    .select("user_id, city_id")
+    .in("user_id", ["u1", "u2"])
+
+  assertEquals(queryCalls.length, 1)
+  assertEquals(queryCalls[0].from, "user_preferred_cities")
+  assertEquals(queryCalls[0].selectStr, "user_id, city_id")
+  assertEquals(queryCalls[0].inCalls[0].col, "user_id")
+})
+
+Deno.test("Resend API call subject uses personalized format", () => {
+  const events = [
+    { id: "e1", title: "Park Day", is_free: true },
+    { id: "e2", title: "Story Time", is_free: true },
+    { id: "e3", title: "Art Class", is_free: false },
+  ]
+  const subject = `${events.length} family picks for your weekend`
+
+  assertEquals(typeof subject, "string")
+  assertEquals(subject, "3 family picks for your weekend")
 })
 
 Deno.test("cron-weekly-digest label maps to send-weekly-digest function", () => {
@@ -349,4 +616,142 @@ Deno.test("cron-weekly-digest label maps to send-weekly-digest function", () => 
   }
 
   assertEquals(cronFunctionByLabel["cron-weekly-digest"], "send-weekly-digest")
+})
+
+Deno.test("weekend window computation: mid-week day targets upcoming Friday-Sunday", () => {
+  // Simulate a Wednesday (day=3) — fridayOffset should be 2
+  const simulatedNow = new Date("2026-06-17T10:00:00Z") // Wednesday
+  const day = simulatedNow.getUTCDay()
+  assertEquals(day, 3)
+
+  const fridayOffset = day === 0 ? -2 : day === 6 ? -1 : 5 - day
+  assertEquals(fridayOffset, 2)
+
+  const friday = new Date(simulatedNow)
+  friday.setUTCDate(simulatedNow.getUTCDate() + fridayOffset)
+  friday.setUTCHours(0, 0, 0, 0)
+
+  const sunday = new Date(friday)
+  sunday.setUTCDate(friday.getUTCDate() + 2)
+  sunday.setUTCHours(23, 59, 59, 999)
+
+  // friday should be 2026-06-19
+  assertEquals(friday.toISOString().startsWith("2026-06-19"), true)
+  // sunday should be 2026-06-21
+  assertEquals(sunday.toISOString().startsWith("2026-06-21"), true)
+
+  // windowFrom should be friday (not now, since friday is still in the future relative to simulatedNow)
+  const windowFrom = new Date(Math.max(simulatedNow.getTime(), friday.getTime())).toISOString()
+  assertEquals(windowFrom, friday.toISOString())
+})
+
+Deno.test("weekend window computation: Saturday targets current weekend", () => {
+  const simulatedNow = new Date("2026-06-20T10:00:00Z") // Saturday
+  const day = simulatedNow.getUTCDay()
+  assertEquals(day, 6)
+
+  const fridayOffset = day === 0 ? -2 : day === 6 ? -1 : 5 - day
+  assertEquals(fridayOffset, -1) // yesterday was Friday
+
+  const friday = new Date(simulatedNow)
+  friday.setUTCDate(simulatedNow.getUTCDate() + fridayOffset)
+  friday.setUTCHours(0, 0, 0, 0)
+
+  // windowFrom should be now (since friday is in the past)
+  const windowFrom = new Date(Math.max(simulatedNow.getTime(), friday.getTime())).toISOString()
+  assertEquals(windowFrom, simulatedNow.toISOString())
+})
+
+Deno.test("personalized events flow: full mock run for a single user", async () => {
+  const rpcCalls: MockRpcCall[] = []
+  const queryCalls: MockQueryChain[] = []
+
+  const rankedRows: RankedEventRow[] = [
+    {
+      event_id: "e1",
+      score: 0.92,
+      distance_score: 0.95,
+      weather_score: null,
+      age_score: 0.85,
+      history_affinity: null,
+      family_fit_score: null,
+      timing_score: null,
+      novelty_score: null,
+      budget_score: null,
+      distance_km: 1.5,
+      start_datetime: "2026-06-21T10:00:00Z",
+      city_id: "c1",
+    },
+  ]
+
+  const eventDetailRow = {
+    id: "e1",
+    title: "Park Day",
+    start_datetime: "2026-06-21T10:00:00Z",
+    venue_name: "City Park",
+    address: null,
+    is_free: true,
+    price: null,
+    images: null,
+  }
+
+  const supabase = createMockSupabase({
+    planEventsResult: { u1: rankedRows },
+    eventDetailRows: [eventDetailRow],
+    preferredCityRows: [{ user_id: "u1", city_id: "c1" }],
+    rpcCalls,
+    queryCalls,
+  })
+
+  // Step 1: load preferred cities
+  const { data: prefRows } = await supabase
+    .from("user_preferred_cities")
+    .select("user_id, city_id")
+    .in("user_id", ["u1"])
+  const prefCityMap = new Map<string, string[]>()
+  for (const row of (prefRows ?? []) as Array<{ user_id: string; city_id: string }>) {
+    const list = prefCityMap.get(row.user_id) ?? []
+    list.push(row.city_id)
+    prefCityMap.set(row.user_id, list)
+  }
+
+  // Step 2: call RPC
+  const cityIds = prefCityMap.get("u1") ?? ["c1"]
+  const { data: ranked } = await supabase.rpc("plan_events_for_user_range", {
+    p_user_id: "u1",
+    p_date_from: "2026-06-20T10:00:00Z",
+    p_date_to: "2026-06-21T23:59:59Z",
+    p_city_ids: cityIds,
+    p_kid_age: null,
+    p_weather_fit: "neutral",
+    p_limit: 5,
+  })
+
+  // Step 3: fetch event details
+  const eventIds = (ranked as RankedEventRow[]).map((r) => r.event_id)
+  const { data: eventRows } = await supabase
+    .from("events")
+    .select("id, title, start_datetime, venue_name, address, is_free, price, images")
+    .in("id", eventIds)
+
+  // Step 4: reassemble with explanations
+  const eventMap = new Map<string, Record<string, unknown>>()
+  for (const row of (eventRows ?? []) as Array<Record<string, unknown>>) {
+    eventMap.set(row.id as string, row)
+  }
+
+  const digestEvents = (ranked as RankedEventRow[]).map((r) => {
+    const ev = eventMap.get(r.event_id)
+    if (!ev) return null
+    const explanation = buildExplanation(r)
+    return { ...ev, explanation }
+  }).filter(Boolean)
+
+  // Assertions
+  assertEquals(rpcCalls[0].name, "plan_events_for_user_range")
+  assertEquals(rpcCalls[0].params.p_user_id, "u1")
+  assertEquals(digestEvents.length, 1)
+  assertEquals((digestEvents[0] as Record<string, unknown>).id, "e1")
+  // explanation: distance_score=0.95 (nearby), age_score=0.85 (great age match)
+  assertEquals((digestEvents[0] as Record<string, unknown>).explanation, "nearby · great age match")
 })
