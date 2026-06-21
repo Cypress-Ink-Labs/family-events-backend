@@ -3118,6 +3118,34 @@ export type Database = {
           weather_score: number
         }[]
       }
+      plan_events_for_user_range: {
+        Args: {
+          p_city_ids?: string[]
+          p_date_from: string
+          p_date_to: string
+          p_kid_age?: number
+          p_lat?: number
+          p_limit?: number
+          p_lng?: number
+          p_user_id: string
+          p_weather_fit?: string
+        }
+        Returns: {
+          age_score: number
+          budget_score: number
+          city_id: string
+          distance_km: number
+          distance_score: number
+          event_id: string
+          family_fit_score: number
+          history_affinity: number
+          novelty_score: number
+          score: number
+          start_datetime: string
+          timing_score: number
+          weather_score: number
+        }[]
+      }
       reap_stuck_event_llm_review_rows: { Args: never; Returns: number }
       reap_stuck_source_scrape_queue_rows: { Args: never; Returns: number }
       reap_stuck_tag_queue_rows: { Args: never; Returns: number }
