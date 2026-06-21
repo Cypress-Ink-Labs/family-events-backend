@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import { captureEdgeException } from "../../_shared/sentry.ts"
 import { errorContext, errorMessage as formatError, logEdgeEvent } from "../../_shared/logger.ts"
 import { guardedFetch } from "../../_shared/guarded-fetch.ts"
+import { isCrossSourceDuplicate } from "../../_shared/dedup-utils.ts"
 import type { ParserContext } from "./parser-context.ts"
 import { resolveCityTimezone } from "./schedule.ts"
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
@@ -225,6 +226,92 @@ export async function importParsedSourceEvents(
 
       const payloads = validEvents.map(prepEventPayload)
 
+      // ── Cross-source fuzzy dedup pre-pass (CIL-16) ──────────────────────
+      // Only runs when city_id is known — without a city scope the query cannot
+      // be bounded, so we skip dedup and import everything.
+      let crossSourceSkipped = 0
+      let dedupedPayloads = payloads
+      if (source.city_id && payloads.length > 0) {
+        // Build a ±4h window around the batch's start_datetime range.
+        const startTimes = payloads
+          .map((p) => new Date(p.start_datetime as string).getTime())
+          .filter((t) => !Number.isNaN(t))
+        if (startTimes.length > 0) {
+          const FOUR_HOURS_MS = 4 * 60 * 60 * 1000
+          const windowFrom = new Date(Math.min(...startTimes) - FOUR_HOURS_MS).toISOString()
+          const windowTo = new Date(Math.max(...startTimes) + FOUR_HOURS_MS).toISOString()
+
+          const { data: candidates, error: candidateError } = await supabase.rpc(
+            "find_cross_source_event_candidates",
+            {
+              p_city_id: source.city_id,
+              p_start_from: windowFrom,
+              p_start_to: windowTo,
+            }
+          )
+
+          if (candidateError) {
+            if (candidateError.code === "42883" || candidateError.code === "42P01") {
+              // RPC not yet deployed — skip dedup gracefully and import all events.
+              // This is non-fatal: ingestion must continue even pre-migration.
+              logEdgeEvent("warn", "find_cross_source_event_candidates RPC missing — skipping dedup", {
+                function: "process-source",
+                source_id: source.id,
+                hint: "Run `supabase db push --linked` to apply migration 20260620010000.",
+              })
+            } else {
+              // Non-fatal: log and continue without dedup so ingestion is not blocked.
+              logEdgeEvent("warn", "cross-source dedup candidate fetch failed — skipping dedup", {
+                function: "process-source",
+                source_id: source.id,
+                error: formatError(candidateError),
+              })
+            }
+          } else if (candidates && (candidates as unknown[]).length > 0) {
+            type CandidateRow = {
+              id: string
+              title: string
+              source_id: string
+              start_datetime: string
+            }
+            const rows = candidates as CandidateRow[]
+
+            dedupedPayloads = payloads.filter((payload) => {
+              const match = rows.find(
+                (candidate) =>
+                  // Cross-source only: same-source dedup is handled by the
+                  // source_url UPDATE path inside bulk_import_scrape_events.
+                  candidate.source_id !== source.id &&
+                  isCrossSourceDuplicate(
+                    payload.title as string,
+                    payload.start_datetime as string,
+                    candidate.title,
+                    candidate.start_datetime,
+                    source.city_id
+                  )
+              )
+              if (match) {
+                crossSourceSkipped += 1
+                logEdgeEvent("log", "skipped cross-source duplicate", {
+                  function: "process-source",
+                  source_id: source.id,
+                  run_id: runId,
+                  candidate_title: payload.title,
+                  candidate_start: payload.start_datetime,
+                  matched_event_id: match.id,
+                  matched_source_id: match.source_id,
+                })
+                return false
+              }
+              return true
+            })
+          }
+        }
+      }
+      // Report cross-source skips alongside the RPC's own skipped count.
+      eventsSkipped += crossSourceSkipped
+      // ── End dedup pre-pass ───────────────────────────────────────────────
+
       // Single bulk RPC: classify + INSERT + UPDATE + event_tag_queue enqueue
       // all in one SQL transaction. Replaces the prior per-event loop (which
       // blew the 150s edge function wall at ~145/605 events).
@@ -233,7 +320,7 @@ export async function importParsedSourceEvents(
         {
           p_run_id: runId,
           p_source_id: source.id,
-          p_events: payloads,
+          p_events: dedupedPayloads,
         }
       )
       if (bulkError) {
