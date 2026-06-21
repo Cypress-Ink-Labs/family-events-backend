@@ -86,11 +86,15 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_preferred_cities TO service_
 -- ─── Backfill ────────────────────────────────────────────────────────────────
 -- Copy every existing city_preference_id into the new table as a primary city.
 -- ON CONFLICT DO NOTHING makes this idempotent if re-run.
+-- FK-safe: user_profiles.city_preference_id has no enforced FK to cities, so
+-- prod can hold orphaned references (a deleted city). Skip those — they'd
+-- violate user_preferred_cities_city_id_fkey.
 
 INSERT INTO public.user_preferred_cities (user_id, city_id, is_primary)
 SELECT id, city_preference_id, true
 FROM public.user_profiles
 WHERE city_preference_id IS NOT NULL
+  AND city_preference_id IN (SELECT id FROM public.cities)
 ON CONFLICT (user_id, city_id) DO NOTHING;
 
 COMMIT;
