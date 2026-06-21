@@ -4,6 +4,7 @@ import { escapeHtml } from "../_shared/html.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
 import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
+import { sendTelegramMessage } from "../_shared/telegram.ts"
 
 // send-weekly-digest
 // ----------------------------------------------------------------
@@ -28,10 +29,16 @@ interface DigestUser {
   city_id: string
   city_name: string
   child_age: number | null
+  digest_email: boolean
+  digest_telegram: boolean
+  telegram_chat_id: string | null
 }
 
 interface DigestPreference {
   user_id: string
+  digest_email: boolean
+  digest_telegram: boolean
+  telegram_chat_id: string | null
 }
 
 interface DigestEvent {
@@ -330,6 +337,41 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+// Formats a short Telegram HTML message for the digest.
+// Uses Telegram's HTML subset: <b>, <a href="...">, entity escaping.
+// Renders the top events as a compact bulleted list.
+function formatDigestTelegram(user: DigestUser, events: DigestEvent[], appUrl: string): string {
+  const username = escapeHtml(user.display_name || "there")
+  const cityName = escapeHtml(user.city_name)
+  const lines: string[] = []
+
+  lines.push(`<b>Hi ${username}, your weekend in ${cityName}!</b>`)
+  lines.push("")
+
+  for (const event of events) {
+    const title = escapeHtml(stripTags(event.title))
+    const eventUrl = `${appUrl}/events/${event.id}`
+    const location = stripTags(event.venue_name || event.address || "")
+    const { date } = splitDateTime(event.start_datetime)
+    const price = formatPrice(event)
+
+    const meta: string[] = [escapeHtml(date)]
+    if (location) meta.push(escapeHtml(location))
+    if (price) meta.push(escapeHtml(price))
+
+    lines.push(`• <a href="${escapeHtml(eventUrl)}">${title}</a>`)
+    lines.push(`  ${meta.join(" · ")}`)
+    if (event.explanation) {
+      lines.push(`  <i>${escapeHtml(event.explanation)}</i>`)
+    }
+  }
+
+  lines.push("")
+  lines.push(`<a href="${escapeHtml(appUrl)}">→ Browse all events</a>`)
+
+  return lines.join("\n")
+}
+
 serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, supabase }) => {
   const cronCtx = cronRunContextFromRequest(request)
 
@@ -349,10 +391,11 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
 
   // 1. Query digest opt-ins, then load profiles with cities. PostgREST cannot
   // embed user_profiles through auth.users, so keep this as two explicit reads.
+  // Include users opted in to EITHER email or Telegram.
   const { data: preferences, error: preferencesError } = await supabase
     .from("user_notification_preferences")
-    .select("user_id")
-    .eq("digest_email", true)
+    .select("user_id, digest_email, digest_telegram, telegram_chat_id")
+    .or("digest_email.eq.true,digest_telegram.eq.true")
 
   if (preferencesError) {
     await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest users", {
@@ -406,6 +449,9 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       city_id: profile.cities.id,
       city_name: profile.cities.name,
       child_age: profile.child_age ?? null,
+      digest_email: row.digest_email,
+      digest_telegram: row.digest_telegram,
+      telegram_chat_id: row.telegram_chat_id,
     })
   }
 
@@ -542,13 +588,31 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     await Promise.all(chunk.map((u) => buildUserDigestEvents(u)))
   }
 
-  // 4. Send emails via Resend
+  // 4. Read API keys / secrets
   const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
   const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
   const appUrl = (Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app").replace(
     /\/$/,
     ""
   )
+
+  // Telegram bot token: try vault first (mirrors send-push pattern), then env.
+  let botToken = ""
+  try {
+    const { data: secrets } = await supabase
+      .from("vault.decrypted_secrets" as "push_subscriptions") // cast to satisfy type
+      .select("name, decrypted_secret")
+      .in("name", ["telegram_bot_token"])
+
+    if (secrets) {
+      for (const s of secrets as Array<{ name: string; decrypted_secret: string }>) {
+        if (s.name === "telegram_bot_token") botToken = s.decrypted_secret
+      }
+    }
+  } catch {
+    // Vault may not be available in local dev
+  }
+  if (!botToken) botToken = Deno.env.get("TELEGRAM_BOT_TOKEN") ?? ""
 
   if (!resendApiKey) {
     const totalUsers = digestUsers.length
@@ -572,8 +636,10 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
   let sent = 0
   let skipped = 0
   let failed = 0
+  let telegramSent = 0
+  let telegramSkipped = 0
 
-  // Process in batches to rate-limit Resend API calls
+  // Process in batches to rate-limit API calls
   const allUsers = [...targetedUsers]
   for (let i = 0; i < allUsers.length; i += BATCH_SIZE) {
     const batch = allUsers.slice(i, i + BATCH_SIZE)
@@ -585,44 +651,73 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
         continue
       }
 
-      const html = renderDigestHtml(user, events, appUrl)
-      const subject = `${events.length} family picks for your weekend`
+      // ── Email via Resend (only if opted in) ─────────────────────────────────
+      if (user.digest_email) {
+        const html = renderDigestHtml(user, events, appUrl)
+        const subject = `${events.length} family picks for your weekend`
 
-      try {
-        const response = await fetch(RESEND_API_ENDPOINT, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: resendFrom,
-            to: [user.email],
-            subject,
-            html,
-          }),
-          signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-        })
+        try {
+          const response = await fetch(RESEND_API_ENDPOINT, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${resendApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: resendFrom,
+              to: [user.email],
+              subject,
+              html,
+            }),
+            signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+          })
 
-        if (response.ok) {
-          sent++
-        } else {
-          const body = await response.text().catch(() => "")
-          logEdgeEvent("warn", "send-weekly-digest: Resend rejected email", {
+          if (response.ok) {
+            sent++
+          } else {
+            const body = await response.text().catch(() => "")
+            logEdgeEvent("warn", "send-weekly-digest: Resend rejected email", {
+              function: "send-weekly-digest",
+              to: user.email,
+              status: response.status,
+              body: body.slice(0, 300),
+            })
+            failed++
+          }
+        } catch (err) {
+          logEdgeEvent("warn", "send-weekly-digest: failed to send email", {
             function: "send-weekly-digest",
             to: user.email,
-            status: response.status,
-            body: body.slice(0, 300),
+            error: err instanceof Error ? err.message : String(err),
           })
           failed++
         }
-      } catch (err) {
-        logEdgeEvent("warn", "send-weekly-digest: failed to send", {
-          function: "send-weekly-digest",
-          to: user.email,
-          error: err instanceof Error ? err.message : String(err),
-        })
-        failed++
+      }
+
+      // ── Telegram ─────────────────────────────────────────────────────────────
+      if (user.digest_telegram) {
+        if (!user.telegram_chat_id || !botToken) {
+          logEdgeEvent("warn", "send-weekly-digest: skipping telegram digest (no chat_id or token)", {
+            function: "send-weekly-digest",
+            user_id: user.user_id,
+            has_chat_id: !!user.telegram_chat_id,
+            has_token: !!botToken,
+          })
+          telegramSkipped++
+        } else {
+          const text = formatDigestTelegram(user, events, appUrl)
+          const tgResult = await sendTelegramMessage(botToken, user.telegram_chat_id, text)
+          if (tgResult.ok) {
+            telegramSent++
+          } else {
+            logEdgeEvent("warn", "send-weekly-digest: Telegram send failed", {
+              function: "send-weekly-digest",
+              user_id: user.user_id,
+              error: tgResult.error,
+            })
+            telegramSkipped++
+          }
+        }
       }
     }
 
@@ -632,7 +727,15 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     }
   }
 
-  const summary = { ok: true, sent, skipped, failed, total: allUsers.length }
+  const summary = {
+    ok: true,
+    sent,
+    skipped,
+    failed,
+    total: allUsers.length,
+    telegram_sent: telegramSent,
+    telegram_skipped: telegramSkipped,
+  }
   await logCronRunEvent(supabase, cronCtx, "log", "Weekly digest run complete", summary)
   logEdgeEvent("log", "send-weekly-digest: complete", {
     function: "send-weekly-digest",

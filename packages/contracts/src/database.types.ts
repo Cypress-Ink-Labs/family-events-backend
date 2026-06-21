@@ -1749,9 +1749,11 @@ export type Database = {
           created_at: string
           digest_email: boolean
           digest_push: boolean
+          digest_telegram: boolean
           id: string
           reminder_email: boolean
           reminder_push: boolean
+          telegram_chat_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1761,9 +1763,11 @@ export type Database = {
           created_at?: string
           digest_email?: boolean
           digest_push?: boolean
+          digest_telegram?: boolean
           id?: string
           reminder_email?: boolean
           reminder_push?: boolean
+          telegram_chat_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1773,9 +1777,11 @@ export type Database = {
           created_at?: string
           digest_email?: boolean
           digest_push?: boolean
+          digest_telegram?: boolean
           id?: string
           reminder_email?: boolean
           reminder_push?: boolean
+          telegram_chat_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -3374,8 +3380,10 @@ export type Database = {
           p_change_push: boolean
           p_digest_email: boolean
           p_digest_push: boolean
+          p_digest_telegram?: boolean
           p_reminder_email: boolean
           p_reminder_push: boolean
+          p_telegram_chat_id?: string
         }
         Returns: {
           change_email: boolean
@@ -3383,9 +3391,11 @@ export type Database = {
           created_at: string
           digest_email: boolean
           digest_push: boolean
+          digest_telegram: boolean
           id: string
           reminder_email: boolean
           reminder_push: boolean
+          telegram_chat_id: string | null
           updated_at: string
           user_id: string
         }

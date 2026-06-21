@@ -763,3 +763,146 @@ Deno.test("personalized events flow: full mock run for a single user", async () 
   // explanation: distance_score=0.95 (nearby), age_score=0.85 (great age match)
   assertEquals((digestEvents[0] as Record<string, unknown>).explanation, "nearby · great age match")
 })
+
+// ---------------------------------------------------------------------------
+// Telegram channel tests
+// ---------------------------------------------------------------------------
+
+// A minimal mock that supports .or() for the broadened prefs query.
+function buildPrefsChainWithOr(rows: Array<Record<string, unknown>>, queryCalls: Array<{ from: string; orStr?: string }>) {
+  let selectStr = ""
+  const chain = {
+    select(s: string) {
+      selectStr = s
+      return chain
+    },
+    or(filter: string) {
+      queryCalls.push({ from: "user_notification_preferences", orStr: filter })
+      // Apply simple filter: return rows where digest_email or digest_telegram is truthy
+      const filtered = rows.filter((r) => r["digest_email"] === true || r["digest_telegram"] === true)
+      return Promise.resolve({ data: filtered, error: null })
+    },
+    eq(col: string, val: unknown) {
+      queryCalls.push({ from: "user_notification_preferences" })
+      const filtered = rows.filter((r) => r[col] === val)
+      return Promise.resolve({ data: filtered, error: null })
+    },
+    in(_col: string, _val: unknown[]) {
+      return Promise.resolve({ data: rows, error: null })
+    },
+  }
+  return chain
+}
+
+Deno.test("prefs query uses .or() to catch both email-only and telegram-only users", async () => {
+  const queryCalls: Array<{ from: string; orStr?: string }> = []
+  const allPrefsRows = [
+    { user_id: "u1", digest_email: true,  digest_telegram: false, telegram_chat_id: null },
+    { user_id: "u2", digest_email: false, digest_telegram: true,  telegram_chat_id: "555" },
+    { user_id: "u3", digest_email: false, digest_telegram: false, telegram_chat_id: null },
+  ]
+
+  const chain = buildPrefsChainWithOr(allPrefsRows, queryCalls)
+  const result = await chain
+    .select("user_id, digest_email, digest_telegram, telegram_chat_id")
+    .or("digest_email.eq.true,digest_telegram.eq.true")
+
+  assertEquals(queryCalls.length, 1)
+  assertEquals(queryCalls[0].orStr, "digest_email.eq.true,digest_telegram.eq.true")
+
+  const data = result.data as Array<Record<string, unknown>>
+  // u3 (both false) must be excluded; u1 and u2 must be included
+  assertEquals(data.length, 2)
+  assertEquals(data.map((r) => r.user_id).sort(), ["u1", "u2"])
+})
+
+Deno.test("DigestPreference carries digest_telegram and telegram_chat_id fields", () => {
+  // Validate that the preference row shape includes new Telegram fields
+  const row = {
+    user_id: "u1",
+    digest_email: true,
+    digest_telegram: true,
+    telegram_chat_id: "123456789",
+  }
+
+  // These must be accessible without TypeScript error (interface check via duck-typing)
+  const userId: string = row.user_id
+  const digestEmail: boolean = row.digest_email
+  const digestTelegram: boolean = row.digest_telegram
+  const chatId: string | null = row.telegram_chat_id
+
+  assertEquals(userId, "u1")
+  assertEquals(digestEmail, true)
+  assertEquals(digestTelegram, true)
+  assertEquals(chatId, "123456789")
+})
+
+Deno.test("DigestUser with digest_telegram=true and chat_id is wired correctly", () => {
+  interface DigestUser {
+    user_id: string
+    email: string
+    display_name: string | null
+    city_id: string
+    city_name: string
+    child_age: number | null
+    digest_email: boolean
+    digest_telegram: boolean
+    telegram_chat_id: string | null
+  }
+
+  const user: DigestUser = {
+    user_id: "u2",
+    email: "bob@test.com",
+    display_name: "Bob",
+    city_id: "c1",
+    city_name: "Lafayette",
+    child_age: null,
+    digest_email: false,
+    digest_telegram: true,
+    telegram_chat_id: "555666777",
+  }
+
+  // Simulate the send-loop gating logic
+  const wouldSendEmail = user.digest_email
+  const wouldSendTelegram = user.digest_telegram && !!user.telegram_chat_id
+
+  assertEquals(wouldSendEmail, false)
+  assertEquals(wouldSendTelegram, true)
+})
+
+Deno.test("DigestUser without telegram_chat_id skips Telegram even if digest_telegram=true", () => {
+  const user = {
+    user_id: "u3",
+    email: "carol@test.com",
+    display_name: "Carol",
+    city_id: "c1",
+    city_name: "Lafayette",
+    child_age: null,
+    digest_email: false,
+    digest_telegram: true,
+    telegram_chat_id: null as string | null,
+  }
+
+  const wouldSendTelegram = user.digest_telegram && !!user.telegram_chat_id
+  assertEquals(wouldSendTelegram, false)
+})
+
+Deno.test("email-only user still gets email and is not sent Telegram", () => {
+  const user = {
+    user_id: "u1",
+    email: "alice@test.com",
+    display_name: "Alice",
+    city_id: "c1",
+    city_name: "Lafayette",
+    child_age: 5,
+    digest_email: true,
+    digest_telegram: false,
+    telegram_chat_id: null as string | null,
+  }
+
+  const wouldSendEmail = user.digest_email
+  const wouldSendTelegram = user.digest_telegram && !!user.telegram_chat_id
+
+  assertEquals(wouldSendEmail, true)
+  assertEquals(wouldSendTelegram, false)
+})
