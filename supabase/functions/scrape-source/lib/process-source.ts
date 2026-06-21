@@ -11,6 +11,8 @@ export { sanitizeImagesForIngest } from "./enrichment.ts"
 
 const SOURCE_FETCH_TIMEOUT_MS = 10_000
 const SOURCE_MAX_BYTES = 5 * 1024 * 1024 // 5 MB cap on feed body to prevent OOM
+// How many consecutive zero-result scrapes before we mark the source stale.
+const STALE_THRESHOLD = 3
 
 const OUTDOOR_TAG_HINTS = ["park", "outdoor", "hike", "nature", "trail", "playground"]
 const INDOOR_TAG_HINTS = ["museum", "indoor", "library", "theater", "theatre"]
@@ -341,17 +343,57 @@ export async function importParsedSourceEvents(
         })
         .eq("id", runId)
 
+      // Stale-escalation: track consecutive zero-result successes.
+      const isZeroResult = status === "success" && eventsFound === 0
+      const nextConsecutiveZero = isZeroResult
+        ? (source.consecutive_zero_result_scrapes ?? 0) + 1
+        : 0
+      const isNewEscalation =
+        nextConsecutiveZero >= STALE_THRESHOLD && source.stale_escalated_at == null
+      const escalatedStatus = isNewEscalation ? "stale" : status
+      const escalatedAt = isNewEscalation ? new Date().toISOString() : undefined
+
       await supabase
         .from("event_sources")
         .update({
           last_scraped_at: new Date().toISOString(),
-          last_status: status,
+          last_status: escalatedStatus,
           // Only reset error_count on full success. A 'partial' run (events
           // found, none imported) used to clear the counter and mask persistent
           // failures; keep accumulating until a clean success.
           error_count: status === "success" ? 0 : source.error_count + (status === "error" ? 1 : 0),
+          consecutive_zero_result_scrapes: nextConsecutiveZero,
+          ...(escalatedAt != null ? { stale_escalated_at: escalatedAt } : {}),
         })
         .eq("id", source.id)
+
+      if (isNewEscalation) {
+        logEdgeEvent("warn", "source escalated to stale", {
+          function: "process-source",
+          source_id: source.id,
+          source_name: source.name,
+          consecutive_zero_result_scrapes: nextConsecutiveZero,
+          last_scraped_at: source.last_scraped_at,
+        })
+        try {
+          await supabase.from("admin_audit_log").insert({
+            action: "source.stale_escalated",
+            target_type: "event_source",
+            target_id: source.id,
+            admin_user_id: null,
+            metadata: {
+              consecutive_zero_result_scrapes: nextConsecutiveZero,
+              last_scraped_at: source.last_scraped_at,
+            },
+          })
+        } catch (auditError) {
+          logEdgeEvent("warn", "failed to write stale-escalation audit log", {
+            function: "process-source",
+            source_id: source.id,
+            error: String(auditError),
+          })
+        }
+      }
       // Kick the tag-queue worker if we imported anything. Each RPC call
       // fires net.http_post (async) and returns immediately, so this is a
       // fan-out, not a blocking loop. process-tag-queue claims BATCH_SIZE=20

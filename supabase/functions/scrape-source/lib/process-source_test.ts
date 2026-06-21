@@ -1,10 +1,11 @@
-import { assertEquals } from "jsr:@std/assert"
+import { assertEquals, assertExists } from "jsr:@std/assert"
 import {
   deriveIsOutdoorFromParsedEvent,
   deriveRawImageCandidates,
+  importParsedSourceEvents,
   sanitizeImagesForIngest,
 } from "./process-source.ts"
-import type { ParsedEvent } from "./types.ts"
+import type { EventSourceRow, ParsedEvent } from "./types.ts"
 
 function buildParsedEvent(overrides: Partial<ParsedEvent> = {}): ParsedEvent {
   return {
@@ -175,6 +176,207 @@ if (typeof Deno !== "undefined") {
       globalThis.fetch = originalFetch
     }
   })
+
+  // ---------------------------------------------------------------------------
+  // Stale-escalation tests
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Builds a minimal EventSourceRow for stale-escalation tests.
+   * consecutive_zero_result_scrapes defaults to 0, stale_escalated_at to null.
+   */
+  function buildSource(overrides: Partial<EventSourceRow> = {}): EventSourceRow {
+    return {
+      id: "src-1",
+      name: "Test Source",
+      url: "https://events.example.com/feed",
+      source_type: "rss",
+      extraction_mode: "deterministic",
+      processing_mode: null,
+      city_id: null,
+      is_active: true,
+      auto_approve: false,
+      scrape_interval_hours: 24,
+      last_scraped_at: null,
+      last_status: "success",
+      error_count: 0,
+      date_window_days: null,
+      consecutive_zero_result_scrapes: 0,
+      stale_escalated_at: null,
+      ...overrides,
+    }
+  }
+
+  /**
+   * Builds a minimal supabase client mock that:
+   * - Returns empty data for city lookups (city_id is null, so never called).
+   * - Returns the given bulkResult for bulk_import_scrape_events RPC calls.
+   * - Captures the last update() payload for each table.
+   * - Captures all insert() payloads for admin_audit_log.
+   */
+  function buildSupabaseMock(opts: {
+    bulkResult?: { imported: number; updated: number; skipped: number; enqueued: number }
+  } = {}) {
+    const captured: {
+      eventSourceUpdate: Record<string, unknown> | null
+      auditLogInserts: unknown[]
+    } = {
+      eventSourceUpdate: null,
+      auditLogInserts: [],
+    }
+
+    const bulkResult = opts.bulkResult ?? { imported: 0, updated: 0, skipped: 0, enqueued: 0 }
+
+    // Each .from(table) returns a builder whose methods return themselves or
+    // terminal promises. We only model the chains that process-source.ts uses.
+    function makeBuilder(table: string): Record<string, unknown> {
+      const builder: Record<string, (...args: unknown[]) => unknown> = {}
+
+      // .select() → builder (for cities maybeSingle path)
+      builder.select = () => makeBuilder(table)
+
+      // .eq() → builder
+      builder.eq = () => makeBuilder(table)
+
+      // .maybeSingle() → terminal (for cities lookup)
+      builder.maybeSingle = () => Promise.resolve({ data: null, error: null })
+
+      // .update(payload) → builder that remembers the payload
+      builder.update = (payload: unknown) => {
+        if (table === "event_sources") {
+          captured.eventSourceUpdate = payload as Record<string, unknown>
+        }
+        return makeBuilder(table)
+      }
+
+      // .insert(payload) → terminal (for admin_audit_log)
+      builder.insert = (payload: unknown) => {
+        if (table === "admin_audit_log") {
+          captured.auditLogInserts.push(payload)
+        }
+        return Promise.resolve({ data: null, error: null })
+      }
+
+      return builder
+    }
+
+    const client = {
+      from: (table: string) => makeBuilder(table),
+      rpc: (name: string, _args?: unknown) => {
+        if (name === "bulk_import_scrape_events") {
+          return Promise.resolve({ data: bulkResult, error: null })
+        }
+        if (name === "invoke_process_tag_queue") {
+          return Promise.resolve({ data: null, error: null })
+        }
+        return Promise.resolve({ data: null, error: null })
+      },
+    }
+
+    return { client, captured }
+  }
+
+  Deno.test(
+    "stale escalation: 3 consecutive zero-result scrapes triggers stale status and audit log",
+    async () => {
+      // Source has already seen 2 consecutive zero-result scrapes.
+      const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
+      const { client, captured } = buildSupabaseMock({
+        bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
+      })
+
+      // Pass 0 parsedEvents → eventsFound=0 → zero-result success path.
+      await importParsedSourceEvents(
+        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+        source,
+        "run-1",
+        []
+      )
+
+      // event_sources update should set last_status='stale', consecutive=3, stale_escalated_at set.
+      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+      assertEquals(captured.eventSourceUpdate!.last_status, "stale")
+      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 3)
+      assertExists(
+        captured.eventSourceUpdate!.stale_escalated_at,
+        "stale_escalated_at should be set"
+      )
+
+      // admin_audit_log insert should have been fired once.
+      assertEquals(captured.auditLogInserts.length, 1)
+      const auditRow = captured.auditLogInserts[0] as Record<string, unknown>
+      assertEquals(auditRow.action, "source.stale_escalated")
+      assertEquals(auditRow.target_type, "event_source")
+      assertEquals(auditRow.target_id, "src-1")
+      assertEquals(auditRow.admin_user_id, null)
+    }
+  )
+
+  Deno.test(
+    "stale escalation: non-zero import resets consecutive_zero_result_scrapes to 0",
+    async () => {
+      const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
+      const { client, captured } = buildSupabaseMock({
+        // 1 event imported → eventsImported > 0 → not a zero-result run.
+        bulkResult: { imported: 1, updated: 0, skipped: 0, enqueued: 1 },
+      })
+
+      const parsedEvent = buildParsedEvent()
+      await importParsedSourceEvents(
+        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+        source,
+        "run-2",
+        [parsedEvent]
+      )
+
+      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 0)
+      assertEquals(captured.eventSourceUpdate!.last_status, "success")
+      // stale_escalated_at should NOT be set (no escalation).
+      assertEquals(
+        captured.eventSourceUpdate!.stale_escalated_at,
+        undefined,
+        "stale_escalated_at should not be set when events are imported"
+      )
+      // No audit log entry.
+      assertEquals(captured.auditLogInserts.length, 0)
+    }
+  )
+
+  Deno.test(
+    "stale escalation: already-escalated source does not re-alert or overwrite timestamp",
+    async () => {
+      const existingTimestamp = "2026-06-19T00:00:00.000Z"
+      const source = buildSource({
+        consecutive_zero_result_scrapes: 5,
+        stale_escalated_at: existingTimestamp,
+      })
+      const { client, captured } = buildSupabaseMock({
+        bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
+      })
+
+      await importParsedSourceEvents(
+        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+        source,
+        "run-3",
+        []
+      )
+
+      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+      // consecutive counter still increments (tracking), but no re-escalation.
+      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 6)
+      // last_status stays "success" (zero-result, no events found — not re-escalated).
+      assertEquals(captured.eventSourceUpdate!.last_status, "success")
+      // stale_escalated_at NOT in the update payload (idempotent).
+      assertEquals(
+        captured.eventSourceUpdate!.stale_escalated_at,
+        undefined,
+        "stale_escalated_at should not be overwritten on already-escalated source"
+      )
+      // No second audit log entry.
+      assertEquals(captured.auditLogInserts.length, 0)
+    }
+  )
 
   Deno.test("sanitizeImagesForIngest validates image candidates with bounded concurrency", async () => {
     const originalFetch = globalThis.fetch

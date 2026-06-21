@@ -18,6 +18,8 @@ function buildSource(overrides: Partial<EventSourceRow> = {}): EventSourceRow {
     last_status: "pending",
     error_count: 0,
     date_window_days: null,
+    consecutive_zero_result_scrapes: 0,
+    stale_escalated_at: null,
     ...overrides,
   }
 }
