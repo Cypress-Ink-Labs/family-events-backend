@@ -48,29 +48,30 @@ export async function sendTelegramMessage(
       { resolve: opts.resolve, maxRedirects: opts.maxRedirects }
     )
 
-    if (response.ok) {
+    let body: { ok?: boolean; description?: string } | undefined
+    try {
+      body = (await response.json()) as { ok?: boolean; description?: string }
+    } catch {
+      // ignore parse failure — Telegram should always return JSON
+    }
+
+    // Telegram can return HTTP 200 with `ok: false` (+ description). Require BOTH
+    // an HTTP 2xx AND the payload `ok` flag before reporting success, else a
+    // failed send (e.g. "chat not found") is silently misreported as delivered.
+    if (response.ok && body?.ok === true) {
       return { ok: true }
     }
 
-    // Non-2xx: attempt to parse Telegram's error body
-    let description: string | undefined
-    try {
-      const body = (await response.json()) as { ok?: boolean; description?: string }
-      if (typeof body.description === "string") {
-        description = body.description
-      }
-    } catch {
-      // ignore parse failure
-    }
-
     return {
       ok: false,
-      error: description ?? `HTTP ${response.status}`,
+      error: typeof body?.description === "string" ? body.description : `HTTP ${response.status}`,
     }
   } catch (err) {
+    const raw = err instanceof Error ? err.message : String(err)
+    // Never let the bot token leak into error strings — callers log these.
     return {
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: botToken ? raw.replaceAll(botToken, "[REDACTED]") : raw,
     }
   }
 }

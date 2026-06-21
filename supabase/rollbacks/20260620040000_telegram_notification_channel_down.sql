@@ -91,7 +91,10 @@ REVOKE ALL ON FUNCTION public.upsert_notification_preferences(boolean, boolean, 
 GRANT EXECUTE ON FUNCTION public.upsert_notification_preferences(boolean, boolean, boolean, boolean, boolean, boolean)
   TO authenticated, service_role;
 
--- ─── Drop new columns ────────────────────────────────────────────────────────
+-- ─── Drop the CHECK constraint + new columns ─────────────────────────────────
+
+ALTER TABLE public.user_notification_preferences
+  DROP CONSTRAINT IF EXISTS user_notification_preferences_telegram_chat_id_required_chk;
 
 ALTER TABLE public.user_notification_preferences
   DROP COLUMN IF EXISTS telegram_chat_id;

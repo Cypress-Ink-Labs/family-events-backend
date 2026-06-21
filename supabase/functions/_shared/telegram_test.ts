@@ -126,3 +126,45 @@ Deno.test("sendTelegramMessage: URL contains bot token and correct path", async 
     globalThis.fetch = original
   }
 })
+
+Deno.test("sendTelegramMessage: HTTP 200 with ok:false is a failure (not misreported)", async () => {
+  // Telegram returns 200 OK with ok:false for many errors (blocked bot, etc.).
+  const { fetch: mockFetch } = makeMockFetch(200, {
+    ok: false,
+    error_code: 403,
+    description: "Forbidden: bot was blocked by the user",
+  })
+  const original = globalThis.fetch
+  globalThis.fetch = mockFetch
+
+  try {
+    const result = await sendTelegramMessage("BOT_TOKEN", "123456", "Hello!", {
+      resolve: noopResolve,
+    })
+
+    assertEquals(result.ok, false)
+    assertEquals(result.error, "Forbidden: bot was blocked by the user")
+  } finally {
+    globalThis.fetch = original
+  }
+})
+
+Deno.test("sendTelegramMessage: bot token is redacted from error messages", async () => {
+  const original = globalThis.fetch
+  globalThis.fetch = (_input: unknown, _init?: unknown): Promise<Response> =>
+    Promise.reject(
+      new Error("fetch failed for https://api.telegram.org/botSECRET123/sendMessage")
+    )
+
+  try {
+    const result = await sendTelegramMessage("SECRET123", "789", "hi", {
+      resolve: noopResolve,
+    })
+
+    assertEquals(result.ok, false)
+    assertEquals(result.error?.includes("SECRET123"), false)
+    assertEquals(result.error?.includes("[REDACTED]"), true)
+  } finally {
+    globalThis.fetch = original
+  }
+})

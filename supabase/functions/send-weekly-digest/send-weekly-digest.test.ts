@@ -770,10 +770,8 @@ Deno.test("personalized events flow: full mock run for a single user", async () 
 
 // A minimal mock that supports .or() for the broadened prefs query.
 function buildPrefsChainWithOr(rows: Array<Record<string, unknown>>, queryCalls: Array<{ from: string; orStr?: string }>) {
-  let selectStr = ""
   const chain = {
-    select(s: string) {
-      selectStr = s
+    select(_s: string) {
       return chain
     },
     or(filter: string) {

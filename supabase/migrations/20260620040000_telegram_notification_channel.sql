@@ -29,6 +29,16 @@ COMMENT ON COLUMN public.user_notification_preferences.digest_telegram IS
 COMMENT ON COLUMN public.user_notification_preferences.telegram_chat_id IS
   'Telegram chat ID (integer as text) for the user''s DM or group. Required when digest_telegram=true.';
 
+-- Enforce the invariant at the schema level: opting into Telegram requires a
+-- non-blank chat_id, so the send path can't reach an invalid (enabled, no
+-- destination) state. Existing rows default digest_telegram=false → all satisfy.
+ALTER TABLE public.user_notification_preferences
+  ADD CONSTRAINT user_notification_preferences_telegram_chat_id_required_chk
+  CHECK (
+    NOT digest_telegram
+    OR NULLIF(btrim(telegram_chat_id), '') IS NOT NULL
+  );
+
 -- ─── Replace the 6-arg RPCs with 8-arg overloads ────────────────────────────
 -- CREATE OR REPLACE with extra params creates a NEW overload instead of
 -- replacing the existing one. Drop the original 6-arg pair first (public
