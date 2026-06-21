@@ -13,7 +13,7 @@ export type SourceType =
   | "manual"
   | "rss"
   | "website"
-export type RunStatus = "running" | "success" | "error" | "partial"
+export type RunStatus = "running" | "success" | "error" | "partial" | "stale"
 export type ExtractionMode = SourceExtractionMode
 export type { EventProcessingMode }
 
@@ -35,9 +35,11 @@ export interface EventSourceRow {
   auto_approve: boolean
   scrape_interval_hours: number
   last_scraped_at: string | null
-  last_status: "pending" | "success" | "error" | "partial" | null
+  last_status: "pending" | "success" | "error" | "partial" | "stale" | null
   error_count: number
   date_window_days: number | null
+  consecutive_zero_result_scrapes: number
+  stale_escalated_at: string | null
 }
 
 export interface ParsedEvent {
