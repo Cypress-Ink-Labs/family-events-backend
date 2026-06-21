@@ -217,9 +217,14 @@ BEGIN
       END AS timing_score,
 
       -- FACTOR 7: novelty_score  (linear decay to 0 over 30 days)
-      GREATEST(
-        0.0,
-        1.0 - (EXTRACT(EPOCH FROM (now() - e.created_at)) / 86400.0) / 30.0
+      -- Clamp to [0,1]: a future created_at (clock skew / backfill / import)
+      -- would otherwise push the inner expression above 1.0.
+      LEAST(
+        1.0,
+        GREATEST(
+          0.0,
+          1.0 - (EXTRACT(EPOCH FROM (now() - e.created_at)) / 86400.0) / 30.0
+        )
       ) AS novelty_score,
 
       -- FACTOR 8: budget_score
@@ -263,7 +268,7 @@ BEGIN
     se.city_id
   FROM scored_events se
   ORDER BY score DESC, se.start_datetime ASC, se.event_id ASC
-  LIMIT LEAST(GREATEST(p_limit, 1), 100);
+  LIMIT LEAST(GREATEST(COALESCE(p_limit, 5), 1), 100);
 
 END;
 $$;
