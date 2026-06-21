@@ -555,16 +555,19 @@ Deno.test("event detail fetch assembles DigestEvents in ranked order", async () 
 
   // Simulate the handler's reassembly logic
   const eventIds = rankedRows.map((r) => r.event_id)
-  const { data: rows } = await supabase.from("events").select("id, title, start_datetime, venue_name, address, is_free, price, images").in("id", eventIds)
+  const { data: rows } = await supabase
+    .from("events")
+    .select("id, title, start_datetime, venue_name, address, is_free, price, images")
+    .in("id", eventIds)
 
   const eventMap = new Map<string, Record<string, unknown>>()
   for (const row of (rows ?? []) as Array<Record<string, unknown>>) {
     eventMap.set(row.id as string, row)
   }
 
-  const digestEvents = rankedRows
-    .map((r) => eventMap.get(r.event_id))
-    .filter(Boolean) as Array<Record<string, unknown>>
+  const digestEvents = rankedRows.map((r) => eventMap.get(r.event_id)).filter(Boolean) as Array<
+    Record<string, unknown>
+  >
 
   // Ranked order is preserved: e2 first, then e1
   assertEquals(digestEvents[0].id, "e2")
@@ -743,12 +746,14 @@ Deno.test("personalized events flow: full mock run for a single user", async () 
     eventMap.set(row.id as string, row)
   }
 
-  const digestEvents = (ranked as RankedEventRow[]).map((r) => {
-    const ev = eventMap.get(r.event_id)
-    if (!ev) return null
-    const explanation = buildExplanation(r)
-    return { ...ev, explanation }
-  }).filter(Boolean)
+  const digestEvents = (ranked as RankedEventRow[])
+    .map((r) => {
+      const ev = eventMap.get(r.event_id)
+      if (!ev) return null
+      const explanation = buildExplanation(r)
+      return { ...ev, explanation }
+    })
+    .filter(Boolean)
 
   // Assertions
   assertEquals(rpcCalls[0].name, "plan_events_for_user_range")

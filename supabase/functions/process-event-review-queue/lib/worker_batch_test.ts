@@ -125,8 +125,15 @@ class FakeSupabase {
         const id = Number(rawId)
         const row = this.queue.get(id)
         if (!row) continue
-        if (row.status === "processing" && (row.started_at === null || row.started_at === undefined)) {
-          Object.assign(row, { status: "pending", started_at: null, updated_at: new Date().toISOString() })
+        if (
+          row.status === "processing" &&
+          (row.started_at === null || row.started_at === undefined)
+        ) {
+          Object.assign(row, {
+            status: "pending",
+            started_at: null,
+            updated_at: new Date().toISOString(),
+          })
           this.queue.set(id, row)
         }
       }

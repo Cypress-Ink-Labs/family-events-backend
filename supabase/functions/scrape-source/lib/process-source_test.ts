@@ -214,12 +214,14 @@ if (typeof Deno !== "undefined") {
    * - Captures the last update() payload for each table.
    * - Captures all insert() payloads for admin_audit_log.
    */
-  function buildSupabaseMock(opts: {
-    bulkResult?: { imported: number; updated: number; skipped: number; enqueued: number }
-    // When set, admin_audit_log.insert() resolves with this error (the supabase
-    // client surfaces DB errors in the response object, not via throw).
-    auditInsertError?: { message: string }
-  } = {}) {
+  function buildSupabaseMock(
+    opts: {
+      bulkResult?: { imported: number; updated: number; skipped: number; enqueued: number }
+      // When set, admin_audit_log.insert() resolves with this error (the supabase
+      // client surfaces DB errors in the response object, not via throw).
+      auditInsertError?: { message: string }
+    } = {}
+  ) {
     const captured: {
       eventSourceUpdate: Record<string, unknown> | null
       auditLogInserts: unknown[]
@@ -282,134 +284,119 @@ if (typeof Deno !== "undefined") {
     return { client, captured }
   }
 
-  Deno.test(
-    "stale escalation: 3 consecutive zero-result scrapes triggers stale status and audit log",
-    async () => {
-      // Source has already seen 2 consecutive zero-result scrapes.
-      const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
-      const { client, captured } = buildSupabaseMock({
-        bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
-      })
+  Deno.test("stale escalation: 3 consecutive zero-result scrapes triggers stale status and audit log", async () => {
+    // Source has already seen 2 consecutive zero-result scrapes.
+    const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
+    const { client, captured } = buildSupabaseMock({
+      bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
+    })
 
-      // Pass 0 parsedEvents → eventsFound=0 → zero-result success path.
-      await importParsedSourceEvents(
-        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
-        source,
-        "run-1",
-        []
-      )
+    // Pass 0 parsedEvents → eventsFound=0 → zero-result success path.
+    await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      source,
+      "run-1",
+      []
+    )
 
-      // event_sources update should set last_status='stale', consecutive=3, stale_escalated_at set.
-      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
-      assertEquals(captured.eventSourceUpdate!.last_status, "stale")
-      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 3)
-      assertExists(
-        captured.eventSourceUpdate!.stale_escalated_at,
-        "stale_escalated_at should be set"
-      )
+    // event_sources update should set last_status='stale', consecutive=3, stale_escalated_at set.
+    assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+    assertEquals(captured.eventSourceUpdate!.last_status, "stale")
+    assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 3)
+    assertExists(captured.eventSourceUpdate!.stale_escalated_at, "stale_escalated_at should be set")
 
-      // admin_audit_log insert should have been fired once.
-      assertEquals(captured.auditLogInserts.length, 1)
-      const auditRow = captured.auditLogInserts[0] as Record<string, unknown>
-      assertEquals(auditRow.action, "source.stale_escalated")
-      assertEquals(auditRow.target_type, "event_source")
-      assertEquals(auditRow.target_id, "src-1")
-      assertEquals(auditRow.admin_user_id, null)
-    }
-  )
+    // admin_audit_log insert should have been fired once.
+    assertEquals(captured.auditLogInserts.length, 1)
+    const auditRow = captured.auditLogInserts[0] as Record<string, unknown>
+    assertEquals(auditRow.action, "source.stale_escalated")
+    assertEquals(auditRow.target_type, "event_source")
+    assertEquals(auditRow.target_id, "src-1")
+    assertEquals(auditRow.admin_user_id, null)
+  })
 
-  Deno.test(
-    "stale escalation: non-zero import resets consecutive_zero_result_scrapes to 0",
-    async () => {
-      const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
-      const { client, captured } = buildSupabaseMock({
-        // 1 event imported → eventsImported > 0 → not a zero-result run.
-        bulkResult: { imported: 1, updated: 0, skipped: 0, enqueued: 1 },
-      })
+  Deno.test("stale escalation: non-zero import resets consecutive_zero_result_scrapes to 0", async () => {
+    const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
+    const { client, captured } = buildSupabaseMock({
+      // 1 event imported → eventsImported > 0 → not a zero-result run.
+      bulkResult: { imported: 1, updated: 0, skipped: 0, enqueued: 1 },
+    })
 
-      const parsedEvent = buildParsedEvent()
-      await importParsedSourceEvents(
-        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
-        source,
-        "run-2",
-        [parsedEvent]
-      )
+    const parsedEvent = buildParsedEvent()
+    await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      source,
+      "run-2",
+      [parsedEvent]
+    )
 
-      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
-      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 0)
-      assertEquals(captured.eventSourceUpdate!.last_status, "success")
-      // stale_escalated_at should NOT be set (no escalation).
-      assertEquals(
-        captured.eventSourceUpdate!.stale_escalated_at,
-        undefined,
-        "stale_escalated_at should not be set when events are imported"
-      )
-      // No audit log entry.
-      assertEquals(captured.auditLogInserts.length, 0)
-    }
-  )
+    assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+    assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 0)
+    assertEquals(captured.eventSourceUpdate!.last_status, "success")
+    // stale_escalated_at should NOT be set (no escalation).
+    assertEquals(
+      captured.eventSourceUpdate!.stale_escalated_at,
+      undefined,
+      "stale_escalated_at should not be set when events are imported"
+    )
+    // No audit log entry.
+    assertEquals(captured.auditLogInserts.length, 0)
+  })
 
-  Deno.test(
-    "stale escalation: already-escalated source does not re-alert or overwrite timestamp",
-    async () => {
-      const existingTimestamp = "2026-06-19T00:00:00.000Z"
-      const source = buildSource({
-        consecutive_zero_result_scrapes: 5,
-        stale_escalated_at: existingTimestamp,
-      })
-      const { client, captured } = buildSupabaseMock({
-        bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
-      })
+  Deno.test("stale escalation: already-escalated source does not re-alert or overwrite timestamp", async () => {
+    const existingTimestamp = "2026-06-19T00:00:00.000Z"
+    const source = buildSource({
+      consecutive_zero_result_scrapes: 5,
+      stale_escalated_at: existingTimestamp,
+    })
+    const { client, captured } = buildSupabaseMock({
+      bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
+    })
 
-      await importParsedSourceEvents(
-        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
-        source,
-        "run-3",
-        []
-      )
+    await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      source,
+      "run-3",
+      []
+    )
 
-      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
-      // consecutive counter still increments (tracking), but no re-escalation.
-      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 6)
-      // last_status stays "success" (zero-result, no events found — not re-escalated).
-      assertEquals(captured.eventSourceUpdate!.last_status, "success")
-      // stale_escalated_at NOT in the update payload (idempotent).
-      assertEquals(
-        captured.eventSourceUpdate!.stale_escalated_at,
-        undefined,
-        "stale_escalated_at should not be overwritten on already-escalated source"
-      )
-      // No second audit log entry.
-      assertEquals(captured.auditLogInserts.length, 0)
-    }
-  )
+    assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+    // consecutive counter still increments (tracking), but no re-escalation.
+    assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 6)
+    // last_status stays "success" (zero-result, no events found — not re-escalated).
+    assertEquals(captured.eventSourceUpdate!.last_status, "success")
+    // stale_escalated_at NOT in the update payload (idempotent).
+    assertEquals(
+      captured.eventSourceUpdate!.stale_escalated_at,
+      undefined,
+      "stale_escalated_at should not be overwritten on already-escalated source"
+    )
+    // No second audit log entry.
+    assertEquals(captured.auditLogInserts.length, 0)
+  })
 
-  Deno.test(
-    "stale escalation: audit-log insert error stays non-fatal and still escalates",
-    async () => {
-      const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
-      const { client, captured } = buildSupabaseMock({
-        bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
-        // admin_audit_log.insert resolves with an error (RLS/constraint) — not a throw.
-        auditInsertError: { message: "permission denied for table admin_audit_log" },
-      })
+  Deno.test("stale escalation: audit-log insert error stays non-fatal and still escalates", async () => {
+    const source = buildSource({ consecutive_zero_result_scrapes: 2, stale_escalated_at: null })
+    const { client, captured } = buildSupabaseMock({
+      bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
+      // admin_audit_log.insert resolves with an error (RLS/constraint) — not a throw.
+      auditInsertError: { message: "permission denied for table admin_audit_log" },
+    })
 
-      // Must not throw even though the audit write fails.
-      await importParsedSourceEvents(
-        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
-        source,
-        "run-4",
-        []
-      )
+    // Must not throw even though the audit write fails.
+    await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      source,
+      "run-4",
+      []
+    )
 
-      // Escalation still happened on event_sources despite the audit failure.
-      assertExists(captured.eventSourceUpdate, "event_sources update was not called")
-      assertEquals(captured.eventSourceUpdate!.last_status, "stale")
-      assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 3)
-      // Insert was attempted exactly once.
-      assertEquals(captured.auditLogInserts.length, 1)
-    }
-  )
+    // Escalation still happened on event_sources despite the audit failure.
+    assertExists(captured.eventSourceUpdate, "event_sources update was not called")
+    assertEquals(captured.eventSourceUpdate!.last_status, "stale")
+    assertEquals(captured.eventSourceUpdate!.consecutive_zero_result_scrapes, 3)
+    // Insert was attempted exactly once.
+    assertEquals(captured.auditLogInserts.length, 1)
+  })
 
   // ── importParsedSourceEvents: cross-source dedup pre-pass ─────────────────
 

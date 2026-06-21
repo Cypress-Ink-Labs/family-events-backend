@@ -477,19 +477,16 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
   async function buildUserDigestEvents(user: DigestUser): Promise<void> {
     const cityIds = prefCityMap.get(user.user_id) ?? [user.city_id]
 
-    const { data: rankedRows, error: rpcError } = await supabase.rpc(
-      "plan_events_for_user_range",
-      {
-        p_user_id: user.user_id,
-        p_date_from: windowFrom,
-        p_date_to: windowTo,
-        p_city_ids: cityIds,
-        p_kid_age: user.child_age,
-        p_weather_fit: "neutral",
-        p_limit: MAX_EVENTS_PER_DIGEST,
-        // p_lat / p_lng intentionally omitted → NULL; geo personalization is a follow-up
-      }
-    )
+    const { data: rankedRows, error: rpcError } = await supabase.rpc("plan_events_for_user_range", {
+      p_user_id: user.user_id,
+      p_date_from: windowFrom,
+      p_date_to: windowTo,
+      p_city_ids: cityIds,
+      p_kid_age: user.child_age,
+      p_weather_fit: "neutral",
+      p_limit: MAX_EVENTS_PER_DIGEST,
+      // p_lat / p_lng intentionally omitted → NULL; geo personalization is a follow-up
+    })
 
     if (rpcError) {
       logEdgeEvent("warn", "send-weekly-digest: plan_events_for_user_range failed", {

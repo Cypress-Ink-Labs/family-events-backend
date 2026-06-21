@@ -256,11 +256,15 @@ export async function importParsedSourceEvents(
             if (candidateError.code === "42883" || candidateError.code === "42P01") {
               // RPC not yet deployed — skip dedup gracefully and import all events.
               // This is non-fatal: ingestion must continue even pre-migration.
-              logEdgeEvent("warn", "find_cross_source_event_candidates RPC missing — skipping dedup", {
-                function: "process-source",
-                source_id: source.id,
-                hint: "Run `supabase db push --linked` to apply migration 20260620010000.",
-              })
+              logEdgeEvent(
+                "warn",
+                "find_cross_source_event_candidates RPC missing — skipping dedup",
+                {
+                  function: "process-source",
+                  source_id: source.id,
+                  hint: "Run `supabase db push --linked` to apply migration 20260620010000.",
+                }
+              )
             } else {
               // Non-fatal: log and continue without dedup so ingestion is not blocked.
               logEdgeEvent("warn", "cross-source dedup candidate fetch failed — skipping dedup", {

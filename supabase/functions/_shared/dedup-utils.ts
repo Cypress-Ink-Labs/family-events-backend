@@ -13,17 +13,19 @@ export const JACCARD_THRESHOLD = 0.7
  * - trim
  */
 export function canonicalizeTitle(title: string): string {
-  return title
-    .toLowerCase()
-    // Replace em-dash / en-dash with space so "Family—Fun" splits correctly
-    .replace(/[–—]/g, " ")
-    // Replace ampersand with space
-    .replace(/&/g, " ")
-    // Strip remaining punctuation (keep alphanumerics and spaces)
-    .replace(/[^\w\s]/g, " ")
-    // Collapse any run of whitespace (including the spaces we just inserted)
-    .replace(/\s+/g, " ")
-    .trim()
+  return (
+    title
+      .toLowerCase()
+      // Replace em-dash / en-dash with space so "Family—Fun" splits correctly
+      .replace(/[–—]/g, " ")
+      // Replace ampersand with space
+      .replace(/&/g, " ")
+      // Strip remaining punctuation (keep alphanumerics and spaces)
+      .replace(/[^\w\s]/g, " ")
+      // Collapse any run of whitespace (including the spaces we just inserted)
+      .replace(/\s+/g, " ")
+      .trim()
+  )
 }
 
 /**
