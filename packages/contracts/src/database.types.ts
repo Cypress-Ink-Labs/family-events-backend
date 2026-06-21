@@ -1823,6 +1823,35 @@ export type Database = {
           },
         ]
       }
+      user_preferred_cities: {
+        Row: {
+          city_id: string
+          created_at: string
+          is_primary: boolean
+          user_id: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          is_primary?: boolean
+          user_id: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          is_primary?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferred_cities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -2812,6 +2841,20 @@ export type Database = {
           view_count: number
         }[]
       }
+      find_cross_source_event_candidates: {
+        Args: {
+          p_city_id: string
+          p_limit?: number
+          p_start_from: string
+          p_start_to: string
+        }
+        Returns: {
+          id: string
+          source_id: string
+          start_datetime: string
+          title: string
+        }[]
+      }
       find_similar_events: {
         Args: {
           p_city_id?: string
@@ -3072,6 +3115,34 @@ export type Database = {
           event_id: string
           history_affinity: number
           score: number
+          weather_score: number
+        }[]
+      }
+      plan_events_for_user_range: {
+        Args: {
+          p_city_ids?: string[]
+          p_date_from: string
+          p_date_to: string
+          p_kid_age?: number
+          p_lat?: number
+          p_limit?: number
+          p_lng?: number
+          p_user_id: string
+          p_weather_fit?: string
+        }
+        Returns: {
+          age_score: number
+          budget_score: number
+          city_id: string
+          distance_km: number
+          distance_score: number
+          event_id: string
+          family_fit_score: number
+          history_affinity: number
+          novelty_score: number
+          score: number
+          start_datetime: string
+          timing_score: number
           weather_score: number
         }[]
       }
