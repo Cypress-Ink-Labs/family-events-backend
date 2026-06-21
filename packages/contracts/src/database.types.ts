@@ -1823,6 +1823,35 @@ export type Database = {
           },
         ]
       }
+      user_preferred_cities: {
+        Row: {
+          city_id: string
+          created_at: string
+          is_primary: boolean
+          user_id: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          is_primary?: boolean
+          user_id: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          is_primary?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferred_cities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
