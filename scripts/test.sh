@@ -70,6 +70,7 @@ TEST_FILES=(
   supabase/tests/trace_retention.sql
   supabase/tests/api_surface_hardening.sql
   supabase/tests/events_enriched_parity.sql
+  supabase/tests/set_preferred_cities.sql
   supabase/tests/reference_data.sql
 )
 

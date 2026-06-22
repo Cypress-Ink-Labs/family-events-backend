@@ -3301,6 +3301,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      set_preferred_cities: {
+        Args: { p_city_ids: string[]; p_primary_city_id: string }
+        Returns: undefined
+      }
       should_auto_reject_source: {
         Args: {
           p_min_events?: number
