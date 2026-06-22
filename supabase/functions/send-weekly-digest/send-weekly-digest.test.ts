@@ -131,7 +131,7 @@ function buildDigestUsers(
     display_name: string | null
     city_preference_id: string | null
     child_age: number | null
-    cities: { id: string; name: string } | null
+    cities: { id: string; name: string; latitude: number | null; longitude: number | null } | null
   }
 
   interface DigestUser {
@@ -140,6 +140,8 @@ function buildDigestUsers(
     display_name: string | null
     city_id: string
     city_name: string
+    lat: number | null
+    lng: number | null
     child_age: number | null
   }
 
@@ -158,6 +160,8 @@ function buildDigestUsers(
       display_name: profile.display_name,
       city_id: profile.cities.id,
       city_name: profile.cities.name,
+      lat: profile.cities.latitude ?? null,
+      lng: profile.cities.longitude ?? null,
       child_age: profile.child_age ?? null,
     })
   }
@@ -206,7 +210,7 @@ Deno.test("buildDigestUsers flattens join rows correctly", () => {
       display_name: "Alice",
       city_preference_id: "c1",
       child_age: 5,
-      cities: { id: "c1", name: "Lafayette" },
+      cities: { id: "c1", name: "Lafayette", latitude: 30.224, longitude: -92.019 },
     },
     {
       id: "u2",
@@ -214,7 +218,7 @@ Deno.test("buildDigestUsers flattens join rows correctly", () => {
       display_name: null,
       city_preference_id: "c2",
       child_age: null,
-      cities: { id: "c2", name: "Houston" },
+      cities: { id: "c2", name: "Houston", latitude: null, longitude: null },
     },
   ]
 
@@ -223,9 +227,13 @@ Deno.test("buildDigestUsers flattens join rows correctly", () => {
   assertEquals(users[0].email, "alice@test.com")
   assertEquals(users[0].city_name, "Lafayette")
   assertEquals(users[0].child_age, 5)
+  assertEquals(users[0].lat, 30.224)
+  assertEquals(users[0].lng, -92.019)
   assertEquals(users[1].display_name, null)
   assertEquals(users[1].city_id, "c2")
   assertEquals(users[1].child_age, null)
+  assertEquals(users[1].lat, null)
+  assertEquals(users[1].lng, null)
 })
 
 Deno.test("buildDigestUsers skips users without email", () => {
@@ -237,7 +245,7 @@ Deno.test("buildDigestUsers skips users without email", () => {
       display_name: "No Email",
       city_preference_id: "c1",
       child_age: null,
-      cities: { id: "c1", name: "Lafayette" },
+      cities: { id: "c1", name: "Lafayette", latitude: 30.224, longitude: -92.019 },
     },
   ]
 
@@ -273,7 +281,7 @@ Deno.test("digest user reads avoid nonexistent preferences to profiles embed", a
         display_name: "Alice",
         city_preference_id: "c1",
         child_age: null,
-        cities: { id: "c1", name: "Lafayette" },
+        cities: { id: "c1", name: "Lafayette", latitude: 30.224, longitude: -92.019 },
       },
     ],
     queryCalls,
@@ -282,7 +290,9 @@ Deno.test("digest user reads avoid nonexistent preferences to profiles embed", a
   await supabase.from("user_notification_preferences").select("user_id").eq("digest_email", true)
   await supabase
     .from("user_profiles")
-    .select("id, email, display_name, city_preference_id, child_age, cities!inner(id, name)")
+    .select(
+      "id, email, display_name, city_preference_id, child_age, cities!inner(id, name, latitude, longitude)"
+    )
     .in("id", ["u1", "u2"])
 
   assertEquals(queryCalls.length, 2)
@@ -377,6 +387,88 @@ Deno.test("plan_events_for_user_range RPC is called with correct parameters", as
   assertEquals(rows.length, 1)
   assertEquals(rows[0].event_id, "e1")
   assertEquals(rows[0].score, 0.9)
+})
+
+Deno.test("RPC receives p_lat/p_lng from primary city centroid when centroid is present", async () => {
+  const rpcCalls: MockRpcCall[] = []
+  const supabase = createMockSupabase({
+    planEventsResult: { u1: [] },
+    rpcCalls,
+  })
+
+  // Simulate a DigestUser with a known centroid
+  const user = {
+    user_id: "u1",
+    lat: 30.224,
+    lng: -92.019,
+  }
+
+  await supabase.rpc("plan_events_for_user_range", {
+    p_user_id: user.user_id,
+    p_date_from: "2026-06-20T00:00:00.000Z",
+    p_date_to: "2026-06-22T23:59:59.999Z",
+    p_city_ids: ["c1"],
+    p_kid_age: null,
+    p_weather_fit: "neutral",
+    p_limit: 5,
+    p_lat: user.lat,
+    p_lng: user.lng,
+  })
+
+  assertEquals(rpcCalls.length, 1)
+  assertEquals(rpcCalls[0].params.p_lat, 30.224)
+  assertEquals(rpcCalls[0].params.p_lng, -92.019)
+})
+
+Deno.test("RPC receives p_lat=null/p_lng=null when city has no centroid (neutral score fallback)", async () => {
+  const rpcCalls: MockRpcCall[] = []
+  const supabase = createMockSupabase({
+    planEventsResult: { u1: [] },
+    rpcCalls,
+  })
+
+  // Simulate a DigestUser with no centroid (city has no lat/lng)
+  const user = {
+    user_id: "u1",
+    lat: null,
+    lng: null,
+  }
+
+  await supabase.rpc("plan_events_for_user_range", {
+    p_user_id: user.user_id,
+    p_date_from: "2026-06-20T00:00:00.000Z",
+    p_date_to: "2026-06-22T23:59:59.999Z",
+    p_city_ids: ["c1"],
+    p_kid_age: null,
+    p_weather_fit: "neutral",
+    p_limit: 5,
+    p_lat: user.lat,
+    p_lng: user.lng,
+  })
+
+  assertEquals(rpcCalls.length, 1)
+  assertEquals(rpcCalls[0].params.p_lat, null)
+  assertEquals(rpcCalls[0].params.p_lng, null)
+  // RPC defaults to neutral 0.50 distance score — no crash
+})
+
+Deno.test("buildDigestUsers propagates null lat/lng for city with no centroid", () => {
+  const prefsRows = [{ user_id: "u1" }]
+  const profileRows = [
+    {
+      id: "u1",
+      email: "alice@test.com",
+      display_name: "Alice",
+      city_preference_id: "c1",
+      child_age: null,
+      cities: { id: "c1", name: "Lafayette", latitude: null, longitude: null },
+    },
+  ]
+
+  const users = buildDigestUsers(prefsRows, profileRows)
+  assertEquals(users.length, 1)
+  assertEquals(users[0].lat, null)
+  assertEquals(users[0].lng, null)
 })
 
 Deno.test("empty plan_events_for_user_range result means user is skipped", async () => {
