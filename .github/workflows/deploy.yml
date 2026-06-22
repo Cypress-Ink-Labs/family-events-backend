@@ -72,6 +72,7 @@ jobs:
           railway link --project "$RAILWAY_PROJECT_ID" --environment production
           pnpm --filter @cypress-ink-labs/deploy-cli cli deploy railway:crons --yes --json --no-color
         env:
+          # Only RAILWAY_API_TOKEN — setting RAILWAY_TOKEN forces project-token mode,
+          # which an account/workspace token isn't valid for.
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
           RAILWAY_PROJECT_ID: b97c92f7-464e-4f77-a760-725fc9fdb5a2
