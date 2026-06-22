@@ -1,6 +1,6 @@
 {
   "name": "@cypress-ink-labs/contracts",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "TypeScript types generated from the family-events Supabase schema.",
   "repository": {
     "type": "git",
