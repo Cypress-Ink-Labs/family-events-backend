@@ -62,11 +62,11 @@ per-dir copies are synced by `scripts/sync-cron-runner.sh`; drift is caught by
 
 ## Deployment
 
-Migrations + edge functions deploy via GitHub Actions (`.github/workflows/deploy.yml`)
-after `ci` passes on `main`, gated by a one-click approval on the `production`
-environment. Railway services (`cron-*`) deploy via Railway. Merging does **not**
-auto-apply migrations — make schema changes backward-compatible and deploy them
-before dependent web code. See `docs/DEPLOYMENT.md`.
+Migrations + edge functions + `cron-*` Railway services deploy via GitHub Actions
+(`.github/workflows/deploy.yml`) after `ci` passes on `main`, gated by a one-click
+approval on the `production` environment (Railway auto-deploy is disabled). Merging
+does **not** deploy by itself — make schema changes backward-compatible and deploy
+them before dependent web code. See `docs/DEPLOYMENT.md`.
 
 ## Guardrails
 

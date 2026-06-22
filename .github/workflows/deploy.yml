@@ -1,12 +1,10 @@
 name: deploy
 
-# Production CD for the Supabase side of the backend: DB migrations + edge functions.
-# Railway services (cron-*) are deployed by Railway's own GitHub integration, so they
-# are intentionally NOT redeployed here (see docs/DEPLOYMENT.md).
-#
-# Trigger model: runs after the `ci` workflow succeeds on `main`, then pauses on the
-# `production` GitHub Environment for a one-click approval before touching prod.
-# Also runnable on demand via workflow_dispatch.
+# Production CD for the backend, gated on green CI + a one-click approval.
+#   1. Supabase: DB migrations + edge functions (deploy-cli auto-links the project).
+#   2. Railway: the cron-* services (deploy-cli `railway:crons`, ordered + bootstrapped).
+# Supabase runs first and independently, so a Railway hiccup can't block a migration.
+# Runs after the `ci` workflow succeeds on `main`; also available via workflow_dispatch.
 
 on:
   workflow_run:
@@ -25,8 +23,8 @@ env:
   NODE_VERSION: "24"
 
 jobs:
-  deploy-supabase:
-    name: Deploy migrations + edge functions
+  deploy:
+    name: Deploy backend (migrations, functions, crons)
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
@@ -53,16 +51,27 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Critical path first — migrations + edge functions have no Railway dependency,
+      # so they deploy even if the Railway step later has trouble.
       - name: Deploy Supabase migrations + edge functions
         run: >-
           pnpm --filter @cypress-ink-labs/deploy-cli cli deploy
           supabase:migrations supabase:functions:all
-          --yes --json --no-color --smoke
+          --yes --json --no-color
         env:
           # deploy-cli auto-links the project (db push --linked) using these.
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          # Optional post-deploy smoke probe (cron-enabled RPC).
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy Railway cron services
+        run: |
+          railway link --project "$RAILWAY_PROJECT_ID" --environment production
+          pnpm --filter @cypress-ink-labs/deploy-cli cli deploy railway:crons --yes --json --no-color
+        env:
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_PROJECT_ID: b97c92f7-464e-4f77-a760-725fc9fdb5a2

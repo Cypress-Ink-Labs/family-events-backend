@@ -6,17 +6,20 @@ How `family-events-backend` reaches production.
 
 | Artifact | Mechanism | Gate |
 | --- | --- | --- |
-| **DB migrations + edge functions** | GitHub Actions `deploy.yml` → `family-events-deploy` CLI | runs after `ci` succeeds on `main`, then waits on the **`production`** GitHub Environment for one-click approval |
-| **Railway services** (`cron-*` here; `web` in the web repo) | Railway's GitHub integration | see [Railway gating](#railway-gating) |
-| **`@cypress-ink-labs/contracts`** package | `publish-packages.yml` | publishes on push to `main` that bumps `packages/contracts/{src,package.json}` or `.changeset/**` |
+| **DB migrations + edge functions** | GitHub Actions `deploy.yml` → `family-events-deploy` CLI | after `ci` succeeds on `main`, one-click approval on the **`production`** environment |
+| **`cron-*` Railway services** | same `deploy.yml`, Railway step (`deploy railway:crons`) | same approval gate |
+| **`web` Railway service** | web repo's `deploy.yml` (`railway up`) | web repo's `production` approval gate |
+| **`@cypress-ink-labs/contracts`** package | `publish-packages.yml` | push to `main` touching `packages/contracts/{src,package.json}` or `.changeset/**` |
 
-`deploy.yml` runs only the Supabase side (`deploy supabase:migrations supabase:functions:all`) — Railway deploys are owned by Railway, so the CD never double-deploys them.
+Railway's own auto-deploy-on-push is **disabled** for these services so GitHub Actions is the single, CI-gated deploy path.
 
 ## GitHub Actions CD (`deploy.yml`)
 
-1. `ci` passes on `main` (or you run `deploy.yml` via **workflow_dispatch**).
-2. The `deploy-supabase` job pauses on the `production` environment until a required reviewer approves.
-3. On approval it runs the deploy CLI, which: applies migrations (`supabase db push --linked --include-all`, auto-linking the project first) → deploys every edge function (`supabase functions deploy … [--no-verify-jwt]`) → runs a smoke probe.
+1. `ci` passes on `main` (or run `deploy.yml` via **workflow_dispatch**).
+2. The `deploy` job pauses on the `production` environment until a required reviewer approves.
+3. On approval it:
+   - **Supabase first** (no Railway dependency): applies migrations (`supabase db push --linked --include-all`, auto-linking the project) → deploys every edge function.
+   - **Railway crons**: `railway link` then `deploy railway:crons` (ordered; `cron-review-events` bootstraps from `cron-enrich-events`).
 
 ### Required GitHub secrets
 
@@ -24,35 +27,26 @@ How `family-events-backend` reaches production.
 | --- | --- |
 | `SUPABASE_ACCESS_TOKEN` | Supabase management API (link + functions deploy) |
 | `SUPABASE_PROJECT_REF` | Project ref (`ufrjcnozcapskjtoakvf`) |
-| `SUPABASE_DB_PASSWORD` | DB password for `db push` / `link` (read from env by the Supabase CLI) |
-| `SUPABASE_SERVICE_ROLE_KEY` | (existing) smoke probe |
-| `RAILWAY_API_TOKEN` | (existing) Railway-side tooling |
+| `SUPABASE_DB_PASSWORD` | DB password for `db push` / `link` |
+| `RAILWAY_API_TOKEN` | (existing) Railway account token for cron deploys |
+| `SUPABASE_SERVICE_ROLE_KEY` | (existing) |
 
 ## Manual / local deploy
 
 ```bash
-# One-time: link the project
-bash scripts/supabase.sh link --project-ref <ref>
-
-# Deploy everything the CLI owns (migrations + functions + cron services)
-pnpm run deploy:all
-# …or just the Supabase side, or a dry run:
-pnpm --filter @cypress-ink-labs/deploy-cli cli deploy supabase:migrations supabase:functions:all --yes
-pnpm --filter @cypress-ink-labs/deploy-cli cli deploy --all --yes --dry-run
+bash scripts/supabase.sh link --project-ref <ref>   # one-time
+pnpm run deploy:all                                  # migrations + functions + crons
+pnpm --filter @cypress-ink-labs/deploy-cli cli deploy --all --yes --dry-run   # preview
 ```
 
-The CLI auto-links the project in CI when `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_PASSWORD` are set, so no pre-link step is needed in the workflow.
-
-## Railway gating
-
-`web` and the `cron-*` services deploy through Railway's GitHub integration. To keep that gated on CI, see the web repo's `docs/DEPLOYMENT.md` and the project's Railway settings. <!-- finalized in CIL-190 -->
+The CLI auto-links the project in CI when `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_PASSWORD` are set.
 
 ## Migration ordering (expand/contract)
 
-CD pipelines for the two repos are independent, so **make schema changes backward-compatible** and deploy them **before** the code that depends on them:
+The two repos have independent pipelines, so **make schema changes backward-compatible** and deploy them **before** the code that depends on them:
 
 - New columns/tables/RPCs are additive; old code keeps working without them.
-- For a cross-repo change (e.g. a new RPC consumed by the web app), approve/deploy the **backend** `production` deploy **before** the web one. The approval gate makes the ordering explicit.
-- Removals are a second, later change once nothing references the old shape.
+- For a cross-repo change (e.g. a new RPC consumed by the web app), approve the **backend** `production` deploy **before** the web one. The approval gate makes the ordering explicit.
+- Removals are a separate, later change once nothing references the old shape.
 
-This is why the web app must never ship code calling an RPC/column in the same release that introduces it — that caused a brief prod break before CD existed (see CIL-190).
+A web release must never call an RPC/column introduced in the same release — that caused a brief prod break before CD existed (see CIL-190).
