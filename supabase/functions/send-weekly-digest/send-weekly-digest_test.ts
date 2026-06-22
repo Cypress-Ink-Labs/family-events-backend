@@ -866,7 +866,10 @@ Deno.test("personalized events flow: full mock run for a single user", async () 
 // ---------------------------------------------------------------------------
 
 // A minimal mock that supports .or() for the broadened prefs query.
-function buildPrefsChainWithOr(rows: Array<Record<string, unknown>>, queryCalls: Array<{ from: string; orStr?: string }>) {
+function buildPrefsChainWithOr(
+  rows: Array<Record<string, unknown>>,
+  queryCalls: Array<{ from: string; orStr?: string }>
+) {
   const chain = {
     select(_s: string) {
       return chain
@@ -874,7 +877,9 @@ function buildPrefsChainWithOr(rows: Array<Record<string, unknown>>, queryCalls:
     or(filter: string) {
       queryCalls.push({ from: "user_notification_preferences", orStr: filter })
       // Apply simple filter: return rows where digest_email or digest_telegram is truthy
-      const filtered = rows.filter((r) => r["digest_email"] === true || r["digest_telegram"] === true)
+      const filtered = rows.filter(
+        (r) => r["digest_email"] === true || r["digest_telegram"] === true
+      )
       return Promise.resolve({ data: filtered, error: null })
     },
     eq(col: string, val: unknown) {
@@ -892,8 +897,8 @@ function buildPrefsChainWithOr(rows: Array<Record<string, unknown>>, queryCalls:
 Deno.test("prefs query uses .or() to catch both email-only and telegram-only users", async () => {
   const queryCalls: Array<{ from: string; orStr?: string }> = []
   const allPrefsRows = [
-    { user_id: "u1", digest_email: true,  digest_telegram: false, telegram_chat_id: null },
-    { user_id: "u2", digest_email: false, digest_telegram: true,  telegram_chat_id: "555" },
+    { user_id: "u1", digest_email: true, digest_telegram: false, telegram_chat_id: null },
+    { user_id: "u2", digest_email: false, digest_telegram: true, telegram_chat_id: "555" },
     { user_id: "u3", digest_email: false, digest_telegram: false, telegram_chat_id: null },
   ]
 

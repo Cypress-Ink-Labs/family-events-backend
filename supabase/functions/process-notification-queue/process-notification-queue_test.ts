@@ -291,7 +291,11 @@ Deno.test("sendResendEmail (notification-queue): non-2xx returns { ok: false, st
   try {
     const result = await sendResendEmail(
       "test-api-key",
-      { from: "f@r.dev", to: ["u@t.com"], template: { id: "family-events-event-change", variables: {} } },
+      {
+        from: "f@r.dev",
+        to: ["u@t.com"],
+        template: { id: "family-events-event-change", variables: {} },
+      },
       { resolve: noopResolve }
     )
 

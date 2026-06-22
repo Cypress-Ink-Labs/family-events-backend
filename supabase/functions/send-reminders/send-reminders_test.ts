@@ -708,7 +708,11 @@ Deno.test("sendResendEmail (reminders): non-2xx returns { ok: false, status, err
   try {
     const result = await sendResendEmail(
       "test-api-key",
-      { from: "f@r.dev", to: ["u@t.com"], template: { id: "family-events-event-reminder", variables: {} } },
+      {
+        from: "f@r.dev",
+        to: ["u@t.com"],
+        template: { id: "family-events-event-reminder", variables: {} },
+      },
       { resolve: noopResolve }
     )
 

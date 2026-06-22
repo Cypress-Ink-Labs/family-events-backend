@@ -17,7 +17,8 @@ function makeMockFetch(
 ): { fetch: typeof globalThis.fetch; captured: CapturedRequest[] } {
   const captured: CapturedRequest[] = []
   const mockFetch = (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url
+    const url =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url
     captured.push({ url, init: init ?? {} })
     return Promise.resolve(
       new Response(JSON.stringify(responseBody), {
@@ -152,9 +153,7 @@ Deno.test("sendTelegramMessage: HTTP 200 with ok:false is a failure (not misrepo
 Deno.test("sendTelegramMessage: bot token is redacted from error messages", async () => {
   const original = globalThis.fetch
   globalThis.fetch = (_input: unknown, _init?: unknown): Promise<Response> =>
-    Promise.reject(
-      new Error("fetch failed for https://api.telegram.org/botSECRET123/sendMessage")
-    )
+    Promise.reject(new Error("fetch failed for https://api.telegram.org/botSECRET123/sendMessage"))
 
   try {
     const result = await sendTelegramMessage("SECRET123", "789", "hi", {

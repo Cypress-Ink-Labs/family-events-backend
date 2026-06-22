@@ -700,12 +700,16 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       // ── Telegram ─────────────────────────────────────────────────────────────
       if (user.digest_telegram) {
         if (!user.telegram_chat_id || !botToken) {
-          logEdgeEvent("warn", "send-weekly-digest: skipping telegram digest (no chat_id or token)", {
-            function: "send-weekly-digest",
-            user_id: user.user_id,
-            has_chat_id: !!user.telegram_chat_id,
-            has_token: !!botToken,
-          })
+          logEdgeEvent(
+            "warn",
+            "send-weekly-digest: skipping telegram digest (no chat_id or token)",
+            {
+              function: "send-weekly-digest",
+              user_id: user.user_id,
+              has_chat_id: !!user.telegram_chat_id,
+              has_token: !!botToken,
+            }
+          )
           telegramSkipped++
         } else {
           const text = formatDigestTelegram(user, events, appUrl)
