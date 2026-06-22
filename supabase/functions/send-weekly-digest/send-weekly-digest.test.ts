@@ -1,4 +1,9 @@
 import { assertEquals, assertStringIncludes } from "jsr:@std/assert"
+import { sendResendEmail } from "../_shared/resend.ts"
+import type { PublicIpResolver } from "../_shared/guarded-fetch.ts"
+
+// No-op SSRF resolver — bypasses real DNS lookups in unit tests (no --allow-net).
+const noopResolve: PublicIpResolver = (_url) => Promise.resolve({ ok: true })
 
 // ---------------------------------------------------------------------------
 // Helpers to build mock Supabase client + Resend server
@@ -995,4 +1000,86 @@ Deno.test("email-only user still gets email and is not sent Telegram", () => {
 
   assertEquals(wouldSendEmail, true)
   assertEquals(wouldSendTelegram, false)
+})
+
+// ---------------------------------------------------------------------------
+// Tests: sendResendEmail — SSRF-safe Resend path (digest email)
+// ---------------------------------------------------------------------------
+
+interface CapturedResendRequest {
+  url: string
+  init: RequestInit
+}
+
+function makeMockResendFetch(
+  status: number,
+  responseBody: unknown = {}
+): { fetch: typeof globalThis.fetch; captured: CapturedResendRequest[] } {
+  const captured: CapturedResendRequest[] = []
+  const mockFetch = (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    const url =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url
+    captured.push({ url, init: init ?? {} })
+    return Promise.resolve(
+      new Response(JSON.stringify(responseBody), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      })
+    )
+  }
+  return { fetch: mockFetch as typeof globalThis.fetch, captured }
+}
+
+Deno.test("sendResendEmail (digest): 2xx returns { ok: true } and POSTs to Resend endpoint", async () => {
+  const { fetch: mockFetch, captured } = makeMockResendFetch(200, { id: "re_123" })
+  const original = globalThis.fetch
+  globalThis.fetch = mockFetch
+
+  try {
+    const result = await sendResendEmail(
+      "test-api-key",
+      {
+        from: "Family Events <onboarding@resend.dev>",
+        to: ["alice@test.com"],
+        subject: "3 family picks for your weekend",
+        html: "<p>Hello</p>",
+      },
+      { resolve: noopResolve }
+    )
+
+    assertEquals(result.ok, true)
+    assertEquals(result.status, 200)
+    assertEquals(captured.length, 1)
+    assertEquals(captured[0].url, "https://api.resend.com/emails")
+
+    const body = JSON.parse(captured[0].init.body as string)
+    assertEquals(body.to, ["alice@test.com"])
+    assertEquals(body.subject, "3 family picks for your weekend")
+    assertEquals(body.from, "Family Events <onboarding@resend.dev>")
+
+    const authHeader = (captured[0].init.headers as Record<string, string>)["Authorization"]
+    assertEquals(authHeader, "Bearer test-api-key")
+  } finally {
+    globalThis.fetch = original
+  }
+})
+
+Deno.test("sendResendEmail (digest): non-2xx returns { ok: false, status, errorBody }", async () => {
+  const { fetch: mockFetch } = makeMockResendFetch(422, { message: "invalid email" })
+  const original = globalThis.fetch
+  globalThis.fetch = mockFetch
+
+  try {
+    const result = await sendResendEmail(
+      "test-api-key",
+      { from: "f@r.dev", to: ["bad"], subject: "hi", html: "<p>x</p>" },
+      { resolve: noopResolve }
+    )
+
+    assertEquals(result.ok, false)
+    assertEquals(result.status, 422)
+    assertEquals(typeof result.errorBody, "string")
+  } finally {
+    globalThis.fetch = original
+  }
 })

@@ -3,7 +3,7 @@ import { serveServiceRoleJson } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
 import { zonedDayStartUtc } from "../_shared/zoned-time.ts"
-import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
+import { sendResendEmail } from "../_shared/resend.ts"
 
 // NOTE: This app is single-region (Lafayette / Baton Rouge, LA).  If multi-region
 // support is ever added, REMINDER_TZ must become per-event (events.timezone column)
@@ -264,40 +264,31 @@ serveServiceRoleJson(
         // 2. Send email if user wants reminder emails
         if (target.reminder_email && resendApiKey) {
           try {
-            const response = await fetch(RESEND_API_ENDPOINT, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${resendApiKey}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                from: resendFrom,
-                to: [target.email],
-                template: {
-                  id: "family-events-event-reminder",
-                  variables: {
-                    USERNAME: target.display_name || "there",
-                    EVENT_TITLE: target.event_title,
-                    EVENT_DATE: formatEventDate(target.start_datetime),
-                    EVENT_LOCATION: target.venue_name || target.address || "TBD",
-                    EVENT_URL: eventUrl,
-                    LOGO_URL: `${appUrl}/brand/family-events-logo.png`,
-                    APP_URL: appUrl,
-                  },
+            const result = await sendResendEmail(resendApiKey, {
+              from: resendFrom,
+              to: [target.email],
+              template: {
+                id: "family-events-event-reminder",
+                variables: {
+                  USERNAME: target.display_name || "there",
+                  EVENT_TITLE: target.event_title,
+                  EVENT_DATE: formatEventDate(target.start_datetime),
+                  EVENT_LOCATION: target.venue_name || target.address || "TBD",
+                  EVENT_URL: eventUrl,
+                  LOGO_URL: `${appUrl}/brand/family-events-logo.png`,
+                  APP_URL: appUrl,
                 },
-              }),
-              signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+              },
             })
 
-            if (response.ok) {
+            if (result.ok) {
               sentEmail++
             } else {
-              const body = await response.text().catch(() => "")
               logEdgeEvent("warn", "send-reminders: Resend rejected email", {
                 function: "send-reminders",
                 to: target.email,
-                status: response.status,
-                body: body.slice(0, 300),
+                status: result.status,
+                body: result.errorBody,
               })
               failedEmail++
             }

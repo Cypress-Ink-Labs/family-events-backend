@@ -3,7 +3,7 @@ import { serveServiceRoleJson, serviceRoleJsonError } from "../_shared/service-r
 import { escapeHtml } from "../_shared/html.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
-import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
+import { sendResendEmail } from "../_shared/resend.ts"
 import { sendTelegramMessage } from "../_shared/telegram.ts"
 
 // send-weekly-digest
@@ -669,30 +669,21 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
         const subject = `${events.length} family picks for your weekend`
 
         try {
-          const response = await fetch(RESEND_API_ENDPOINT, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${resendApiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              from: resendFrom,
-              to: [user.email],
-              subject,
-              html,
-            }),
-            signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+          const result = await sendResendEmail(resendApiKey, {
+            from: resendFrom,
+            to: [user.email],
+            subject,
+            html,
           })
 
-          if (response.ok) {
+          if (result.ok) {
             sent++
           } else {
-            const body = await response.text().catch(() => "")
             logEdgeEvent("warn", "send-weekly-digest: Resend rejected email", {
               function: "send-weekly-digest",
               to: user.email,
-              status: response.status,
-              body: body.slice(0, 300),
+              status: result.status,
+              body: result.errorBody,
             })
             failed++
           }

@@ -2,7 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts"
 import { serveServiceRoleJson } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
-import { RESEND_API_ENDPOINT, RESEND_TIMEOUT_MS } from "../_shared/resend-config.ts"
+import { sendResendEmail } from "../_shared/resend.ts"
 
 // process-notification-queue
 // ----------------------------------------------------------------
@@ -230,39 +230,30 @@ serveServiceRoleJson(
         // Send email if user wants change emails (stays per-user: personalized template vars)
         if (userPrefs.change_email && resendApiKey) {
           try {
-            const response = await fetch(RESEND_API_ENDPOINT, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${resendApiKey}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                from: resendFrom,
-                to: [user.email],
-                template: {
-                  id: "family-events-event-change",
-                  variables: {
-                    USERNAME: user.display_name || "there",
-                    EVENT_TITLE: event.title,
-                    CHANGE_SUMMARY: summary,
-                    EVENT_DATE: formatEventDate(event.start_datetime),
-                    EVENT_LOCATION: event.venue_name || event.address || "TBD",
-                    EVENT_URL: eventUrl,
-                  },
+            const result = await sendResendEmail(resendApiKey, {
+              from: resendFrom,
+              to: [user.email],
+              template: {
+                id: "family-events-event-change",
+                variables: {
+                  USERNAME: user.display_name || "there",
+                  EVENT_TITLE: event.title,
+                  CHANGE_SUMMARY: summary,
+                  EVENT_DATE: formatEventDate(event.start_datetime),
+                  EVENT_LOCATION: event.venue_name || event.address || "TBD",
+                  EVENT_URL: eventUrl,
                 },
-              }),
-              signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+              },
             })
 
-            if (response.ok) {
+            if (result.ok) {
               sentEmail++
             } else {
-              const body = await response.text().catch(() => "")
               logEdgeEvent("warn", "process-notification-queue: Resend rejected email", {
                 function: "process-notification-queue",
                 to: user.email,
-                status: response.status,
-                body: body.slice(0, 300),
+                status: result.status,
+                body: result.errorBody,
               })
               failedEmail++
             }
