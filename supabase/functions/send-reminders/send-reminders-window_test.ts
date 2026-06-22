@@ -4,7 +4,7 @@ import { zonedDayStartUtc } from "../_shared/zoned-time.ts"
 // ---------------------------------------------------------------------------
 // send-reminders day-window + in-app row shape + push call.
 //
-// Complements send-reminders.test.ts (which covers flattenRows / dedup /
+// Complements send-reminders_test.ts (which covers flattenRows / dedup /
 // formatEventDate / email template). Here we pin the exact four window bounds
 // the handler computes, the in-app user_notifications row shape, and the
 // send-push call body — with the network mocked.
