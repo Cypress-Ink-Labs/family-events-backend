@@ -293,7 +293,7 @@ async function deployTarget(
 ): Promise<void> {
   switch (target.kind) {
     case "supabase:migrations":
-      await supabase.deployMigrations();
+      await supabase.deployMigrations(options.env);
       return;
     case "supabase:function":
       if (!target.name) throw new ValidationError(`Missing function name for target ${target.id}`);
