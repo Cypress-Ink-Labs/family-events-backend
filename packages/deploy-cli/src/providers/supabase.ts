@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { ValidationError } from "../core/errors";
 import { requireExecutable } from "../core/exec";
@@ -50,7 +50,41 @@ export class SupabaseProvider {
     }
   }
 
-  async deployMigrations(): Promise<void> {
+  /**
+   * Ensure the Supabase project is linked so `db push --linked` works headlessly
+   * in CI. Idempotent: a no-op when `supabase/.temp/project-ref` already matches the
+   * resolved ref (the local/dev case where `supabase link` was run manually).
+   * Otherwise runs `supabase link --project-ref <ref>`, which requires
+   * `SUPABASE_ACCESS_TOKEN` (management API) and reads `SUPABASE_DB_PASSWORD` from the
+   * environment for the database connection — both supplied as CI secrets.
+   */
+  async ensureLinked(env: EnvironmentName): Promise<void> {
+    const projectRef = this.resolveProjectRef(env);
+    const refFile = path.join(this.rootDir, "supabase", ".temp", "project-ref");
+    if (existsSync(refFile) && readFileSync(refFile, "utf8").trim() === projectRef) {
+      return;
+    }
+    if (!process.env.SUPABASE_ACCESS_TOKEN) {
+      throw new ValidationError(
+        "Supabase project is not linked and SUPABASE_ACCESS_TOKEN is not set. " +
+          "Set SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD, or run: " +
+          "bash scripts/supabase.sh link --project-ref <ref>",
+      );
+    }
+    const result = await this.runner.run(
+      this.supabaseCommand(),
+      ["link", "--project-ref", projectRef],
+      { allowFailure: true },
+    );
+    if (result.exitCode !== 0) {
+      throw new ValidationError(
+        `Supabase link failed for project ${projectRef}: ${(result.stderr || result.stdout).trim()}`,
+      );
+    }
+  }
+
+  async deployMigrations(env: EnvironmentName): Promise<void> {
+    await this.ensureLinked(env);
     await this.runner.run(this.supabaseCommand(), ["migration", "list", "--linked"], {
       allowFailure: true,
     });

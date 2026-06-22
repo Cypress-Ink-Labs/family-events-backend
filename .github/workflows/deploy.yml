@@ -1,0 +1,68 @@
+name: deploy
+
+# Production CD for the Supabase side of the backend: DB migrations + edge functions.
+# Railway services (cron-*) are deployed by Railway's own GitHub integration, so they
+# are intentionally NOT redeployed here (see docs/DEPLOYMENT.md).
+#
+# Trigger model: runs after the `ci` workflow succeeds on `main`, then pauses on the
+# `production` GitHub Environment for a one-click approval before touching prod.
+# Also runnable on demand via workflow_dispatch.
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  deploy-supabase:
+    name: Deploy migrations + edge functions
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Deploy exactly the commit CI went green on (workflow_run runs against the
+          # default branch otherwise); fall back to the dispatched ref for manual runs.
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy Supabase migrations + edge functions
+        run: >-
+          pnpm --filter @cypress-ink-labs/deploy-cli cli deploy
+          supabase:migrations supabase:functions:all
+          --yes --json --no-color --smoke
+        env:
+          # deploy-cli auto-links the project (db push --linked) using these.
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          # Optional post-deploy smoke probe (cron-enabled RPC).
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
