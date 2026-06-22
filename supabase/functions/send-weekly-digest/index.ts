@@ -28,6 +28,11 @@ interface DigestUser {
   display_name: string | null
   city_id: string
   city_name: string
+  // Primary city centroid — used as the reference point for distance scoring.
+  // Distance is measured from the user's city_preference_id city (the joined cities row).
+  // null when the city has no centroid; the RPC falls back to a neutral 0.50 score.
+  lat: number | null
+  lng: number | null
   child_age: number | null
   digest_email: boolean
   digest_telegram: boolean
@@ -418,12 +423,14 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     display_name: string | null
     city_preference_id: string | null
     child_age: number | null
-    cities: { id: string; name: string } | null
+    cities: { id: string; name: string; latitude: number | null; longitude: number | null } | null
   }
 
   const { data: profiles, error: profilesError } = await supabase
     .from("user_profiles")
-    .select("id, email, display_name, city_preference_id, child_age, cities!inner(id, name)")
+    .select(
+      "id, email, display_name, city_preference_id, child_age, cities!inner(id, name, latitude, longitude)"
+    )
     .in("id", userIds)
 
   if (profilesError) {
@@ -448,6 +455,8 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       display_name: profile.display_name,
       city_id: profile.cities.id,
       city_name: profile.cities.name,
+      lat: profile.cities.latitude ?? null,
+      lng: profile.cities.longitude ?? null,
       child_age: profile.child_age ?? null,
       digest_email: row.digest_email,
       digest_telegram: row.digest_telegram,
@@ -531,7 +540,10 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       p_kid_age: user.child_age,
       p_weather_fit: "neutral",
       p_limit: MAX_EVENTS_PER_DIGEST,
-      // p_lat / p_lng intentionally omitted → NULL; geo personalization is a follow-up
+      // Distance is measured from the user's primary city centroid (city_preference_id → cities join).
+      // null when the city has no centroid; the RPC defaults to a neutral 0.50 distance score.
+      p_lat: user.lat,
+      p_lng: user.lng,
     })
 
     if (rpcError) {
