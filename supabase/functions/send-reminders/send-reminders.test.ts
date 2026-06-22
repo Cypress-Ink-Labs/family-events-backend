@@ -1,5 +1,10 @@
 import { assertEquals } from "jsr:@std/assert"
 import { zonedDayStartUtc } from "../_shared/zoned-time.ts"
+import { sendResendEmail } from "../_shared/resend.ts"
+import type { PublicIpResolver } from "../_shared/guarded-fetch.ts"
+
+// No-op SSRF resolver — bypasses real DNS lookups in unit tests (no --allow-net).
+const noopResolve: PublicIpResolver = (_url) => Promise.resolve({ ok: true })
 
 // ---------------------------------------------------------------------------
 // Extracted business logic for testing
@@ -620,4 +625,97 @@ Deno.test("batch processing respects MAX_PER_RUN and BATCH_SIZE", () => {
   // Batches should be ceil(100/10) = 10
   const batchCount = Math.ceil(limited.length / BATCH_SIZE)
   assertEquals(batchCount, 10)
+})
+
+// ---------------------------------------------------------------------------
+// Tests: sendResendEmail — SSRF-safe Resend path (reminder email)
+// ---------------------------------------------------------------------------
+
+interface CapturedResendRequest {
+  url: string
+  init: RequestInit
+}
+
+function makeMockResendFetch(
+  status: number,
+  responseBody: unknown = {}
+): { fetch: typeof globalThis.fetch; captured: CapturedResendRequest[] } {
+  const captured: CapturedResendRequest[] = []
+  const mockFetch = (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    const url =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url
+    captured.push({ url, init: init ?? {} })
+    return Promise.resolve(
+      new Response(JSON.stringify(responseBody), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      })
+    )
+  }
+  return { fetch: mockFetch as typeof globalThis.fetch, captured }
+}
+
+Deno.test("sendResendEmail (reminders): 2xx returns { ok: true } and POSTs to Resend endpoint", async () => {
+  const { fetch: mockFetch, captured } = makeMockResendFetch(200, { id: "re_abc" })
+  const original = globalThis.fetch
+  globalThis.fetch = mockFetch
+
+  try {
+    const result = await sendResendEmail(
+      "test-api-key",
+      {
+        from: "Family Events <onboarding@resend.dev>",
+        to: ["alice@test.com"],
+        template: {
+          id: "family-events-event-reminder",
+          variables: {
+            USERNAME: "Alice",
+            EVENT_TITLE: "Park Day",
+            EVENT_DATE: "Saturday, June 20",
+            EVENT_LOCATION: "City Park",
+            EVENT_URL: "https://app.example.com/events/e1",
+            LOGO_URL: "https://app.example.com/brand/logo.png",
+            APP_URL: "https://app.example.com",
+          },
+        },
+      },
+      { resolve: noopResolve }
+    )
+
+    assertEquals(result.ok, true)
+    assertEquals(result.status, 200)
+    assertEquals(captured.length, 1)
+    assertEquals(captured[0].url, "https://api.resend.com/emails")
+
+    const body = JSON.parse(captured[0].init.body as string)
+    assertEquals(body.to, ["alice@test.com"])
+    assertEquals(body.template.id, "family-events-event-reminder")
+    assertEquals(body.template.variables.USERNAME, "Alice")
+    assertEquals(body.template.variables.EVENT_TITLE, "Park Day")
+
+    const authHeader = (captured[0].init.headers as Record<string, string>)["Authorization"]
+    assertEquals(authHeader, "Bearer test-api-key")
+  } finally {
+    globalThis.fetch = original
+  }
+})
+
+Deno.test("sendResendEmail (reminders): non-2xx returns { ok: false, status, errorBody }", async () => {
+  const { fetch: mockFetch } = makeMockResendFetch(429, { message: "rate limited" })
+  const original = globalThis.fetch
+  globalThis.fetch = mockFetch
+
+  try {
+    const result = await sendResendEmail(
+      "test-api-key",
+      { from: "f@r.dev", to: ["u@t.com"], template: { id: "family-events-event-reminder", variables: {} } },
+      { resolve: noopResolve }
+    )
+
+    assertEquals(result.ok, false)
+    assertEquals(result.status, 429)
+    assertEquals(typeof result.errorBody, "string")
+  } finally {
+    globalThis.fetch = original
+  }
 })
