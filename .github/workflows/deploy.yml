@@ -45,6 +45,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
+      # Pinned to match ci.yml — scripts/supabase.sh otherwise falls through to
+      # `npx supabase@latest`, which drifts independently of what CI tests against.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.109.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

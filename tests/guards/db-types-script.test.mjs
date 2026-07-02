@@ -30,7 +30,7 @@ test("db:types uses the configured local Supabase database port", () => {
 
 test("CI db type drift check uses the configured local Supabase database port", () => {
   const workflow = readCiWorkflow()
-  assert.match(workflow, /version: 2\.105\.0/)
+  assert.match(workflow, /version: 2\.109\.0/)
   assert.match(workflow, /supabase gen types --lang typescript\b/)
   assert.match(workflow, new RegExp("127\\.0\\.0\\.1:" + readSupabaseDbPort() + "/postgres"))
 })
