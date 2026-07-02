@@ -144,22 +144,48 @@ esac
 
 emit info "starting" 0 0 ""
 
+# Transient 5xx/network failures (proxy blips, cold starts) get one retry.
+# Safe by default: targets either claim/lock rows before processing (so a
+# retry just reclaims what the prior invocation didn't finish) or perform
+# only idempotent SQL. Labels below send user-facing notifications with no
+# dedup guard against a duplicate invocation, so they opt out of the retry —
+# a client-side 5xx after the server already sent real emails/push/Telegram
+# messages must not trigger a second send.
+MAX_ATTEMPTS=2
+case "$LABEL" in
+  cron-send-reminders | cron-weekly-digest) MAX_ATTEMPTS=1 ;;
+esac
+RETRY_DELAY_S=2
+
 START=$(date +%s)
 BODY_FILE=$(mktemp)
-HTTP_RAW=$(curl --silent --show-error --max-time 170 \
-  -o "$BODY_FILE" -w "%{http_code}" \
-  -X POST \
-  -H 'Content-Type: application/json' \
-  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-  -H "X-Cron-Run-Key: $RUN_KEY" \
-  -H "X-Cron-Label: $LABEL" \
-  "$URL" -d "$(printf '{"cron_run_key":"%s","cron_label":"%s"}' "$RUN_KEY" "$LABEL")" 2>/dev/null || echo "0")
+ATTEMPT=1
+while :; do
+  HTTP_RAW=$(curl --silent --show-error --max-time 170 \
+    -o "$BODY_FILE" -w "%{http_code}" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+    -H "X-Cron-Run-Key: $RUN_KEY" \
+    -H "X-Cron-Label: $LABEL" \
+    "$URL" -d "$(printf '{"cron_run_key":"%s","cron_label":"%s"}' "$RUN_KEY" "$LABEL")" 2>/dev/null || echo "0")
+  # Strip leading zeros so JSON output is valid (e.g. curl "000" -> 0, "200" -> 200).
+  HTTP=$(printf '%d' "${HTTP_RAW:-0}" 2>/dev/null || echo 0)
+  BODY=$(cat "$BODY_FILE" 2>/dev/null || true)
+
+  case "$HTTP" in
+    5*|0) ;;
+    *) break ;;
+  esac
+  if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+    break
+  fi
+  emit info "retrying after http $HTTP" "$HTTP" "$(($(date +%s) - START))" "$BODY"
+  ATTEMPT=$((ATTEMPT + 1))
+  sleep "$RETRY_DELAY_S"
+done
 END=$(date +%s)
 DUR=$((END - START))
-BODY=$(cat "$BODY_FILE" 2>/dev/null || true)
-
-# Strip leading zeros so JSON output is valid (e.g. curl "000" -> 0, "200" -> 200).
-HTTP=$(printf '%d' "${HTTP_RAW:-0}" 2>/dev/null || echo 0)
 
 case "$HTTP" in
   2*) emit info "ok" "$HTTP" "$DUR" "$BODY"; log_run "succeeded" "$HTTP" "$DUR" "$BODY"; EXIT_CODE=$? ;;
