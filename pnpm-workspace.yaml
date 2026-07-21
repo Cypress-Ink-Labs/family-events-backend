@@ -7,8 +7,7 @@ allowBuilds:
   supabase: false
 
 minimumReleaseAgeExclude:
-  - railway@3.2.0
-  - railway@3.3.2
+  - railway@3.2.0 || 3.3.2 || 3.5.10
 
 onlyBuiltDependencies:
   - esbuild
