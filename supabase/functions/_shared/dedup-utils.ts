@@ -39,26 +39,31 @@ export function titleTokens(title: string): Set<string> {
 }
 
 /**
- * Jaccard similarity between the token sets of two title strings.
- * Returns 0 when the union is empty (both titles tokenize to nothing).
+ * Jaccard similarity between two prepared title token sets.
+ * Returns 0 when the union is empty (both sets are empty).
  */
-export function jaccardSimilarity(a: string, b: string): number {
-  const tokensA = titleTokens(a)
-  const tokensB = titleTokens(b)
-
-  if (tokensA.size === 0 && tokensB.size === 0) {
+export function jaccardFromTokens(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 && b.size === 0) {
     return 0
   }
 
   let intersection = 0
-  for (const token of tokensA) {
-    if (tokensB.has(token)) {
+  for (const token of a) {
+    if (b.has(token)) {
       intersection += 1
     }
   }
 
-  const union = tokensA.size + tokensB.size - intersection
+  const union = a.size + b.size - intersection
   return union === 0 ? 0 : intersection / union
+}
+
+/**
+ * Jaccard similarity between the token sets of two title strings.
+ * Returns 0 when the union is empty (both titles tokenize to nothing).
+ */
+export function jaccardSimilarity(a: string, b: string): number {
+  return jaccardFromTokens(titleTokens(a), titleTokens(b))
 }
 
 /**
@@ -81,10 +86,8 @@ export function eventFingerprint(
  *
  * Returns true when EITHER:
  *   1. The fingerprints match exactly (same city + same minute + same canonical title), OR
- *   2. The titles' Jaccard similarity >= threshold (fuzzy match within the same time window).
- *
- * The SQL RPC already limits candidates to the ±4h time window so we only need
- * title comparison here — no additional time-window check is performed.
+ *   2. The titles' Jaccard similarity >= threshold within a valid per-pair
+ *      ±4-hour start-time window.
  *
  * NOTE: threshold = 0.7 is conservative enough to avoid most false positives
  * at the cost of missing near-matches like "Family Storytime" vs
@@ -105,6 +108,11 @@ export function isCrossSourceDuplicate(
     return true
   }
 
-  // Fuzzy title match (Jaccard on tokens)
-  return jaccardSimilarity(candidateTitle, existingTitle) >= threshold
+  // Fuzzy title match is valid only within the per-pair ±4-hour window.
+  const timeDifference = Math.abs(
+    new Date(candidateStart).getTime() - new Date(existingStart).getTime()
+  )
+  return Number.isFinite(timeDifference) &&
+    timeDifference <= 4 * 60 * 60 * 1000 &&
+    jaccardSimilarity(candidateTitle, existingTitle) >= threshold
 }

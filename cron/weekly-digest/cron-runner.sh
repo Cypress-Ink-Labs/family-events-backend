@@ -80,7 +80,13 @@ log_run() {
     -X POST \
     -H 'Content-Type: application/json' \
     -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-    "$LOG_CRON_RUN_URL" -d "$payload" 2>/dev/null || echo "000")
+    "$LOG_CRON_RUN_URL" -d "$payload" 2>/dev/null)
+  log_curl_exit=$?
+  if [ "$log_curl_exit" -ne 0 ]; then
+    log_http=0
+  else
+    log_http=$(printf '%d' "${log_http:-0}" 2>/dev/null || echo 0)
+  fi
 
   case "$log_http" in
     2*) return 0 ;;
@@ -107,7 +113,13 @@ is_enabled() {
     -H 'Content-Type: application/json' \
     -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
     -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-    "$IS_CRON_ENABLED_URL" -d "$(printf '{"p_label":"%s"}' "$LABEL")" 2>/dev/null || echo "000")
+    "$IS_CRON_ENABLED_URL" -d "$(printf '{"p_label":"%s"}' "$LABEL")" 2>/dev/null)
+  enabled_curl_exit=$?
+  if [ "$enabled_curl_exit" -ne 0 ]; then
+    enabled_http=0
+  else
+    enabled_http=$(printf '%d' "${enabled_http:-0}" 2>/dev/null || echo 0)
+  fi
   resp=$(cat "$ENABLED_BODY_FILE" 2>/dev/null || true)
   rm -f "$ENABLED_BODY_FILE"
 
@@ -168,9 +180,14 @@ while :; do
     -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
     -H "X-Cron-Run-Key: $RUN_KEY" \
     -H "X-Cron-Label: $LABEL" \
-    "$URL" -d "$(printf '{"cron_run_key":"%s","cron_label":"%s"}' "$RUN_KEY" "$LABEL")" 2>/dev/null || echo "0")
-  # Strip leading zeros so JSON output is valid (e.g. curl "000" -> 0, "200" -> 200).
-  HTTP=$(printf '%d' "${HTTP_RAW:-0}" 2>/dev/null || echo 0)
+    "$URL" -d "$(printf '{"cron_run_key":"%s","cron_label":"%s"}' "$RUN_KEY" "$LABEL")" 2>/dev/null)
+  CURL_EXIT=$?
+  if [ "$CURL_EXIT" -ne 0 ]; then
+    HTTP=0
+  else
+    # Strip leading zeros so JSON output is valid (e.g. curl "000" -> 0, "200" -> 200).
+    HTTP=$(printf '%d' "${HTTP_RAW:-0}" 2>/dev/null || echo 0)
+  fi
   BODY=$(cat "$BODY_FILE" 2>/dev/null || true)
 
   case "$HTTP" in

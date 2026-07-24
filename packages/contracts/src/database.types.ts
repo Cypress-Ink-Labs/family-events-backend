@@ -3151,6 +3151,7 @@ export type Database = {
           p_weather_fit?: string
         }
         Returns: {
+          address: string
           age_score: number
           budget_score: number
           city_id: string
@@ -3159,10 +3160,15 @@ export type Database = {
           event_id: string
           family_fit_score: number
           history_affinity: number
+          images: Json
+          is_free: boolean
           novelty_score: number
+          price: number
           score: number
           start_datetime: string
           timing_score: number
+          title: string
+          venue_name: string
           weather_score: number
         }[]
       }

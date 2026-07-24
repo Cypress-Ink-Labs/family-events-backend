@@ -2,7 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import { captureEdgeException } from "../../_shared/sentry.ts"
 import { errorContext, errorMessage as formatError, logEdgeEvent } from "../../_shared/logger.ts"
 import { guardedFetch } from "../../_shared/guarded-fetch.ts"
-import { isCrossSourceDuplicate } from "../../_shared/dedup-utils.ts"
+import {
+  JACCARD_THRESHOLD,
+  eventFingerprint,
+  isCrossSourceDuplicate,
+  jaccardFromTokens,
+  titleTokens,
+} from "../../_shared/dedup-utils.ts"
 import type { ParserContext } from "./parser-context.ts"
 import { resolveCityTimezone } from "./schedule.ts"
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
@@ -249,6 +255,7 @@ export async function importParsedSourceEvents(
               p_city_id: source.city_id,
               p_start_from: windowFrom,
               p_start_to: windowTo,
+              p_limit: 1000,
             }
           )
 
@@ -273,29 +280,90 @@ export async function importParsedSourceEvents(
                 error: formatError(candidateError),
               })
             }
-          } else if (candidates && (candidates as unknown[]).length > 0) {
+          } else if (candidates) {
             type CandidateRow = {
               id: string
               title: string
               source_id: string
               start_datetime: string
             }
+            type PreparedCandidate = CandidateRow & {
+              fp: string
+              tokens: Set<string>
+              hourBucket: number | null
+            }
             const rows = candidates as CandidateRow[]
 
-            dedupedPayloads = payloads.filter((payload) => {
-              const match = rows.find(
-                (candidate) =>
-                  // Cross-source only: same-source dedup is handled by the
-                  // source_url UPDATE path inside bulk_import_scrape_events.
-                  candidate.source_id !== source.id &&
-                  isCrossSourceDuplicate(
-                    payload.title as string,
-                    payload.start_datetime as string,
-                    candidate.title,
-                    candidate.start_datetime,
-                    source.city_id
-                  )
+            if (rows.length === 1000) {
+              logEdgeEvent(
+                "warn",
+                "cross-source dedup candidate cap reached — duplicates beyond cap may be missed",
+                {
+                  function: "process-source",
+                  source_id: source.id,
+                  candidate_count: rows.length,
+                }
               )
+            }
+
+            const exactMap = new Map<string, PreparedCandidate>()
+            const bucketMap = new Map<number, PreparedCandidate[]>()
+            for (const candidate of rows) {
+              // Same-source dedup is handled by bulk_import_scrape_events.
+              if (candidate.source_id === source.id) continue
+
+              const startMs = new Date(candidate.start_datetime).getTime()
+              const prepared: PreparedCandidate = {
+                ...candidate,
+                fp: eventFingerprint(candidate.title, candidate.start_datetime, source.city_id),
+                tokens: titleTokens(candidate.title),
+                hourBucket: Number.isFinite(startMs) ? Math.floor(startMs / 3_600_000) : null,
+              }
+              exactMap.set(prepared.fp, prepared)
+              if (prepared.hourBucket !== null) {
+                const bucket = bucketMap.get(prepared.hourBucket)
+                if (bucket) {
+                  bucket.push(prepared)
+                } else {
+                  bucketMap.set(prepared.hourBucket, [prepared])
+                }
+              }
+            }
+
+            dedupedPayloads = payloads.filter((payload) => {
+              const title = payload.title as string
+              const startDatetime = payload.start_datetime as string
+              const fp = eventFingerprint(title, startDatetime, source.city_id)
+              let match = exactMap.get(fp)
+
+              if (!match) {
+                const startMs = new Date(startDatetime).getTime()
+                if (Number.isFinite(startMs)) {
+                  const tokens = titleTokens(title)
+                  const hourBucket = Math.floor(startMs / 3_600_000)
+                  for (let bucket = hourBucket - 4; bucket <= hourBucket + 4 && !match; bucket += 1) {
+                    const candidatesInBucket = bucketMap.get(bucket)
+                    if (!candidatesInBucket) continue
+
+                    for (const candidate of candidatesInBucket) {
+                      if (
+                        jaccardFromTokens(tokens, candidate.tokens) >= JACCARD_THRESHOLD &&
+                        isCrossSourceDuplicate(
+                          title,
+                          startDatetime,
+                          candidate.title,
+                          candidate.start_datetime,
+                          source.city_id
+                        )
+                      ) {
+                        match = candidate
+                        break
+                      }
+                    }
+                  }
+                }
+              }
+
               if (match) {
                 crossSourceSkipped += 1
                 logEdgeEvent("log", "skipped cross-source duplicate", {
@@ -421,12 +489,14 @@ export async function importParsedSourceEvents(
     // Finalization MUST run even when the catch handler itself throws (e.g.
     // a logging call fails) or when an unexpected error escapes after the
     // catch. Otherwise source_runs is left in 'running' state forever.
+    const statusBeforeFinalization = status
+    let finalizationFailureMessage: string | null = null
     try {
-      await supabase
+      const { error: runUpdateError } = await supabase
         .from("source_runs")
         .update({
           completed_at: new Date().toISOString(),
-          status,
+          status: statusBeforeFinalization,
           events_found: eventsFound,
           events_imported: eventsImported,
           events_skipped: eventsSkipped,
@@ -435,16 +505,16 @@ export async function importParsedSourceEvents(
         .eq("id", runId)
 
       // Stale-escalation: track consecutive zero-result successes.
-      const isZeroResult = status === "success" && eventsFound === 0
+      const isZeroResult = statusBeforeFinalization === "success" && eventsFound === 0
       const nextConsecutiveZero = isZeroResult
         ? (source.consecutive_zero_result_scrapes ?? 0) + 1
         : 0
       const isNewEscalation =
         nextConsecutiveZero >= STALE_THRESHOLD && source.stale_escalated_at == null
-      const escalatedStatus = isNewEscalation ? "stale" : status
+      const escalatedStatus = isNewEscalation ? "stale" : statusBeforeFinalization
       const escalatedAt = isNewEscalation ? new Date().toISOString() : undefined
 
-      await supabase
+      const { error: sourceUpdateError } = await supabase
         .from("event_sources")
         .update({
           last_scraped_at: new Date().toISOString(),
@@ -452,11 +522,41 @@ export async function importParsedSourceEvents(
           // Only reset error_count on full success. A 'partial' run (events
           // found, none imported) used to clear the counter and mask persistent
           // failures; keep accumulating until a clean success.
-          error_count: status === "success" ? 0 : source.error_count + (status === "error" ? 1 : 0),
+          error_count:
+            statusBeforeFinalization === "success"
+              ? 0
+              : source.error_count + (statusBeforeFinalization === "error" ? 1 : 0),
           consecutive_zero_result_scrapes: nextConsecutiveZero,
           ...(escalatedAt != null ? { stale_escalated_at: escalatedAt } : {}),
         })
         .eq("id", source.id)
+
+      for (const [writeName, writeError] of [
+        ["source_runs", runUpdateError],
+        ["event_sources", sourceUpdateError],
+      ] as const) {
+        if (!writeError) continue
+
+        if (
+          finalizationFailureMessage === null &&
+          (statusBeforeFinalization === "success" || statusBeforeFinalization === "partial")
+        ) {
+          finalizationFailureMessage = `Failed to finalize ${writeName} write: ${formatError(writeError)}`
+          status = "error"
+          errorMessage = finalizationFailureMessage
+        }
+
+        const context = errorContext(writeError, {
+          function: "process-source",
+          source_id: source.id,
+          source_name: source.name,
+          run_id: runId,
+          stage: "finalize",
+          write: writeName,
+        })
+        logEdgeEvent("error", `failed to finalize ${writeName} write`, context)
+        await captureEdgeException(writeError, context)
+      }
 
       if (isNewEscalation) {
         logEdgeEvent("warn", "source escalated to stale", {

@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "jsr:@std/assert"
+import { assert, assertEquals, assertRejects } from "jsr:@std/assert"
 import {
   type EventLlmReviewQueueRow,
   processReviewQueueBatch,
@@ -52,6 +52,7 @@ class FakeSupabase {
   events = new Map<string, FakeEvent>()
   queue = new Map<number, QueueRow>()
   rpcCalls: Array<{ name: string; args?: Record<string, unknown> }> = []
+  failStartForQueueId: number | null = null
 
   rpc(name: string, args?: Record<string, unknown>) {
     this.rpcCalls.push({ name, args })
@@ -74,6 +75,9 @@ class FakeSupabase {
 
     if (name === "mark_event_llm_review_queue_row_started") {
       const queueId = Number(args?.p_queue_id)
+      if (queueId === this.failStartForQueueId) {
+        return Promise.reject(new Error(`unexpected start failure for queue ${queueId}`))
+      }
       const row = this.queue.get(queueId)
       if (!row || row.status !== "processing") {
         return Promise.resolve({ data: null, error: new Error("queue row missing") })
@@ -302,6 +306,28 @@ function decision(
   }
 }
 
+interface Deferred<T> {
+  promise: Promise<T>
+  resolve: (value: T) => void
+  reject: (reason?: unknown) => void
+}
+
+function deferred<T>(): Deferred<T> {
+  let resolve!: (value: T) => void
+  let reject!: (reason?: unknown) => void
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise
+    reject = rejectPromise
+  })
+  return { promise, resolve, reject }
+}
+
+async function flushMicrotasks(times = 32) {
+  for (let index = 0; index < times; index += 1) {
+    await Promise.resolve()
+  }
+}
+
 // Seed the store with N reviewable rows (ids 1..N), each backed by a draft
 // event. Returns the fake client ready for processReviewQueueBatch.
 function seed(rows: Array<{ row?: Partial<QueueRow>; event?: Partial<FakeEvent> }>): FakeSupabase {
@@ -502,15 +528,15 @@ Deno.test("processReviewQueueBatch aggregates a mixed batch (success + retry + d
   assertEquals(db.queue.get(3)?.status, "dead")
 })
 
-Deno.test("processReviewQueueBatch releases unstarted rows once the wall budget is spent", async () => {
-  // Three rows claimed. A fake clock jumps past the 110s budget after the first
-  // row, so rows 2 and 3 are never started and must be released back.
-  const db = seed([{}, {}, {}])
+Deno.test("processReviewQueueBatch releases only the unstarted chunk suffix once the wall budget is spent", async () => {
+  // Six rows claimed. The first three are a complete chunk. A fake clock jumps
+  // past the 110s budget before the second chunk, so only rows 4–6 release.
+  const db = seed([{}, {}, {}, {}, {}, {}])
 
   let calls = 0
-  // now() is read once at batch start, then once before each row.
-  // Sequence: start=0, before row1=0 (under budget), before row2=200_000 (over).
-  const clock = [0, 0, 200_000, 200_000, 200_000]
+  // now() is read once at batch start, then once before each chunk.
+  // Sequence: start=0, before chunk one=0, before chunk two=200_000.
+  const clock = [0, 0, 200_000, 200_000]
   const now = () => {
     const value = clock[Math.min(calls, clock.length - 1)] ?? 200_000
     calls += 1
@@ -528,21 +554,19 @@ Deno.test("processReviewQueueBatch releases unstarted rows once the wall budget 
     })
   )
 
-  assertEquals(summary.claimed, 3)
-  // Only the first row ran before the budget cut-off.
-  assertEquals(summary.succeeded, 1)
+  assertEquals(summary.claimed, 6)
+  assertEquals(summary.succeeded, 3)
   assertEquals(summary.failed, 0)
 
   const release = db.rpcCalls.find(
     (call) => call.name === "release_unstarted_event_llm_review_rows"
   )
   assert(release !== undefined, "expected unstarted rows to be released")
-  assertEquals(release?.args?.p_claimed_ids, [2, 3])
-  // Released rows are returned to 'pending' with started_at cleared (real RPC contract).
-  assertEquals(db.queue.get(2)?.status, "pending")
-  assertEquals(db.queue.get(3)?.status, "pending")
-  assertEquals(db.queue.get(2)?.started_at, null)
-  assertEquals(db.queue.get(3)?.started_at, null)
+  assertEquals(release?.args?.p_claimed_ids, [4, 5, 6])
+  for (const id of [4, 5, 6]) {
+    assertEquals(db.queue.get(id)?.status, "pending")
+    assertEquals(db.queue.get(id)?.started_at, null)
+  }
 })
 
 Deno.test("processReviewQueueBatch releases the whole batch when the budget is spent before row one", async () => {
@@ -570,4 +594,83 @@ Deno.test("processReviewQueueBatch releases the whole batch when the budget is s
     (call) => call.name === "release_unstarted_event_llm_review_rows"
   )
   assertEquals(release?.args?.p_claimed_ids, [1, 2])
+})
+
+Deno.test("processReviewQueueBatch runs six rows in bounded three-row chunks", async () => {
+  const db = seed([{}, {}, {}, {}, {}, {}])
+  const started: string[] = []
+  const gates: Deferred<AppliedLlmEventReviewDecision>[] = []
+  let active = 0
+  let maxActive = 0
+  let releaseImmediately = false
+
+  const batchPromise = processReviewQueueBatch(
+    depsFor(db, {
+      reviewEvent: (input) => {
+        started.push(input.eventId)
+        active += 1
+        maxActive = Math.max(maxActive, active)
+        if (releaseImmediately) {
+          active -= 1
+          return Promise.resolve(decision())
+        }
+
+        const gate = deferred<AppliedLlmEventReviewDecision>()
+        gates.push(gate)
+        return gate.promise.finally(() => {
+          active -= 1
+        })
+      },
+    })
+  )
+
+  await flushMicrotasks()
+  try {
+    assertEquals(started, ["event-1", "event-2", "event-3"])
+    assertEquals(active, 3)
+    assertEquals(maxActive, 3)
+  } finally {
+    releaseImmediately = true
+    for (const gate of gates) gate.resolve(decision())
+    await batchPromise
+  }
+
+  assertEquals(started, ["event-1", "event-2", "event-3", "event-4", "event-5", "event-6"])
+  assertEquals(maxActive, 3)
+})
+
+Deno.test("processReviewQueueBatch lets unexpected row throws escape Promise.all", async () => {
+  const db = seed([{}, {}, {}])
+  db.failStartForQueueId = 2
+
+  await assertRejects(
+    () => processReviewQueueBatch(depsFor(db, { reviewEvent: async () => decision() })),
+    Error,
+    "unexpected start failure for queue 2"
+  )
+})
+
+Deno.test("processReviewQueueBatch completes sixty synthetic reviews in twenty bounded scheduling waves", async () => {
+  const db = seed(Array.from({ length: 60 }, () => ({})))
+  let active = 0
+  let maxActive = 0
+
+  const summary = await processReviewQueueBatch(
+    depsFor(db, {
+      reviewEvent: async () => {
+        active += 1
+        maxActive = Math.max(maxActive, active)
+        await Promise.resolve()
+        active -= 1
+        return decision()
+      },
+    })
+  )
+
+  const serialWaves = 60
+  const boundedWaves = Math.ceil(summary.succeeded / maxActive)
+  assertEquals(summary.succeeded, 60)
+  assertEquals(maxActive, 3)
+  assertEquals(boundedWaves, 20)
+  assert(boundedWaves < serialWaves)
 })

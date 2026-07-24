@@ -341,20 +341,57 @@ Deno.test("processSourceQueueRow schedules retry when parser fetch fails", async
   })
 })
 
-Deno.test("processSourceQueueRow schedules retry when deterministic extraction returns no events", async () => {
+Deno.test("processSourceQueueRow imports empty deterministic extraction results without retrying", async () => {
   const db = createFakeSupabase(source({ extraction_mode: "deterministic" }))
+  let importedEvents: ParsedEvent[] | null = null
 
   const result = await processSourceQueueRow(
     db.client as never,
     queueRow(),
     createDependencies({
       parser: parser({ extractEvents: () => Promise.resolve([]) }),
+      importParsedSourceEvents: (events) => {
+        importedEvents = events
+        return Promise.resolve({
+          sourceId: "source-1",
+          status: "success",
+          eventsFound: 0,
+          eventsImported: 0,
+          eventsSkipped: 0,
+          error: null,
+        })
+      },
+    })
+  )
+
+  assertEquals(result, { outcome: "succeeded", imported: 0 })
+  assertEquals(importedEvents, [])
+  assertEquals(
+    db.rpcCalls.some((call) => call.name === "source_scrape_queue_schedule_retry"),
+    false
+  )
+})
+
+Deno.test("processSourceQueueRow retries deterministic extraction errors", async () => {
+  const db = createFakeSupabase(source({ extraction_mode: "deterministic" }))
+
+  const result = await processSourceQueueRow(
+    db.client as never,
+    queueRow(),
+    createDependencies({
+      parser: parser({ extractEvents: () => Promise.reject(new Error("extract failed")) }),
     })
   )
 
   assertEquals(result, { outcome: "retry", imported: 0 })
-  assertEquals((db.inserts.at(-1)?.payload as { status?: string }).status, "fallback")
-  assertEquals(db.rpcCalls.at(-1)?.name, "source_scrape_queue_schedule_retry")
+  assertEquals(db.rpcCalls.at(-1), {
+    name: "source_scrape_queue_schedule_retry",
+    params: {
+      p_queue_id: 42,
+      p_attempt_count: 1,
+      p_error: "extract failed",
+    },
+  })
 })
 
 Deno.test("processSourceQueueRow records deterministic-to-LLM fallback traces", async () => {

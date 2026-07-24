@@ -5,6 +5,7 @@ import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
 import { sendResendEmail } from "../_shared/resend.ts"
 import { sendTelegramMessage } from "../_shared/telegram.ts"
+import { weekendWindowUtc } from "../_shared/zoned-time.ts"
 
 // send-weekly-digest
 // ----------------------------------------------------------------
@@ -75,6 +76,12 @@ interface RankedEventRow {
   distance_km: number | null
   start_datetime: string
   city_id: string
+  title: string
+  venue_name: string | null
+  address: string | null
+  is_free: boolean
+  price: number | null
+  images: Array<string | { url?: string }> | null
 }
 
 function firstImageUrl(event: DigestEvent): string | undefined {
@@ -131,11 +138,13 @@ function splitDateTime(isoDate: string): { date: string; time: string } {
   try {
     const d = new Date(isoDate)
     const date = d.toLocaleDateString("en-US", {
+      timeZone: "America/Chicago",
       weekday: "short",
       month: "short",
       day: "numeric",
     })
     const time = d.toLocaleTimeString("en-US", {
+      timeZone: "America/Chicago",
       hour: "numeric",
       minute: "2-digit",
     })
@@ -397,19 +406,41 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
   // 1. Query digest opt-ins, then load profiles with cities. PostgREST cannot
   // embed user_profiles through auth.users, so keep this as two explicit reads.
   // Include users opted in to EITHER email or Telegram.
-  const { data: preferences, error: preferencesError } = await supabase
-    .from("user_notification_preferences")
-    .select("user_id, digest_email, digest_telegram, telegram_chat_id")
-    .or("digest_email.eq.true,digest_telegram.eq.true")
+  const preferenceRows: DigestPreference[] = []
+  const preferencePageSize = 1000
+  let lastUserId: string | null = null
 
-  if (preferencesError) {
-    await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest users", {
-      error: preferencesError.message,
-    })
-    throw preferencesError
+  while (true) {
+    const preferencesQuery = supabase
+      .from("user_notification_preferences")
+      .select("user_id, digest_email, digest_telegram, telegram_chat_id")
+      .or("digest_email.eq.true,digest_telegram.eq.true")
+      .order("user_id", { ascending: true })
+      .range(0, preferencePageSize - 1)
+    const { data: preferencePage, error: preferencesError } = await (
+      lastUserId === null ? preferencesQuery : preferencesQuery.gt("user_id", lastUserId)
+    )
+
+    if (preferencesError) {
+      await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest users", {
+        error: preferencesError.message,
+      })
+      throw preferencesError
+    }
+
+    const rows = (preferencePage ?? []) as DigestPreference[]
+    if (rows.length === 0) break
+
+    const nextLastUserId = rows[rows.length - 1].user_id
+    if (lastUserId !== null && nextLastUserId <= lastUserId) {
+      throw new Error("Digest preference pagination cursor did not advance")
+    }
+
+    preferenceRows.push(...rows)
+    if (rows.length < preferencePageSize) break
+    lastUserId = nextLastUserId
   }
 
-  const preferenceRows = (preferences ?? []) as DigestPreference[]
   const userIds = [...new Set(preferenceRows.map((row) => row.user_id).filter(Boolean))]
 
   if (userIds.length === 0) {
@@ -426,22 +457,29 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     cities: { id: string; name: string; latitude: number | null; longitude: number | null } | null
   }
 
-  const { data: profiles, error: profilesError } = await supabase
-    .from("user_profiles")
-    .select(
-      "id, email, display_name, city_preference_id, child_age, cities!inner(id, name, latitude, longitude)"
-    )
-    .in("id", userIds)
+  const profiles: ProfileRow[] = []
+  const profileChunkSize = 500
+  for (let i = 0; i < userIds.length; i += profileChunkSize) {
+    const userIdChunk = userIds.slice(i, i + profileChunkSize)
+    const { data: profileRows, error: profilesError } = await supabase
+      .from("user_profiles")
+      .select(
+        "id, email, display_name, city_preference_id, child_age, cities!inner(id, name, latitude, longitude)"
+      )
+      .in("id", userIdChunk)
 
-  if (profilesError) {
-    await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest profiles", {
-      error: profilesError.message,
-    })
-    throw profilesError
+    if (profilesError) {
+      await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest profiles", {
+        error: profilesError.message,
+      })
+      throw profilesError
+    }
+
+    profiles.push(...((profileRows ?? []) as unknown as ProfileRow[]))
   }
 
   const profilesById = new Map<string, ProfileRow>()
-  for (const profile of (profiles ?? []) as unknown as ProfileRow[]) {
+  for (const profile of profiles) {
     profilesById.set(profile.id, profile)
   }
 
@@ -491,42 +529,42 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
   // 1c. Batch-load preferred cities for all targeted users.
   // Fallback for users with no rows: their primary city_id.
   const targetedUserIds = targetedUsers.map((u) => u.user_id)
-  const { data: prefCityRows, error: prefCityError } = await supabase
-    .from("user_preferred_cities")
-    .select("user_id, city_id")
-    .in("user_id", targetedUserIds)
+  const prefCityRows: Array<{ user_id: string; city_id: string }> = []
+  const preferredCityChunkSize = 200
+  for (let i = 0; i < targetedUserIds.length; i += preferredCityChunkSize) {
+    const userIdChunk = targetedUserIds.slice(i, i + preferredCityChunkSize)
+    const { data: cityRows, error: prefCityError } = await supabase
+      .from("user_preferred_cities")
+      .select("user_id, city_id")
+      .in("user_id", userIdChunk)
 
-  if (prefCityError) {
-    logEdgeEvent("warn", "send-weekly-digest: failed to load preferred cities; using primary", {
-      function: "send-weekly-digest",
-      error: prefCityError.message,
-    })
+    if (prefCityError) {
+      logEdgeEvent("warn", "send-weekly-digest: failed to load preferred cities; using primary", {
+        function: "send-weekly-digest",
+        error: prefCityError.message,
+      })
+      continue
+    }
+
+    prefCityRows.push(...((cityRows ?? []) as Array<{ user_id: string; city_id: string }>))
   }
 
   // Build map: user_id → city_id[]
   const prefCityMap = new Map<string, string[]>()
-  for (const row of (prefCityRows ?? []) as Array<{ user_id: string; city_id: string }>) {
+  for (const row of prefCityRows) {
     const list = prefCityMap.get(row.user_id) ?? []
     list.push(row.city_id)
     prefCityMap.set(row.user_id, list)
   }
 
-  // 2. Compute the upcoming weekend window (UTC).
-  // UTC approximation — the RPC's timing_score refines local-time fit.
+  // 2. Compute the upcoming Friday-to-Monday weekend in the product timezone.
   const now = new Date()
-  const day = now.getUTCDay() // 0=Sun..6=Sat
-  const fridayOffset = day === 0 ? -2 : day === 6 ? -1 : 5 - day
-  const friday = new Date(now)
-  friday.setUTCDate(now.getUTCDate() + fridayOffset)
-  friday.setUTCHours(0, 0, 0, 0)
-  const sunday = new Date(friday)
-  sunday.setUTCDate(friday.getUTCDate() + 2)
-  sunday.setUTCHours(23, 59, 59, 999)
-  // Don't recommend events already in the past
-  const windowFrom = new Date(Math.max(now.getTime(), friday.getTime())).toISOString()
-  const windowTo = sunday.toISOString()
+  const weekend = weekendWindowUtc(now, "America/Chicago")
+  // Don't recommend events already in the past.
+  const windowFrom = new Date(Math.max(now.getTime(), weekend.from.getTime())).toISOString()
+  const windowTo = weekend.to.toISOString()
 
-  // 3. Per-user (bounded concurrency): rank → fetch event details → build DigestEvent[].
+  // 3. Per-user (bounded concurrency): rank hydrated event details and build DigestEvent[].
   const eventsByUser = new Map<string, DigestEvent[]>()
 
   async function buildUserDigestEvents(user: DigestUser): Promise<void> {
@@ -558,34 +596,20 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     const ranked = (rankedRows ?? []) as RankedEventRow[]
     if (ranked.length === 0) return
 
-    const eventIds = ranked.map((r) => r.event_id)
-
-    const { data: eventRows, error: eventsError } = await supabase
-      .from("events")
-      .select("id, title, start_datetime, venue_name, address, is_free, price, images")
-      .in("id", eventIds)
-
-    if (eventsError) {
-      logEdgeEvent("warn", "send-weekly-digest: failed to fetch event details", {
-        function: "send-weekly-digest",
-        user_id: user.user_id,
-        error: eventsError.message,
-      })
-      return
-    }
-
-    // Build a lookup map by event_id, then reassemble in ranked order
-    const eventMap = new Map<string, DigestEvent>()
-    for (const row of (eventRows ?? []) as DigestEvent[]) {
-      eventMap.set(row.id, row)
-    }
-
     const digestEvents: DigestEvent[] = []
     for (const rankedRow of ranked) {
-      const ev = eventMap.get(rankedRow.event_id)
-      if (!ev) continue
       const explanation = buildExplanation(rankedRow)
-      digestEvents.push({ ...ev, explanation })
+      digestEvents.push({
+        id: rankedRow.event_id,
+        title: rankedRow.title,
+        start_datetime: rankedRow.start_datetime,
+        venue_name: rankedRow.venue_name,
+        address: rankedRow.address,
+        is_free: rankedRow.is_free,
+        price: rankedRow.price,
+        images: rankedRow.images,
+        explanation,
+      })
     }
 
     if (digestEvents.length > 0) {
@@ -626,28 +650,23 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
   }
   if (!botToken) botToken = Deno.env.get("TELEGRAM_BOT_TOKEN") ?? ""
 
-  if (!resendApiKey) {
-    const totalUsers = digestUsers.length
-    const usersWithEvents = eventsByUser.size
+  const emailEnabled = resendApiKey !== ""
+  if (!emailEnabled) {
     logEdgeEvent(
       "warn",
-      "send-weekly-digest: RESEND_API_KEY not configured; would have sent digests",
+      "send-weekly-digest: RESEND_API_KEY not configured; email digests will be skipped",
       {
         function: "send-weekly-digest",
-        total_users: totalUsers,
-        users_with_events: usersWithEvents,
+        total_users: digestUsers.length,
+        users_with_events: eventsByUser.size,
       }
     )
-    await logCronRunEvent(supabase, cronCtx, "log", "Dry run (no RESEND_API_KEY)", {
-      total_users: totalUsers,
-      users_with_events: usersWithEvents,
-    })
-    return { ok: true, sent: 0, skipped: totalUsers, failed: 0, dev: true }
   }
 
   let sent = 0
   let skipped = 0
   let failed = 0
+  let emailSkipped = 0
   let telegramSent = 0
   let telegramSkipped = 0
 
@@ -664,7 +683,7 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       }
 
       // ── Email via Resend (only if opted in) ─────────────────────────────────
-      if (user.digest_email) {
+      if (user.digest_email && emailEnabled) {
         const html = renderDigestHtml(user, events, appUrl)
         const subject = `${events.length} family picks for your weekend`
 
@@ -695,6 +714,8 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
           })
           failed++
         }
+      } else if (user.digest_email) {
+        emailSkipped++
       }
 
       // ── Telegram ─────────────────────────────────────────────────────────────
@@ -739,6 +760,7 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
     sent,
     skipped,
     failed,
+    email_skipped: emailSkipped,
     total: allUsers.length,
     telegram_sent: telegramSent,
     telegram_skipped: telegramSkipped,

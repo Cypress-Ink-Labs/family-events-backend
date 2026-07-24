@@ -3,6 +3,21 @@ import { serveServiceRoleJson } from "../_shared/service-role-handler.ts"
 import { logEdgeEvent } from "../_shared/logger.ts"
 import { cronRunContextFromRequest, logCronRunEvent } from "../_shared/cron-run-log.ts"
 import { sendResendEmail } from "../_shared/resend.ts"
+import type { SupabaseClient } from "@supabase/supabase-js"
+
+export interface ProcessNotificationQueueContext {
+  request: Request
+  supabase: SupabaseClient
+  supabaseUrl: string
+  serviceRoleKey: string
+}
+
+export interface ProcessNotificationQueueConfig {
+  resendApiKey?: string
+  resendFrom?: string
+  appUrl?: string
+}
+
 
 // process-notification-queue
 // ----------------------------------------------------------------
@@ -90,10 +105,12 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-serveServiceRoleJson(
-  { functionName: "process-notification-queue" },
-  async ({ request, supabase, supabaseUrl, serviceRoleKey }) => {
-    const cronCtx = cronRunContextFromRequest(request)
+export async function processNotificationQueue(
+  { request, supabase, supabaseUrl, serviceRoleKey }: ProcessNotificationQueueContext,
+  config: ProcessNotificationQueueConfig = {}
+) {
+  const cronCtx = cronRunContextFromRequest(request)
+
 
     // 1. Read pending entries older than the debounce window
     const cutoff = new Date(Date.now() - DEBOUNCE_HOURS * 60 * 60 * 1000).toISOString()
@@ -123,10 +140,18 @@ serveServiceRoleJson(
     const userIds = [...new Set(entries.map((e: QueueEntry) => e.user_id))]
 
     // 3. Fetch event info
-    const { data: events } = await supabase
+    const { data: events, error: eventsError } = await supabase
       .from("events")
       .select("id, title, start_datetime, venue_name, address, status")
       .in("id", eventIds)
+
+    if (eventsError) {
+      await logCronRunEvent(supabase, cronCtx, "error", "Failed to hydrate notification queue events", {
+        stage: "events",
+        error: eventsError.message,
+      })
+      throw eventsError
+    }
 
     const eventMap = new Map<string, EventInfo>()
     for (const e of (events ?? []) as EventInfo[]) {
@@ -134,10 +159,19 @@ serveServiceRoleJson(
     }
 
     // 4. Fetch user info
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from("user_profiles")
       .select("id, email, display_name")
       .in("id", userIds)
+
+    if (profilesError) {
+      await logCronRunEvent(supabase, cronCtx, "error", "Failed to hydrate notification queue profiles", {
+        stage: "profiles",
+        error: profilesError.message,
+      })
+      throw profilesError
+    }
+
 
     const profileMap = new Map<string, UserInfo>()
     for (const p of (profiles ?? []) as Array<{
@@ -149,10 +183,25 @@ serveServiceRoleJson(
     }
 
     // 5. Fetch user preferences
-    const { data: prefs } = await supabase
+    const { data: prefs, error: preferencesError } = await supabase
       .from("user_notification_preferences")
       .select("user_id, change_email, change_push")
       .in("user_id", userIds)
+
+    if (preferencesError) {
+      await logCronRunEvent(
+        supabase,
+        cronCtx,
+        "error",
+        "Failed to hydrate notification queue preferences",
+        {
+          stage: "preferences",
+          error: preferencesError.message,
+        }
+      )
+      throw preferencesError
+    }
+
 
     const prefsMap = new Map<string, UserPrefs>()
     for (const p of (prefs ?? []) as Array<{
@@ -163,9 +212,13 @@ serveServiceRoleJson(
       prefsMap.set(p.user_id, { change_email: p.change_email, change_push: p.change_push })
     }
 
-    const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? ""
-    const resendFrom = Deno.env.get("RESEND_FROM") ?? "Family Events <onboarding@resend.dev>"
-    const appUrl = (Deno.env.get("APP_URL") ?? "https://family-events.up.railway.app").replace(
+    const resendApiKey = config.resendApiKey ?? Deno.env.get("RESEND_API_KEY") ?? ""
+    const resendFrom = config.resendFrom ??
+      Deno.env.get("RESEND_FROM") ??
+      "Family Events <onboarding@resend.dev>"
+    const appUrl = (config.appUrl ??
+      Deno.env.get("APP_URL") ??
+      "https://family-events.up.railway.app").replace(
       /\/$/,
       ""
     )
@@ -375,6 +428,8 @@ serveServiceRoleJson(
     }
 
     // 7. Mark processed entries
+    let processedUpdateError: string | null = null
+
     if (processedIds.length > 0) {
       const { error: updateErr } = await supabase
         .from("notification_queue")
@@ -387,12 +442,16 @@ serveServiceRoleJson(
           count: processedIds.length,
           error: updateErr.message,
         })
+        processedUpdateError = updateErr.message
+
       }
     }
 
     const result = {
-      ok: true,
-      processed: processedIds.length,
+      ok: processedUpdateError === null,
+      processed: processedUpdateError === null ? processedIds.length : 0,
+      processed_update_failed: processedUpdateError !== null,
+      error: processedUpdateError ?? undefined,
       in_app: inApp,
       sent_email: sentEmail,
       sent_push: sentPush,
@@ -400,12 +459,24 @@ serveServiceRoleJson(
       failed_push: failedPush,
     }
 
-    await logCronRunEvent(supabase, cronCtx, "log", "process-notification-queue complete", result)
+    await logCronRunEvent(
+      supabase,
+      cronCtx,
+      processedUpdateError === null ? "log" : "error",
+      "process-notification-queue complete",
+      result
+    )
     logEdgeEvent("log", "process-notification-queue: complete", {
       function: "process-notification-queue",
       ...result,
     })
 
-    return result
-  }
-)
+  return result
+}
+
+if (import.meta.main) {
+  serveServiceRoleJson(
+    { functionName: "process-notification-queue" },
+    processNotificationQueue
+  )
+}

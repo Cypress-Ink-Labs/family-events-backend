@@ -220,13 +220,20 @@ if (typeof Deno !== "undefined") {
       // When set, admin_audit_log.insert() resolves with this error (the supabase
       // client surfaces DB errors in the response object, not via throw).
       auditInsertError?: { message: string }
+      sourceRunUpdateError?: { message: string }
+      eventSourceUpdateError?: { message: string }
+      bulkError?: { message: string }
     } = {}
   ) {
     const captured: {
+      sourceRunUpdate: Record<string, unknown> | null
       eventSourceUpdate: Record<string, unknown> | null
+      eventSourceUpdates: Record<string, unknown>[]
       auditLogInserts: unknown[]
     } = {
+      sourceRunUpdate: null,
       eventSourceUpdate: null,
+      eventSourceUpdates: [],
       auditLogInserts: [],
     }
 
@@ -234,24 +241,42 @@ if (typeof Deno !== "undefined") {
 
     // Each .from(table) returns a builder whose methods return themselves or
     // terminal promises. We only model the chains that process-source.ts uses.
-    function makeBuilder(table: string): Record<string, unknown> {
+    function makeBuilder(
+      table: string,
+      pendingUpdate: Record<string, unknown> | null = null
+    ): Record<string, unknown> {
       const builder: Record<string, (...args: unknown[]) => unknown> = {}
 
       // .select() → builder (for cities maybeSingle path)
       builder.select = () => makeBuilder(table)
 
-      // .eq() → builder
-      builder.eq = () => makeBuilder(table)
+      // .eq() terminates update chains, but remains chainable for selects.
+      builder.eq = () => {
+        if (pendingUpdate) {
+          const error =
+            table === "source_runs"
+              ? opts.sourceRunUpdateError ?? null
+              : table === "event_sources"
+                ? opts.eventSourceUpdateError ?? null
+                : null
+          return Promise.resolve({ data: null, error })
+        }
+        return makeBuilder(table)
+      }
 
       // .maybeSingle() → terminal (for cities lookup)
       builder.maybeSingle = () => Promise.resolve({ data: null, error: null })
 
       // .update(payload) → builder that remembers the payload
       builder.update = (payload: unknown) => {
+        if (table === "source_runs") {
+          captured.sourceRunUpdate = payload as Record<string, unknown>
+        }
         if (table === "event_sources") {
           captured.eventSourceUpdate = payload as Record<string, unknown>
+          captured.eventSourceUpdates.push(payload as Record<string, unknown>)
         }
-        return makeBuilder(table)
+        return makeBuilder(table, payload as Record<string, unknown>)
       }
 
       // .insert(payload) → terminal (for admin_audit_log)
@@ -272,7 +297,9 @@ if (typeof Deno !== "undefined") {
       from: (table: string) => makeBuilder(table),
       rpc: (name: string, _args?: unknown) => {
         if (name === "bulk_import_scrape_events") {
-          return Promise.resolve({ data: bulkResult, error: null })
+          return Promise.resolve({ data: null, error: opts.bulkError ?? null }).then((result) =>
+            result.error ? result : { data: bulkResult, error: null }
+          )
         }
         if (name === "invoke_process_tag_queue") {
           return Promise.resolve({ data: null, error: null })
@@ -398,6 +425,111 @@ if (typeof Deno !== "undefined") {
     assertEquals(captured.auditLogInserts.length, 1)
   })
 
+  Deno.test("stale escalation: three consecutive empty successes increment to the threshold", async () => {
+    for (const consecutiveZeroBeforeRun of [0, 1, 2]) {
+      const { client, captured } = buildSupabaseMock()
+      const result = await importParsedSourceEvents(
+        client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+        buildSource({ consecutive_zero_result_scrapes: consecutiveZeroBeforeRun }),
+        `run-empty-${consecutiveZeroBeforeRun}`,
+        []
+      )
+
+      assertEquals(result.status, "success")
+      assertEquals(
+        captured.eventSourceUpdate!.consecutive_zero_result_scrapes,
+        consecutiveZeroBeforeRun + 1
+      )
+      if (consecutiveZeroBeforeRun === 2) {
+        assertEquals(captured.eventSourceUpdate!.last_status, "stale")
+        assertEquals(captured.auditLogInserts.length, 1)
+      }
+    }
+  })
+
+  Deno.test("finalization: source_runs update error makes a successful scrape retryable", async () => {
+    const { client } = buildSupabaseMock({
+      sourceRunUpdateError: { message: "source_runs update denied" },
+    })
+
+    const result = await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      buildSource(),
+      "run-source-runs-error",
+      []
+    )
+
+    assertEquals(result.status, "error")
+    assertEquals(result.error?.includes("source_runs write"), true)
+  })
+
+  Deno.test("finalization: event_sources update error makes a successful scrape retryable", async () => {
+    const { client } = buildSupabaseMock({
+      eventSourceUpdateError: { message: "event_sources update denied" },
+    })
+
+    const result = await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      buildSource(),
+      "run-event-sources-error",
+      []
+    )
+
+    assertEquals(result.status, "error")
+    assertEquals(result.error?.includes("event_sources write"), true)
+  })
+
+  Deno.test("finalization: event_sources update error makes a partial scrape retryable", async () => {
+    const { client } = buildSupabaseMock({
+      bulkResult: { imported: 0, updated: 0, skipped: 0, enqueued: 0 },
+      eventSourceUpdateError: { message: "event_sources update denied" },
+    })
+
+    const result = await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      buildSource(),
+      "run-event-sources-partial-error",
+      [buildParsedEvent()]
+    )
+
+    assertEquals(result.status, "error")
+    assertEquals(result.error?.includes("event_sources write"), true)
+  })
+
+  Deno.test("finalization: concurrent write errors preserve the source_runs failure first", async () => {
+    const { client } = buildSupabaseMock({
+      sourceRunUpdateError: { message: "source_runs update denied" },
+      eventSourceUpdateError: { message: "event_sources update denied" },
+    })
+
+    const result = await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      buildSource(),
+      "run-both-finalization-errors",
+      []
+    )
+
+    assertEquals(result.status, "error")
+    assertEquals(result.error?.includes("source_runs write"), true)
+  })
+
+  Deno.test("finalization: write errors do not replace the original scrape failure", async () => {
+    const { client } = buildSupabaseMock({
+      bulkError: new Error("original scrape failed"),
+      eventSourceUpdateError: { message: "event_sources update denied" },
+    })
+
+    const result = await importParsedSourceEvents(
+      client as unknown as Parameters<typeof importParsedSourceEvents>[0],
+      buildSource(),
+      "run-original-error",
+      [buildParsedEvent()]
+    )
+
+    assertEquals(result.status, "error")
+    assertEquals(result.error, "original scrape failed")
+  })
+
   // ── importParsedSourceEvents: cross-source dedup pre-pass ─────────────────
 
   /**
@@ -423,8 +555,11 @@ if (typeof Deno !== "undefined") {
     // Track what was passed to the bulk RPC.
     bulkRpcCalls: Array<Record<string, unknown>[]> = []
 
+    crossSourceRpcCalls: Array<Record<string, unknown>> = []
+
     rpc(name: string, args?: Record<string, unknown>) {
       if (name === "find_cross_source_event_candidates") {
+        this.crossSourceRpcCalls.push(args ?? {})
         if (this.crossSourceCandidateError) {
           return Promise.resolve({ data: null, error: this.crossSourceCandidateError })
         }
@@ -516,15 +651,15 @@ if (typeof Deno !== "undefined") {
     }
   }
 
-  Deno.test("importParsedSourceEvents: cross-source duplicate is skipped (not sent to bulk_import)", async () => {
+  Deno.test("importParsedSourceEvents: cross-source fuzzy duplicate within four hours is skipped", async () => {
     const db = new FakeSupabase()
-    // Existing event from a DIFFERENT source with same title + time
+    // Existing event from a DIFFERENT source with the same title within two hours.
     db.crossSourceCandidates = [
       {
         id: "event-existing-1",
         title: "Family Story Time",
-        source_id: "source-b", // different source
-        start_datetime: "2026-06-20T14:00:00.000Z",
+        source_id: "source-b",
+        start_datetime: "2026-06-20T16:00:00.000Z",
       },
     ]
 
@@ -538,6 +673,80 @@ if (typeof Deno !== "undefined") {
     assertEquals(db.bulkRpcCalls[0].length, 0)
     // eventsSkipped should reflect the cross-source skip
     assertEquals(result.eventsSkipped, 1)
+  })
+
+  Deno.test("importParsedSourceEvents: recurring title outside the four-hour window is imported", async () => {
+    const db = new FakeSupabase()
+    db.crossSourceCandidates = [
+      {
+        id: "event-last-week",
+        title: "Family Story Time",
+        source_id: "source-b",
+        start_datetime: "2026-06-13T14:00:00.000Z",
+      },
+    ]
+
+    await importParsedSourceEvents(
+      db as never,
+      buildDedupSource(),
+      "run-recurring",
+      [buildParsedEventForDedup()]
+    )
+
+    assertEquals(db.bulkRpcCalls[0].length, 1)
+  })
+
+  Deno.test("importParsedSourceEvents: requests 1000 candidates and dedupes a match beyond the old cap", async () => {
+    const db = new FakeSupabase()
+    db.crossSourceCandidates = [
+      ...Array.from({ length: 500 }, (_, index) => ({
+        id: `event-no-match-${index}`,
+        title: `Different Event ${index}`,
+        source_id: "source-b",
+        start_datetime: "2026-06-20T14:00:00.000Z",
+      })),
+      {
+        id: "event-beyond-old-cap",
+        title: "Family Story Time",
+        source_id: "source-b",
+        start_datetime: "2026-06-20T14:00:00.000Z",
+      },
+    ]
+
+    await importParsedSourceEvents(db as never, buildDedupSource(), "run-cap", [
+      buildParsedEventForDedup(),
+    ])
+
+    assertEquals(db.crossSourceRpcCalls[0].p_limit, 1000)
+    assertEquals(db.bulkRpcCalls[0].length, 0)
+  })
+
+  Deno.test("importParsedSourceEvents: warns once when the candidate cap is reached", async () => {
+    const db = new FakeSupabase()
+    db.crossSourceCandidates = Array.from({ length: 1000 }, (_, index) => ({
+      id: `event-${index}`,
+      title: `Different Event ${index}`,
+      source_id: "source-b",
+      start_datetime: "2026-06-20T14:00:00.000Z",
+    }))
+    const originalWarn = console.warn
+    const warnings: string[] = []
+    console.warn = (message: string) => warnings.push(message)
+
+    try {
+      await importParsedSourceEvents(db as never, buildDedupSource(), "run-cap-warning", [
+        buildParsedEventForDedup(),
+      ])
+    } finally {
+      console.warn = originalWarn
+    }
+
+    const capWarnings = warnings.filter((message) =>
+      message.includes("cross-source dedup candidate cap reached")
+    )
+    assertEquals(capWarnings.length, 1)
+    assertEquals(JSON.parse(capWarnings[0]).source_id, "source-a")
+    assertEquals(JSON.parse(capWarnings[0]).candidate_count, 1000)
   })
 
   Deno.test("importParsedSourceEvents: same-source candidate is NOT skipped", async () => {

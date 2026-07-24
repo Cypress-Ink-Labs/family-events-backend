@@ -1,51 +1,97 @@
 // Returns the UTC Date for midnight (00:00:00) of the zone-local calendar day
-// at (now + dayOffset days).  dayOffset 0 = start of the current zone-local day,
+// at (now + dayOffset days). dayOffset 0 = start of the current zone-local day,
 // 1 = start of tomorrow, 2 = start of the day after, etc.
 //
-// Implementation uses Intl.DateTimeFormat to read the wall-clock Y/M/D in the
-// target zone, derives the zone's current UTC offset from those parts, then
-// constructs zone-local midnight as a UTC instant.  No external dependencies —
-// Deno and V8 both implement Intl.
-//
-// DST safety: the offset is recalculated each call from the supplied `now`, so
-// it reflects the actual offset at that instant rather than a cached value.
+// No external dependencies — Deno and V8 both implement Intl.
 //
 // NOTE: This hardcodes a single timezone for callers like send-reminders.
 // If multi-region support is ever added, callers must pass the per-event or
 // per-user timezone and the single-global-window query approach will need to
 // change accordingly.
-export function zonedDayStartUtc(now: Date, timeZone: string, dayOffset: number): Date {
-  // Step 1 — read the zone-local wall-clock year/month/day for `now`.
-  const fmt = new Intl.DateTimeFormat("en-US", {
+interface ZonedParts {
+  year: number
+  month: number
+  day: number
+  hour: number
+  minute: number
+  second: number
+  weekday: string
+}
+
+function getZonedParts(date: Date, timeZone: string): ZonedParts {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",
     month: "numeric",
     day: "numeric",
+    weekday: "short",
     hour: "numeric",
     minute: "numeric",
     second: "numeric",
-    hour12: false,
-  })
+    hourCycle: "h23",
+  }).formatToParts(date)
 
-  const parts = fmt.formatToParts(now)
-  const get = (type: string) => {
-    const part = parts.find((p) => p.type === type)
+  const getNumber = (type: string) => {
+    const part = parts.find((candidate) => candidate.type === type)
     if (!part) throw new Error(`Intl part "${type}" missing for timezone "${timeZone}"`)
     return parseInt(part.value, 10)
   }
+  const getText = (type: string) => {
+    const part = parts.find((candidate) => candidate.type === type)
+    if (!part) throw new Error(`Intl part "${type}" missing for timezone "${timeZone}"`)
+    return part.value
+  }
 
-  const year = get("year")
-  const month = get("month") - 1 // Intl months are 1-based; Date.UTC months are 0-based
-  const day = get("day")
+  return {
+    year: getNumber("year"),
+    month: getNumber("month") - 1,
+    day: getNumber("day"),
+    hour: getNumber("hour"),
+    minute: getNumber("minute"),
+    second: getNumber("second"),
+    weekday: getText("weekday"),
+  }
+}
 
-  // Step 2 — derive the zone's UTC offset at this instant.
-  // Treat the wall-clock parts as if they were a UTC time and subtract `now`.
-  // The difference is (zone-local wall clock - UTC), i.e. the UTC offset in ms.
-  const wallAsUtcMs = Date.UTC(year, month, day, get("hour"), get("minute"), get("second"))
-  const offsetMs = wallAsUtcMs - now.getTime()
+function offsetAt(date: Date, timeZone: string): number {
+  const parts = getZonedParts(date, timeZone)
+  const wallAsUtcMs = Date.UTC(
+    parts.year,
+    parts.month,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second
+  )
+  return wallAsUtcMs - Math.floor(date.getTime() / 1000) * 1000
+}
 
-  // Step 3 — zone-local midnight of (today + dayOffset) as a UTC instant.
-  // Date.UTC(year, month, day + dayOffset) gives midnight of that day *as if* in
-  // UTC.  Subtracting the offset converts it to the real UTC instant.
-  return new Date(Date.UTC(year, month, day + dayOffset) - offsetMs)
+export function zonedDayStartUtc(now: Date, timeZone: string, dayOffset: number): Date {
+  const localNow = getZonedParts(now, timeZone)
+  const targetWallMidnightMs = Date.UTC(
+    localNow.year,
+    localNow.month,
+    localNow.day + dayOffset
+  )
+
+  // Resolve the offset at the target local day rather than reusing today's
+  // offset. A first estimate locates the target day; its wall-clock parts then
+  // yield the offset that applies at that day's midnight.
+  const estimatedUtc = new Date(targetWallMidnightMs - offsetAt(now, timeZone))
+  return new Date(targetWallMidnightMs - offsetAt(estimatedUtc, timeZone))
+}
+
+/** Upcoming-weekend window as UTC instants: [Friday 00:00, Monday 00:00) zone-local. */
+export function weekendWindowUtc(now: Date, timeZone: string): { from: Date; to: Date } {
+  const weekday = getZonedParts(now, timeZone).weekday
+  const weekdayIndex = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(weekday)
+  if (weekdayIndex === -1) {
+    throw new Error(`Unrecognized weekday "${weekday}" for timezone "${timeZone}"`)
+  }
+
+  const fridayOffset = weekdayIndex === 0 ? -2 : weekdayIndex === 6 ? -1 : 5 - weekdayIndex
+  return {
+    from: zonedDayStartUtc(now, timeZone, fridayOffset),
+    to: zonedDayStartUtc(now, timeZone, fridayOffset + 3),
+  }
 }

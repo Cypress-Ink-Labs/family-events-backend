@@ -371,10 +371,7 @@ async function extractParsedEventsForSource(
     ctx
   )
 
-  if (
-    source.extraction_mode === "deterministic" &&
-    (deterministic.error || deterministic.events.length === 0)
-  ) {
+  if (source.extraction_mode === "deterministic" && deterministic.error) {
     const message =
       deterministic.error instanceof Error
         ? deterministic.error.message

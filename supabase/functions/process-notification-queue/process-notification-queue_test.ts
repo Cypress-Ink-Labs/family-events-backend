@@ -1,4 +1,6 @@
-import { assertEquals } from "jsr:@std/assert"
+import { assertEquals, assertRejects } from "jsr:@std/assert"
+import { processNotificationQueue } from "./index.ts"
+import type { ProcessNotificationQueueContext } from "./index.ts"
 import { sendResendEmail } from "../_shared/resend.ts"
 import type { PublicIpResolver } from "../_shared/guarded-fetch.ts"
 
@@ -305,4 +307,182 @@ Deno.test("sendResendEmail (notification-queue): non-2xx returns { ok: false, st
   } finally {
     globalThis.fetch = original
   }
+})
+
+// ---------------------------------------------------------------------------
+// Tests: queue hydration and completion reporting
+// ---------------------------------------------------------------------------
+
+type StubResponse = { data?: unknown; error?: { message: string } | null }
+
+function createQueueSupabaseStub(
+  responses: {
+    events?: StubResponse
+    profiles?: StubResponse
+    preferences?: StubResponse
+    processedUpdate?: StubResponse
+  },
+  calls: string[]
+) {
+  let notificationQueueReads = 0
+
+  const terminal = (response: StubResponse) => ({
+    ...response,
+    in: (_column: string, _values: unknown[]) => Promise.resolve(response),
+    insert: (_values: unknown) => Promise.resolve(response),
+  })
+
+  return {
+    from(table: string) {
+      calls.push(table)
+      if (table === "notification_queue") {
+        notificationQueueReads++
+        if (notificationQueueReads === 1) {
+          const entries = [
+            {
+              id: "queue-1",
+              user_id: "user-1",
+              event_id: "event-1",
+              change_type: "status_changed",
+              change_detail: null,
+              created_at: "2026-07-24T00:00:00.000Z",
+            },
+          ]
+          const query = {
+            eq: () => query,
+            lt: () => query,
+            order: () => query,
+            limit: () => Promise.resolve({ data: entries, error: null }),
+          }
+          return {
+            select: () => query,
+          }
+        }
+
+        return {
+          update: () => ({
+            in: () => Promise.resolve(responses.processedUpdate ?? { error: null }),
+          }),
+        }
+      }
+
+      if (table === "events") {
+        return {
+          select: () => terminal(responses.events ?? {
+            data: [{
+              id: "event-1",
+              title: "Park Day",
+              start_datetime: "2026-07-25T15:00:00.000Z",
+              venue_name: null,
+              address: null,
+              status: "published",
+            }],
+            error: null,
+          }),
+        }
+      }
+
+      if (table === "user_profiles") {
+        return {
+          select: () => terminal(responses.profiles ?? {
+            data: [{ id: "user-1", email: "parent@example.com", display_name: "Parent" }],
+            error: null,
+          }),
+        }
+      }
+
+      if (table === "user_notification_preferences") {
+        return {
+          select: () => terminal(responses.preferences ?? {
+            data: [{ user_id: "user-1", change_email: false, change_push: false }],
+            error: null,
+          }),
+        }
+      }
+
+      if (table === "user_notifications") {
+        return {
+          insert: () => Promise.resolve({ error: null }),
+        }
+      }
+
+      throw new Error(`Unexpected table: ${table}`)
+    },
+  }
+}
+
+function handlerRequest() {
+  return new Request("https://example.test/process-notification-queue", { method: "POST" })
+}
+
+async function invokeQueueHandler(
+  responses: Parameters<typeof createQueueSupabaseStub>[0],
+  calls: string[]
+) {
+  return await processNotificationQueue({
+    request: handlerRequest(),
+    supabase: createQueueSupabaseStub(responses, calls) as unknown as ProcessNotificationQueueContext["supabase"],
+    supabaseUrl: "https://example.test",
+    serviceRoleKey: "test-key",
+  }, {
+    resendApiKey: "",
+    resendFrom: "Family Events <test@example.test>",
+    appUrl: "https://app.example.test",
+  })
+}
+
+for (const stage of ["events", "profiles", "preferences"] as const) {
+  Deno.test(`queue hydration failure at ${stage} aborts before side effects`, async () => {
+    const calls: string[] = []
+    const responses = {
+      [stage]: { data: null, error: new Error(`${stage} unavailable`) },
+    }
+
+    await assertRejects(
+      () => invokeQueueHandler(responses, calls),
+      Error,
+      `${stage} unavailable`
+    )
+    assertEquals(calls.includes("user_notifications"), false)
+    assertEquals(calls.filter((table) => table === "notification_queue").length, 1)
+  })
+}
+
+Deno.test("missing preference row keeps the default notification delivery behavior", async () => {
+  const calls: string[] = []
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (() =>
+    Promise.resolve(
+      new Response(JSON.stringify({ sent: 1 }), {
+        headers: { "Content-Type": "application/json" },
+      })
+    )) as typeof globalThis.fetch
+
+  try {
+    const response = await invokeQueueHandler(
+      { preferences: { data: [], error: null } },
+      calls
+    )
+
+    assertEquals(response.ok, true)
+    assertEquals(response.sent_push, 1)
+    assertEquals(calls.includes("user_notifications"), true)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+Deno.test("processed update failure returns an honest result", async () => {
+  const calls: string[] = []
+  const response = await invokeQueueHandler(
+    { processedUpdate: { error: { message: "update unavailable" } } },
+    calls
+  )
+
+  assertEquals(response.ok, false)
+  assertEquals(response.processed, 0)
+  assertEquals("processed_update_failed" in response, true)
+  if (!("processed_update_failed" in response)) throw new Error("missing processed update failure result")
+  assertEquals(response.processed_update_failed, true)
+  assertEquals(response.error, "update unavailable")
 })

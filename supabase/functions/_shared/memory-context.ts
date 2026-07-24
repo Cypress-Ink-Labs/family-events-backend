@@ -76,6 +76,7 @@ interface SimilarEventRow {
 }
 
 interface EventTagRow {
+  event_id: string
   tag_id: string
   confidence: number
   is_manual_override: boolean
@@ -83,8 +84,23 @@ interface EventTagRow {
 }
 
 interface AdminDecisionRow {
+  event_id: string
   decision_type: string
   new_tags: unknown
+  reason: string | null
+  created_at: string
+}
+
+interface ReviewEventRow {
+  id: string
+  status: string
+  llm_review_decision: string | null
+}
+
+interface ReviewAdminDecisionRow {
+  event_id: string
+  decision_type: string
+  new_status: string
   reason: string | null
   created_at: string
 }
@@ -107,61 +123,74 @@ export async function fetchSimilarEventTagContext(
   })
 
   if (simError) throw simError
-  if (!similar || (similar as SimilarEventRow[]).length === 0) return []
+  const similarRows = (similar ?? []) as SimilarEventRow[]
+  if (similarRows.length === 0) return []
 
-  const results: SimilarEventTagContext[] = []
+  const eventIds = [...new Set(similarRows.map((row) => row.event_id))]
+  const { data: tagRows, error: tagError } = await supabase
+    .from("event_tags")
+    .select("event_id, tag_id, confidence, is_manual_override, tags(slug, name)")
+    .in("event_id", eventIds)
 
-  for (const row of similar as SimilarEventRow[]) {
-    // Fetch tags for this event
-    const { data: tagRows, error: tagError } = await supabase
-      .from("event_tags")
-      .select("tag_id, confidence, is_manual_override, tags(slug, name)")
-      .eq("event_id", row.event_id)
+  if (tagError) {
+    logEdgeEvent("warn", "memory-context: failed to bulk fetch tags for similar events", {
+      error: tagError.message,
+    })
+    return []
+  }
 
-    if (tagError) {
-      logEdgeEvent("warn", "memory-context: failed to fetch tags for similar event", {
-        event_id: row.event_id,
-        error: tagError.message,
-      })
-      continue
+  const { data: decisionRows, error: decisionError } = await supabase
+    .from("admin_event_decisions")
+    .select("event_id, decision_type, new_tags, reason, created_at")
+    .in("event_id", eventIds)
+    .in("decision_type", ["tag_edit", "status_and_tags"])
+    .order("created_at", { ascending: false })
+
+  if (decisionError) {
+    logEdgeEvent("warn", "memory-context: failed to bulk fetch tag decisions for similar events", {
+      error: decisionError.message,
+    })
+    return []
+  }
+
+  const tagsByEvent = new Map<string, EventTagRow[]>()
+  for (const tagRow of (tagRows ?? []) as unknown as EventTagRow[]) {
+    const tags = tagsByEvent.get(tagRow.event_id) ?? []
+    tags.push(tagRow)
+    tagsByEvent.set(tagRow.event_id, tags)
+  }
+
+  const decisionsByEvent = new Map<string, AdminDecisionRow>()
+  for (const decisionRow of (decisionRows ?? []) as unknown as AdminDecisionRow[]) {
+    if (!decisionsByEvent.has(decisionRow.event_id)) {
+      decisionsByEvent.set(decisionRow.event_id, decisionRow)
     }
+  }
 
-    const tags: SimilarEventTag[] = ((tagRows ?? []) as unknown as EventTagRow[])
-      .filter((t) => t.tags)
-      .map((t) => ({
-        slug: t.tags!.slug,
-        name: t.tags!.name,
-        source: t.is_manual_override ? ("admin" as const) : ("ai" as const),
-        confidence: t.confidence,
+  return similarRows.map((row) => {
+    const tags: SimilarEventTag[] = (tagsByEvent.get(row.event_id) ?? [])
+      .filter((tag) => tag.tags)
+      .map((tag) => ({
+        slug: tag.tags!.slug,
+        name: tag.tags!.name,
+        source: tag.is_manual_override ? ("admin" as const) : ("ai" as const),
+        confidence: tag.confidence,
       }))
       .sort((a, b) => {
-        // Admin corrections first, then by confidence
         if (a.source !== b.source) return a.source === "admin" ? -1 : 1
         return b.confidence - a.confidence
       })
+    const latestDecision = decisionsByEvent.get(row.event_id) ?? null
 
-    // Check for admin corrections
-    const { data: decisions } = await supabase
-      .from("admin_event_decisions")
-      .select("decision_type, new_tags, reason, created_at")
-      .eq("event_id", row.event_id)
-      .in("decision_type", ["tag_edit", "status_and_tags"])
-      .order("created_at", { ascending: false })
-      .limit(1)
-
-    const latestDecision = (decisions as AdminDecisionRow[] | null)?.[0] ?? null
-
-    results.push({
+    return {
       eventId: row.event_id,
       title: row.title.slice(0, 100),
       cosineDistance: row.cosine_distance,
       tags,
-      adminCorrected: latestDecision !== null || tags.some((t) => t.source === "admin"),
+      adminCorrected: latestDecision !== null || tags.some((tag) => tag.source === "admin"),
       adminReason: latestDecision?.reason ?? null,
-    })
-  }
-
-  return results
+    }
+  })
 }
 
 // ── Review memory context ────────────────────────────────────────────────────
@@ -202,53 +231,82 @@ export async function fetchSimilarReviewContext(
     }
   }
 
+  const eventIds = [...new Set(similarRows.map((row) => row.event_id))]
+  const { data: eventRows, error: eventError } = await supabase
+    .from("events")
+    .select("id, status, llm_review_decision")
+    .in("id", eventIds)
+
+  if (eventError) {
+    logEdgeEvent("warn", "memory-context: failed to bulk fetch review events", {
+      error: eventError.message,
+    })
+    return {
+      contexts: [],
+      confidenceAdjustment: {
+        delta: 0,
+        reason: "no similar events found",
+        approvedCount: 0,
+        rejectedCount: 0,
+        totalSimilar: 0,
+      },
+    }
+  }
+
+  const { data: decisionRows, error: decisionError } = await supabase
+    .from("admin_event_decisions")
+    .select("event_id, decision_type, new_status, reason, created_at")
+    .eq("decision_type", "status_change")
+    .in("event_id", eventIds)
+    .order("created_at", { ascending: false })
+
+  if (decisionError) {
+    logEdgeEvent("warn", "memory-context: failed to bulk fetch review decisions", {
+      error: decisionError.message,
+    })
+    return {
+      contexts: [],
+      confidenceAdjustment: {
+        delta: 0,
+        reason: "no similar events found",
+        approvedCount: 0,
+        rejectedCount: 0,
+        totalSimilar: 0,
+      },
+    }
+  }
+
+  const eventsById = new Map<string, ReviewEventRow>()
+  for (const eventRow of (eventRows ?? []) as unknown as ReviewEventRow[]) {
+    eventsById.set(eventRow.id, eventRow)
+  }
+
+  const decisionsByEvent = new Map<string, ReviewAdminDecisionRow>()
+  for (const decisionRow of (decisionRows ?? []) as unknown as ReviewAdminDecisionRow[]) {
+    if (!decisionsByEvent.has(decisionRow.event_id)) {
+      decisionsByEvent.set(decisionRow.event_id, decisionRow)
+    }
+  }
+
   const contexts: SimilarEventReviewContext[] = []
   let approvedCount = 0
   let rejectedCount = 0
 
   for (const row of similarRows) {
-    // Fetch event's review state
-    const { data: eventRow, error: evtError } = await supabase
-      .from("events")
-      .select("status, llm_review_decision")
-      .eq("id", row.event_id)
-      .maybeSingle()
+    const eventRow = eventsById.get(row.event_id)
+    if (!eventRow) continue
 
-    if (evtError || !eventRow) continue
-
-    const evt = eventRow as { status: string; llm_review_decision: string | null }
-
-    // Check for admin override
-    const { data: decisions } = await supabase
-      .from("admin_event_decisions")
-      .select("decision_type, new_status, reason, created_at")
-      .eq("event_id", row.event_id)
-      .eq("decision_type", "status_change")
-      .order("created_at", { ascending: false })
-      .limit(1)
-
-    const latestAdminDecision =
-      (
-        decisions as Array<{
-          decision_type: string
-          new_status: string
-          reason: string | null
-        }> | null
-      )?.[0] ?? null
-
-    const adminOverridden = latestAdminDecision !== null
-
-    // Count outcomes based on final status
-    if (evt.status === "published") approvedCount++
-    if (evt.status === "rejected") rejectedCount++
+    const latestAdminDecision = decisionsByEvent.get(row.event_id) ?? null
+    if (eventRow.status === "published") approvedCount++
+    if (eventRow.status === "rejected") rejectedCount++
 
     contexts.push({
       eventId: row.event_id,
       title: row.title.slice(0, 100),
       cosineDistance: row.cosine_distance,
-      status: evt.status,
-      llmReviewDecision: evt.llm_review_decision,
-      adminOverridden,
+      status: eventRow.status,
+      llmReviewDecision: eventRow.llm_review_decision,
+      adminOverridden: latestAdminDecision !== null,
       adminDecision: latestAdminDecision?.new_status ?? null,
       adminReason: latestAdminDecision?.reason ?? null,
     })

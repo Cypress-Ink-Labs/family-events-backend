@@ -1,6 +1,7 @@
 import { assertEquals, assertStringIncludes } from "jsr:@std/assert"
 import { sendResendEmail } from "../_shared/resend.ts"
 import type { PublicIpResolver } from "../_shared/guarded-fetch.ts"
+import { weekendWindowUtc } from "../_shared/zoned-time.ts"
 
 // No-op SSRF resolver — bypasses real DNS lookups in unit tests (no --allow-net).
 const noopResolve: PublicIpResolver = (_url) => Promise.resolve({ ok: true })
@@ -19,6 +20,9 @@ interface MockQueryChain {
   selectStr: string
   eqCalls: Array<{ col: string; val: unknown }>
   inCalls: Array<{ col: string; val: unknown[] }>
+  gtCalls?: Array<{ col: string; val: unknown }>
+  orderCalls?: Array<{ col: string; ascending: boolean }>
+  rangeCalls?: Array<{ from: number; to: number }>
 }
 
 // Ranked row returned by plan_events_for_user_range
@@ -36,6 +40,12 @@ interface RankedEventRow {
   distance_km: number | null
   start_datetime: string
   city_id: string
+  title?: string
+  venue_name?: string | null
+  address?: string | null
+  is_free?: boolean
+  price?: number | null
+  images?: Array<string | { url?: string }> | null
 }
 
 function createMockSupabase(opts: {
@@ -43,43 +53,87 @@ function createMockSupabase(opts: {
   profileRows?: Array<Record<string, unknown>>
   preferredCityRows?: Array<{ user_id: string; city_id: string }>
   planEventsResult?: Record<string, RankedEventRow[]>
-  eventDetailRows?: Array<Record<string, unknown>>
   rpcCalls?: MockRpcCall[]
   queryCalls?: MockQueryChain[]
 }) {
   const rpcCalls: MockRpcCall[] = opts.rpcCalls ?? []
   const queryCalls: MockQueryChain[] = opts.queryCalls ?? []
 
-  function buildSelectChain(
-    tableName: string,
-    rows: Array<Record<string, unknown>>,
-    // allow overriding rows after select for tables that need it
-    _extra?: unknown
-  ) {
+  function buildSelectChain(tableName: string, rows: Array<Record<string, unknown>>) {
     let selectStr = ""
     const eqCalls: Array<{ col: string; val: unknown }> = []
+    const gtCalls: Array<{ col: string; val: unknown }> = []
+    const orderCalls: Array<{ col: string; ascending: boolean }> = []
+    let rangeCall: { from: number; to: number } | undefined
+
+    function record(inCalls: Array<{ col: string; val: unknown[] }> = [], rangeCalls?: Array<{ from: number; to: number }>) {
+      queryCalls.push({
+        from: tableName,
+        selectStr,
+        eqCalls: [...eqCalls],
+        inCalls,
+        gtCalls: [...gtCalls],
+        orderCalls: [...orderCalls],
+        rangeCalls,
+      })
+    }
+
+    function filteredRows() {
+      let result = rows.filter((row) => gtCalls.every(({ col, val }) => String(row[col]) > String(val)))
+      for (const { col, ascending } of orderCalls) {
+        result = [...result].sort((a, b) => {
+          const comparison = String(a[col]).localeCompare(String(b[col]))
+          return ascending ? comparison : -comparison
+        })
+      }
+      return result
+    }
 
     const chain = {
       select(s: string) {
         selectStr = s
         return chain
       },
+      or(_filter: string) {
+        return chain
+      },
+      order(col: string, { ascending }: { ascending: boolean }) {
+        orderCalls.push({ col, ascending })
+        return chain
+      },
+      gt(col: string, val: unknown) {
+        gtCalls.push({ col, val })
+        return chain
+      },
+      range(from: number, to: number) {
+        rangeCall = { from, to }
+        return chain
+      },
       eq(col: string, val: unknown) {
         eqCalls.push({ col, val })
-        queryCalls.push({ from: tableName, selectStr, eqCalls: [...eqCalls], inCalls: [] })
-        const filtered = rows.filter((r) => r[col] === val)
+        record()
+        const filtered = filteredRows().filter((row) => row[col] === val)
         return Promise.resolve({ data: filtered, error: null })
       },
       in(col: string, val: unknown[]) {
-        queryCalls.push({
-          from: tableName,
-          selectStr,
-          eqCalls: [...eqCalls],
-          inCalls: [{ col, val }],
-        })
+        record([{ col, val }])
         const set = new Set(val)
-        const filtered = rows.filter((r) => set.has(r[col]))
+        const filtered = filteredRows().filter((row) => set.has(row[col]))
         return Promise.resolve({ data: filtered, error: null })
+      },
+      then(
+        onfulfilled: ((value: { data: Array<Record<string, unknown>>; error: null }) => unknown) | null = null,
+        onrejected: ((reason: unknown) => unknown) | null = null
+      ) {
+        const currentRange = rangeCall
+        const result = {
+          data: currentRange
+            ? filteredRows().slice(currentRange.from, currentRange.to + 1)
+            : filteredRows(),
+          error: null,
+        }
+        record([], currentRange ? [currentRange] : undefined)
+        return Promise.resolve(result).then(onfulfilled, onrejected)
       },
     }
     return chain
@@ -98,9 +152,6 @@ function createMockSupabase(opts: {
           table,
           (opts.preferredCityRows ?? []) as Array<Record<string, unknown>>
         )
-      }
-      if (table === "events") {
-        return buildSelectChain(table, opts.eventDetailRows ?? [])
       }
       return buildSelectChain(table, [])
     },
@@ -306,6 +357,69 @@ Deno.test("digest user reads avoid nonexistent preferences to profiles embed", a
   assertEquals(queryCalls[0].eqCalls, [{ col: "digest_email", val: true }])
   assertEquals(queryCalls[1].from, "user_profiles")
   assertEquals(queryCalls[1].inCalls, [{ col: "id", val: ["u1", "u2"] }])
+})
+
+Deno.test("digest recipient preference pagination reaches every user after the PostgREST cap", async () => {
+  const queryCalls: MockQueryChain[] = []
+  const prefsRows = Array.from({ length: 1001 }, (_, index) => ({
+    user_id: `u${String(index).padStart(4, "0")}`,
+    digest_email: true,
+    digest_telegram: false,
+    telegram_chat_id: null,
+  }))
+  const supabase = createMockSupabase({ prefsRows, queryCalls })
+  const preferenceRows: Array<Record<string, unknown>> = []
+  const pageSize = 1000
+  let lastUserId: string | null = null
+
+  while (true) {
+    const query = supabase
+      .from("user_notification_preferences")
+      .select("user_id, digest_email, digest_telegram, telegram_chat_id")
+      .or("digest_email.eq.true,digest_telegram.eq.true")
+      .order("user_id", { ascending: true })
+      .range(0, pageSize - 1)
+    const { data } = await (lastUserId === null ? query : query.gt("user_id", lastUserId))
+    const page = (data ?? []) as Array<Record<string, unknown>>
+    if (page.length === 0) break
+
+    const nextLastUserId = page[page.length - 1].user_id as string
+    if (lastUserId !== null && nextLastUserId <= lastUserId) {
+      throw new Error("Digest preference pagination cursor did not advance")
+    }
+    preferenceRows.push(...page)
+    if (page.length < pageSize) break
+    lastUserId = nextLastUserId
+  }
+
+  assertEquals(preferenceRows.length, 1001)
+  assertEquals(queryCalls.length, 2)
+  assertEquals(queryCalls[0].orderCalls, [{ col: "user_id", ascending: true }])
+  assertEquals(queryCalls[0].rangeCalls, [{ from: 0, to: 999 }])
+  assertEquals(queryCalls[1].gtCalls, [{ col: "user_id", val: "u0999" }])
+})
+
+Deno.test("digest profile and preferred-city reads stay within bounded chunks", async () => {
+  const queryCalls: MockQueryChain[] = []
+  const userIds = Array.from({ length: 1001 }, (_, index) => `u${index}`)
+  const supabase = createMockSupabase({ queryCalls })
+
+  for (let i = 0; i < userIds.length; i += 500) {
+    await supabase.from("user_profiles").select("id").in("id", userIds.slice(i, i + 500))
+  }
+  for (let i = 0; i < userIds.length; i += 200) {
+    await supabase
+      .from("user_preferred_cities")
+      .select("user_id, city_id")
+      .in("user_id", userIds.slice(i, i + 200))
+  }
+
+  const profileCalls = queryCalls.filter((call) => call.from === "user_profiles")
+  const preferredCityCalls = queryCalls.filter((call) => call.from === "user_preferred_cities")
+  assertEquals(profileCalls.length, 3)
+  assertEquals(preferredCityCalls.length, 6)
+  assertEquals(profileCalls.every((call) => call.inCalls[0].val.length <= 500), true)
+  assertEquals(preferredCityCalls.every((call) => call.inCalls[0].val.length <= 200), true)
 })
 
 Deno.test("preferred cities fallback: user with no rows uses primary city_id", async () => {
@@ -583,10 +697,9 @@ Deno.test("buildExplanation returns single label when only one factor above thre
   assertEquals(explanation, "budget-friendly")
 })
 
-Deno.test("event detail fetch assembles DigestEvents in ranked order", async () => {
+Deno.test("hydrated ranking rows assemble DigestEvents in ranked order without events queries", async () => {
   const queryCalls: MockQueryChain[] = []
-
-  // RPC returns e2 ranked higher than e1
+  const rpcCalls: MockRpcCall[] = []
   const rankedRows: RankedEventRow[] = [
     {
       event_id: "e2",
@@ -602,6 +715,12 @@ Deno.test("event detail fetch assembles DigestEvents in ranked order", async () 
       distance_km: 1.0,
       start_datetime: "2026-06-21T11:00:00Z",
       city_id: "c1",
+      title: "Story Time",
+      venue_name: "Library",
+      address: null,
+      is_free: true,
+      price: null,
+      images: ["https://example.test/story.jpg"],
     },
     {
       event_id: "e1",
@@ -617,56 +736,45 @@ Deno.test("event detail fetch assembles DigestEvents in ranked order", async () 
       distance_km: 5.0,
       start_datetime: "2026-06-21T14:00:00Z",
       city_id: "c1",
-    },
-  ]
-
-  // DB returns rows in reverse order (ID order, not rank order)
-  const eventDetailRows = [
-    {
-      id: "e1",
       title: "Park Day",
-      start_datetime: "2026-06-21T14:00:00Z",
       venue_name: "City Park",
       address: null,
       is_free: true,
       price: null,
       images: null,
     },
-    {
-      id: "e2",
-      title: "Story Time",
-      start_datetime: "2026-06-21T11:00:00Z",
-      venue_name: "Library",
-      address: null,
-      is_free: true,
-      price: null,
-      images: null,
-    },
   ]
-
   const supabase = createMockSupabase({
     planEventsResult: { u1: rankedRows },
-    eventDetailRows,
+    rpcCalls,
     queryCalls,
   })
 
-  // Simulate the handler's reassembly logic
-  const eventIds = rankedRows.map((r) => r.event_id)
-  const { data: rows } = await supabase
-    .from("events")
-    .select("id, title, start_datetime, venue_name, address, is_free, price, images")
-    .in("id", eventIds)
+  const { data: rows } = await supabase.rpc("plan_events_for_user_range", {
+    p_user_id: "u1",
+    p_date_from: "2026-06-20T00:00:00Z",
+    p_date_to: "2026-06-22T00:00:00Z",
+    p_city_ids: ["c1"],
+    p_kid_age: null,
+    p_weather_fit: "neutral",
+    p_limit: 5,
+    p_lat: null,
+    p_lng: null,
+  })
+  const digestEvents = (rows as RankedEventRow[]).map((row) => ({
+    id: row.event_id,
+    title: row.title,
+    start_datetime: row.start_datetime,
+    venue_name: row.venue_name,
+    address: row.address,
+    is_free: row.is_free,
+    price: row.price,
+    images: row.images,
+    explanation: buildExplanation(row),
+  }))
 
-  const eventMap = new Map<string, Record<string, unknown>>()
-  for (const row of (rows ?? []) as Array<Record<string, unknown>>) {
-    eventMap.set(row.id as string, row)
-  }
-
-  const digestEvents = rankedRows.map((r) => eventMap.get(r.event_id)).filter(Boolean) as Array<
-    Record<string, unknown>
-  >
-
-  // Ranked order is preserved: e2 first, then e1
+  assertEquals(rpcCalls.length, 1)
+  assertEquals(queryCalls.filter((call) => call.from === "events").length, 0)
   assertEquals(digestEvents[0].id, "e2")
   assertEquals(digestEvents[0].title, "Story Time")
   assertEquals(digestEvents[1].id, "e1")
@@ -721,54 +829,33 @@ Deno.test("cron-weekly-digest label maps to send-weekly-digest function", () => 
   assertEquals(cronFunctionByLabel["cron-weekly-digest"], "send-weekly-digest")
 })
 
-Deno.test("weekend window computation: mid-week day targets upcoming Friday-Sunday", () => {
-  // Simulate a Wednesday (day=3) — fridayOffset should be 2
-  const simulatedNow = new Date("2026-06-17T10:00:00Z") // Wednesday
-  const day = simulatedNow.getUTCDay()
-  assertEquals(day, 3)
+Deno.test("Chicago weekend window includes Sunday evening and excludes Thursday evening", () => {
+  const now = new Date("2026-06-17T18:00:00Z") // Wednesday afternoon in Chicago
+  const weekend = weekendWindowUtc(now, "America/Chicago")
+  const windowFrom = new Date(Math.max(now.getTime(), weekend.from.getTime()))
 
-  const fridayOffset = day === 0 ? -2 : day === 6 ? -1 : 5 - day
-  assertEquals(fridayOffset, 2)
+  const sundayEvening = new Date("2026-06-22T00:00:00Z") // Sunday 19:00 CDT
+  const thursdayEvening = new Date("2026-06-19T01:00:00Z") // Thursday 20:00 CDT
 
-  const friday = new Date(simulatedNow)
-  friday.setUTCDate(simulatedNow.getUTCDate() + fridayOffset)
-  friday.setUTCHours(0, 0, 0, 0)
-
-  const sunday = new Date(friday)
-  sunday.setUTCDate(friday.getUTCDate() + 2)
-  sunday.setUTCHours(23, 59, 59, 999)
-
-  // friday should be 2026-06-19
-  assertEquals(friday.toISOString().startsWith("2026-06-19"), true)
-  // sunday should be 2026-06-21
-  assertEquals(sunday.toISOString().startsWith("2026-06-21"), true)
-
-  // windowFrom should be friday (not now, since friday is still in the future relative to simulatedNow)
-  const windowFrom = new Date(Math.max(simulatedNow.getTime(), friday.getTime())).toISOString()
-  assertEquals(windowFrom, friday.toISOString())
+  assertEquals(windowFrom.toISOString(), "2026-06-19T05:00:00.000Z")
+  assertEquals(weekend.to.toISOString(), "2026-06-22T05:00:00.000Z")
+  assertEquals(sundayEvening >= windowFrom && sundayEvening < weekend.to, true)
+  assertEquals(thursdayEvening >= windowFrom && thursdayEvening < weekend.to, false)
 })
 
-Deno.test("weekend window computation: Saturday targets current weekend", () => {
-  const simulatedNow = new Date("2026-06-20T10:00:00Z") // Saturday
-  const day = simulatedNow.getUTCDay()
-  assertEquals(day, 6)
+Deno.test("Chicago weekend window keeps the current weekend on Saturday", () => {
+  const now = new Date("2026-06-20T18:00:00Z") // Saturday 13:00 CDT
+  const weekend = weekendWindowUtc(now, "America/Chicago")
+  const windowFrom = new Date(Math.max(now.getTime(), weekend.from.getTime()))
 
-  const fridayOffset = day === 0 ? -2 : day === 6 ? -1 : 5 - day
-  assertEquals(fridayOffset, -1) // yesterday was Friday
-
-  const friday = new Date(simulatedNow)
-  friday.setUTCDate(simulatedNow.getUTCDate() + fridayOffset)
-  friday.setUTCHours(0, 0, 0, 0)
-
-  // windowFrom should be now (since friday is in the past)
-  const windowFrom = new Date(Math.max(simulatedNow.getTime(), friday.getTime())).toISOString()
-  assertEquals(windowFrom, simulatedNow.toISOString())
+  assertEquals(weekend.from.toISOString(), "2026-06-19T05:00:00.000Z")
+  assertEquals(windowFrom.toISOString(), now.toISOString())
+  assertEquals(weekend.to.toISOString(), "2026-06-22T05:00:00.000Z")
 })
 
-Deno.test("personalized events flow: full mock run for a single user", async () => {
+Deno.test("personalized events flow builds a digest directly from hydrated ranking rows", async () => {
   const rpcCalls: MockRpcCall[] = []
   const queryCalls: MockQueryChain[] = []
-
   const rankedRows: RankedEventRow[] = [
     {
       event_id: "e1",
@@ -784,29 +871,21 @@ Deno.test("personalized events flow: full mock run for a single user", async () 
       distance_km: 1.5,
       start_datetime: "2026-06-21T10:00:00Z",
       city_id: "c1",
+      title: "Park Day",
+      venue_name: "City Park",
+      address: null,
+      is_free: true,
+      price: null,
+      images: null,
     },
   ]
-
-  const eventDetailRow = {
-    id: "e1",
-    title: "Park Day",
-    start_datetime: "2026-06-21T10:00:00Z",
-    venue_name: "City Park",
-    address: null,
-    is_free: true,
-    price: null,
-    images: null,
-  }
-
   const supabase = createMockSupabase({
     planEventsResult: { u1: rankedRows },
-    eventDetailRows: [eventDetailRow],
     preferredCityRows: [{ user_id: "u1", city_id: "c1" }],
     rpcCalls,
     queryCalls,
   })
 
-  // Step 1: load preferred cities
   const { data: prefRows } = await supabase
     .from("user_preferred_cities")
     .select("user_id, city_id")
@@ -818,7 +897,6 @@ Deno.test("personalized events flow: full mock run for a single user", async () 
     prefCityMap.set(row.user_id, list)
   }
 
-  // Step 2: call RPC
   const cityIds = prefCityMap.get("u1") ?? ["c1"]
   const { data: ranked } = await supabase.rpc("plan_events_for_user_range", {
     p_user_id: "u1",
@@ -829,36 +907,24 @@ Deno.test("personalized events flow: full mock run for a single user", async () 
     p_weather_fit: "neutral",
     p_limit: 5,
   })
+  const digestEvents = (ranked as RankedEventRow[]).map((row) => ({
+    id: row.event_id,
+    title: row.title,
+    start_datetime: row.start_datetime,
+    venue_name: row.venue_name,
+    address: row.address,
+    is_free: row.is_free,
+    price: row.price,
+    images: row.images,
+    explanation: buildExplanation(row),
+  }))
 
-  // Step 3: fetch event details
-  const eventIds = (ranked as RankedEventRow[]).map((r) => r.event_id)
-  const { data: eventRows } = await supabase
-    .from("events")
-    .select("id, title, start_datetime, venue_name, address, is_free, price, images")
-    .in("id", eventIds)
-
-  // Step 4: reassemble with explanations
-  const eventMap = new Map<string, Record<string, unknown>>()
-  for (const row of (eventRows ?? []) as Array<Record<string, unknown>>) {
-    eventMap.set(row.id as string, row)
-  }
-
-  const digestEvents = (ranked as RankedEventRow[])
-    .map((r) => {
-      const ev = eventMap.get(r.event_id)
-      if (!ev) return null
-      const explanation = buildExplanation(r)
-      return { ...ev, explanation }
-    })
-    .filter(Boolean)
-
-  // Assertions
   assertEquals(rpcCalls[0].name, "plan_events_for_user_range")
   assertEquals(rpcCalls[0].params.p_user_id, "u1")
+  assertEquals(queryCalls.filter((call) => call.from === "events").length, 0)
   assertEquals(digestEvents.length, 1)
-  assertEquals((digestEvents[0] as Record<string, unknown>).id, "e1")
-  // explanation: distance_score=0.95 (nearby), age_score=0.85 (great age match)
-  assertEquals((digestEvents[0] as Record<string, unknown>).explanation, "nearby · great age match")
+  assertEquals(digestEvents[0].id, "e1")
+  assertEquals(digestEvents[0].explanation, "nearby · great age match")
 })
 
 // ---------------------------------------------------------------------------
@@ -1007,6 +1073,32 @@ Deno.test("email-only user still gets email and is not sent Telegram", () => {
   assertEquals(wouldSendTelegram, false)
 })
 
+Deno.test("Telegram-only users are dispatched when Resend is unavailable", async () => {
+  const emailEnabled = false
+  const telegramSendSpy = {
+    calls: 0,
+    async send() {
+      this.calls++
+      return { ok: true }
+    },
+  }
+  const users = [
+    { digest_email: false, digest_telegram: true, telegram_chat_id: "telegram-only" },
+    { digest_email: true, digest_telegram: false, telegram_chat_id: null },
+  ]
+  let emailSkipped = 0
+
+  for (const user of users) {
+    if (user.digest_email && !emailEnabled) emailSkipped++
+    if (user.digest_telegram && user.telegram_chat_id) {
+      await telegramSendSpy.send()
+    }
+  }
+
+  assertEquals(telegramSendSpy.calls, 1)
+  assertEquals(emailSkipped, 1)
+})
+
 // ---------------------------------------------------------------------------
 // Tests: sendResendEmail — SSRF-safe Resend path (digest email)
 // ---------------------------------------------------------------------------
@@ -1025,6 +1117,7 @@ function makeMockResendFetch(
     const url =
       typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url
     captured.push({ url, init: init ?? {} })
+
     return Promise.resolve(
       new Response(JSON.stringify(responseBody), {
         status,

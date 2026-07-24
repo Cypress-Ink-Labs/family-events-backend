@@ -4,6 +4,7 @@ import {
   canonicalizeTitle,
   eventFingerprint,
   isCrossSourceDuplicate,
+  jaccardFromTokens,
   jaccardSimilarity,
   titleTokens,
 } from "./dedup-utils.ts"
@@ -110,6 +111,13 @@ if (typeof Deno !== "undefined") {
     assertEquals(jaccardSimilarity("Family Story Time", "Story Time Family"), 1.0)
   })
 
+  Deno.test("jaccardFromTokens: reuses prepared sets without changing similarity", () => {
+    assertEquals(
+      jaccardFromTokens(titleTokens("Family Story Time"), titleTokens("Story Time Family")),
+      1.0
+    )
+  })
+
   // ── eventFingerprint ────────────────────────────────────────────────────────
 
   Deno.test("eventFingerprint: same event with different casing gives same fingerprint", () => {
@@ -202,6 +210,62 @@ if (typeof Deno !== "undefined") {
         0.5
       ),
       true
+    )
+  })
+
+  Deno.test("isCrossSourceDuplicate: fuzzy title match within three hours is a duplicate", () => {
+    assertEquals(
+      isCrossSourceDuplicate(
+        "Art Workshop",
+        "2026-06-20T10:00:00.000Z",
+        "Art Workshop for Families",
+        "2026-06-20T13:00:00.000Z",
+        "city-1",
+        0.5
+      ),
+      true
+    )
+  })
+
+  Deno.test("isCrossSourceDuplicate: fuzzy title match exactly four hours apart is a duplicate", () => {
+    assertEquals(
+      isCrossSourceDuplicate(
+        "Art Workshop",
+        "2026-06-20T10:00:00.000Z",
+        "Art Workshop for Families",
+        "2026-06-20T14:00:00.000Z",
+        "city-1",
+        0.5
+      ),
+      true
+    )
+  })
+
+  Deno.test("isCrossSourceDuplicate: fuzzy title match five hours apart is not a duplicate", () => {
+    assertEquals(
+      isCrossSourceDuplicate(
+        "Art Workshop",
+        "2026-06-20T10:00:00.000Z",
+        "Art Workshop for Families",
+        "2026-06-20T15:00:00.000Z",
+        "city-1",
+        0.5
+      ),
+      false
+    )
+  })
+
+  Deno.test("isCrossSourceDuplicate: malformed fuzzy dates are not duplicates", () => {
+    assertEquals(
+      isCrossSourceDuplicate(
+        "Art Workshop",
+        "not-a-date",
+        "Art Workshop for Families",
+        "2026-06-20T10:00:00.000Z",
+        "city-1",
+        0.5
+      ),
+      false
     )
   })
 

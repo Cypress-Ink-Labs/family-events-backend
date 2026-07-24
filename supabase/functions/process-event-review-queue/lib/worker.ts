@@ -20,6 +20,8 @@ import {
 const DEFAULT_BATCH_SIZE = 60
 const MAX_BATCH_SIZE = 100
 const BUDGET_MS = 110_000
+// 3 × 30s provider timeout = 90s, below the 110s worker budget.
+const REVIEW_CONCURRENCY = 3
 const REVIEWABLE_LLM_REVIEW_STATUS_PENDING = "pending"
 
 export interface EventLlmReviewQueueRow {
@@ -646,40 +648,43 @@ export async function processReviewQueueBatch(
     reaped: summary.reaped,
   })
 
-  for (let index = 0; index < claimed.length; index += 1) {
+  for (let index = 0; index < claimed.length; index += REVIEW_CONCURRENCY) {
     const elapsed = (deps.now?.() ?? Date.now()) - startedAt
     if (shouldStopBeforeStartingNextRow(elapsed)) {
       await releaseUnstartedRows(deps.supabase, claimed.slice(index))
       break
     }
 
-    const row = claimed[index]
-    if (!row) continue
+    const chunk = claimed.slice(index, index + REVIEW_CONCURRENCY)
+    const results = await Promise.all(
+      chunk.map((row) => processReviewQueueRow(deps, row))
+    )
 
-    const result = await processReviewQueueRow(deps, row)
-    if (result.outcome === "succeeded" || result.outcome === "skipped") {
-      summary.succeeded += 1
-      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE) {
-        summary.approved += 1
+    for (const result of results) {
+      if (result.outcome === "succeeded" || result.outcome === "skipped") {
+        summary.succeeded += 1
+        if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.APPROVE) {
+          summary.approved += 1
+        }
+        if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT) {
+          summary.rejected += 1
+        }
+        if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW) {
+          summary.needsAdminReview += 1
+        }
+        if (result.failed) summary.failed += 1
+        continue
       }
-      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.REJECT) {
-        summary.rejected += 1
-      }
-      if (result.appliedDecision === LLM_EVENT_REVIEW_DECISION.NEEDS_ADMIN_REVIEW) {
-        summary.needsAdminReview += 1
-      }
-      if (result.failed) summary.failed += 1
-      continue
-    }
 
-    if (result.outcome === "retrying") {
-      summary.retrying += 1
+      if (result.outcome === "retrying") {
+        summary.retrying += 1
+        summary.failed += 1
+        continue
+      }
+
+      summary.dead += 1
       summary.failed += 1
-      continue
     }
-
-    summary.dead += 1
-    summary.failed += 1
   }
 
   await logReviewEvent(deps, "log", "event review queue batch done", {
