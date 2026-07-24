@@ -8,6 +8,7 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - railway@3.2.0 || 3.3.2 || 3.5.10
+  - react-email@6.9.1
 
 onlyBuiltDependencies:
   - esbuild
