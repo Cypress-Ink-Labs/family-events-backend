@@ -417,9 +417,9 @@ serveServiceRoleJson({ functionName: "send-weekly-digest" }, async ({ request, s
       .or("digest_email.eq.true,digest_telegram.eq.true")
       .order("user_id", { ascending: true })
       .range(0, preferencePageSize - 1)
-    const { data: preferencePage, error: preferencesError } = await (
-      lastUserId === null ? preferencesQuery : preferencesQuery.gt("user_id", lastUserId)
-    )
+    const { data: preferencePage, error: preferencesError } = await (lastUserId === null
+      ? preferencesQuery
+      : preferencesQuery.gt("user_id", lastUserId))
 
     if (preferencesError) {
       await logCronRunEvent(supabase, cronCtx, "error", "Failed to query digest users", {

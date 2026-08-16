@@ -1,4 +1,5 @@
 import { type SupabaseClient } from "@supabase/supabase-js"
+import { sendFailurePing } from "../../_shared/failure-ping.ts"
 import { errorMessage, logEdgeEvent } from "../../_shared/logger.ts"
 import { parsers } from "../../scrape-source/parsers/index.ts"
 import {
@@ -28,10 +29,17 @@ export interface ProcessSourceQueueResult {
   imported: number
 }
 
+export interface SourceFailureNotice {
+  kind: "run_failed" | "dead_letter"
+  sourceName: string
+  error: string
+}
+
 interface SourceQueueWorkerDependencies {
   parsers: Record<SourceType, SourceParser>
   importParsedSourceEvents: typeof importParsedSourceEvents
   extractWithLlm: typeof extractWithLlm
+  notifyFailure?: (notice: SourceFailureNotice) => Promise<void>
 }
 
 export function shouldReleaseBeforeSourceStart(elapsedMs: number, budgetMs = 105_000): boolean {
@@ -181,6 +189,39 @@ const defaultWorkerDependencies: SourceQueueWorkerDependencies = {
   parsers,
   importParsedSourceEvents,
   extractWithLlm,
+  notifyFailure: async (notice) => {
+    await sendFailurePing({
+      functionName: "process-source-queue",
+      kind: notice.kind,
+      subject: notice.sourceName,
+      error: notice.error,
+    })
+  },
+}
+
+// U3 life-support alerting (R14): one ping per failed run, one per new
+// dead-letter (attempt 4 is the scheduleRetry dead-letter threshold). The ping
+// must never break the pipeline it monitors, so failures here only log.
+async function notifySourceFailure(
+  dependencies: SourceQueueWorkerDependencies,
+  source: EventSourceRow,
+  attemptCount: number,
+  error: string
+): Promise<void> {
+  if (!dependencies.notifyFailure) return
+  try {
+    await dependencies.notifyFailure({
+      kind: sourceRetryDelayMinutes(attemptCount) === null ? "dead_letter" : "run_failed",
+      sourceName: source.name,
+      error,
+    })
+  } catch (err) {
+    logEdgeEvent("warn", "source failure notification threw", {
+      function: "process-source-queue",
+      source_id: source.id,
+      error: errorMessage(err),
+    })
+  }
 }
 
 async function handleExtractionFailure(
@@ -190,7 +231,8 @@ async function handleExtractionFailure(
   source: EventSourceRow,
   startedRow: SourceQueueRow,
   extractor: "deterministic" | "llm",
-  err: unknown
+  err: unknown,
+  dependencies: SourceQueueWorkerDependencies
 ): Promise<ProcessSourceQueueResult> {
   const message = errorMessage(err)
   await persistExtractionTrace(
@@ -206,6 +248,7 @@ async function handleExtractionFailure(
   )
   await markRunError(supabase, runId, message)
   await scheduleRetry(supabase, row.id, startedRow.attempt_count, message)
+  await notifySourceFailure(dependencies, source, startedRow.attempt_count, message)
   return { outcome: "retry", imported: 0 }
 }
 
@@ -337,7 +380,8 @@ async function extractParsedEventsForSource(
       source,
       startedRow,
       "deterministic",
-      new Error(`No parser registered for source_type=${source.source_type}`)
+      new Error(`No parser registered for source_type=${source.source_type}`),
+      dependencies
     )
     return { status: "retry", result }
   }
@@ -356,7 +400,8 @@ async function extractParsedEventsForSource(
       source,
       startedRow,
       "deterministic",
-      err
+      err,
+      dependencies
     )
     return { status: "retry", result }
   }
@@ -378,6 +423,7 @@ async function extractParsedEventsForSource(
         : "Deterministic extraction returned no valid events"
     await markRunError(supabase, runId, message)
     await scheduleRetry(supabase, row.id, startedRow.attempt_count, message)
+    await notifySourceFailure(dependencies, source, startedRow.attempt_count, message)
     return {
       status: "retry",
       result: { outcome: "retry", imported: 0 },
@@ -426,7 +472,8 @@ async function extractParsedEventsForSource(
         source,
         startedRow,
         "llm",
-        err
+        err,
+        dependencies
       )
       return { status: "retry", result }
     }
@@ -465,11 +512,13 @@ export async function processSourceQueueRow(
   )
 
   if (result.status !== "success" && result.status !== "partial") {
-    await scheduleRetry(
-      supabase,
-      row.id,
+    const message = result.error ?? "Source processing failed"
+    await scheduleRetry(supabase, row.id, runnable.startedRow.attempt_count, message)
+    await notifySourceFailure(
+      dependencies,
+      runnable.source,
       runnable.startedRow.attempt_count,
-      result.error ?? "Source processing failed"
+      message
     )
     return { outcome: "retry", imported: result.eventsImported }
   }

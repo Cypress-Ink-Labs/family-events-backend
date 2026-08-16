@@ -341,7 +341,11 @@ export async function importParsedSourceEvents(
                 if (Number.isFinite(startMs)) {
                   const tokens = titleTokens(title)
                   const hourBucket = Math.floor(startMs / 3_600_000)
-                  for (let bucket = hourBucket - 4; bucket <= hourBucket + 4 && !match; bucket += 1) {
+                  for (
+                    let bucket = hourBucket - 4;
+                    bucket <= hourBucket + 4 && !match;
+                    bucket += 1
+                  ) {
                     const candidatesInBucket = bucketMap.get(bucket)
                     if (!candidatesInBucket) continue
 

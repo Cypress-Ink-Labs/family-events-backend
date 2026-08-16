@@ -66,7 +66,10 @@ function createMockSupabase(opts: {
     const orderCalls: Array<{ col: string; ascending: boolean }> = []
     let rangeCall: { from: number; to: number } | undefined
 
-    function record(inCalls: Array<{ col: string; val: unknown[] }> = [], rangeCalls?: Array<{ from: number; to: number }>) {
+    function record(
+      inCalls: Array<{ col: string; val: unknown[] }> = [],
+      rangeCalls?: Array<{ from: number; to: number }>
+    ) {
       queryCalls.push({
         from: tableName,
         selectStr,
@@ -79,7 +82,9 @@ function createMockSupabase(opts: {
     }
 
     function filteredRows() {
-      let result = rows.filter((row) => gtCalls.every(({ col, val }) => String(row[col]) > String(val)))
+      let result = rows.filter((row) =>
+        gtCalls.every(({ col, val }) => String(row[col]) > String(val))
+      )
       for (const { col, ascending } of orderCalls) {
         result = [...result].sort((a, b) => {
           const comparison = String(a[col]).localeCompare(String(b[col]))
@@ -122,7 +127,9 @@ function createMockSupabase(opts: {
         return Promise.resolve({ data: filtered, error: null })
       },
       then(
-        onfulfilled: ((value: { data: Array<Record<string, unknown>>; error: null }) => unknown) | null = null,
+        onfulfilled:
+          | ((value: { data: Array<Record<string, unknown>>; error: null }) => unknown)
+          | null = null,
         onrejected: ((reason: unknown) => unknown) | null = null
       ) {
         const currentRange = rangeCall
@@ -405,7 +412,10 @@ Deno.test("digest profile and preferred-city reads stay within bounded chunks", 
   const supabase = createMockSupabase({ queryCalls })
 
   for (let i = 0; i < userIds.length; i += 500) {
-    await supabase.from("user_profiles").select("id").in("id", userIds.slice(i, i + 500))
+    await supabase
+      .from("user_profiles")
+      .select("id")
+      .in("id", userIds.slice(i, i + 500))
   }
   for (let i = 0; i < userIds.length; i += 200) {
     await supabase
@@ -418,8 +428,14 @@ Deno.test("digest profile and preferred-city reads stay within bounded chunks", 
   const preferredCityCalls = queryCalls.filter((call) => call.from === "user_preferred_cities")
   assertEquals(profileCalls.length, 3)
   assertEquals(preferredCityCalls.length, 6)
-  assertEquals(profileCalls.every((call) => call.inCalls[0].val.length <= 500), true)
-  assertEquals(preferredCityCalls.every((call) => call.inCalls[0].val.length <= 200), true)
+  assertEquals(
+    profileCalls.every((call) => call.inCalls[0].val.length <= 500),
+    true
+  )
+  assertEquals(
+    preferredCityCalls.every((call) => call.inCalls[0].val.length <= 200),
+    true
+  )
 })
 
 Deno.test("preferred cities fallback: user with no rows uses primary city_id", async () => {

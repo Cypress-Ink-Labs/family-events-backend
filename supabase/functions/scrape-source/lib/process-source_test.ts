@@ -255,9 +255,9 @@ if (typeof Deno !== "undefined") {
         if (pendingUpdate) {
           const error =
             table === "source_runs"
-              ? opts.sourceRunUpdateError ?? null
+              ? (opts.sourceRunUpdateError ?? null)
               : table === "event_sources"
-                ? opts.eventSourceUpdateError ?? null
+                ? (opts.eventSourceUpdateError ?? null)
                 : null
           return Promise.resolve({ data: null, error })
         }
@@ -686,12 +686,9 @@ if (typeof Deno !== "undefined") {
       },
     ]
 
-    await importParsedSourceEvents(
-      db as never,
-      buildDedupSource(),
-      "run-recurring",
-      [buildParsedEventForDedup()]
-    )
+    await importParsedSourceEvents(db as never, buildDedupSource(), "run-recurring", [
+      buildParsedEventForDedup(),
+    ])
 
     assertEquals(db.bulkRpcCalls[0].length, 1)
   })

@@ -4,6 +4,7 @@ import {
   processSourceQueueRow,
   shouldFallbackToLlm,
   sourceRetryDelayMinutes,
+  type SourceFailureNotice,
 } from "./worker.ts"
 import type {
   EventSourceRow,
@@ -391,6 +392,84 @@ Deno.test("processSourceQueueRow retries deterministic extraction errors", async
       p_attempt_count: 1,
       p_error: "extract failed",
     },
+  })
+})
+
+Deno.test("processSourceQueueRow pings the operator once per failed run", async () => {
+  const db = createFakeSupabase()
+  const notices: SourceFailureNotice[] = []
+
+  const result = await processSourceQueueRow(db.client as never, queueRow(), {
+    ...createDependencies({
+      parser: parser({ fetchArtifact: () => Promise.reject(new Error("fetch failed")) }),
+    }),
+    notifyFailure: (notice) => {
+      notices.push(notice)
+      return Promise.resolve()
+    },
+  })
+
+  assertEquals(result, { outcome: "retry", imported: 0 })
+  assertEquals(notices, [{ kind: "run_failed", sourceName: "Source", error: "fetch failed" }])
+})
+
+Deno.test("processSourceQueueRow pings a dead-letter when retries are exhausted", async () => {
+  const db = createFakeSupabase()
+  // mark_source_scrape_queue_started returns attempt_count 4 — the
+  // scheduleRetry RPC dead-letters at >= 4, so the notice must say so.
+  db.client.rpc = (name: string, params?: Record<string, unknown>) => {
+    db.rpcCalls.push({ name, params })
+    if (name === "mark_source_scrape_queue_started") {
+      return Promise.resolve({ data: { ...queueRow(), attempt_count: 4 }, error: null })
+    }
+    return Promise.resolve({ data: null, error: null })
+  }
+  const notices: SourceFailureNotice[] = []
+
+  const result = await processSourceQueueRow(db.client as never, queueRow(), {
+    ...createDependencies({
+      parser: parser({ fetchArtifact: () => Promise.reject(new Error("still broken")) }),
+    }),
+    notifyFailure: (notice) => {
+      notices.push(notice)
+      return Promise.resolve()
+    },
+  })
+
+  assertEquals(result, { outcome: "retry", imported: 0 })
+  assertEquals(notices, [{ kind: "dead_letter", sourceName: "Source", error: "still broken" }])
+})
+
+Deno.test("processSourceQueueRow sends no ping on success", async () => {
+  const db = createFakeSupabase()
+  const notices: SourceFailureNotice[] = []
+
+  const result = await processSourceQueueRow(db.client as never, queueRow(), {
+    ...createDependencies(),
+    notifyFailure: (notice) => {
+      notices.push(notice)
+      return Promise.resolve()
+    },
+  })
+
+  assertEquals(result, { outcome: "succeeded", imported: 1 })
+  assertEquals(notices, [])
+})
+
+Deno.test("processSourceQueueRow result is unchanged when the failure ping throws", async () => {
+  const db = createFakeSupabase()
+
+  const result = await processSourceQueueRow(db.client as never, queueRow(), {
+    ...createDependencies({
+      parser: parser({ fetchArtifact: () => Promise.reject(new Error("fetch failed")) }),
+    }),
+    notifyFailure: () => Promise.reject(new Error("telegram down")),
+  })
+
+  assertEquals(result, { outcome: "retry", imported: 0 })
+  assertEquals(db.rpcCalls.at(-1), {
+    name: "source_scrape_queue_schedule_retry",
+    params: { p_queue_id: 42, p_attempt_count: 1, p_error: "fetch failed" },
   })
 })
 

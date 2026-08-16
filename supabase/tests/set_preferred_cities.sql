@@ -248,6 +248,49 @@ BEGIN
   RAISE NOTICE 'T6_OK: u2 rows + profile untouched by u1 operations.';
 END $$;
 
+-- -----------------------------------------------------------------------------
+-- T7 Regression (20260816002000): flip primary between two EXISTING rows with
+-- the new primary FIRST in p_city_ids. The original body raised 23505 here —
+-- the one-primary partial unique index is enforced per row, so promoting A
+-- before demoting C violated it. T2 missed this because its new primary was a
+-- freshly inserted row and the ordering happened to demote first.
+-- State entering T7 (from T2): u1 has [A(not primary), C(primary)].
+-- -----------------------------------------------------------------------------
+DO $$
+DECLARE u1 uuid; a uuid; c uuid;
+BEGIN
+  SELECT (v)::uuid INTO u1 FROM _fx WHERE k='u1';
+  SELECT (v)::uuid INTO a  FROM _fx WHERE k='city_a';
+  SELECT (v)::uuid INTO c  FROM _fx WHERE k='city_c';
+
+  SET LOCAL role authenticated;
+  PERFORM set_config('request.jwt.claim.sub', u1::text, true);
+  -- New primary A listed before current primary C.
+  PERFORM public.set_preferred_cities(ARRAY[a, c]::uuid[], a);
+  RESET role;
+END $$;
+
+DO $$
+DECLARE u1 uuid; a uuid; prim int; mirror uuid;
+BEGIN
+  SELECT (v)::uuid INTO u1 FROM _fx WHERE k='u1';
+  SELECT (v)::uuid INTO a  FROM _fx WHERE k='city_a';
+
+  SELECT count(*) INTO prim FROM public.user_preferred_cities WHERE user_id = u1 AND is_primary;
+  IF prim <> 1 THEN RAISE EXCEPTION 'T7_FAIL: expected exactly 1 primary, got %', prim; END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.user_preferred_cities WHERE user_id=u1 AND city_id=a AND is_primary
+  ) THEN RAISE EXCEPTION 'T7_FAIL: city_a should be the primary after the flip'; END IF;
+
+  SELECT city_preference_id INTO mirror FROM public.user_profiles WHERE id = u1;
+  IF mirror IS DISTINCT FROM a THEN
+    RAISE EXCEPTION 'T7_FAIL: profile mirror % <> city_a (%)', mirror, a;
+  END IF;
+
+  RAISE NOTICE 'T7_OK: existing-rows primary flip (new primary first in array) succeeded.';
+END $$;
+
 ROLLBACK;
 
 \echo 'set_preferred_cities: PASS'

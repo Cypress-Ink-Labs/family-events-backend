@@ -1,7 +1,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import { requireServiceRole } from "./auth.ts"
 import { buildCorsHeaders, resolveAllowedOrigin } from "./cors.ts"
-import { errorContext } from "./logger.ts"
+import { sendFailurePing } from "./failure-ping.ts"
+import { errorContext, errorMessage } from "./logger.ts"
 import { captureEdgeException } from "./sentry.ts"
 
 interface ServiceRoleJsonContext {
@@ -82,6 +83,15 @@ export function serveServiceRoleJson(
         err,
         errorContext(err, { function: functionName, stage: errorStage })
       )
+      // U3 life-support alerting: a scheduled function that crashes pings the
+      // operator, naming which function failed. Covers every family served by
+      // this wrapper (scrape, tag, review, digest, reminders, dispatch, push).
+      // sendFailurePing never throws and degrades to a log when unconfigured.
+      await sendFailurePing({
+        functionName,
+        kind: "function_failed",
+        error: errorMessage(err),
+      })
       // Do not leak DB/PostgREST detail (code=/details=) to callers. Full detail
       // is logged + sent to Sentry above; the client gets a correlation id.
       return jsonResponse(

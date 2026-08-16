@@ -74,6 +74,9 @@ TEST_FILES=(
   supabase/tests/reference_data.sql
   supabase/tests/plan_events_for_user_range_age.sql
   supabase/tests/plan_events_for_user_range_hydrated.sql
+  supabase/tests/event_sources_stale_status.sql
+  supabase/tests/redrive_constraint_bug_dead_letters.sql
+  supabase/tests/clerk_user_mapping.sql
 )
 
 for test_file in "${TEST_FILES[@]}"; do
