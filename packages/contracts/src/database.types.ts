@@ -194,6 +194,33 @@ export type Database = {
         }
         Relationships: []
       }
+      clerk_user_mapping: {
+        Row: {
+          clerk_user_id: string
+          created_at: string
+          email: string
+          role: string
+          supabase_uuid: string
+          updated_at: string
+        }
+        Insert: {
+          clerk_user_id: string
+          created_at?: string
+          email: string
+          role?: string
+          supabase_uuid: string
+          updated_at?: string
+        }
+        Update: {
+          clerk_user_id?: string
+          created_at?: string
+          email?: string
+          role?: string
+          supabase_uuid?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           body: string
@@ -755,6 +782,7 @@ export type Database = {
       event_tag_queue: {
         Row: {
           attempt_count: number
+          claimed_at: string | null
           enqueued_at: string
           event_id: string
           finished_at: string | null
@@ -768,6 +796,7 @@ export type Database = {
         }
         Insert: {
           attempt_count?: number
+          claimed_at?: string | null
           enqueued_at?: string
           event_id: string
           finished_at?: string | null
@@ -781,6 +810,7 @@ export type Database = {
         }
         Update: {
           attempt_count?: number
+          claimed_at?: string | null
           enqueued_at?: string
           event_id?: string
           finished_at?: string | null
@@ -2753,6 +2783,7 @@ export type Database = {
         Args: { p_limit?: number }
         Returns: {
           attempt_count: number
+          claimed_at: string | null
           enqueued_at: string
           event_id: string
           finished_at: string | null
@@ -3068,6 +3099,7 @@ export type Database = {
         Args: { p_queue_id: number }
         Returns: {
           attempt_count: number
+          claimed_at: string | null
           enqueued_at: string
           event_id: string
           finished_at: string | null
