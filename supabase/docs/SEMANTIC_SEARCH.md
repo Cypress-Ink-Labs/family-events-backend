@@ -151,7 +151,9 @@ fixed in migration `20260618000000_*` (plan 024).
 Embeddings are populated by:
 
 - `embed-event` edge function (on-demand, triggered when an event is created/updated)
-- `backfill-embeddings` cron (fills events missing embeddings)
+- `backfill-embeddings` function (manual/on-demand catch-up for events missing embeddings; not scheduled as a cron)
+
+Note: While `backfill-embeddings` exists as a function, the deployed infrastructure and IaC contain no automatic scheduler for it. The `embed-event` function already handles routine embedding generation inline when events are tagged (when `OPENAI_API_KEY` is configured). Backfill is available as a manual operation for catch-up scenarios only.
 
 Model: OpenAI `text-embedding-3-small` (1536 dimensions).
 Table: `public.event_embeddings` (one row per event, RLS-protected).
