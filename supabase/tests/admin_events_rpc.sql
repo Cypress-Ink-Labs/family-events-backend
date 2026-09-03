@@ -487,6 +487,45 @@ BEGIN
   RAISE NOTICE 'KEYWORD_SYNC_OK';
 END $$;
 
+-- 7) Short fallback keywords treat ILIKE metacharacters as literals.
+DO $$
+DECLARE
+  uid uuid;
+  keyword text;
+  list_total bigint;
+  facet_total bigint;
+BEGIN
+  INSERT INTO public.events (id, title, description, status, start_datetime, created_at, updated_at)
+  VALUES (
+    gen_random_uuid(),
+    'ADMIN RPC Literal 100%_\\',
+    'literal fallback marker',
+    'draft',
+    now() + interval '1 day',
+    now(),
+    now()
+  );
+
+  SELECT id INTO uid FROM _fixture_users WHERE key = 'admin_uid';
+  SET LOCAL ROLE authenticated;
+  PERFORM set_config('request.jwt.claim.sub', uid::text, true);
+
+  FOREACH keyword IN ARRAY ARRAY['%', '_', E'\\']
+  LOOP
+    SELECT COALESCE(MAX(total_count), 0) INTO list_total
+    FROM public.admin_events_enriched(p_keyword => keyword, p_limit => 200);
+    SELECT COALESCE(SUM(count), 0) INTO facet_total
+    FROM public.admin_event_facets(keyword);
+
+    IF list_total IS DISTINCT FROM 1 OR facet_total IS DISTINCT FROM 1 THEN
+      RAISE EXCEPTION 'LITERAL_ESCAPE_FAIL: keyword=% list_total=% facet_total=%', keyword, list_total, facet_total;
+    END IF;
+  END LOOP;
+
+  RESET ROLE;
+  RAISE NOTICE 'LITERAL_ESCAPE_OK';
+END $$;
+
 ROLLBACK;
 
 \echo 'admin_events_rpc: PASS'
