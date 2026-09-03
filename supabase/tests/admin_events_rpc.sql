@@ -491,6 +491,7 @@ END $$;
 DO $$
 DECLARE
   uid uuid;
+  keyword text;
   list_total bigint;
   facet_total bigint;
 BEGIN
@@ -509,17 +510,19 @@ BEGIN
   SET LOCAL ROLE authenticated;
   PERFORM set_config('request.jwt.claim.sub', uid::text, true);
 
-  SELECT COALESCE(MAX(total_count), 0) INTO list_total
-  FROM public.admin_events_enriched(p_keyword => '%', p_limit => 200);
-  SELECT COALESCE(SUM(count), 0) INTO facet_total
-  FROM public.admin_event_facets('%');
+  FOREACH keyword IN ARRAY ARRAY['%', '_', E'\\']
+  LOOP
+    SELECT COALESCE(MAX(total_count), 0) INTO list_total
+    FROM public.admin_events_enriched(p_keyword => keyword, p_limit => 200);
+    SELECT COALESCE(SUM(count), 0) INTO facet_total
+    FROM public.admin_event_facets(keyword);
+
+    IF list_total IS DISTINCT FROM 1 OR facet_total IS DISTINCT FROM 1 THEN
+      RAISE EXCEPTION 'LITERAL_ESCAPE_FAIL: keyword=% list_total=% facet_total=%', keyword, list_total, facet_total;
+    END IF;
+  END LOOP;
 
   RESET ROLE;
-
-  IF list_total IS DISTINCT FROM 1 OR facet_total IS DISTINCT FROM 1 THEN
-    RAISE EXCEPTION 'LITERAL_ESCAPE_FAIL: list_total=% facet_total=%', list_total, facet_total;
-  END IF;
-
   RAISE NOTICE 'LITERAL_ESCAPE_OK';
 END $$;
 
