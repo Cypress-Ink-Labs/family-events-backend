@@ -1,5 +1,3 @@
-BEGIN;
-
 -- PostgreSQL requires ILIKE's ESCAPE expression to contain exactly one
 -- character. The previous definition used the standard string '\\', which is
 -- two backslashes when standard_conforming_strings is on. Use explicit escape
@@ -74,5 +72,3 @@ BEGIN
   ORDER BY e.city_id, e.source_id, e.status;
 END;
 $$;
-
-COMMIT;
