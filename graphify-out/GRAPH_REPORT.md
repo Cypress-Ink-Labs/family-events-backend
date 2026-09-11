@@ -5,7 +5,7 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1774 nodes · 3154 edges · 143 communities (125 shown, 18 thin omitted)
+- 1782 nodes · 3168 edges · 144 communities (126 shown, 18 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -61,6 +61,7 @@
 - [[_COMMUNITY_Admin Review Memory Context|Admin Review Memory Context]]
 - [[_COMMUNITY_Event Tag Classification|Event Tag Classification]]
 - [[_COMMUNITY_Tag Event Handler Tests|Tag Event Handler Tests]]
+- [[_COMMUNITY_Sentry Observability|Sentry Observability]]
 - [[_COMMUNITY_Fake Query Test Helpers|Fake Query Test Helpers]]
 - [[_COMMUNITY_DB Performance Benchmarks|DB Performance Benchmarks]]
 - [[_COMMUNITY_Changeset Config|Changeset Config]]
@@ -162,13 +163,19 @@
 7. `SupabaseProvider` - 19 edges
 8. `captureEdgeException()` - 19 edges
 9. `errorContext()` - 18 edges
-10. `RailwayProvider` - 16 edges
+10. `initializeSentry()` - 17 edges
+11. `redact()` - 16 edges
+12. `RailwayProvider` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `collect-db-evidence.sql Diagnostic Script` --semantically_similar_to--> `P0-003 RLS/RPC Benchmark (After)`  [INFERRED] [semantically similar]
   scripts/db/README.md → supabase/benchmarks/artifacts/p0-003-after.txt
 - `Railway Cron Drift Guard (Terraform)` --semantically_similar_to--> `cron-enrich-events Railway Service`  [INFERRED] [semantically similar]
   .github/workflows/railway-cron-drift.yml → supabase/functions/backfill-event-enrichment/README.md
+- `PgExceptionFilter` --calls--> `captureUnhandledException()`  [EXTRACTED]
+  src/common/pg-exception.filter.ts → src/observability/sentry.ts
+- `initializeSentry()` --calls--> `sentryOptions()` --uses--> `redact()`  [EXTRACTED]
+  src/instrument.ts → src/observability/sentry.ts → src/observability/redaction.ts
 - `EventSourceRow` --references--> `EventProcessingMode`  [EXTRACTED]
   supabase/functions/scrape-source/lib/types.ts → packages/contracts/src/database-enums.ts
 - `processReviewQueueRow()` --calls--> `errorMessage()`  [INFERRED]
@@ -428,7 +435,7 @@ Nodes (8): baseHeaders, callFunction(), callJson(), callRpc(), drainSourceQueue(
 
 ### Community 62 - "Environment Variables"
 Cohesion: 0.47
-Nodes (6): boolEnv(), EnvReader, intEnv(), optionalEnv(), requiredEnv(), urlEnv()
+Nodes (10): boolEnv(), EnvReader, intEnv(), optionalEnv(), requiredEnv(), urlEnv(), SENTRY_DSN, SENTRY_ENVIRONMENT, SENTRY_RELEASE, SENTRY_TRACES_SAMPLE_RATE
 
 ### Community 63 - "Nominatim Geocoder"
 Cohesion: 0.31
@@ -445,6 +452,10 @@ Nodes (5): changeSummary(), formatEventDate(), JoinRow, PrefRow, ReminderTarget
 ### Community 66 - "CORS Headers"
 Cohesion: 0.32
 Nodes (4): buildCorsHeaders(), DEFAULT_ALLOWED_ORIGINS, resolveAllowedOrigin(), WeatherSnapshot
+
+### Community 51 - "Sentry Observability"
+Cohesion: 0.28
+Nodes (8): captureUnhandledException(), initializeSentry(), redact(), REDACTED_VALUE, sentryOptions(), SENTRY_DSN, SENTRY_ENVIRONMENT, SENTRY_RELEASE (+0 more)
 
 ### Community 67 - "Edge Logger"
 Cohesion: 0.32
@@ -679,7 +690,7 @@ Cohesion: 0.50
 Nodes (3): imports, @supabase/functions-js/edge-runtime.d.ts, nodeModulesDir
 
 ## Knowledge Gaps
-- **523 isolated node(s):** `$schema`, `changelog`, `commit`, `fixed`, `linked` (+518 more)
+- **520 isolated node(s):** `$schema`, `changelog`, `commit`, `fixed`, `linked` (+515 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -690,6 +701,8 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.053) - this node is a cross-community bridge._
 - **Why does `logEdgeEvent()` connect `Process Source Handler` to `LLM Extraction Pipeline`, `Scrape Source Edge Function`, `Source Queue`, `Admin Cron Handler`, `Edge Logger`, `LLM Tag Event Handler`, `LLM Event Review Queue`, `Parent Tips Generator`, `Embedding Backfill`, `Mobile Push Notifications`, `Weekly Digest Handler`, `Admin Review Memory Context`, `Parent Tips Pass`, `Event Notification Emails`?**
   _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `redact()` connect `Sentry Observability` to `Environment Variables`, `Rollback and Logging`, `PgExceptionFilter`?**
+  _16 edges - this node bridges observability, error handling, and configuration._
 - **Why does `errorMessage()` connect `Tag Event Index` to `LLM Extraction Pipeline`, `Scrape Source Edge Function`, `Edge Logger`, `LLM Tag Event Handler`, `Attribution Backfill Function`, `Parent Tips Generator`, `LLM Event Review Queue`, `Parent Tips Pass`, `Process Source Handler`?**
   _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **What connects `$schema`, `changelog`, `commit` to the rest of the system?**
