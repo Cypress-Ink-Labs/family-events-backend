@@ -1,11 +1,11 @@
 # Graph Report - .  (2026-06-12)
 
 ## Corpus Check
-- 381 files · ~220,583 words
+- 396 files · ~223,274 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1774 nodes · 3154 edges · 143 communities (125 shown, 18 thin omitted)
+- 1822 nodes · 3228 edges · 143 communities (125 shown, 18 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -252,7 +252,7 @@ Nodes (17): ParserContext, ParserFetchOptions, ParsedEvent, SourceParser, Determ
 
 ### Community 16 - "Invite Gate RLS/RPC"
 Cohesion: 0.12
-Nodes (25): admin_approve_invite_request RPC, private.bootstrap_admin() Admin Provisioning, private.enforce_invited_oauth_signup() Trigger, public.handle_new_user() Trigger, Invite Gate (app.settings.require_invite GUC), private.invites_required() Function, JSON-LD Schema.org Event Parsing, LLM Proxy Service (apps/llm-proxy) (+17 more)
+Nodes (73): admin_approve_invite_request RPC, admin_reject_invite_request RPC, AdminInviteController, AdminInviteService, AdminInviteRepository, AdminInviteRequestDto, AdminApprovedInviteRequestDto, AdminInviteRequestRow, AdminApprovedInviteRequestRow, AdminInviteRequestStatus, AdminRejectInviteRequestInput, parseAdminInviteRequestId(), parseAdminInviteRequestQuery(), parseAdminApproveInviteRequestBody(), parseAdminRejectInviteRequestBody(), listRequests(), approveRequest(), rejectRequest(), private.bootstrap_admin() Admin Provisioning, private.enforce_invited_oauth_signup() Trigger, public.handle_new_user() Trigger, Invite Gate (app.settings.require_invite GUC), private.invites_required() Function, JSON-LD Schema.org Event Parsing, LLM Proxy Service (apps/llm-proxy) (+48 more)
 
 ### Community 17 - "Railway Cron Drift Guard"
 Cohesion: 0.15
@@ -679,7 +679,7 @@ Cohesion: 0.50
 Nodes (3): imports, @supabase/functions-js/edge-runtime.d.ts, nodeModulesDir
 
 ## Knowledge Gaps
-- **523 isolated node(s):** `$schema`, `changelog`, `commit`, `fixed`, `linked` (+518 more)
+- **571 isolated node(s):** `$schema`, `changelog`, `commit`, `fixed`, `linked` (+566 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
