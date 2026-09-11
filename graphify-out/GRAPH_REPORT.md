@@ -5,7 +5,7 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1774 nodes · 3154 edges · 143 communities (125 shown, 18 thin omitted)
+- 1789 nodes · 3189 edges · 144 communities (126 shown, 18 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -77,6 +77,7 @@
 - [[_COMMUNITY_Lint Config Package|Lint Config Package]]
 - [[_COMMUNITY_Send Reminders Tests|Send Reminders Tests]]
 - [[_COMMUNITY_CORS Headers|CORS Headers]]
+- [[_COMMUNITY_Observability Module|Observability Module]]
 - [[_COMMUNITY_Edge Logger|Edge Logger]]
 - [[_COMMUNITY_Sitemap Handler|Sitemap Handler]]
 - [[_COMMUNITY_Enrichment Backfill Docs|Enrichment Backfill Docs]]
@@ -153,16 +154,16 @@
 - [[_COMMUNITY_Community 140|Community 140]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `logEdgeEvent()` - 31 edges
+1. `logEdgeEvent()` - 32 edges
 2. `validateExternalUrl()` - 28 edges
 3. `scripts` - 24 edges
 4. `cleanDescription()` - 23 edges
 5. `extractPrice()` - 22 edges
 6. `ParsedEvent` - 20 edges
-7. `SupabaseProvider` - 19 edges
-8. `captureEdgeException()` - 19 edges
-9. `errorContext()` - 18 edges
-10. `RailwayProvider` - 16 edges
+7. `emitStructuredLog()` - 19 edges
+8. `SupabaseProvider` - 19 edges
+9. `captureEdgeException()` - 19 edges
+10. `errorContext()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `collect-db-evidence.sql Diagnostic Script` --semantically_similar_to--> `P0-003 RLS/RPC Benchmark (After)`  [INFERRED] [semantically similar]
@@ -446,87 +447,91 @@ Nodes (5): changeSummary(), formatEventDate(), JoinRow, PrefRow, ReminderTarget
 Cohesion: 0.32
 Nodes (4): buildCorsHeaders(), DEFAULT_ALLOWED_ORIGINS, resolveAllowedOrigin(), WeatherSnapshot
 
-### Community 67 - "Edge Logger"
+### Community 67 - "Observability Module"
+Cohesion: 0.28
+Nodes (11): ObservabilityModule, RequestLoggingMiddleware, requestIdFromHeader(), runWithLogCorrelation(), currentLogCorrelation(), emitStructuredLog(), safeStructuredJson(), STRUCTURED_LOG_SINK, StructuredLogSink, consoleStructuredLogSink, LogCorrelation
+
+### Community 68 - "Edge Logger"
 Cohesion: 0.32
 Nodes (6): EdgeLogContext, looksLikePostgrestError(), PostgrestErrorShape, serializeError(), toError(), initSentry()
 
-### Community 68 - "Sitemap Handler"
+### Community 69 - "Sitemap Handler"
 Cohesion: 0.39
 Nodes (7): escapeXml(), handleSitemap(), PublicEvent, robotsTxt(), sitemapXml(), STATIC_PAGES, toW3CDate()
 
-### Community 69 - "Enrichment Backfill Docs"
+### Community 70 - "Enrichment Backfill Docs"
 Cohesion: 0.43
 Nodes (7): backfill-event-enrichment Function README, backfill-event-enrichment Edge Function, cron-enrich-events Railway Service, Nominatim Geocoding, Railway Cron Drift Guard (Terraform), Unsplash Image Fallback Integration, Railway Cron Drift Workflow
 
-### Community 70 - "Cron Runner Shell Script (1)"
+### Community 71 - "Cron Runner Shell Script (1)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 71 - "CI/CD and Contracts Package"
+### Community 72 - "CI/CD and Contracts Package"
 Cohesion: 0.29
 Nodes (7): @family-events/contracts npm Package, database.types.ts Generated Contract, Secret Scanning (TruffleHog + Gitleaks), DB Type Drift Check, pnpm Workspace Configuration, CI Workflow, Publish Packages Workflow
 
-### Community 72 - "Cron Runner Shell Script (2)"
+### Community 73 - "Cron Runner Shell Script (2)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 73 - "React TSConfig"
+### Community 74 - "React TSConfig"
 Cohesion: 0.29
 Nodes (6): compilerOptions, jsx, lib, types, extends, include
 
-### Community 74 - "Cron Runner Shell Script (3)"
+### Community 75 - "Cron Runner Shell Script (3)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 75 - "Cron Runner Shell Script (4)"
+### Community 76 - "Cron Runner Shell Script (4)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 76 - "Cron Runner Shell Script (5)"
+### Community 77 - "Cron Runner Shell Script (5)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 77 - "Cron Runner Shell Script (6)"
+### Community 78 - "Cron Runner Shell Script (6)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 78 - "Cron Runner Shell Script (7)"
+### Community 79 - "Cron Runner Shell Script (7)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 79 - "Cron Runner Shell Script (8)"
+### Community 80 - "Cron Runner Shell Script (8)"
 Cohesion: 0.52
 Nodes (4): emit(), is_enabled(), log_run(), cron-runner.sh script
 
-### Community 80 - "Cron Runner Script Docs"
+### Community 81 - "Cron Runner Script Docs"
 Cohesion: 0.52
 Nodes (4): cron-runner.sh script, emit(), is_enabled(), log_run()
 
-### Community 81 - "Deno Edge Function Config (1)"
+### Community 82 - "Deno Edge Function Config (1)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 82 - "Deno Edge Function Config (2)"
+### Community 83 - "Deno Edge Function Config (2)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 83 - "Deno Edge Function Config (3)"
+### Community 84 - "Deno Edge Function Config (3)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 84 - "React Vite TSConfig"
+### Community 85 - "React Vite TSConfig"
 Cohesion: 0.33
 Nodes (5): compilerOptions, jsx, lib, types, extends
 
-### Community 85 - "TS Path Config (1)"
+### Community 86 - "TS Path Config (1)"
 Cohesion: 0.33
 Nodes (5): compilerOptions, paths, extends, include, *
 
-### Community 86 - "Deno Edge Function Config (4)"
+### Community 87 - "Deno Edge Function Config (4)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 87 - "TS Path Config (2)"
+### Community 88 - "TS Path Config (2)"
 Cohesion: 0.33
 Nodes (5): compilerOptions, paths, extends, include, *
 
@@ -534,17 +539,17 @@ Nodes (5): compilerOptions, paths, extends, include, *
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 90 - "Root Scripts Package"
+### Community 90 - "Deno Edge Function Config (6)"
+Cohesion: 0.33
+Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
+
+### Community 91 - "Root Scripts Package"
 Cohesion: 0.33
 Nodes (5): name, private, scripts, dev, test
 
-### Community 91 - "Migration Rollback Tests"
+### Community 92 - "Migration Rollback Tests"
 Cohesion: 0.33
 Nodes (4): LEGACY_ALLOWLIST, migrationsDir, repoRoot, rollbacksDir
-
-### Community 92 - "Deno Edge Function Config (6)"
-Cohesion: 0.33
-Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
 ### Community 93 - "Deno Edge Function Config (7)"
 Cohesion: 0.33
@@ -570,111 +575,123 @@ Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, 
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 99 - "Railway Health Check Script"
+### Community 99 - "Deno Edge Function Config (13)"
+Cohesion: 0.33
+Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
+
+### Community 100 - "Railway Health Check Script"
 Cohesion: 0.47
 Nodes (4): expected_cron_for(), expected_root_for(), service_in_iac(), check-railway.sh script
 
-### Community 100 - "URL Validation Sync Script"
+### Community 101 - "URL Validation Sync Script"
 Cohesion: 0.33
 Nodes (5): edgePath, edgeSource, repoRoot, sharedPath, sharedSource
-
-### Community 101 - "Deno Edge Function Config (13)"
-Cohesion: 0.33
-Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
 ### Community 102 - "Deno Edge Function Config (14)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 104 - "Deno Edge Function Config (15)"
+### Community 103 - "Deno Edge Function Config (15)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 105 - "Deno Edge Function Config (16)"
+### Community 104 - "Deno Edge Function Config (16)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 106 - "Deno Edge Function Config (17)"
+### Community 105 - "Deno Edge Function Config (17)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 107 - "Deno Edge Function Config (18)"
+### Community 106 - "Deno Edge Function Config (18)"
 Cohesion: 0.33
 Nodes (5): imports, @b-fuze/deno-dom, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 108 - "Deno Supabase Config (1)"
+### Community 107 - "Deno Supabase Config (1)"
 Cohesion: 0.40
 Nodes (4): imports, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 109 - "Internal Package Metadata (1)"
+### Community 108 - "Internal Package Metadata (1)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 110 - "Node TSConfig"
+### Community 109 - "Node TSConfig"
 Cohesion: 0.40
 Nodes (4): compilerOptions, lib, types, extends
 
-### Community 111 - "Internal Package Metadata (2)"
+### Community 110 - "Internal Package Metadata (2)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 112 - "Deno Supabase Config (2)"
+### Community 111 - "Deno Supabase Config (2)"
 Cohesion: 0.40
 Nodes (4): imports, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 113 - "Internal Package Metadata (3)"
+### Community 112 - "Internal Package Metadata (3)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 114 - "Deno Supabase Config (3)"
+### Community 113 - "Deno Supabase Config (3)"
 Cohesion: 0.40
 Nodes (4): imports, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 116 - "Railway Cron Build"
+### Community 114 - "DB Types CI Check"
+Cohesion: 0.60
+Nodes (4): db-types-check.yml CI Job, database.types.ts File, supabase gen types CLI, DB Type Drift Detection
+
+### Community 115 - "Railway Cron Build"
 Cohesion: 0.60
 Nodes (4): cronBuild(), cronDeploy(), cronService(), preservedCronEnv
 
-### Community 117 - "Internal Package Metadata (4)"
+### Community 116 - "Internal Package Metadata (4)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 118 - "Deno DOM Config"
+### Community 117 - "Deno DOM Config"
 Cohesion: 0.40
 Nodes (4): imports, @b-fuze/deno-dom, @supabase/supabase-js, nodeModulesDir
 
-### Community 119 - "Internal Package Metadata (5)"
+### Community 118 - "Internal Package Metadata (5)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 120 - "Local Setup Script"
+### Community 119 - "Local Setup Script"
 Cohesion: 0.70
 Nodes (4): fail(), ok(), warn(), setup-local.sh script
 
-### Community 121 - "Edge Function Verify Script"
+### Community 120 - "Edge Function Verify Script"
 Cohesion: 0.70
 Nodes (4): main(), pollForSourceRun(), requireEnv(), sleep()
 
-### Community 122 - "Internal Package Metadata (6)"
+### Community 121 - "Internal Package Metadata (6)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 124 - "Deno Supabase Config (4)"
+### Community 122 - "Weekly Digest Tests"
+Cohesion: 0.50
+Nodes (3): FakeEvent, FakeQuery, FakeSupabase
+
+### Community 123 - "Deno Supabase Config (4)"
 Cohesion: 0.40
 Nodes (4): imports, @supabase/functions-js/edge-runtime.d.ts, @supabase/supabase-js, nodeModulesDir
 
-### Community 125 - "Internal Package Metadata (7)"
+### Community 124 - "Internal Package Metadata (7)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 126 - "Internal Package Metadata (8)"
+### Community 125 - "Internal Package Metadata (8)"
 Cohesion: 0.40
 Nodes (4): description, name, private, version
 
-### Community 127 - "Cron Runner Boundary Tests"
+### Community 126 - "Cron Runner Boundary Tests"
 Cohesion: 0.50
 Nodes (3): cronServices, repoRoot, sharedRunnerPath
 
-### Community 129 - "Deno Node Modules Config"
+### Community 127 - "Email Template Aliases"
+Cohesion: 0.67
+Nodes (3): package.json exports, EventChangeEmail, EventReminderEmail
+
+### Community 128 - "Deno Node Modules Config"
 Cohesion: 0.50
 Nodes (3): imports, @supabase/functions-js/edge-runtime.d.ts, nodeModulesDir
 
@@ -688,8 +705,8 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ParsedEvent` connect `Parser Context and Types` to `LLM Extraction Pipeline`, `RSS Parser`, `Event Processing Pipeline`, `Macaroni Kid Parser`, `Website HTML Parser`, `Attribution Backfill Function`, `BREC Article Parser`, `LocalHop Address Lookup`, `iCal Parser`, `Process Source Handler`, `Event Enrichment Images`, `Date Utilities`?**
   _High betweenness centrality (0.053) - this node is a cross-community bridge._
-- **Why does `logEdgeEvent()` connect `Process Source Handler` to `LLM Extraction Pipeline`, `Scrape Source Edge Function`, `Source Queue`, `Admin Cron Handler`, `Edge Logger`, `LLM Tag Event Handler`, `LLM Event Review Queue`, `Parent Tips Generator`, `Embedding Backfill`, `Mobile Push Notifications`, `Weekly Digest Handler`, `Admin Review Memory Context`, `Parent Tips Pass`, `Event Notification Emails`?**
-  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `logEdgeEvent()` connect `Process Source Handler` to `LLM Extraction Pipeline`, `Scrape Source Edge Function`, `Source Queue`, `Admin Cron Handler`, `Observability Module`, `Edge Logger`, `LLM Tag Event Handler`, `LLM Event Review Queue`, `Parent Tips Generator`, `Embedding Backfill`, `Mobile Push Notifications`, `Weekly Digest Handler`, `Admin Review Memory Context`, `Parent Tips Pass`, `Event Notification Emails`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Why does `errorMessage()` connect `Tag Event Index` to `LLM Extraction Pipeline`, `Scrape Source Edge Function`, `Edge Logger`, `LLM Tag Event Handler`, `Attribution Backfill Function`, `Parent Tips Generator`, `LLM Event Review Queue`, `Parent Tips Pass`, `Process Source Handler`?**
   _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **What connects `$schema`, `changelog`, `commit` to the rest of the system?**
