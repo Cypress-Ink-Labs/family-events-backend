@@ -1,10 +1,10 @@
 # Plan 020: Model B — move the crons to their own IaC-managed Railway project
 
 > **Executor instructions**: HIGH-RISK production migration. It creates a new Railway project, cuts the
-> 8 cron jobs over to it, and decommissions the old ones — with a window where **double-firing crons could
-> send duplicate emails to real users**. Follow every step and STOP condition. Do destructive steps
-> (deleting old services) only after the new ones are verified. Update this plan's row in `plans/README.md`
-> when done/blocked.
+> remaining 6 cron jobs over to it (scrape/stale-cleanup already migrated to NestJS), and decommissions the
+> old ones — with a window where **double-firing crons could send duplicate emails to real users**. Follow
+> every step and STOP condition. Do destructive steps (deleting old services) only after the new ones are
+> verified. Update this plan's row in `plans/README.md` when done/blocked.
 >
 > **Drift check (run first)**: `git diff --stat c3278e6..HEAD -- .railway/railway.ts config/deploy.config.json infra/railway-cron-drift`
 
@@ -35,14 +35,14 @@ old ones, and update the deploy config / drift tooling.
 
 ## Current state (facts the executor needs)
 
-- Live project `family-events-ui` / `production`: `web` (web repo) + 8 crons (this repo). Crons:
+- Live project `family-events-ui` / `production`: `web` (web repo) + 6 active crons (this repo). **Two crons
+  (`cron-scrape-sources`, `cron-cleanup-stale`) have been migrated to the NestJS scheduled job system
+  (`CUTOVER_SCRAPE=true`) and disabled in Railway; they are no longer active in `family-events-ui`.** Remaining crons:
 
   | service | rootDir | schedule | extra secret env |
   |---|---|---|---|
   | cron-tag-queue | cron/tag-queue | `*/5 * * * *` | — |
-  | cron-scrape-sources | cron/scrape-sources | `0 * * * *` | — |
   | cron-db-maintenance | cron/db-maintenance | `15 3 * * *` | — |
-  | cron-cleanup-stale | cron/cleanup-stale | `*/30 * * * *` | — |
   | cron-enrich-events | cron/enrich-events | `*/15 * * * *` | `UNSPLASH_ACCESS_KEY` |
   | cron-send-reminders | cron/send-reminders | `0 11 * * *` | `VITE_VAPID_PRIVATE_KEY`, `VITE_VAPID_PUBLIC_KEY` |
   | cron-weekly-digest | cron/weekly-digest | `0 13 * * 1` | — |
@@ -52,10 +52,10 @@ old ones, and update the deploy config / drift tooling.
   own target `*_URL`. URLs: `https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/<fn>`;
   kill-switch: `.../rest/v1/rpc/is_cron_enabled`. `restartPolicyType` is `NEVER` per
   `infra/railway-cron-drift/cron-services.json` (one-shot crons; do not retry).
-- `.railway/railway.ts` currently targets `project("family-events-ui")` with these 8 crons (URLs SET,
+- `.railway/railway.ts` currently targets `project("family-events-ui")` with the 6 remaining crons (URLs SET,
   secrets `preserve()`). Model B re-points it to the new project.
-- `config/deploy.config.json` `railway.services` lists `web` + the 8 crons together (used by deploy-cli +
-  the `deploy-cli-boundary` guard, which cross-checks `cron-services.json`). Splitting the crons to a new
+- `config/deploy.config.json` `railway.services` lists `web` + the crons together (used by deploy-cli +
+  the `deploy-cli-boundary` guard, which cross-checks `cron-services.json`). Splitting the remaining crons to a new
   project means this list must change.
 - The cron runner POSTs run status to `LOG_CRON_RUN_URL` (→ `log-cron-run` fn → DB). The web admin "cron"
   view (`family-events-web` `apps/web/src/features/admin/hooks/operations/use-admin-crons.ts`) uses
@@ -83,8 +83,11 @@ old ones, and update the deploy config / drift tooling.
 
 **In scope:** `.railway/railway.ts` (re-point to `family-events-cron`), `config/deploy.config.json`
 (split web vs crons), `infra/railway-cron-drift/cron-services.json` + `scripts/railway-cron-drift.mjs` if they
-gain a project reference, the new Railway project + its services/vars, decommissioning the 8 old cron services.
-**Out of scope:** the `web` service / `family-events-ui` project (untouched beyond deleting the 8 crons),
+gain a project reference, the new Railway project + its services/vars, decommissioning the remaining 6 cron services.
+**Already migrated:** `cron-scrape-sources` and `cron-cleanup-stale` have been cut over to the NestJS scheduled job
+system (`CUTOVER_SCRAPE=true`); their legacy Railway cron services are disabled (zero replicas). The scrape cutover
+included: controlled scrape and cleanup runs succeeded, the drain chain completed, and the scrape DLQ remained empty.
+**Out of scope:** the `web` service / `family-events-ui` project (untouched beyond deleting the remaining 6 crons),
 the web repo, the mobile repo, secret *values* (copy via CLI, never commit), cron schedules/behavior.
 
 ## Steps
@@ -100,17 +103,19 @@ the web repo, the mobile repo, secret *values* (copy via CLI, never commit), cro
 
 ### Step 2: Re-point the IaC to the new project
 Edit `.railway/railway.ts`: `project("family-events-cron", { resources: [cronJobs] })` (was `family-events-ui`).
-Keep the 8 cron services, each `*_URL` SET, secrets `preserve()`. Set `restartPolicyType: "NEVER"` to match
-`cron-services.json` (the current file has `ON_FAILURE` — fix it here so apply matches intended one-shot behavior;
-this is in scope for B). Keep `watchPatterns` as `cron/<dir>/**` (this repo's real layout).
+Keep the 6 remaining cron services (`cron-tag-queue`, `cron-db-maintenance`, `cron-enrich-events`,
+`cron-send-reminders`, `cron-weekly-digest`, `cron-review-events`), each `*_URL` SET, secrets `preserve()`. **Omit
+`cron-scrape-sources` and `cron-cleanup-stale`** (migrated to NestJS scheduled jobs). Set `restartPolicyType: "NEVER"`
+to match `cron-services.json` (the current file has `ON_FAILURE` — fix it here so apply matches intended one-shot
+behavior; this is in scope for B). Keep `watchPatterns` as `cron/<dir>/**` (this repo's real layout).
 
-**Verify**: `railway config plan` (linked to the new empty project) shows **create-only** changes (8 services +
+**Verify**: `railway config plan` (linked to the new empty project) shows **create-only** changes (6 services +
 group), **zero deletes**. If any delete appears, STOP.
 
 ### Step 3: Apply (creates services) + seed secrets
-`railway config apply` → creates the 8 cron services with URLs set and secrets unset. Then copy each secret
+`railway config apply` → creates the 6 cron services with URLs set and secrets unset. Then copy each secret
 from the old project into the new one (do NOT print values):
-- All 8: `SUPABASE_SERVICE_ROLE_KEY` (read from any old cron service, set on each new one).
+- All 6: `SUPABASE_SERVICE_ROLE_KEY` (read from any old cron service, set on each new one).
 - `cron-enrich-events`: `UNSPLASH_ACCESS_KEY`.
 - `cron-send-reminders`: `VITE_VAPID_PRIVATE_KEY`, `VITE_VAPID_PUBLIC_KEY`.
 Use `railway variables --set` piped from the old value without echoing it.
@@ -119,24 +124,29 @@ Use `railway variables --set` piped from the old value without echoing it.
 and `... | grep -c SUPABASE_SERVICE_ROLE_KEY` is 1 (don't print the value).
 
 ### Step 4: Cutover without double-firing (the dangerous part)
-Old and new crons would both fire on the same schedule → **duplicate work + duplicate emails**. Cut over per job:
-- **Low-frequency / non-user-facing first** (`cron-cleanup-stale`, `cron-db-maintenance`): let the new one run
+Old and new crons would both fire on the same schedule → **duplicate work + duplicate emails**. **`cron-scrape-sources`
+and `cron-cleanup-stale` have already been cut over to NestJS scheduled jobs and disabled in Railway; skip them.**
+Cut over the remaining 6 jobs:
+- **Low-frequency / non-user-facing first** (`cron-db-maintenance`): let the new one run
   once, confirm green in the new project's logs, then delete the old service (Step 5) — a brief overlap here is
   harmless (idempotent maintenance).
 - **Email-sending crons** (`cron-send-reminders` `0 11`, `cron-weekly-digest` `0 13 Mon`): cut over **outside
   their scheduled window** so only one project ever fires in a given day. Use the `is_cron_enabled` kill switch
   (disable the label in the DB) to hold both off, delete the old service, then re-enable — so exactly one
   service exists when the next scheduled time arrives.
-- **High-frequency queue crons** (`*/5`, `*/15`): a short overlap is mostly idempotent (queue workers claim
-  rows transactionally), but minimize it — delete the old service promptly after the new one is verified.
+- **High-frequency queue crons** (`cron-tag-queue`, `cron-enrich-events`, `cron-review-events` `*/5` or `*/15`):
+  a short overlap is mostly idempotent (queue workers claim rows transactionally), but minimize it — delete the
+  old service promptly after the new one is verified.
 
 **Verify**: at no point are two services with the same label both enabled and scheduled to fire. Document the
 cutover order + timing you used.
 
 ### Step 5: Decommission the old crons
-Delete the 8 cron services from `family-events-ui` (CLI or dashboard). **Leave `web` untouched.**
+Delete the remaining 6 cron services from `family-events-ui` (CLI or dashboard). **`cron-scrape-sources` and
+`cron-cleanup-stale` have already been disabled (zero replicas) as part of the NestJS cutover; if they still exist as
+Railway services, delete them now.** **Leave `web` untouched.**
 
-**Verify**: `family-events-ui` retains only `web`; `family-events-cron` has the 8 crons running green.
+**Verify**: `family-events-ui` retains only `web`; `family-events-cron` has the 6 remaining crons running green.
 
 ### Step 6: Update deploy config + drift tooling + commit
 - `config/deploy.config.json`: split `railway.services` so the crons reference the new project (or remove them
@@ -150,9 +160,10 @@ Delete the 8 cron services from `family-events-ui` (CLI or dashboard). **Leave `
 ## Done criteria
 
 ALL must hold:
-- [ ] New project `family-events-cron` runs all 8 crons green; each `*_URL` set; secrets present (not printed)
+- [ ] New project `family-events-cron` runs the 6 remaining crons green; each `*_URL` set; secrets present (not printed)
 - [ ] `railway config plan` for the new project is create/no-op (never a delete of a pre-existing service)
-- [ ] Old 8 crons deleted from `family-events-ui`; `web` untouched and still serving
+- [ ] Remaining 6 crons deleted from `family-events-ui`; `cron-scrape-sources` and `cron-cleanup-stale` already
+  disabled/removed (NestJS cutover); `web` untouched and still serving
 - [ ] No duplicate emails sent during cutover (verify reminders/weekly-digest fired once)
 - [ ] `config/deploy.config.json` + drift tooling updated; `pnpm run workspace:test` passes
 - [ ] Web admin cron view still works (data source confirmed)
