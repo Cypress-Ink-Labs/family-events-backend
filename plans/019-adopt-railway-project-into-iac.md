@@ -35,7 +35,11 @@ that env vars (and service config) are version-controlled and a missing var is i
   service (`family-events.org`, sourced from the **web** repo) + a "Cron Jobs" group of **8** services
   sourced from this backend repo (`Cypress-Ink-Labs/family-events-backend`): `cron-tag-queue`,
   `cron-scrape-sources`, `cron-db-maintenance`, `cron-cleanup-stale`, `cron-enrich-events`,
-  `cron-send-reminders`, `cron-weekly-digest`, `cron-review-events`.
+  `cron-send-reminders`, `cron-weekly-digest`, `cron-review-events`. Of these **8** cron services,
+  **6** are still actively running; `cron-scrape-sources` and `cron-cleanup-stale` have been disabled
+  (set to `false`) and have zero running replicas — their execution has been transferred to the NestJS
+  scrape job family (`CUTOVER_SCRAPE=true`). The disabled cron services may still exist as Railway
+  infrastructure resources for IaC adoption purposes, but are no longer operational.
 - The product spans **three repos** that all deploy into this one Railway project: **web**, **backend**
   (this repo — owns the crons), **mobile** (no Railway service).
 - `.railway/railway.ts` (this repo) currently declares the 8 crons (project renamed to `family-events-ui`,
