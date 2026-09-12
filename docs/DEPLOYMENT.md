@@ -50,3 +50,22 @@ The two repos have independent pipelines, so **make schema changes backward-comp
 - Removals are a separate, later change once nothing references the old shape.
 
 A web release must never call an RPC/column introduced in the same release — that caused a brief prod break before CD existed (see CIL-190).
+
+## Deployment status
+
+The pg-boss dashboard listens on `dashboard.family-events.railway.internal:3001`; external access is firewalled with 403. It connects over Railway IPv6 to the Supabase direct endpoint using the dedicated `pgboss_dashboard` login and the pinned Supabase CA. That login has no pg-boss write privileges.
+
+U33 has transferred the scrape, tag, and review families:
+
+- `CUTOVER_SCRAPE=true`;
+- `cron-scrape-sources=false` and `cron-cleanup-stale=false` in one transaction;
+- `scrape` and `scrape.dlq` are installed with the hourly scrape and 30-minute cleanup schedules;
+- controlled scrape and cleanup runs succeeded, the drain chain completed, and no scrape DLQ work remained;
+- `CUTOVER_TAG=true`;
+- `cron-tag-queue=false` and `cron-enrich-events=false` in one transaction;
+- controlled and scheduled tag/enrichment runs succeeded after OpenAI and Unsplash credential smokes, and no tag DLQ work remained;
+- `CUTOVER_REVIEW=true` with batch size 60;
+- `cron-review-events=false`;
+- the exact `gpt-5.4-mini` JSON-mode request passed, a single prioritized draft review completed with consistent queue/event/trace state, and eight catch-up runs drained the 377-row eligible backlog without failures or review DLQ work.
+
+`CUTOVER_DIGEST`, `CUTOVER_REMINDERS`, and `CUTOVER_NOTIFY` remain disabled. They require delivery credentials and identified controlled recipients before their first production sends. The former Railway cron services have zero running replicas. Database maintenance remains outside the Nest job families.
