@@ -1,7 +1,7 @@
 # Plan 019: Bring the live Railway project under IaC management (`.railway/railway.ts`)
 
 > **Executor instructions**: This is a HIGH-RISK infrastructure migration against a **production**
-> Railway project that currently runs the live site + 8 cron jobs. A wrong `railway config apply`
+> Railway project that currently runs the live site + 6 active cron jobs. A wrong `railway config apply`
 > **deletes running services**. Follow every step, run every gate, and treat every STOP condition as a
 > hard stop. **Never run `railway config apply` against production while the plan shows a single
 > `resource.delete`.** When done (or blocked), update this plan's row in `plans/README.md`.
@@ -32,20 +32,17 @@ that env vars (and service config) are version-controlled and a missing var is i
 ## Current state (facts the executor needs)
 
 - Live Railway project: **`family-events-ui`** / environment **`production`**. It contains: a `web`
-  service (`family-events.org`, sourced from the **web** repo) + a "Cron Jobs" group of **8** services
-  sourced from this backend repo (`Cypress-Ink-Labs/family-events-backend`): `cron-tag-queue`,
-  `cron-scrape-sources`, `cron-db-maintenance`, `cron-cleanup-stale`, `cron-enrich-events`,
-  `cron-send-reminders`, `cron-weekly-digest`, `cron-review-events`. Of these **8** cron services,
-  **6** are still actively running; `cron-scrape-sources` and `cron-cleanup-stale` have been disabled
-  (set to `false`) and have zero running replicas — their execution has been transferred to the NestJS
-  scrape job family (`CUTOVER_SCRAPE=true`). The disabled cron services may still exist as Railway
-  infrastructure resources for IaC adoption purposes, but are no longer operational.
+  service (`family-events.org`, sourced from the **web** repo) + a "Cron Jobs" group of **6 active**
+  services sourced from this backend repo (`Cypress-Ink-Labs/family-events-backend`): `cron-tag-queue`,
+  `cron-db-maintenance`, `cron-enrich-events`, `cron-send-reminders`, `cron-weekly-digest`,
+  `cron-review-events`. Two former cron services (`cron-scrape-sources`, `cron-cleanup-stale`) have been
+  migrated to the NestJS scheduled job system and have zero running replicas on Railway.
 - The product spans **three repos** that all deploy into this one Railway project: **web**, **backend**
   (this repo — owns the crons), **mobile** (no Railway service).
-- `.railway/railway.ts` (this repo) currently declares the 8 crons (project renamed to `family-events-ui`,
-  `web` removed) with each cron's `*_URL` SET via `fnUrl()`/`rpcUrl()` helpers and secrets `preserve()`d.
-  It compiles (`railway config plan` → `ok:true`, no diagnostics) but the plan shows delete-all because it
-  was hand-authored, not pulled from the live project.
+- `.railway/railway.ts` (this repo) currently declares the 6 active crons plus the 2 decommissioned ones
+  (project renamed to `family-events-ui`, `web` removed) with each cron's `*_URL` SET via `fnUrl()`/`rpcUrl()`
+  helpers and secrets `preserve()`d. It compiles (`railway config plan` → `ok:true`, no diagnostics) but the
+  plan shows delete-all because it was hand-authored, not pulled from the live project.
 - Live URL pattern (verified): `https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/<fn>` and
   `.../rest/v1/rpc/is_cron_enabled`.
 - Pre-existing live↔IaC drifts beyond addresses: live `restartPolicyType: NEVER` (matches
@@ -76,11 +73,12 @@ project but not in the IaC is planned for **deletion**. The project is shared by
 one of two models; **this plan cannot proceed to apply until the operator picks one**:
 
 - **Model A — single-owner IaC (simplest).** The backend repo's `.railway/railway.ts` declares the **whole**
-  project: `web` (sourced from the *web* repo) + all 8 crons. The web repo does NOT manage Railway IaC.
-  One `railway config apply` (from this repo) manages everything. Trade-off: backend repo owns `web`'s
-  Railway config — contradicts the earlier "web owned by web repo" preference.
+  project: `web` (sourced from the *web* repo) + the 6 active crons (plus the 2 decommissioned cron services
+  that remain in Railway with zero replicas). The web repo does NOT manage Railway IaC. One `railway config apply`
+  (from this repo) manages everything. Trade-off: backend repo owns `web`'s Railway config — contradicts the
+  earlier "web owned by web repo" preference.
 - **Model B — split projects (cleanest ownership, bigger migration).** Create a **separate** Railway project
-  for the crons (e.g. `family-events-cron`), recreate the 8 cron services + their env vars + cron schedules
+  for the crons (e.g. `family-events-cron`), recreate the 6 active cron services + their env vars + cron schedules
   there, adopt THAT project via this repo's IaC, and leave `web` in `family-events-ui` managed by the web
   repo. Trade-off: a real service-recreation migration (downtime/cutover for the crons; re-set all env vars).
 
@@ -104,7 +102,8 @@ Recommended: **Model A** for speed if the team accepts the backend repo owning t
 ## Scope
 
 **In scope:**
-- `.railway/railway.ts` (the IaC).
+- `.railway/railway.ts` (the IaC), which must reflect that only 6 crons remain active (scrape-sources and
+  cleanup-stale have migrated to the NestJS job system).
 - A throwaway Railway environment for dry-runs (`iac-adopt-test`), deleted at the end.
 - Possibly `config/deploy.config.json` / `infra/railway-cron-drift/cron-services.json` if the adoption changes
   how drift is tracked (coordinate — don't silently diverge them).
@@ -129,7 +128,8 @@ re-apply the URL edits onto the pulled baseline, using this copy as the referenc
 `railway link -p family-events-ui -e production` then `railway config pull`. This rewrites
 `.railway/railway.ts` to mirror the live project (correct resource addresses, all services, real env-var
 shapes). Inspect the diff: `git diff .railway/railway.ts`. Confirm it now contains the live resources
-(`web` + 8 crons) with addresses/IDs that match live.
+(`web` + the 6 active crons + the 2 decommissioned cron services with zero replicas) with addresses/IDs
+that match live.
 
 **Verify**: `railway config plan` now shows **zero `resource.delete`** (a freshly pulled IaC should be a
 no-op against the project it was pulled from). Parse the change kinds:
@@ -137,17 +137,19 @@ no-op against the project it was pulled from). Parse the change kinds:
 If it still shows deletes, STOP — the pull didn't reconcile; do not continue.
 
 ### Step 3: Reconcile to the chosen model
-- **Model A**: keep all pulled resources; edit so each cron's target `*_URL` (and `LOG_CRON_RUN_URL`,
+- **Model A**: keep all pulled resources; edit so each **active** cron's target `*_URL` (and `LOG_CRON_RUN_URL`,
   `IS_CRON_ENABLED_URL`) is SET to the values in `/tmp/railway.curated.ts` (the `fnUrl()`/`rpcUrl()` form)
-  instead of `preserve()`; keep `web` as pulled; keep all secrets `preserve()`.
+  instead of `preserve()`; keep `web` as pulled; keep all secrets `preserve()`. The 2 decommissioned crons
+  (scrape-sources, cleanup-stale) should be included in the IaC as pulled (with zero replicas) to avoid
+  inadvertent deletion, but do not set their URL variables — they are no longer active.
 - **Model B**: this plan's apply targets a NEW project — first create it (`railway environment`/project
   setup is out of this file's depth; treat Model B as its own follow-up plan and STOP here with a note).
 
-**Verify**: `railway config plan` shows **only** `variable.set`/update changes for the cron URL vars and
-**zero** `resource.delete` and zero changes to `web` or to any secret var. Confirm by parsing
-`changeSet.changes`: every change `kind` must be a variable set on a cron service; assert no `resource.delete`
-and no change whose target is `web` or a secret key (`SUPABASE_SERVICE_ROLE_KEY`, `VITE_VAPID_*`,
-`UNSPLASH_ACCESS_KEY`).
+**Verify**: `railway config plan` shows **only** `variable.set`/update changes for the **active** cron URL
+vars and **zero** `resource.delete` and zero changes to `web` or to any secret var. Confirm by parsing
+`changeSet.changes`: every change `kind` must be a variable set on one of the 6 active cron services; assert
+no `resource.delete` and no change whose target is `web`, either decommissioned cron (scrape-sources,
+cleanup-stale), or a secret key (`SUPABASE_SERVICE_ROLE_KEY`, `VITE_VAPID_*`, `UNSPLASH_ACCESS_KEY`).
 
 ### Step 4: Dry-run in an isolated environment first
 `railway environment new iac-adopt-test` (or link an existing non-prod env), `railway link -e iac-adopt-test`,
@@ -155,8 +157,8 @@ then `railway config plan` and — only if clean — `railway config apply` agai
 exist + are configured as expected there. This proves the apply is non-destructive before touching production.
 (Note: a new environment may not copy secret values; that's fine for validating structure/URLs.)
 
-**Verify**: in `iac-adopt-test`, the 8 crons exist with the URL vars set; nothing was deleted. Re-link to
-production afterward: `railway link -e production`.
+**Verify**: in `iac-adopt-test`, the 6 active crons exist with the URL vars set; nothing was deleted. Re-link
+to production afterward: `railway link -e production`.
 
 ### Step 5: Apply to production (gated)
 ONLY after Steps 2–4 are green: `railway link -e production`, `railway config plan` (final confirm: zero
@@ -176,9 +178,10 @@ deletes), then `railway config apply`. Immediately verify each cron's `*_URL` is
 ALL must hold:
 
 - [ ] Operator chose Model A or B (recorded here + in README)
-- [ ] `railway config plan` against production shows **zero `resource.delete`** and only the intended cron
-      `*_URL` variable sets
-- [ ] Production apply done; every cron `*_URL` confirmed set; `web` unchanged; all crons' last run not crashed
+- [ ] `railway config plan` against production shows **zero `resource.delete`** and only the intended **active**
+      cron `*_URL` variable sets (6 crons; scrape-sources and cleanup-stale decommissioned)
+- [ ] Production apply done; every active cron `*_URL` confirmed set; `web` unchanged; all active crons' last run
+      not crashed
 - [ ] No secret value committed to `.railway/railway.ts` (`grep` check passes; secrets remain `preserve()`)
 - [ ] `pnpm run workspace:test` passes (drift guards green)
 - [ ] `iac-adopt-test` environment deleted
@@ -204,6 +207,8 @@ Stop and report (do not improvise) if:
   the source of truth.
 - The whole point: a missing `*_URL` becomes impossible because the IaC sets it. Keep new crons' URLs set
   (not `preserve()`); only secrets stay `preserve()`.
+- Scrape-sources and cleanup-stale have migrated to the NestJS job system; their Railway services remain in the
+  IaC with zero replicas to avoid inadvertent deletion but are no longer operationally active.
 - Reviewer: the single thing to scrutinize is the `railway config plan` output before any apply — zero
   `resource.delete` is the non-negotiable gate.
 - If the team later wants strict per-repo ownership, revisit Model B (separate cron project) — record the
