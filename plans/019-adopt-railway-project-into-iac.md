@@ -1,10 +1,13 @@
 # Plan 019: Bring the live Railway project under IaC management (`.railway/railway.ts`)
 
 > **Executor instructions**: This is a HIGH-RISK infrastructure migration against a **production**
-> Railway project that currently runs the live site + 8 cron jobs. A wrong `railway config apply`
-> **deletes running services**. Follow every step, run every gate, and treat every STOP condition as a
-> hard stop. **Never run `railway config apply` against production while the plan shows a single
-> `resource.delete`.** When done (or blocked), update this plan's row in `plans/README.md`.
+> Railway project. A wrong `railway config apply` **deletes running services**. Follow every step,
+> run every gate, and treat every STOP condition as a hard stop. **Never run `railway config apply`
+> against production while the plan shows a single `resource.delete`.** When done (or blocked),
+> update this plan's row in `plans/README.md`.
+>
+> **IMPORTANT**: This plan was written for the pre-U31 `family-events-ui` project (web + 8 crons).
+> Production now uses project `family-events` (API + dashboard). See "Current state" below.
 >
 > **Drift check (run first)**: `git diff --stat add0f0b..HEAD -- .railway/railway.ts config/deploy.config.json infra/railway-cron-drift`
 > If `.railway/railway.ts` changed since this plan was written, re-read it and the "Current state"
@@ -31,17 +34,31 @@ that env vars (and service config) are version-controlled and a missing var is i
 
 ## Current state (facts the executor needs)
 
-- Live Railway project: **`family-events-ui`** / environment **`production`**. It contains: a `web`
-  service (`family-events.org`, sourced from the **web** repo) + a "Cron Jobs" group of **8** services
-  sourced from this backend repo (`Cypress-Ink-Labs/family-events-backend`): `cron-tag-queue`,
-  `cron-scrape-sources`, `cron-db-maintenance`, `cron-cleanup-stale`, `cron-enrich-events`,
-  `cron-send-reminders`, `cron-weekly-digest`, `cron-review-events`.
-- The product spans **three repos** that all deploy into this one Railway project: **web**, **backend**
-  (this repo — owns the crons), **mobile** (no Railway service).
+> [!IMPORTANT]
+> **Project change as of U31:** The production Railway project changed from `family-events-ui`
+> (web service + 8 cron services) to `family-events` (API service + dashboard service). The old
+> `family-events-ui` deployment state was marked as superseded in U31. Current production facts are
+> in `docs/DEPLOYMENT.md`: project `family-events` (`35ac6425-4859-4203-bbd4-15744209e717`) with
+> API service and read-only dashboard service. This plan was written against the pre-U31 Railway
+> structure and **must be updated** to reflect the new project before IaC adoption work proceeds.
+
+- **Historical (pre-U31) Railway project:** **`family-events-ui`** / environment **`production`**.
+  It contained: a `web` service (`family-events.org`, sourced from the **web** repo) + a "Cron Jobs"
+  group of **8** services sourced from this backend repo (`Cypress-Ink-Labs/family-events-backend`):
+  `cron-tag-queue`, `cron-scrape-sources`, `cron-db-maintenance`, `cron-cleanup-stale`,
+  `cron-enrich-events`, `cron-send-reminders`, `cron-weekly-digest`, `cron-review-events`.
+  **This structure is superseded.**
+- **Current (post-U31) Railway project:** **`family-events`** (`35ac6425-4859-4203-bbd4-15744209e717`) /
+  environment **`production`**. It contains two services sourced from `Cypress-Ink-Labs/family-events-api`:
+  an **API service** and a **dashboard service** (read-only pg-boss dashboard). See `docs/DEPLOYMENT.md` for
+  service IDs, URLs, and configuration. No cron services exist in this project yet; cutover flags remain
+  disabled until U33.
+- The product spans **three repos** (historical note; current deployment uses one): **web**, **backend**
+  (this repo — historically owned the crons), **mobile** (no Railway service).
 - `.railway/railway.ts` (this repo) currently declares the 8 crons (project renamed to `family-events-ui`,
   `web` removed) with each cron's `*_URL` SET via `fnUrl()`/`rpcUrl()` helpers and secrets `preserve()`d.
   It compiles (`railway config plan` → `ok:true`, no diagnostics) but the plan shows delete-all because it
-  was hand-authored, not pulled from the live project.
+  was hand-authored, not pulled from the live project. **This IaC references a superseded project structure.**
 - Live URL pattern (verified): `https://ufrjcnozcapskjtoakvf.supabase.co/functions/v1/<fn>` and
   `.../rest/v1/rpc/is_cron_enabled`.
 - Pre-existing live↔IaC drifts beyond addresses: live `restartPolicyType: NEVER` (matches
@@ -88,7 +105,7 @@ Recommended: **Model A** for speed if the team accepts the backend repo owning t
 | Purpose | Command | Expected |
 |---------|---------|----------|
 | Confirm auth | `railway whoami` | logged in |
-| Link project+env | `railway link -p family-events-ui -e production` | "linked successfully" |
+| Link project+env | `railway link -p family-events -e production` (or `family-events-ui` if adopting historical project) | "linked successfully" |
 | List environments | `railway environment list` | shows `production` (+ any test env) |
 | New dry-run env | `railway environment new iac-adopt-test` | created |
 | Pull live → IaC | `railway config pull` | rewrites `.railway/railway.ts` from live |
@@ -122,10 +139,12 @@ the choice in this plan and in `plans/README.md`.
 re-apply the URL edits onto the pulled baseline, using this copy as the reference for which vars to set.
 
 ### Step 2: Pull the live baseline
-`railway link -p family-events-ui -e production` then `railway config pull`. This rewrites
-`.railway/railway.ts` to mirror the live project (correct resource addresses, all services, real env-var
-shapes). Inspect the diff: `git diff .railway/railway.ts`. Confirm it now contains the live resources
-(`web` + 8 crons) with addresses/IDs that match live.
+Determine which Railway project is the IaC adoption target (see "Current state" note above — production is
+now `family-events`, not `family-events-ui`). Link to that project: `railway link -p <project-name> -e production`
+then `railway config pull`. This rewrites `.railway/railway.ts` to mirror the live project (correct resource
+addresses, all services, real env-var shapes). Inspect the diff: `git diff .railway/railway.ts`. Confirm it
+now contains the live resources (API + dashboard if `family-events`; `web` + 8 crons if historical
+`family-events-ui`) with addresses/IDs that match live.
 
 **Verify**: `railway config plan` now shows **zero `resource.delete`** (a freshly pulled IaC should be a
 no-op against the project it was pulled from). Parse the change kinds:
