@@ -145,10 +145,10 @@ describe("extractPrice", () => {
     })
   })
 
-  it("detects complimentary", () => {
+  it("does not treat a complimentary item as no-charge admission", () => {
     expect(extractPrice("Complimentary snacks provided")).toEqual({
       price: null,
-      isFree: true,
+      isFree: false,
     })
   })
 

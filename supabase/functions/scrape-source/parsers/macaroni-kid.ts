@@ -166,6 +166,9 @@ export function mapMacaroniKidEvent(raw: unknown, sourceBase: string): ParsedEve
   const priceFromText = extractPrice(costText)
   const price = numericCost ?? priceFromText.price
   const isFree = price === 0 || priceFromText.isFree
+  const admissionCostState = isFree ? "free" : price !== null ? "paid" : "unknown"
+  const admissionCostEvidence =
+    admissionCostState === "unknown" ? null : costText.trim() || `Source cost field: ${price}`
 
   return {
     title,
@@ -179,6 +182,9 @@ export function mapMacaroniKidEvent(raw: unknown, sourceBase: string): ParsedEve
     images,
     price,
     isFree,
+    admissionCostState,
+    admissionAmount: admissionCostState === "paid" ? price : null,
+    admissionCostEvidence,
   }
 }
 

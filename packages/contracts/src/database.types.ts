@@ -898,6 +898,9 @@ export type Database = {
           admin_last_edited_at: string | null
           admin_last_edited_by: string | null
           admin_locked_fields: string[]
+          admission_amount: number | null
+          admission_cost_evidence: string | null
+          admission_cost_state: Database["public"]["Enums"]["admission_cost_state"]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
@@ -936,6 +939,7 @@ export type Database = {
           price: number | null
           recurrence_info: Json | null
           search_vector: unknown
+          source_details_fetched_at: string | null
           source_id: string | null
           source_name: string | null
           source_url: string | null
@@ -953,6 +957,9 @@ export type Database = {
           admin_last_edited_at?: string | null
           admin_last_edited_by?: string | null
           admin_locked_fields?: string[]
+          admission_amount?: number | null
+          admission_cost_evidence?: string | null
+          admission_cost_state?: Database["public"]["Enums"]["admission_cost_state"]
           age_max?: number | null
           age_min?: number | null
           ai_confidence?: number | null
@@ -991,6 +998,7 @@ export type Database = {
           price?: number | null
           recurrence_info?: Json | null
           search_vector?: unknown
+          source_details_fetched_at?: string | null
           source_id?: string | null
           source_name?: string | null
           source_url?: string | null
@@ -1008,6 +1016,9 @@ export type Database = {
           admin_last_edited_at?: string | null
           admin_last_edited_by?: string | null
           admin_locked_fields?: string[]
+          admission_amount?: number | null
+          admission_cost_evidence?: string | null
+          admission_cost_state?: Database["public"]["Enums"]["admission_cost_state"]
           age_max?: number | null
           age_min?: number | null
           ai_confidence?: number | null
@@ -1046,6 +1057,7 @@ export type Database = {
           price?: number | null
           recurrence_info?: Json | null
           search_vector?: unknown
+          source_details_fetched_at?: string | null
           source_id?: string | null
           source_name?: string | null
           source_url?: string | null
@@ -2124,6 +2136,9 @@ export type Database = {
           admin_last_edited_at: string | null
           admin_last_edited_by: string | null
           admin_locked_fields: string[]
+          admission_amount: number | null
+          admission_cost_evidence: string | null
+          admission_cost_state: Database["public"]["Enums"]["admission_cost_state"]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
@@ -2162,6 +2177,7 @@ export type Database = {
           price: number | null
           recurrence_info: Json | null
           search_vector: unknown
+          source_details_fetched_at: string | null
           source_id: string | null
           source_name: string | null
           source_url: string | null
@@ -2431,6 +2447,9 @@ export type Database = {
           admin_last_edited_at: string | null
           admin_last_edited_by: string | null
           admin_locked_fields: string[]
+          admission_amount: number | null
+          admission_cost_evidence: string | null
+          admission_cost_state: Database["public"]["Enums"]["admission_cost_state"]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
@@ -2469,6 +2488,7 @@ export type Database = {
           price: number | null
           recurrence_info: Json | null
           search_vector: unknown
+          source_details_fetched_at: string | null
           source_id: string | null
           source_name: string | null
           source_url: string | null
@@ -2532,6 +2552,9 @@ export type Database = {
           admin_last_edited_at: string | null
           admin_last_edited_by: string | null
           admin_locked_fields: string[]
+          admission_amount: number | null
+          admission_cost_evidence: string | null
+          admission_cost_state: Database["public"]["Enums"]["admission_cost_state"]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
@@ -2570,6 +2593,7 @@ export type Database = {
           price: number | null
           recurrence_info: Json | null
           search_vector: unknown
+          source_details_fetched_at: string | null
           source_id: string | null
           source_name: string | null
           source_url: string | null
@@ -2596,6 +2620,9 @@ export type Database = {
           admin_last_edited_at: string | null
           admin_last_edited_by: string | null
           admin_locked_fields: string[]
+          admission_amount: number | null
+          admission_cost_evidence: string | null
+          admission_cost_state: Database["public"]["Enums"]["admission_cost_state"]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
@@ -2634,6 +2661,7 @@ export type Database = {
           price: number | null
           recurrence_info: Json | null
           search_vector: unknown
+          source_details_fetched_at: string | null
           source_id: string | null
           source_name: string | null
           source_url: string | null
@@ -2854,6 +2882,9 @@ export type Database = {
         }
         Returns: {
           address: string
+          admission_amount: number
+          admission_cost_evidence: string
+          admission_cost_state: Database["public"]["Enums"]["admission_cost_state"]
           age_max: number
           age_min: number
           ai_confidence: number
@@ -2879,6 +2910,7 @@ export type Database = {
           rating_count: number
           recurrence_info: Json
           search_vector: unknown
+          source_details_fetched_at: string
           source_id: string
           source_name: string
           source_url: string
@@ -3282,6 +3314,9 @@ export type Database = {
           admin_last_edited_at: string | null
           admin_last_edited_by: string | null
           admin_locked_fields: string[]
+          admission_amount: number | null
+          admission_cost_evidence: string | null
+          admission_cost_state: Database["public"]["Enums"]["admission_cost_state"]
           age_max: number | null
           age_min: number | null
           ai_confidence: number | null
@@ -3320,6 +3355,7 @@ export type Database = {
           price: number | null
           recurrence_info: Json | null
           search_vector: unknown
+          source_details_fetched_at: string | null
           source_id: string | null
           source_name: string | null
           source_url: string | null
@@ -3450,6 +3486,7 @@ export type Database = {
       }
     }
     Enums: {
+      admission_cost_state: "free" | "paid" | "unknown"
       event_processing_mode: "manual_review" | "auto_approve" | "llm_review"
       event_status: "draft" | "published" | "rejected" | "archived"
       event_tag_queue_status:
@@ -3606,6 +3643,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admission_cost_state: ["free", "paid", "unknown"],
       event_processing_mode: ["manual_review", "auto_approve", "llm_review"],
       event_status: ["draft", "published", "rejected", "archived"],
       event_tag_queue_status: [

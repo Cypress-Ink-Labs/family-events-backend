@@ -70,6 +70,8 @@ TEST_FILES=(
   supabase/tests/trace_retention.sql
   supabase/tests/api_surface_hardening.sql
   supabase/tests/events_enriched_parity.sql
+  supabase/tests/source_details_freshness.sql
+  supabase/tests/admission_cost.sql
   supabase/tests/set_preferred_cities.sql
   supabase/tests/reference_data.sql
   supabase/tests/plan_events_for_user_range_age.sql

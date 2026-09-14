@@ -10,6 +10,7 @@ import {
   titleTokens,
 } from "../../_shared/dedup-utils.ts"
 import type { ParserContext } from "./parser-context.ts"
+import { extractAdmissionCost } from "../../_shared/parsing.ts"
 import { resolveCityTimezone } from "./schedule.ts"
 // tag-fanout retired in Phase 4 — replaced by event_tag_queue + cron worker.
 // scrape-source now just enqueues, returning immediately.
@@ -208,9 +209,21 @@ export async function importParsedSourceEvents(
     if (validEvents.length === 0) {
       await flushProgress()
     } else {
+      const detailsFetchedAt = new Date().toISOString()
       function prepEventPayload(parsed: ParsedEvent): Record<string, unknown> {
         const isOutdoor = deriveIsOutdoorFromParsedEvent(parsed)
         const imageCandidates = deriveRawImageCandidates(parsed)
+        const extractedAdmission = extractAdmissionCost(`${parsed.title} ${parsed.description}`)
+        const isManualSource = source.source_type === "manual"
+        const admissionCostState = isManualSource
+          ? "unknown"
+          : (parsed.admissionCostState ?? extractedAdmission.state)
+        const admissionAmount = isManualSource
+          ? null
+          : (parsed.admissionAmount ?? extractedAdmission.amount)
+        const admissionCostEvidence = isManualSource
+          ? null
+          : (parsed.admissionCostEvidence ?? extractedAdmission.evidence)
 
         return {
           title: parsed.title,
@@ -223,9 +236,13 @@ export async function importParsedSourceEvents(
           city_id: source.city_id,
           source_url: parsed.sourceUrl ?? null,
           source_name: source.name,
+          source_details_fetched_at: source.source_type === "manual" ? null : detailsFetchedAt,
           images: imageCandidates,
           price: parsed.price ?? null,
           is_free: Boolean(parsed.isFree),
+          admission_cost_state: admissionCostState,
+          admission_amount: admissionAmount,
+          admission_cost_evidence: admissionCostEvidence,
           is_outdoor: isOutdoor,
           latitude: cityCentroid?.latitude ?? null,
           longitude: cityCentroid?.longitude ?? null,
