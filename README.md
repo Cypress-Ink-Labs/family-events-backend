@@ -11,7 +11,7 @@ IaC for infrastructure management.
 | ----------------------------- | ------------------------------------------------------------------------------------------- |
 | `supabase/functions/`         | 23 Deno edge functions (scraping, tagging, notifications, admin)                            |
 | `supabase/functions/_shared/` | Shared utilities imported across functions (auth, SSRF guard, LLM, geocode, CORS)           |
-| `supabase/migrations/`        | 42 append-only SQL migrations; each must have a paired rollback in `supabase/rollbacks/`    |
+| `supabase/migrations/`        | 44 append-only SQL migrations; each must have a paired rollback in `supabase/rollbacks/`    |
 | `supabase/tests/`             | pgTAP SQL test files for DB logic                                                           |
 | `packages/contracts/`         | Generated TypeScript types (`database.types.ts`) + shared contracts                         |
 | `packages/deploy-cli/`        | Internal CLI for deploying edge functions and Railway services                              |

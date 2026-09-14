@@ -1,5 +1,16 @@
 # @family-events/contracts
 
+## 0.0.5
+
+### Patch Changes
+
+- Added `listing_scraped_at` timestamp field to track successful source retrieval freshness (no historical backfill)
+- Added explicit `admission_cost` enumeration with three states: Free, Paid, and Unknown
+- Added `admission_cost_evidence` field to capture supporting evidence
+- Preserved legacy ingestion and admin behavior while extending enriched event reads
+- Regenerated database TypeScript contracts from migrated schema
+- Included paired surgical rollback migrations and PostgreSQL regression test suites
+
 ## 0.0.4
 
 ### Patch Changes
