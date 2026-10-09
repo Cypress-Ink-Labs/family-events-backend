@@ -41,6 +41,17 @@ pnpm --filter @cypress-ink-labs/deploy-cli cli deploy --all --yes --dry-run   # 
 
 The CLI auto-links the project in CI when `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_PASSWORD` are set.
 
+### Legacy public compatibility functions
+
+The Family Events API repo's `legacy-public` package prepares replacements for exactly four public Supabase functions (`events-api`, `events-feed`, `share-og`, `sitemap`) so old JSON, feed and crawler URLs reach the canonical app. They are not yet deployed and are not part of the normal CI deploy or `deploy:all`.
+
+- Each function requires `PUBLIC_APP_URL` (intended `https://family-events.org`): an HTTPS origin only, with no path, query or credentials. Missing or invalid config returns `503` with `no-store`.
+- Deploy them separately, only with explicit approval. Publish only those four functions with `--workdir legacy-public` and an explicit `--project-ref`, and set only `PUBLIC_APP_URL` via `supabase secrets set`. Never deploy all functions, push full project config or apply migrations from this package.
+- The functions use custom `.mjs` entrypoints with `verify_jwt=false`, which requires Supabase CLI >= 1.215.0.
+- Setting the secret and the four deploys are separate, non-atomic operations. Retain the prior function versions for rollback.
+
+See `legacy-public/README.md` in the API repo for the runbook. The normal workflow described above is unchanged for all other functions.
+
 ## Migration ordering (expand/contract)
 
 The two repos have independent pipelines, so **make schema changes backward-compatible** and deploy them **before** the code that depends on them:

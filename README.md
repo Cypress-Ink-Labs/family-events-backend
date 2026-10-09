@@ -77,6 +77,21 @@ pnpm run railway:plan          # preview infrastructure changes
 pnpm run railway:drift:validate  # validate cron config drift
 ```
 
+The Family Events API repo (`Cypress-Ink-Labs/family-events-api`, PR #61) contains a
+separate `legacy-public` package with replacement handlers for exactly four existing
+public Supabase functions: `events-api`, `events-feed`, `share-og`, and `sitemap`. They
+preserve the old public URLs by proxying to the canonical app routes (`events-api` →
+`/api/events[/:uuid]`, `events-feed` → `/feeds/events`, `sitemap` → `/sitemap.xml` or
+`/robots.txt`) and by 307-redirecting `share-og` to the app's HTML preview alias at
+`/functions/v1/share-og` (Supabase rewrites `text/html` on its default origin). Each
+handler requires a `PUBLIC_APP_URL` setting (intended value: `https://family-events.org`).
+
+This package is not yet deployed and is **not** part of this repo's `deploy:all` or
+normal deploy pipeline. Deploying it requires separate explicit approval and a scoped
+deployment of only those four functions, using the `legacy-public` workdir and an explicit
+project ref. The deployment guidance above is unchanged; see `legacy-public/README.md` in
+the API repo for details.
+
 ### Railway config sync (opt-in, guarded)
 
 `railway config apply` syncs the **whole** Railway project from `.railway/railway.ts`.
